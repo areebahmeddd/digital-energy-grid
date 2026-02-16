@@ -15,6 +15,7 @@ This collection provides schemas for credentials issued by electricity distribut
 | [Generation Profile Credential](./generation-profile-vc/) | DER generation capability | Grid management, net metering, renewable tracking |
 | [Storage Profile Credential](./storage-profile-vc/) | Battery/energy storage capability | Virtual power plants, demand response |
 | [Program Enrollment Credential](./program-enrollment-vc/) | Energy program participation | Demand response, ToU programs |
+| [Meter Data Credential](./meter-data-vc/) | Historical interval meter readings | Demand forecasting, P2P trading |
 
 ## Credential Relationships
 
@@ -34,6 +35,16 @@ This collection provides schemas for credentials issued by electricity distribut
 │ - Load/tariff info │ - Solar/Wind/etc.   │ - Battery capacity│
 │ - Connection type  │ - Capacity (kW)     │ - Power rating    │
 └────────────────────┴─────────────────────┴───────────────────┘
+               │
+               │ Links via customer DID + meterNumber
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Data Credentials                            │
+├──────────────────────────────────────────────────────────────┤
+│ Meter Data Credential                                         │
+│ - Historical interval readings (Green Button / ESPI aligned) │
+│ - 15-min / hourly kWh data for demand forecasting            │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 All profile credentials link to the customer via the `credentialSubject.id` field (customer DID).
@@ -42,16 +53,19 @@ All profile credentials link to the customer via the `credentialSubject.id` fiel
 
 ### Pure Consumer
 - **Has**: Utility Customer Credential, Consumption Profile Credential
+- **May have**: Meter Data Credential (for sharing history with trading apps)
 - **Does not have**: Generation Profile, Storage Profile
 
 ### Solar Prosumer
 - **Has**: Utility Customer Credential, Consumption Profile, Generation Profile (Solar)
 - **May have**: Storage Profile (if battery installed)
+- **May have**: Meter Data Credential (for demand forecasting)
 
 ### Full Prosumer
 - **Has**: All credential types
 - **May have**: Multiple Generation Profiles (e.g., solar + wind)
 - **May have**: Multiple Storage Profiles (e.g., home battery + EV)
+- **May have**: Meter Data Credentials covering different time periods
 
 ## Directory Structure
 
@@ -80,6 +94,12 @@ energy-credentials/
 ├── program-enrollment-vc/     # Program participation
 │   ├── schema.json
 │   ├── context.jsonld
+│   ├── example.json
+│   └── readme.md
+├── meter-data-vc/             # Historical meter readings (Green Button aligned)
+│   ├── attributes.yaml
+│   ├── context.jsonld
+│   ├── vocab.jsonld
 │   ├── example.json
 │   └── readme.md
 └── readme.md                  # This file

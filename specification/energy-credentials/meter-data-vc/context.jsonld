@@ -1,0 +1,154 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "schema": "https://schema.org/",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "espi": "http://naesb.org/espi#",
+        "meter": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/context.jsonld#",
+
+        "MeterDataCredential": {
+            "@id": "meter:MeterDataCredential",
+            "@context": {
+                "@version": 1.1,
+                "@protected": true,
+                "id": "@id",
+                "type": "@type",
+                "meterNumber": {
+                    "@id": "meter:meterNumber",
+                    "@type": "xsd:string"
+                },
+                "serviceKind": {
+                    "@id": "espi:ServiceKind",
+                    "@type": "xsd:string"
+                },
+                "timeZone": {
+                    "@id": "meter:timeZone",
+                    "@type": "xsd:string"
+                },
+                "readingType": {
+                    "@id": "espi:ReadingType",
+                    "@type": "@id",
+                    "@context": {
+                        "@version": 1.1,
+                        "@protected": true,
+                        "commodity": {
+                            "@id": "espi:CommodityKind",
+                            "@type": "xsd:string"
+                        },
+                        "flowDirection": {
+                            "@id": "espi:FlowDirectionKind",
+                            "@type": "xsd:string"
+                        },
+                        "uom": {
+                            "@id": "espi:UnitOfMeasure",
+                            "@type": "xsd:string"
+                        },
+                        "powerOfTenMultiplier": {
+                            "@id": "espi:UnitMultiplierKind",
+                            "@type": "xsd:integer"
+                        },
+                        "accumulationBehaviour": {
+                            "@id": "espi:AccumulationBehaviourKind",
+                            "@type": "xsd:string"
+                        },
+                        "intervalLength": {
+                            "@id": "espi:intervalLength",
+                            "@type": "xsd:integer"
+                        }
+                    }
+                },
+                "coveragePeriod": {
+                    "@id": "meter:coveragePeriod",
+                    "@type": "@id",
+                    "@context": {
+                        "@version": 1.1,
+                        "@protected": true,
+                        "start": {
+                            "@id": "meter:start",
+                            "@type": "xsd:dateTime"
+                        },
+                        "end": {
+                            "@id": "meter:end",
+                            "@type": "xsd:dateTime"
+                        }
+                    }
+                },
+                "intervalBlocks": {
+                    "@id": "espi:IntervalBlock",
+                    "@type": "@id",
+                    "@container": "@set",
+                    "@context": {
+                        "@version": 1.1,
+                        "@protected": true,
+                        "interval": {
+                            "@id": "espi:DateTimeInterval",
+                            "@type": "@id",
+                            "@context": {
+                                "@version": 1.1,
+                                "@protected": true,
+                                "start": {
+                                    "@id": "meter:start",
+                                    "@type": "xsd:dateTime"
+                                },
+                                "duration": {
+                                    "@id": "meter:duration",
+                                    "@type": "xsd:integer"
+                                }
+                            }
+                        },
+                        "intervalReadings": {
+                            "@id": "espi:IntervalReading",
+                            "@type": "@id",
+                            "@container": "@set",
+                            "@context": {
+                                "@version": 1.1,
+                                "@protected": true,
+                                "timePeriod": {
+                                    "@id": "espi:DateTimeInterval",
+                                    "@type": "@id",
+                                    "@context": {
+                                        "@version": 1.1,
+                                        "@protected": true,
+                                        "start": {
+                                            "@id": "meter:start",
+                                            "@type": "xsd:dateTime"
+                                        },
+                                        "duration": {
+                                            "@id": "meter:duration",
+                                            "@type": "xsd:integer"
+                                        }
+                                    }
+                                },
+                                "value": {
+                                    "@id": "espi:value",
+                                    "@type": "xsd:integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        "UtilityIssuer": {
+            "@id": "meter:UtilityIssuer",
+            "@context": {
+                "@version": 1.1,
+                "@protected": true,
+                "id": "@id",
+                "type": "@type",
+                "name": {
+                    "@id": "schema:name",
+                    "@type": "xsd:string"
+                },
+                "licenseNumber": {
+                    "@id": "meter:licenseNumber",
+                    "@type": "xsd:string"
+                }
+            }
+        }
+    }
+}

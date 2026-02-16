@@ -1,0 +1,242 @@
+{
+    "@context": {
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "schema": "https://schema.org/",
+        "espi": "http://naesb.org/espi#",
+        "meter": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/vocab.jsonld#"
+    },
+    "@graph": [
+        {
+            "@id": "meter:MeterDataCredential",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Meter Data Credential",
+            "rdfs:comment": "A W3C Verifiable Credential containing historical time-series meter reading data aligned with Green Button (ESPI/NAESB) semantics."
+        },
+        {
+            "@id": "meter:ReadingType",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Reading Type",
+            "rdfs:comment": "Describes what is being measured. Maps to ESPI ReadingType.",
+            "rdfs:seeAlso": { "@id": "espi:ReadingType" }
+        },
+        {
+            "@id": "meter:IntervalBlock",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Interval Block",
+            "rdfs:comment": "A contiguous block of interval readings. Maps to ESPI IntervalBlock.",
+            "rdfs:seeAlso": { "@id": "espi:IntervalBlock" }
+        },
+        {
+            "@id": "meter:IntervalReading",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Interval Reading",
+            "rdfs:comment": "A single metered reading within a block. Maps to ESPI IntervalReading.",
+            "rdfs:seeAlso": { "@id": "espi:IntervalReading" }
+        },
+        {
+            "@id": "meter:DateTimeInterval",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Date Time Interval",
+            "rdfs:comment": "A time interval defined by a start timestamp and duration. Maps to ESPI DateTimeInterval.",
+            "rdfs:seeAlso": { "@id": "espi:DateTimeInterval" }
+        },
+
+        {
+            "@id": "meter:meterNumber",
+            "@type": "rdf:Property",
+            "rdfs:label": "meter number",
+            "rdfs:comment": "Meter serial number linking to the physical meter.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "xsd:string" }
+        },
+        {
+            "@id": "meter:serviceKind",
+            "@type": "rdf:Property",
+            "rdfs:label": "service kind",
+            "rdfs:comment": "Kind of service (electricity, gas, water). Maps to ESPI ServiceKind.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "meter:ServiceKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:ServiceKind" }
+        },
+        {
+            "@id": "meter:timeZone",
+            "@type": "rdf:Property",
+            "rdfs:label": "time zone",
+            "rdfs:comment": "IANA time-zone identifier for the meter location.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "xsd:string" }
+        },
+        {
+            "@id": "meter:readingType",
+            "@type": "rdf:Property",
+            "rdfs:label": "reading type",
+            "rdfs:comment": "Describes what is being measured. Maps to ESPI ReadingType.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "meter:ReadingType" }
+        },
+        {
+            "@id": "meter:coveragePeriod",
+            "@type": "rdf:Property",
+            "rdfs:label": "coverage period",
+            "rdfs:comment": "Summary date range of the data contained in this credential.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "meter:DateTimeInterval" }
+        },
+        {
+            "@id": "meter:intervalBlocks",
+            "@type": "rdf:Property",
+            "rdfs:label": "interval blocks",
+            "rdfs:comment": "Array of interval blocks containing meter readings.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "meter:IntervalBlock" }
+        },
+        {
+            "@id": "meter:commodity",
+            "@type": "rdf:Property",
+            "rdfs:label": "commodity",
+            "rdfs:comment": "Commodity being metered. Maps to ESPI CommodityKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:CommodityKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:CommodityKind" }
+        },
+        {
+            "@id": "meter:flowDirection",
+            "@type": "rdf:Property",
+            "rdfs:label": "flow direction",
+            "rdfs:comment": "Direction of energy flow. Maps to ESPI FlowDirectionKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:FlowDirectionKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:FlowDirectionKind" }
+        },
+        {
+            "@id": "meter:uom",
+            "@type": "rdf:Property",
+            "rdfs:label": "unit of measure",
+            "rdfs:comment": "Unit of measure for readings. Maps to ESPI UnitOfMeasure.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:UnitOfMeasureEnum" },
+            "rdfs:seeAlso": { "@id": "espi:UnitOfMeasure" }
+        },
+        {
+            "@id": "meter:powerOfTenMultiplier",
+            "@type": "rdf:Property",
+            "rdfs:label": "power of ten multiplier",
+            "rdfs:comment": "Power-of-ten multiplier for the reading value. Maps to ESPI UnitMultiplierKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "xsd:integer" }
+        },
+        {
+            "@id": "meter:accumulationBehaviour",
+            "@type": "rdf:Property",
+            "rdfs:label": "accumulation behaviour",
+            "rdfs:comment": "How the reading value accumulates over time. Maps to ESPI AccumulationBehaviourKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:AccumulationBehaviourKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:AccumulationBehaviourKind" }
+        },
+        {
+            "@id": "meter:intervalLength",
+            "@type": "rdf:Property",
+            "rdfs:label": "interval length",
+            "rdfs:comment": "Standard interval length in seconds. Maps to ESPI intervalLength.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "xsd:integer" }
+        },
+        {
+            "@id": "meter:interval",
+            "@type": "rdf:Property",
+            "rdfs:label": "interval",
+            "rdfs:comment": "Time interval covered by an interval block.",
+            "rdfs:domain": { "@id": "meter:IntervalBlock" },
+            "rdfs:range": { "@id": "meter:DateTimeInterval" }
+        },
+        {
+            "@id": "meter:intervalReadings",
+            "@type": "rdf:Property",
+            "rdfs:label": "interval readings",
+            "rdfs:comment": "Array of individual readings within an interval block.",
+            "rdfs:domain": { "@id": "meter:IntervalBlock" },
+            "rdfs:range": { "@id": "meter:IntervalReading" }
+        },
+        {
+            "@id": "meter:timePeriod",
+            "@type": "rdf:Property",
+            "rdfs:label": "time period",
+            "rdfs:comment": "Time period for a single reading.",
+            "rdfs:domain": { "@id": "meter:IntervalReading" },
+            "rdfs:range": { "@id": "meter:DateTimeInterval" }
+        },
+        {
+            "@id": "meter:value",
+            "@type": "rdf:Property",
+            "rdfs:label": "value",
+            "rdfs:comment": "Raw reading value (scaled by powerOfTenMultiplier and UOM).",
+            "rdfs:domain": { "@id": "meter:IntervalReading" },
+            "rdfs:range": { "@id": "xsd:integer" },
+            "rdfs:seeAlso": { "@id": "espi:value" }
+        },
+        {
+            "@id": "meter:start",
+            "@type": "rdf:Property",
+            "rdfs:label": "start",
+            "rdfs:comment": "Start timestamp of an interval.",
+            "rdfs:domain": { "@id": "meter:DateTimeInterval" },
+            "rdfs:range": { "@id": "xsd:dateTime" }
+        },
+        {
+            "@id": "meter:duration",
+            "@type": "rdf:Property",
+            "rdfs:label": "duration",
+            "rdfs:comment": "Duration of an interval in seconds.",
+            "rdfs:domain": { "@id": "meter:DateTimeInterval" },
+            "rdfs:range": { "@id": "xsd:integer" }
+        },
+        {
+            "@id": "meter:end",
+            "@type": "rdf:Property",
+            "rdfs:label": "end",
+            "rdfs:comment": "End timestamp of a coverage period.",
+            "rdfs:range": { "@id": "xsd:dateTime" }
+        },
+        {
+            "@id": "meter:licenseNumber",
+            "@type": "rdf:Property",
+            "rdfs:label": "license number",
+            "rdfs:comment": "Regulatory license number of the issuing utility.",
+            "rdfs:range": { "@id": "xsd:string" }
+        },
+
+        {
+            "@id": "meter:ServiceKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Service Kind",
+            "rdfs:comment": "Enumeration: electricity, gas, water."
+        },
+        {
+            "@id": "meter:CommodityKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Commodity Kind",
+            "rdfs:comment": "Enumeration of commodity types (ESPI CommodityKind)."
+        },
+        {
+            "@id": "meter:FlowDirectionKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Flow Direction Kind",
+            "rdfs:comment": "Enumeration of flow directions: none, forward, reverse, net, lagging, leading."
+        },
+        {
+            "@id": "meter:UnitOfMeasureEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Unit of Measure",
+            "rdfs:comment": "Enumeration of measurement units: Wh, kWh, W, kW, VA, VAr, V, A, Hz, J, m3."
+        },
+        {
+            "@id": "meter:AccumulationBehaviourKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Accumulation Behaviour Kind",
+            "rdfs:comment": "Enumeration of accumulation behaviours: none, bulkQuantity, continuousCumulative, cumulative, deltaData, indicating, summation, instantaneous."
+        }
+    ]
+}
