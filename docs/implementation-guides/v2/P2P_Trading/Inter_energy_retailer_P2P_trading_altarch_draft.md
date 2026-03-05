@@ -6,8 +6,6 @@ This document describes an alternative approach to inter-energy retailer P2P tra
 
 For the original approach using a central ledger, see [Inter_energy_retailer_P2P_trading_draft.md](./Inter_energy_retailer_P2P_trading_draft.md).
 
-For a detailed comparison of both approaches, see [Central_vs_Decentralized_Ledger_Comparison.md](./Central_vs_Decentralized_Ledger_Comparison.md).
-
 ---
 
 ## Scenario
@@ -89,28 +87,15 @@ sequenceDiagram
     rect rgb(230, 255, 230)
     note over BuyerTP,SellerUtility: Phase 3: Trade Confirmation
     BuyerTP->>SellerTP: /confirm (trade contract)
-    alt Non-blocking (Recommended)
-        SellerTP->>BuyerTP: /on_confirm (trade confirmed)
-        par Inform utilities
-            SellerTP->>SellerUtility: /confirm (inform utility)
-            SellerUtility->>SellerUtility: Deduct from seller limit, log trade
-            SellerUtility->>SellerTP: /on_confirm (acknowledged)
-        and
-            SellerTP->>BuyerUtility: /confirm (inform utility)
-            BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-            BuyerUtility->>SellerTP: /on_confirm (acknowledged)
-        end
-    else Blocking
-        par Utility confirmations
-            SellerTP->>SellerUtility: /confirm
-            SellerUtility->>SellerUtility: Deduct from seller limit, log trade
-            SellerUtility->>SellerTP: /on_confirm (signed)
-        and
-            SellerTP->>BuyerUtility: /confirm
-            BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-            BuyerUtility->>SellerTP: /on_confirm (signed)
-        end
-        SellerTP->>BuyerTP: /on_confirm (signed sealed order)
+    SellerTP->>BuyerTP: /on_confirm (trade confirmed)
+    par Inform utilities
+        SellerTP->>SellerUtility: /confirm (inform utility)
+        SellerUtility->>SellerUtility: Deduct from seller limit, log trade
+        SellerUtility->>SellerTP: /on_confirm (acknowledged)
+    and
+        SellerTP->>BuyerUtility: /confirm (inform utility)
+        BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
+        BuyerUtility->>SellerTP: /on_confirm (acknowledged)
     end
     end
 
@@ -131,15 +116,8 @@ sequenceDiagram
 
     rect rgb(255, 230, 230)
     note over S,BuyerUtility: Phase 4: Energy Delivery
-    S->>SellerUtility: Request to inject energy
-    SellerUtility->>SellerUtility: Grid security check
-    alt Grid stable
-        SellerUtility->>S: Permit injection
-        S->>S: Inject energy into grid
-        B->>B: Consume energy
-    else Grid unstable
-        SellerUtility-->>S: Reject/limit injection
-    end
+    S->>S: Inject energy into grid
+    B->>B: Consume energy
     end
 
     rect rgb(245, 230, 255)
@@ -240,14 +218,7 @@ sequenceDiagram
 
 ## Phase 3: Trade Confirmation
 
-This is the critical phase that establishes trust without a central ledger. SellerTP coordinates with both utilities in parallel, and each utility logs the trade and (optionally) signs the order.
-
-Two modes are supported:
-
-| Mode | When to Use | Trade Confirmed |
-|------|-------------|-----------------|
-| **Non-blocking (Recommended)** | Utilities cannot block trades; they are informed for record-keeping | Immediately after SellerTP receives `/confirm` |
-| **Blocking** | Utilities must approve before trade is confirmed | After both utilities respond with `/on_confirm` |
+This is the critical phase that establishes trust without a central ledger. SellerTP coordinates with both utilities in parallel. The trade is confirmed immediately by SellerTP, and utilities are informed non-blockingly for record-keeping — they cannot block trades.
 
 ### Confirmation Flow
 
@@ -262,29 +233,15 @@ sequenceDiagram
     Note over BuyerTP,BuyerUtility: Trade: 5 kWh, 2-4 PM, $0.50/kWh
 
     BuyerTP->>SellerTP: /confirm (trade contract)
-
-    alt Non-blocking (Recommended)
-        SellerTP->>BuyerTP: /on_confirm (trade confirmed)
-        par Inform utilities
-            SellerTP->>SellerUtility: /confirm (inform utility)
-            SellerUtility->>SellerUtility: Deduct from seller limit, log trade
-            SellerUtility-->>SellerTP: /on_confirm (acknowledged)
-        and
-            SellerTP->>BuyerUtility: /confirm (inform utility)
-            BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-            BuyerUtility-->>SellerTP: /on_confirm (acknowledged)
-        end
-    else Blocking
-        par Utility confirmations
-            SellerTP->>SellerUtility: /confirm
-            SellerUtility->>SellerUtility: Deduct from seller limit, log trade
-            SellerUtility->>SellerTP: /on_confirm (signed)
-        and
-            SellerTP->>BuyerUtility: /confirm
-            BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-            BuyerUtility->>SellerTP: /on_confirm (signed)
-        end
-        SellerTP->>BuyerTP: /on_confirm (signed sealed order)
+    SellerTP->>BuyerTP: /on_confirm (trade confirmed)
+    par Inform utilities
+        SellerTP->>SellerUtility: /confirm (inform utility)
+        SellerUtility->>SellerUtility: Deduct from seller limit, log trade
+        SellerUtility-->>SellerTP: /on_confirm (acknowledged)
+    and
+        SellerTP->>BuyerUtility: /confirm (inform utility)
+        BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
+        BuyerUtility-->>SellerTP: /on_confirm (acknowledged)
     end
 ```
 
@@ -294,29 +251,6 @@ sequenceDiagram
 2. Check customer's remaining trading limit
 3. Deduct trade quantity from limit
 4. Log trade in own ledger
-5. (Blocking mode only) Sign the order
-
-### Multi-Party Signature Chain (Blocking Mode)
-
-In blocking mode, the sealed trade order contains signatures from all parties:
-
-| Signature | Attests To |
-|-----------|-----------|
-| BuyerTP | Buyer's intent to purchase |
-| SellerTP | Seller's agreement to supply |
-| BuyerUtility | Trade is within buyer's limits, logged in buyer's utility ledger |
-| SellerUtility | Trade is within seller's limits, logged in seller's utility ledger |
-
-This creates a **tamper-proof, distributed proof of trade commitment** without requiring a central ledger.
-
-### Non-blocking vs Blocking Trade-offs
-
-| Aspect | Non-blocking | Blocking |
-|--------|--------------|----------|
-| **Latency** | Lower (immediate confirmation) | Higher (waits for utilities) |
-| **Utility control** | Utilities informed, cannot block | Utilities can reject trades |
-| **Trust model** | Trust SellerTP to inform utilities | Full multi-party consensus |
-| **Use case** | High-frequency trading, trusted platforms | Regulatory requirement for utility approval |
 
 ---
 
@@ -400,43 +334,25 @@ In all cases, SellerTP acts as the coordination hub, ensuring all parties receiv
 
 Energy delivery follows the same physical process as the central ledger approach. The key difference is that each utility records meter data in its own ledger.
 
-### Energy Injection
-
-- At scheduled time, seller injects energy into the grid
-- Seller's utility performs grid security checks and permits injection only if grid stability is maintained
-
-### Energy Consumption
-
-- Buyer consumes energy as usual during the delivery window
+At the scheduled time, the seller injects energy into the grid and the buyer consumes energy as usual during the delivery window. Smart meters on both sides record the actual quantities.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant S as Seller
     participant SM_S as Seller's<br/>Smart Meter
-    participant SellerUtility as SellerUtility
-    participant BuyerUtility as BuyerUtility
     participant SM_B as Buyer's<br/>Smart Meter
     participant B as Buyer
 
     Note over S,B: Scheduled Delivery Window Begins
 
     S->>SM_S: Generate/inject energy
-    SM_S->>SellerUtility: Report injection request
+    SM_S->>SM_S: Energy injected into grid
 
-    SellerUtility->>SellerUtility: Grid security check
-    alt Grid stable
-        SellerUtility->>SellerUtility: Permit injection
-        SM_S->>SM_S: Energy injected into grid
+    SM_B->>B: Energy consumed
 
-        SM_B->>B: Energy consumed
-
-        SM_S->>SM_S: Record injection (kWh, timestamp)
-        SM_B->>SM_B: Record consumption (kWh, timestamp)
-    else Grid unstable
-        SellerUtility-->>SM_S: Reject/limit injection
-        Note over SellerUtility: Grid stability<br/>takes priority
-    end
+    SM_S->>SM_S: Record injection (kWh, timestamp)
+    SM_B->>SM_B: Record consumption (kWh, timestamp)
 
     Note over S,B: Scheduled Delivery Window Ends
 ```
