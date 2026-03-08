@@ -45,11 +45,33 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 ## Core Design Principles
 
-1. **BuyerTP-initiated, SellerTP-orchestrated flows**: All transactions start from BuyerTP (BAP), and are orchestrated by SellerTP, including informing multiple utilities if needed. Utilities do not need to ordinate directly with eachother.
-2. **Cascading calls**: Multi-party flows cascade through SellerTP to both utilities
-3. **Utility involvement patterns**: Utility participation within init is optional, and only needed in case customers or trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, a non-blocking intimation is required to sent to utility informing them of trade, so they can avoid double-billing and compute wheeling and deviation charges, post delivery.
+1. **Symmetric TP-liaison model**: Each trading platform acts as the sole liaison to its own utility. No utility communicates directly with the counterparty's TP. Cross-utility information flows TP-to-TP only.
+2. **Privacy-preserving information flow**: Only allocations are exchanged between TPs and utilities — not customer IDs, PII, or meter data. Price information stays between trading platforms only. Intra-discom trade data stays in the discom's own ledger.
+3. **Utility involvement patterns**: Utility participation during init is optional, and only needed when trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, each TP sends a non-blocking intimation to its own utility, informing them of the trade so they can avoid double-billing and compute wheeling and deviation charges post delivery. Utilities can independently track and publish trade deviation scores (e.g., CIBIL for energy).
 4. **Distributed ledgers**: Each utility maintains its own ledger for its customers only
 5. **Natural collapse**: Same-utility trades collapse to single-discom flow automatically
+
+---
+
+## Architecture Overview
+
+```mermaid
+flowchart TD
+    DeDi["DeDi + Registry service"] --- Catalog["Catalog service"]
+
+    Catalog -.->|discover| BuyerApp
+    SellerApp -.->|publish| Catalog
+
+    BuyerApp["Buyer App<br/>(trade ledger)"] <-->|"init/select, confirm,<br/>update, status"| SellerApp["Seller App<br/>(trade ledger)"]
+
+    BuyerApp -->|"Log trades,<br/>Seller alloc,<br/>Settled qty"| BuyerDiscom["Buyer discom<br/>(Discom ledger)"]
+    BuyerDiscom -->|"Buyer alloc,<br/>Cancel trades"| BuyerApp
+
+    SellerApp -->|"Log trades,<br/>Buyer alloc,<br/>Settled qty"| SellerDiscom["Seller discom<br/>(Discom ledger)"]
+    SellerDiscom -->|"Seller alloc,<br/>Cancel trades"| SellerApp
+```
+
+> **Key properties:** Each TP acts as the sole liaison to its own utility. Trade protocol flows (init, select, confirm, update, status) stay between TPs. Only allocations and settled quantities cross the TP-utility boundary — not customer IDs, PII, meter data, or price information. Intra-discom trade data stays in the discom's own ledger.
 
 ---
 
@@ -59,11 +81,11 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 sequenceDiagram
     autonumber
     participant B as Buyer
+    participant BuyerUtility as BuyerUtility
     participant BuyerTP as BuyerTP (BAP)
     participant SellerTP as SellerTP (BPP)
-    participant S as Seller
-    participant BuyerUtility as BuyerUtility
     participant SellerUtility as SellerUtility
+    participant S as Seller
 
     rect rgb(230, 245, 255)
     note over BuyerTP,SellerTP: Phase 1: Trade Discovery & Selection
@@ -73,11 +95,11 @@ sequenceDiagram
     end
 
     rect rgb(255, 250, 230)
-    note over BuyerTP,SellerUtility: Phase 2: Trade Initialization
+    note over BuyerUtility,SellerUtility: Phase 2: Trade Initialization
     BuyerTP->>SellerTP: /init (trade details)
     opt Optional Utility Limit Checks
-        BuyerTP-->>BuyerUtility: /init (if trading limits unknown OR multi-platform onboarding is allowed)
-        SellerTP-->>SellerUtility: /init (cascaded)
+        BuyerTP-->>BuyerUtility: /init (buyer limit check)
+        SellerTP-->>SellerUtility: /init (seller limit check)
         SellerUtility-->>SellerTP: /on_init (seller's remaining limit)
         BuyerUtility-->>BuyerTP: /on_init (buyer's remaining limit)
     end
@@ -85,55 +107,60 @@ sequenceDiagram
     end
 
     rect rgb(230, 255, 230)
-    note over BuyerTP,SellerUtility: Phase 3: Trade Confirmation
+    note over BuyerUtility,SellerUtility: Phase 3: Trade Confirmation
     BuyerTP->>SellerTP: /confirm (trade contract)
     SellerTP->>BuyerTP: /on_confirm (trade confirmed)
-    par Inform utilities
-        SellerTP->>SellerUtility: /confirm (inform utility)
+    par Each TP informs own utility
+        SellerTP->>SellerUtility: /confirm (log trade)
         SellerUtility->>SellerUtility: Deduct from seller limit, log trade
         SellerUtility->>SellerTP: /on_confirm (acknowledged)
     and
-        SellerTP->>BuyerUtility: /confirm (inform utility)
+        BuyerTP->>BuyerUtility: /confirm (log trade)
         BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-        BuyerUtility->>SellerTP: /on_confirm (acknowledged)
+        BuyerUtility->>BuyerTP: /on_confirm (acknowledged)
     end
     end
 
-    opt Phase 3b: Trade Update (e.g., scheduled outage/congestion/trading limit violation)
-        BuyerUtility->>SellerTP: /update (cancel/curtail trade)
-        par Cascade update
-            SellerTP->>SellerUtility: /update (notify of change)
-            SellerUtility->>SellerUtility: Update trade in ledger
-            SellerUtility-->>SellerTP: /on_update (acknowledged)
-        and
-            SellerTP->>BuyerTP: /update (notify of change)
-            BuyerTP->>BuyerTP: Update trade status
-            BuyerTP-->>SellerTP: /on_update (acknowledged)
-        end
-        SellerTP->>BuyerUtility: /on_update (update confirmed)
+    opt Phase 3b: Trade Update (e.g., scheduled outage/congestion)
+        BuyerUtility->>BuyerTP: /update (cancel/curtail trade)
+        BuyerTP->>SellerTP: /update (relay to seller side)
+        SellerTP->>SellerUtility: /update (notify of change)
+        SellerUtility->>SellerUtility: Update trade in ledger
+        SellerUtility-->>SellerTP: /on_update (acknowledged)
+        SellerTP->>BuyerTP: /on_update (seller side confirmed)
+        BuyerTP->>BuyerUtility: /on_update (update confirmed)
         BuyerUtility->>BuyerUtility: Update trade in ledger
     end
 
     rect rgb(255, 230, 230)
-    note over S,BuyerUtility: Phase 4: Energy Delivery
+    note over B,S: Phase 4: Energy Delivery
     S->>S: Inject energy into grid
     B->>B: Consume energy
     end
 
     rect rgb(245, 230, 255)
-    note over SellerTP,BuyerUtility: Phase 5: Post-Delivery Allocation
+    note over BuyerUtility,SellerUtility: Phase 5: Post-Delivery Allocation
     SellerUtility->>SellerUtility: Allocate actual pushed to trades
     BuyerUtility->>BuyerUtility: Allocate actual pulled to trades
-    par Utilities report to SellerTP
+    par Utilities report to own TPs
         SellerUtility-->>SellerTP: /on_status (seller allocated qty)
     and
-        BuyerUtility-->>SellerTP: /on_status (buyer allocated qty)
+        BuyerUtility-->>BuyerTP: /on_status (buyer allocated qty)
     end
-    SellerTP->>BuyerTP: /on_status (trade settlement summary)
+    par TPs exchange allocations
+        SellerTP->>BuyerTP: /on_status (seller allocation)
+    and
+        BuyerTP->>SellerTP: /on_status (buyer allocation)
+    end
+    par TPs relay to own utilities
+        BuyerTP->>BuyerUtility: /on_status (seller alloc + settled qty)
+    and
+        SellerTP->>SellerUtility: /on_status (buyer alloc + settled qty)
+    end
     end
 
     rect rgb(255, 240, 245)
-    note over S,B: Phase 6: Billing & Settlement
+    note over B,S: Phase 6: Billing & Settlement
     B->>S: Pay for P2P trade (post-delivery)
     SellerUtility->>S: Monthly bill (excl. P2P sold, incl. wheeling)
     S->>SellerUtility: Pay bill
@@ -218,30 +245,30 @@ sequenceDiagram
 
 ## Phase 3: Trade Confirmation
 
-This is the critical phase that establishes trust without a central ledger. SellerTP coordinates with both utilities in parallel. The trade is confirmed immediately by SellerTP, and utilities are informed non-blockingly for record-keeping — they cannot block trades.
+This is the critical phase that establishes trust without a central ledger. After SellerTP confirms the trade to BuyerTP, each TP independently informs its own utility. Utilities are informed non-blockingly for record-keeping. If needed, utilities can cancel or curtail trades through a separate update workflow (Phase 3b).
 
 ### Confirmation Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
+    participant BuyerUtility as BuyerUtility
     participant BuyerTP as BuyerTP (BAP)
     participant SellerTP as SellerTP (BPP)
     participant SellerUtility as SellerUtility
-    participant BuyerUtility as BuyerUtility
 
-    Note over BuyerTP,BuyerUtility: Trade: 5 kWh, 2-4 PM, $0.50/kWh
+    Note over BuyerUtility,SellerUtility: Trade: 5 kWh, 2-4 PM, $0.50/kWh
 
     BuyerTP->>SellerTP: /confirm (trade contract)
     SellerTP->>BuyerTP: /on_confirm (trade confirmed)
-    par Inform utilities
-        SellerTP->>SellerUtility: /confirm (inform utility)
+    par Each TP informs own utility
+        SellerTP->>SellerUtility: /confirm (log trade)
         SellerUtility->>SellerUtility: Deduct from seller limit, log trade
         SellerUtility-->>SellerTP: /on_confirm (acknowledged)
     and
-        SellerTP->>BuyerUtility: /confirm (inform utility)
+        BuyerTP->>BuyerUtility: /confirm (log trade)
         BuyerUtility->>BuyerUtility: Deduct from buyer limit, log trade
-        BuyerUtility-->>SellerTP: /on_confirm (acknowledged)
+        BuyerUtility-->>BuyerTP: /on_confirm (acknowledged)
     end
 ```
 
@@ -267,35 +294,29 @@ After a trade is confirmed but before energy delivery, a utility may need to mod
 
 ### Update Flow
 
-The initiating utility (in this example, BuyerUtility) sends `/update` to SellerTP, which coordinates the update across all parties.
+The initiating utility communicates with its own TP, which relays the update through the TP-to-TP link to the other side. Each utility only ever communicates with its own customer's TP.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant BuyerUtility as BuyerUtility
+    participant BuyerTP as BuyerTP (BAP)
     participant SellerTP as SellerTP (BPP)
     participant SellerUtility as SellerUtility
-    participant BuyerTP as BuyerTP (BAP)
 
-    Note over BuyerUtility,BuyerTP: Trade update triggered (e.g., scheduled outage)
+    Note over BuyerUtility,SellerUtility: Trade update triggered (e.g., scheduled outage on buyer side)
 
-    BuyerUtility->>SellerTP: /update (cancel/curtail trade)
-    Note right of SellerTP: Update reason: scheduled outage<br/>Action: cancel OR curtail to X kWh
-
-    par Cascade update to all parties
-        SellerTP->>SellerUtility: /update (notify of change)
-        SellerUtility->>SellerUtility: Update trade in ledger
-        SellerUtility-->>SellerTP: /on_update (acknowledged)
-    and
-        SellerTP->>BuyerTP: /update (notify of change)
-        BuyerTP->>BuyerTP: Update trade status
-        BuyerTP-->>SellerTP: /on_update (acknowledged)
-    end
-
-    SellerTP->>BuyerUtility: /on_update (update confirmed)
+    BuyerUtility->>BuyerTP: /update (cancel/curtail trade)
+    Note right of BuyerTP: Update reason: scheduled outage<br/>Action: cancel OR curtail to X kWh
+    BuyerTP->>SellerTP: /update (relay to seller side)
+    SellerTP->>SellerUtility: /update (notify of change)
+    SellerUtility->>SellerUtility: Update trade in ledger
+    SellerUtility-->>SellerTP: /on_update (acknowledged)
+    SellerTP->>BuyerTP: /on_update (seller side confirmed)
+    BuyerTP->>BuyerUtility: /on_update (update confirmed)
     BuyerUtility->>BuyerUtility: Update trade in ledger
 
-    Note over BuyerUtility,BuyerTP: All parties now have consistent view of modified trade
+    Note over BuyerUtility,SellerUtility: All parties now have consistent view of modified trade
 ```
 
 ### Update Types
@@ -320,11 +341,12 @@ While this example shows BuyerUtility initiating, updates can also be initiated 
 
 | Initiator | Route | Use Case |
 |-----------|-------|----------|
-| **BuyerUtility** | BuyerUtility → SellerTP → (SellerUtility, BuyerTP) | Outage on buyer's side |
-| **SellerUtility** | SellerUtility → SellerTP → (BuyerUtility, BuyerTP) | Outage on seller's side |
-| **BuyerTP** | BuyerTP → SellerTP → (SellerUtility, BuyerUtility) | Buyer requests cancellation |
+| **BuyerUtility** | BuyerUtility → BuyerTP → SellerTP → SellerUtility | Outage on buyer's side |
+| **SellerUtility** | SellerUtility → SellerTP → BuyerTP → BuyerUtility | Outage on seller's side |
+| **BuyerTP** | BuyerTP → SellerTP → SellerUtility; BuyerTP → BuyerUtility | Buyer requests cancellation |
+| **SellerTP** | SellerTP → BuyerTP → BuyerUtility; SellerTP → SellerUtility | Seller requests cancellation |
 
-In all cases, SellerTP acts as the coordination hub, ensuring all parties receive the update and acknowledge it.
+In all cases, each utility communicates only with its own TP. Updates cascade through the TP-to-TP link, maintaining symmetric information flow.
 
 ---
 
@@ -361,7 +383,7 @@ sequenceDiagram
 
 ## Phase 5: Post-Delivery Allocation and Status
 
-After the delivery window, each utility performs allocation independently for its own customers and reports to SellerTP, which then notifies BuyerTP.
+After the delivery window, each utility performs allocation independently for its own customers and reports to its own TP. The TPs then exchange allocations and compute settled quantities, relaying both the counterparty's raw allocation and the settled quantity back to their respective utilities for verification.
 
 ### Why Allocation Matters
 
@@ -375,12 +397,12 @@ A prosumer may have multiple trades in the same delivery window but inject/consu
 ```mermaid
 sequenceDiagram
     autonumber
+    participant BuyerUtility as BuyerUtility
     participant BuyerTP as BuyerTP (BAP)
     participant SellerTP as SellerTP (BPP)
     participant SellerUtility as SellerUtility
-    participant BuyerUtility as BuyerUtility
 
-    Note over SellerUtility,BuyerUtility: Verification Cycle (e.g., every X hours)
+    Note over BuyerUtility,SellerUtility: Verification Cycle (e.g., every X hours)
 
     rect rgb(255, 245, 230)
     Note over SellerUtility: Seller-Side Allocation
@@ -396,14 +418,27 @@ sequenceDiagram
     BuyerUtility->>BuyerUtility: Allocate actuals to trades<br/>(FIFO or pro-rata)
     end
 
-    par Utilities report to SellerTP
+    par Utilities report to own TPs
         SellerUtility-->>SellerTP: /on_status<br/>(seller allocated qty per trade)
     and
-        BuyerUtility-->>SellerTP: /on_status<br/>(buyer allocated qty per trade)
+        BuyerUtility-->>BuyerTP: /on_status<br/>(buyer allocated qty per trade)
     end
 
-    SellerTP->>BuyerTP: /on_status<br/>(trade settlement summary)
-    Note right of BuyerTP: Buyer knows what to expect<br/>in P2P payment and bill adjustment
+    par TPs exchange allocations
+        SellerTP->>BuyerTP: /on_status<br/>(seller allocation per trade)
+    and
+        BuyerTP->>SellerTP: /on_status<br/>(buyer allocation per trade)
+    end
+
+    Note over BuyerTP,SellerTP: Both TPs compute settled qty per trade
+
+    par TPs relay to own utilities
+        BuyerTP->>BuyerUtility: /on_status<br/>(seller alloc + settled qty per trade)
+    and
+        SellerTP->>SellerUtility: /on_status<br/>(buyer alloc + settled qty per trade)
+    end
+
+    Note over BuyerUtility,SellerUtility: Each utility can verify settlement rules<br/>using counterparty allocation and settled qty
 ```
 
 ### Allocation Example (FIFO)
@@ -495,22 +530,24 @@ sequenceDiagram
     participant Utility as Utility<br/>(same for both)
 
     BuyerTP->>SellerTP: /confirm (trade contract)
-    SellerTP->>Utility: /confirm (single utility call)
+    SellerTP->>BuyerTP: /on_confirm (trade confirmed)
+    par Each TP informs same utility
+        SellerTP->>Utility: /confirm (log trade, seller side)
+        Utility->>Utility: Deduct from seller limit, log trade
+        Utility-->>SellerTP: /on_confirm
+    and
+        BuyerTP->>Utility: /confirm (log trade, buyer side)
+        Utility->>Utility: Deduct from buyer limit, deduplicate by trade ID
+        Utility-->>BuyerTP: /on_confirm
+    end
 
-    Utility->>Utility: Check both limits
-    Utility->>Utility: Log single trade entry
-    Utility->>Utility: Sign and seal order
-
-    Utility-->>SellerTP: /on_confirm
-    SellerTP-->>BuyerTP: /on_confirm
-
-    Note over BuyerTP,Utility: Same protocol, fewer hops
+    Note over BuyerTP,Utility: Same protocol, same number of hops.<br/>Utility deduplicates by trade ID.
 ```
 
-The protocol structure remains identical, but:
-- Only one utility is involved
-- No cross-utility confirm/on_confirm
-- Single ledger entry (but from same utility's perspective for both parties)
+The protocol structure remains identical:
+- Both TPs inform the same utility independently
+- Utility deduplicates by trade ID — double entry ensures double confirmation
+- Single ledger with entries from both sides
 
 ---
 
@@ -519,9 +556,9 @@ The protocol structure remains identical, but:
 | Aspect | Central Ledger | Decentralized (This Approach) |
 |--------|---------------|------------------------------|
 | **Trust model** | All trust central exchange | Multi-party signatures |
-| **Privacy** | Central entity sees all trades | Each utility sees only its customers' trades |
+| **Privacy** | Central entity sees all trades | Each utility sees only its customers' trades; price stays between TPs; only allocations cross TP-utility boundary |
 | **Single point of failure** | Yes (central ledger) | No |
-| **Cross-utility coordination** | Via central ledger queries | Via cascading Beckn calls |
+| **Cross-utility coordination** | Via central ledger queries | Via symmetric TP-to-TP Beckn calls; each TP liaises with own utility |
 | **Regulatory complexity** | Central exchange needs regulation | Each utility self-regulates |
 | **Deployment** | Requires new central infrastructure | Builds on existing utility systems |
 | **Dispute resolution** | Central ledger is arbiter | Multi-party signatures provide evidence |
@@ -534,7 +571,7 @@ The protocol structure remains identical, but:
 
 2. **Allocation Consistency:** If FIFO allocation differs between utilities for the same trade (due to data timing), how to reconcile?
 
-3. **Cross-Utility Trust:** What compels SellerUtility to forward `/confirm` to BuyerUtility honestly?
+3. **Cross-TP Trust:** How do TPs verify that the counterparty TP has accurately relayed allocation data from its utility?
 
 4. **Offline Handling:** If a utility is temporarily unavailable during confirmation cascade, how to handle?
 
