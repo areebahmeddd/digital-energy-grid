@@ -32,10 +32,10 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 | # | Actor | Role | Beckn Role |
 |---|-------|------|------------|
-| 1 | **BuyerTP** | Consumer's trading platform | BAP (Beckn Application Platform) |
-| 2 | **SellerTP** | Producer's trading platform | BPP (Beckn Provider Platform) |
-| 3 | **BuyerUtility** | Buyer's energy retailer/distribution company | BPP (for limit checks and settlement) |
-| 4 | **SellerUtility** | Seller's energy retailer/distribution company | BPP (for limit checks and settlement) |
+| 1 | **BuyerTP** | Consumer's trading platform | BAP when requesting, BPP when responding |
+| 2 | **SellerTP** | Producer's trading platform | BAP when requesting, BPP when responding |
+| 3 | **BuyerUtility** | Buyer's energy retailer/distribution company | BAP when requesting, BPP when responding |
+| 4 | **SellerUtility** | Seller's energy retailer/distribution company | BAP when requesting, BPP when responding |
 | 5 | **Buyer** | Energy consumer in P2P trade | End user |
 | 6 | **Seller** | Energy producer in P2P trade | End user |
 
@@ -82,8 +82,8 @@ sequenceDiagram
     autonumber
     participant B as Buyer
     participant BuyerUtility as BuyerUtility
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant SellerUtility as SellerUtility
     participant S as Seller
 
@@ -179,8 +179,8 @@ This phase follows standard Beckn discovery flow. Buyer searches for energy offe
 sequenceDiagram
     autonumber
     participant B as Buyer
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant S as Seller
 
     B->>BuyerTP: Search for energy offers<br/>(delivery window, quantity, location)
@@ -208,9 +208,9 @@ Each utility may impose trading limits on its customers to:
 ```mermaid
 sequenceDiagram
     autonumber
-    participant BuyerTP as BuyerTP (BAP)
+    participant BuyerTP as BuyerTP
     participant BuyerUtility as BuyerUtility
-    participant SellerTP as SellerTP (BPP)
+    participant SellerTP as SellerTP
     participant SellerUtility as SellerUtility
 
     Note over BuyerTP,SellerUtility: Trade: 5 kWh, 2-4 PM, $0.50/kWh
@@ -253,8 +253,8 @@ This is the critical phase that establishes trust without a central ledger. Afte
 sequenceDiagram
     autonumber
     participant BuyerUtility as BuyerUtility
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant SellerUtility as SellerUtility
 
     Note over BuyerUtility,SellerUtility: Trade: 5 kWh, 2-4 PM, $0.50/kWh
@@ -300,8 +300,8 @@ The initiating utility communicates with its own TP, which relays the update thr
 sequenceDiagram
     autonumber
     participant BuyerUtility as BuyerUtility
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant SellerUtility as SellerUtility
 
     Note over BuyerUtility,SellerUtility: Trade update triggered (e.g., scheduled outage on buyer side)
@@ -398,8 +398,8 @@ A prosumer may have multiple trades in the same delivery window but inject/consu
 sequenceDiagram
     autonumber
     participant BuyerUtility as BuyerUtility
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant SellerUtility as SellerUtility
 
     Note over BuyerUtility,SellerUtility: Verification Cycle (e.g., every X hours)
@@ -525,8 +525,8 @@ When buyer and seller are with the **same utility**, the flow simplifies natural
 ```mermaid
 sequenceDiagram
     autonumber
-    participant BuyerTP as BuyerTP (BAP)
-    participant SellerTP as SellerTP (BPP)
+    participant BuyerTP as BuyerTP
+    participant SellerTP as SellerTP
     participant Utility as Utility<br/>(same for both)
 
     BuyerTP->>SellerTP: /confirm (trade contract)
