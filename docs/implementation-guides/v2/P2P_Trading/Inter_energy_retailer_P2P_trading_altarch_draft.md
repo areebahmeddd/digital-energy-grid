@@ -47,7 +47,7 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 1. **Symmetric TP-liaison model**: Each trading platform acts as the sole liaison to its own utility. No utility communicates directly with the counterparty's TP. Cross-utility information flows TP-to-TP only.
 2. **Privacy-preserving information flow**: Only allocations are exchanged between TPs and utilities — not customer IDs, PII, or meter data. Price information stays between trading platforms only. Intra-discom trade data stays in the discom's own ledger.
-3. **Utility involvement patterns**: Utility participation during init is optional, and only needed when trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, each TP sends a non-blocking intimation to its own utility, informing them of the trade so they can avoid double-billing and compute wheeling and deviation charges post delivery. Utilities can independently track and publish trade deviation scores (e.g., CIBIL for energy).
+3. **Utility involvement patterns**: Utility participation during init is optional, and only needed when trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, each TP sends a non-blocking intimation to its own utility, informing them of the trade so they can avoid double-billing and compute wheeling and under-fulfillment charges post delivery. Utilities can independently track and publish trade reliability scores (e.g., CIBIL for energy).
 4. **Distributed ledgers**: Each utility maintains its own ledger for its customers only
 5. **Natural collapse**: Same-utility trades collapse to single-discom flow automatically
 
@@ -57,12 +57,12 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 ```mermaid
 flowchart LR
-    BuyerDiscom["Buyer discom<br/>(Discom ledger)"] -->|"Buyer alloc,<br/>Cancel trades"| BuyerApp
+    BuyerDiscom["Buyer discom<br/>w Discom ledger"] -->|"Buyer alloc,<br/>Cancel trades"| BuyerApp
     BuyerApp -->|"Log trades,<br/>Seller alloc,<br/>Settled qty"| BuyerDiscom
 
     BuyerApp["Buyer App<br/>(trade ledger)"] <-->|"init/select, confirm,<br/>update, status"| SellerApp["Seller App<br/>(trade ledger)"]
 
-    SellerApp -->|"Log trades,<br/>Buyer alloc,<br/>Settled qty"| SellerDiscom["Seller discom<br/>(Discom ledger)"]
+    SellerApp -->|"Log trades,<br/>Buyer alloc,<br/>Settled qty"| SellerDiscom["Seller discom<br/> w Discom ledger"]
     SellerDiscom -->|"Seller alloc,<br/>Cancel trades"| SellerApp
 ```
 
@@ -403,14 +403,14 @@ sequenceDiagram
     Note over SellerUtility: Seller-Side Allocation
     SellerUtility->>SellerUtility: Get all confirmed trades for<br/>seller in delivery period
     SellerUtility->>SellerUtility: Get actual meter injection data
-    SellerUtility->>SellerUtility: Allocate actuals to trades<br/>(FIFO or pro-rata)
+    SellerUtility->>SellerUtility: Allocate actuals to trades<br/>(pro-rata)
     end
 
     rect rgb(230, 245, 255)
     Note over BuyerUtility: Buyer-Side Allocation
     BuyerUtility->>BuyerUtility: Get all confirmed trades for<br/>buyer in delivery period
     BuyerUtility->>BuyerUtility: Get actual meter consumption data
-    BuyerUtility->>BuyerUtility: Allocate actuals to trades<br/>(FIFO or pro-rata)
+    BuyerUtility->>BuyerUtility: Allocate actuals to trades<br/>(pro-rata)
     end
 
     par Utilities report to own TPs
@@ -436,24 +436,24 @@ sequenceDiagram
     Note over BuyerUtility,SellerUtility: Each utility can verify settlement rules<br/>using counterparty allocation and settled qty
 ```
 
-### Allocation Example (FIFO)
+### Allocation Example (Pro-rata)
 
 **Seller's trades for delivery window 2-4 PM:**
 
-| Trade | Trade Time | Contracted Qty | Priority |
-|-------|------------|----------------|----------|
-| T1 (with Buyer A) | 9:00 AM | 5 kWh | 1st |
-| T2 (with Buyer B) | 9:30 AM | 4 kWh | 2nd |
-| **Total** | | **9 kWh** | |
+| Trade | Contracted Qty | Share of Total |
+|-------|----------------|----------------|
+| T1 (with Buyer A) | 5 kWh | 5/9 ≈ 55.6% |
+| T2 (with Buyer B) | 4 kWh | 4/9 ≈ 44.4% |
+| **Total** | **9 kWh** | **100%** |
 
 **Actual injection: 7 kWh**
 
-**SellerUtility allocation (FIFO):**
+**SellerUtility allocation (pro-rata):** Under-fulfillment (7 of 9 kWh) is distributed proportionally across all trades for that meter and time block.
 
 | Trade | Contracted | Allocated | Status |
 |-------|------------|-----------|--------|
-| T1 | 5 kWh | 5 kWh | Full delivery |
-| T2 | 4 kWh | 2 kWh | Partial delivery |
+| T1 | 5 kWh | 3.89 kWh (5/9 × 7) | Partial delivery |
+| T2 | 4 kWh | 3.11 kWh (4/9 × 7) | Partial delivery |
 
 SellerUtility sends `/on_status` to SellerTP with these allocated quantities.
 
@@ -564,7 +564,7 @@ The protocol structure remains identical:
 
 1. **Signature Format:** What cryptographic format for multi-party signatures? (JWS, EdDSA, etc.)
 
-2. **Allocation Consistency:** If FIFO allocation differs between utilities for the same trade (due to data timing), how to reconcile?
+2. **Allocation Consistency:** If pro-rata allocation differs between utilities for the same trade (due to data timing), how to reconcile?
 
 3. **Cross-TP Trust:** How do TPs verify that the counterparty TP has accurately relayed allocation data from its utility?
 
