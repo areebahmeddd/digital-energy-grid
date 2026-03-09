@@ -168,14 +168,14 @@ sequenceDiagram
 
 ## Phase 5: Post-Delivery Allocation and Status
 
-After the delivery window, each utility performs allocation independently for its own customers and reports to its own TP. The TPs then exchange allocations and compute settled quantities, relaying both the counterparty's raw allocation and the settled quantity back to their respective utilities for verification.
+After the delivery window, each utility performs allocation independently for its own customers and reports to its own TP. The TPs then exchange allocations and compute settled quantities using agreed reconciliation rules (for example minimum of buyer & seller discom allocation against the trade), relaying both the counterparty's raw allocation and the settled quantity back to their respective utilities for verification.
 
 ### Why Allocation Matters
 
-A prosumer may have multiple trades in the same delivery window but inject/consume less than the total contracted amount. Each utility must allocate actual meter readings to specific trades to determine:
+A prosumer or consumer may have multiple trades in the same delivery window but inject/consume less than the total contracted amount. Each utility must allocate actual meter readings to specific trades to determine:
 - What quantity was actually delivered/received for each trade
 - What to include in billing adjustments
-- Whether penalties apply for under-delivery
+- Whether penalties apply for under-fulfillment
 
 ### Allocation Example (Pro-rata)
 
@@ -197,3 +197,5 @@ A prosumer may have multiple trades in the same delivery window but inject/consu
 | T2 | 4 kWh | 3.11 kWh (4/9 × 7) | Partial delivery |
 
 SellerUtility sends `/on_status` to SellerTP with these allocated quantities.
+
+Once both discom's allocations reach both trading platforms, each implements a network policy to use minimum of two allocations for the final settlement, and sends a final on_status to own utilities, so that their ledgers can log the counter-party allocations as well as the final trade volume for settlement. Trading platforms use this final trade volume to exchange peer to peer payment, and discoms use it to avoid double billing.
