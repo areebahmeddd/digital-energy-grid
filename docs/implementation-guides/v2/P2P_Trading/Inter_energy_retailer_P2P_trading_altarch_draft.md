@@ -56,11 +56,11 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 ## Architecture Overview
 
 ```mermaid
-flowchart TD
-    BuyerApp["Buyer App<br/>(trade ledger)"] <-->|"init/select, confirm,<br/>update, status"| SellerApp["Seller App<br/>(trade ledger)"]
+flowchart LR
+    BuyerDiscom["Buyer discom<br/>(Discom ledger)"] -->|"Buyer alloc,<br/>Cancel trades"| BuyerApp
+    BuyerApp -->|"Log trades,<br/>Seller alloc,<br/>Settled qty"| BuyerDiscom
 
-    BuyerApp -->|"Log trades,<br/>Seller alloc,<br/>Settled qty"| BuyerDiscom["Buyer discom<br/>(Discom ledger)"]
-    BuyerDiscom -->|"Buyer alloc,<br/>Cancel trades"| BuyerApp
+    BuyerApp["Buyer App<br/>(trade ledger)"] <-->|"init/select, confirm,<br/>update, status"| SellerApp["Seller App<br/>(trade ledger)"]
 
     SellerApp -->|"Log trades,<br/>Buyer alloc,<br/>Settled qty"| SellerDiscom["Seller discom<br/>(Discom ledger)"]
     SellerDiscom -->|"Seller alloc,<br/>Cancel trades"| SellerApp
