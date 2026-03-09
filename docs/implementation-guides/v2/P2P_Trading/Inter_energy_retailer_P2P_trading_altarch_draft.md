@@ -66,7 +66,7 @@ flowchart LR
     SellerDiscom -->|"Seller alloc,<br/>Cancel trades"| SellerApp
 ```
 
-> **Key properties:** Each TP acts as the sole liaison to its own utility. Trade protocol flows (init, select, confirm, update, status) stay between TPs. Only allocations and settled quantities cross the TP-utility boundary — not customer IDs, PII, meter data, or price information. Intra-discom trade data stays in the discom's own ledger.
+> **Key properties:** Each TP acts as the liaison to the customer's utility. Trade protocol flows (init, select, confirm, update, status) and prices stay between TPs. Each customer's PII data only stays with trading platform & utility they have formally enrolled with. It does not get sent to other systems without their consent. Only allocations and settled quantities cross the TP-utility boundary — not other discom's customer IDs, PII, meter data, or price information. Intra-discom trade data stays in the discom's own ledger.
 
 ---
 
