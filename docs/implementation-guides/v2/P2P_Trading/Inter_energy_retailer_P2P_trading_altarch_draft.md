@@ -70,6 +70,46 @@ flowchart LR
 
 ---
 
+## Ledger Contents
+
+### Utility (Discom) Ledger
+
+Each utility maintains the following per trade for its own customer:
+
+- trade_id
+- meter/customer info
+- trade qty
+- delivery start_time
+- delivery end_time
+- actual qty (from meter data)
+- allocated qty (pro-rata from actuals)
+- counterparty's allocation
+- settled_qty
+- trade status
+
+### Trading Platform Ledger
+
+Each trading platform maintains the following per trade:
+
+- trade_id
+- meter/customer info
+- trade qty
+- price
+- delivery start_time
+- delivery end_time
+- allocated qty (from own utility)
+- counterparty's allocation
+- settled_qty
+- trade status
+
+### Data Residency Summary
+
+- **Customer data** (IDs, PII, meter info) stays with the customer's own trading platform and utility — it is not shared with counterparty systems except as allocations.
+- **Meter data** (actual injection/consumption readings) stays with the utility alone.
+- **Price data** stays with the two trading platforms only — utilities never see trade prices.
+
+---
+
 ## Overall Process Flow
 
 ```mermaid
@@ -135,8 +175,8 @@ sequenceDiagram
 
     rect rgb(245, 230, 255)
     note over BuyerUtility,SellerUtility: Phase 5: Post-Delivery Allocation
-    SellerUtility->>SellerUtility: Allocate actual pushed to trades
-    BuyerUtility->>BuyerUtility: Allocate actual pulled to trades
+    SellerUtility->>SellerUtility: Allocate actual pushed to trades, update ledger
+    BuyerUtility->>BuyerUtility: Allocate actual pulled to trades, update ledger
     par Utilities report to own TPs
         SellerUtility-->>SellerTP: /on_status (seller allocated qty)
     and
@@ -147,10 +187,20 @@ sequenceDiagram
     and
         BuyerTP->>SellerTP: /on_status (buyer allocation)
     end
+    par TPs compute settled qty
+        BuyerTP->>BuyerTP: Compute settled qty (min of two allocations)
+    and
+        SellerTP->>SellerTP: Compute settled qty (min of two allocations)
+    end
     par TPs relay to own utilities
         BuyerTP->>BuyerUtility: /on_status (seller alloc + settled qty)
     and
         SellerTP->>SellerUtility: /on_status (buyer alloc + settled qty)
+    end
+    par Utilities update ledger
+        BuyerUtility->>BuyerUtility: Update ledger with counterparty alloc + settled qty
+    and
+        SellerUtility->>SellerUtility: Update ledger with counterparty alloc + settled qty
     end
     end
 
