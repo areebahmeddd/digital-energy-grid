@@ -57,11 +57,6 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 ```mermaid
 flowchart TD
-    DeDi["DeDi + Registry service"] --- Catalog["Catalog service"]
-
-    Catalog -.->|discover| BuyerApp
-    SellerApp -.->|publish| Catalog
-
     BuyerApp["Buyer App<br/>(trade ledger)"] <-->|"init/select, confirm,<br/>update, status"| SellerApp["Seller App<br/>(trade ledger)"]
 
     BuyerApp -->|"Log trades,<br/>Seller alloc,<br/>Settled qty"| BuyerDiscom["Buyer discom<br/>(Discom ledger)"]
