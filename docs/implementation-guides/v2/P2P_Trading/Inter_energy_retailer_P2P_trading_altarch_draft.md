@@ -72,35 +72,22 @@ flowchart LR
 
 ## Ledger Contents
 
-### Utility (Discom) Ledger
-
-Each utility maintains the following per trade for its own customer:
-
-- trade_id
-- meter/customer info
-- trade qty
-- delivery start_time
-- delivery end_time
-- actual qty (from meter data)
-- allocated qty (pro-rata from actuals)
-- counterparty's allocation
-- settled_qty
-- trade status
-
-### Trading Platform Ledger
-
-Each trading platform maintains the following per trade:
-
-- trade_id
-- meter/customer info
-- trade qty
-- price
-- delivery start_time
-- delivery end_time
-- allocated qty (from own utility)
-- counterparty's allocation
-- settled_qty
-- trade status
+| Field | Utility Ledger | TP Ledger |
+|-------|:-:|:-:|
+| **Common fields** | | |
+| trade_id | Yes | Yes |
+| meter/customer info | Yes | Yes |
+| trade qty | Yes | Yes |
+| delivery start_time | Yes | Yes |
+| delivery end_time | Yes | Yes |
+| allocated qty | Yes | Yes |
+| counterparty's allocation | Yes | Yes |
+| settled_qty | Yes | Yes |
+| trade status | Yes | Yes |
+| **Utility only** | | |
+| actual qty (from meter data) | Yes | — |
+| **TP only** | | |
+| price | — | Yes |
 
 ### Data Residency Summary
 
