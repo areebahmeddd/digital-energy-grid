@@ -162,31 +162,31 @@ sequenceDiagram
 
     rect rgb(245, 230, 255)
     note over BuyerUtility,SellerUtility: Phase 5: Post-Delivery Allocation
-    SellerUtility->>SellerUtility: Allocate actual pushed to trades (round 1), update ledger
-    BuyerUtility->>BuyerUtility: Allocate actual pulled to trades (round 1), update ledger
-    par Utilities report round 1 allocations to own TPs
-        SellerUtility-->>SellerTP: /on_status (seller allocated qty, round 1)
+    SellerUtility->>SellerUtility: Allocate actual pushed to trades, update ledger
+    BuyerUtility->>BuyerUtility: Allocate actual pulled to trades, update ledger
+    par Utilities report allocations to own TPs
+        SellerUtility-->>SellerTP: /on_status (seller allocated qty)
     and
-        BuyerUtility-->>BuyerTP: /on_status (buyer allocated qty, round 1)
+        BuyerUtility-->>BuyerTP: /on_status (buyer allocated qty)
     end
-    par TPs exchange round 1 allocations
-        SellerTP->>BuyerTP: /on_status (seller allocation, round 1)
+    par TPs exchange allocations
+        SellerTP->>BuyerTP: /on_status (seller allocation)
     and
-        BuyerTP->>SellerTP: /on_status (buyer allocation, round 1)
+        BuyerTP->>SellerTP: /on_status (buyer allocation)
     end
-    par TPs relay counterparty round 1 allocations to own utilities
-        BuyerTP->>BuyerUtility: /on_status (seller allocation, round 1)
+    par TPs relay counterparty allocations to own utilities
+        BuyerTP->>BuyerUtility: /on_status (seller allocation)
     and
-        SellerTP->>SellerUtility: /on_status (buyer allocation, round 1)
+        SellerTP->>SellerUtility: /on_status (buyer allocation)
     end
     note over SellerUtility: SellerUtility now has buyer's allocation
-    SellerUtility->>SellerUtility: Re-allocate with buyer's allocation (round 2), update ledger
-    SellerUtility->>SellerTP: /on_status (seller allocated qty, round 2)
-    SellerTP->>BuyerTP: /on_status (seller allocation, round 2)
+    SellerUtility->>SellerUtility: Final adjustment using buyer's allocation, update ledger
+    SellerUtility->>SellerTP: /on_status (seller final adjusted qty)
+    SellerTP->>BuyerTP: /on_status (seller final adjusted allocation)
     par TPs compute settled qty
-        BuyerTP->>BuyerTP: Compute settled qty (min of seller round 2, buyer round 1)
+        BuyerTP->>BuyerTP: Compute settled qty (min of seller final adjusted, buyer allocated)
     and
-        SellerTP->>SellerTP: Compute settled qty (min of seller round 2, buyer round 1)
+        SellerTP->>SellerTP: Compute settled qty (min of seller final adjusted, buyer allocated)
     end
     par TPs send settled qty to each other
         BuyerTP->>SellerTP: /on_status (settled qty)
@@ -219,7 +219,7 @@ sequenceDiagram
 
 ## Phase 5: Post-Delivery Allocation and Status
 
-After the delivery window, each utility performs an independent first-round allocation for its own customers and reports to its own TP. The TPs exchange these round 1 allocations and relay the counterparty's allocation back to their respective utilities. Once SellerUtility receives BuyerUtility's allocation (via BuyerTP → SellerTP → SellerUtility), it performs a second allocation (allocationRound=2), which flows to both SellerTP and BuyerTP. Only after receiving the round 2 seller allocation can the TPs compute settled quantities using the min-of-two rule (minimum of seller's round 2 allocation and buyer's round 1 allocation). The TPs then send the settled quantity back to their respective utilities and to each other.
+After the delivery window, each utility independently allocates actual meter readings to its own customers' trades and reports to its own TP. The TPs exchange these allocations and relay the counterparty's allocation back to their respective utilities. Once SellerUtility receives BuyerUtility's allocation (via BuyerTP → SellerTP → SellerUtility), it performs a final adjustment informed by the buyer's allocation, which flows to both SellerTP and BuyerTP. Only after receiving the seller's final adjusted allocation can the TPs compute settled quantities using the min-of-two rule (minimum of seller's final adjusted allocation and buyer's allocation). The TPs then send the settled quantity back to their respective utilities and to each other.
 
 ### Why Allocation Matters
 
@@ -249,4 +249,4 @@ A prosumer or consumer may have multiple trades in the same delivery window but 
 
 SellerUtility sends `/on_status` to SellerTP with these allocated quantities.
 
-Once both discoms' round 1 allocations reach both trading platforms and are relayed to the respective utilities, SellerUtility performs a second allocation (round 2) informed by the buyer's allocation. This round 2 allocation flows to both TPs, which then apply the min-of-two rule (minimum of seller's round 2 allocation and buyer's round 1 allocation) to compute the settled quantity. TPs send this settled quantity to their own utilities and to each other. Trading platforms use this final settled volume to exchange peer-to-peer payment, and discoms use it to avoid double billing.
+Once both discoms' allocations reach both trading platforms and are relayed to the respective utilities, SellerUtility performs a final adjustment informed by the buyer's allocation. This final adjusted allocation flows to both TPs, which then apply the min-of-two rule (minimum of seller's final adjusted allocation and buyer's allocation) to compute the settled quantity. TPs send this settled quantity to their own utilities and to each other. Trading platforms use this final settled volume to exchange peer-to-peer payment, and discoms use it to avoid double billing.
