@@ -182,22 +182,13 @@ sequenceDiagram
     note over SellerUtility: SellerUtility now has buyer's allocation
     SellerUtility->>SellerUtility: Final adjustment using buyer's allocation, update ledger
     SellerUtility->>SellerTP: /on_status (seller final adjusted qty)
-    SellerTP->>BuyerTP: /on_status (seller final adjusted allocation)
-    par TPs compute settled qty
-        BuyerTP->>BuyerTP: Compute settled qty (min of seller final adjusted, buyer allocated)
-    and
-        SellerTP->>SellerTP: Compute settled qty (min of seller final adjusted, buyer allocated)
-    end
-    par TPs send settled qty to each other
-        BuyerTP->>SellerTP: /on_status (settled qty)
-    and
-        SellerTP->>BuyerTP: /on_status (settled qty)
-    end
-    par TPs relay settled qty to own utilities
-        BuyerTP->>BuyerUtility: /on_status (settled qty)
-    and
+    SellerTP->>SellerTP: Compute settled qty (min of seller final adjusted, buyer allocated)
+    par SellerTP sends final adjusted allocation and settled qty
         SellerTP->>SellerUtility: /on_status (settled qty)
+    and
+        SellerTP->>BuyerTP: /on_status (seller final adjusted allocation, settled qty)
     end
+    BuyerTP->>BuyerUtility: /on_status (seller final adjusted allocation, settled qty)
     par Utilities update ledger
         BuyerUtility->>BuyerUtility: Update ledger with settled qty
     and
@@ -219,7 +210,7 @@ sequenceDiagram
 
 ## Phase 5: Post-Delivery Allocation and Status
 
-After the delivery window, each utility independently allocates actual meter readings to its own customers' trades and reports to its own TP. The TPs exchange these allocations and relay the counterparty's allocation back to their respective utilities. Once SellerUtility receives BuyerUtility's allocation (via BuyerTP → SellerTP → SellerUtility), it performs a final adjustment informed by the buyer's allocation, which flows to both SellerTP and BuyerTP. Only after receiving the seller's final adjusted allocation can the TPs compute settled quantities using the min-of-two rule (minimum of seller's final adjusted allocation and buyer's allocation). The TPs then send the settled quantity back to their respective utilities and to each other.
+After the delivery window, each utility independently allocates actual meter readings to its own customers' trades and reports to its own TP. The TPs exchange these allocations and relay the counterparty's allocation back to their respective utilities. Once SellerUtility receives BuyerUtility's allocation (via BuyerTP → SellerTP → SellerUtility), it performs a final adjustment informed by the buyer's allocation and sends the result to SellerTP. SellerTP then computes the settled quantity using the min-of-two rule (minimum of seller's final adjusted allocation and buyer's allocation), and sends both the final adjusted allocation and settled quantity to SellerUtility and BuyerTP in parallel. BuyerTP relays both to BuyerUtility.
 
 ### Why Allocation Matters
 
@@ -249,4 +240,4 @@ A prosumer or consumer may have multiple trades in the same delivery window but 
 
 SellerUtility sends `/on_status` to SellerTP with these allocated quantities.
 
-Once both discoms' allocations reach both trading platforms and are relayed to the respective utilities, SellerUtility performs a final adjustment informed by the buyer's allocation. This final adjusted allocation flows to both TPs, which then apply the min-of-two rule (minimum of seller's final adjusted allocation and buyer's allocation) to compute the settled quantity. TPs send this settled quantity to their own utilities and to each other. Trading platforms use this final settled volume to exchange peer-to-peer payment, and discoms use it to avoid double billing.
+Once both discoms' allocations reach both trading platforms and are relayed to the respective utilities, SellerUtility performs a final adjustment informed by the buyer's allocation and sends it to SellerTP. SellerTP computes the settled quantity (minimum of seller's final adjusted allocation and buyer's allocation) and sends both the final adjusted allocation and settled quantity to SellerUtility and BuyerTP in parallel. BuyerTP relays both to BuyerUtility. Trading platforms use this final settled volume to exchange peer-to-peer payment, and discoms use it to avoid double billing.
