@@ -86,7 +86,9 @@ This credential links to the Utility Customer Credential via the `credentialSubj
 - `attributes.yaml` - OpenAPI 3.1.1 schema definition
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
-- `example.json` - Sample credential with 15-minute residential data
+- `example.json` - Sample credential with 15-minute residential data (single VC, pretty-printed)
+- `example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
+- `ndjson-transport.md` - NDJSON bulk delivery transport specification
 - `readme.md` - This documentation
 
 ## Usage
