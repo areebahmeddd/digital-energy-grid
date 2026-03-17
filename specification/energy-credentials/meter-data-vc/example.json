@@ -18,6 +18,7 @@
   },
   "credentialSubject": {
     "id": "did:example:consumer:abc123",
+    "consumerNumber": "UTIL-2025-001234567",
     "meterNumber": "MET2025789456123",
     "serviceKind": "electricity",
     "timeZone": "Asia/Kolkata",

@@ -21,6 +21,7 @@ Key use cases:
 | Field | Type | Required | Description | Green Button Source |
 |-------|------|----------|-------------|---------------------|
 | `id` | string (DID) | Yes | Customer DID (links to customer) | — |
+| `consumerNumber` | string | Yes | Utility account number (links to customer record) | — |
 | `meterNumber` | string | Yes | Meter serial number | — |
 | `serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
 | `timeZone` | string | Yes | IANA time-zone (e.g., "Asia/Kolkata") | — |
@@ -78,7 +79,7 @@ This credential uses human-readable string enum values instead of Green Button's
 
 ## Credential Linkage
 
-This credential links to the Utility Customer Credential via the `credentialSubject.id` (customer DID) and `meterNumber` fields. A customer may have multiple Meter Data Credentials covering different time periods or meters.
+This credential links to the Utility Customer Credential via the `credentialSubject.id` (customer DID), `consumerNumber` (utility account number), and `meterNumber` fields. A customer may have multiple Meter Data Credentials covering different time periods or meters.
 
 ## Files
 
@@ -100,6 +101,7 @@ This credential links to the Utility Customer Credential via the `credentialSubj
   "type": ["VerifiableCredential", "MeterDataCredential"],
   "credentialSubject": {
     "id": "did:example:consumer:abc123",
+    "consumerNumber": "UTIL-2025-001234567",
     "meterNumber": "MET2025789456123",
     "serviceKind": "electricity",
     "timeZone": "Asia/Kolkata",

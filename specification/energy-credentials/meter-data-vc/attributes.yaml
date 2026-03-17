@@ -135,6 +135,7 @@ components:
         (ESPI/NAESB) semantics.
       required:
         - id
+        - consumerNumber
         - meterNumber
         - serviceKind
         - timeZone
@@ -146,6 +147,12 @@ components:
           type: string
           format: uri
           description: DID of the customer / credential subject
+        consumerNumber:
+          type: string
+          minLength: 1
+          description: >
+            Utility account number (links to the customer record;
+            reused from Utility Customer Credential)
         meterNumber:
           type: string
           minLength: 1

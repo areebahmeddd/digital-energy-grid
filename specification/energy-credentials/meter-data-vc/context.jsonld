@@ -6,8 +6,7 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "espi": "http://naesb.org/espi#",
-        "meter": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/context.jsonld#",
+        "meter": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/vocab.jsonld#",
 
         "MeterDataCredential": {
             "@id": "meter:MeterDataCredential",
@@ -16,12 +15,16 @@
                 "@protected": true,
                 "id": "@id",
                 "type": "@type",
+                "consumerNumber": {
+                    "@id": "meter:consumerNumber",
+                    "@type": "xsd:string"
+                },
                 "meterNumber": {
                     "@id": "meter:meterNumber",
                     "@type": "xsd:string"
                 },
                 "serviceKind": {
-                    "@id": "espi:ServiceKind",
+                    "@id": "meter:serviceKind",
                     "@type": "xsd:string"
                 },
                 "timeZone": {
@@ -29,33 +32,33 @@
                     "@type": "xsd:string"
                 },
                 "readingType": {
-                    "@id": "espi:ReadingType",
+                    "@id": "meter:readingType",
                     "@type": "@id",
                     "@context": {
                         "@version": 1.1,
                         "@protected": true,
                         "commodity": {
-                            "@id": "espi:CommodityKind",
+                            "@id": "meter:commodity",
                             "@type": "xsd:string"
                         },
                         "flowDirection": {
-                            "@id": "espi:FlowDirectionKind",
+                            "@id": "meter:flowDirection",
                             "@type": "xsd:string"
                         },
                         "uom": {
-                            "@id": "espi:UnitOfMeasure",
+                            "@id": "meter:uom",
                             "@type": "xsd:string"
                         },
                         "powerOfTenMultiplier": {
-                            "@id": "espi:UnitMultiplierKind",
+                            "@id": "meter:powerOfTenMultiplier",
                             "@type": "xsd:integer"
                         },
                         "accumulationBehaviour": {
-                            "@id": "espi:AccumulationBehaviourKind",
+                            "@id": "meter:accumulationBehaviour",
                             "@type": "xsd:string"
                         },
                         "intervalLength": {
-                            "@id": "espi:intervalLength",
+                            "@id": "meter:intervalLength",
                             "@type": "xsd:integer"
                         }
                     }
@@ -77,14 +80,14 @@
                     }
                 },
                 "intervalBlocks": {
-                    "@id": "espi:IntervalBlock",
+                    "@id": "meter:intervalBlocks",
                     "@type": "@id",
                     "@container": "@set",
                     "@context": {
                         "@version": 1.1,
                         "@protected": true,
                         "interval": {
-                            "@id": "espi:DateTimeInterval",
+                            "@id": "meter:interval",
                             "@type": "@id",
                             "@context": {
                                 "@version": 1.1,
@@ -100,14 +103,14 @@
                             }
                         },
                         "intervalReadings": {
-                            "@id": "espi:IntervalReading",
+                            "@id": "meter:intervalReadings",
                             "@type": "@id",
                             "@container": "@set",
                             "@context": {
                                 "@version": 1.1,
                                 "@protected": true,
                                 "timePeriod": {
-                                    "@id": "espi:DateTimeInterval",
+                                    "@id": "meter:timePeriod",
                                     "@type": "@id",
                                     "@context": {
                                         "@version": 1.1,
@@ -123,7 +126,7 @@
                                     }
                                 },
                                 "value": {
-                                    "@id": "espi:value",
+                                    "@id": "meter:value",
                                     "@type": "xsd:integer"
                                 }
                             }

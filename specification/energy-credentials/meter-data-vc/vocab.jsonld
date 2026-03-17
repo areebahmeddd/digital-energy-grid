@@ -42,7 +42,21 @@
             "rdfs:comment": "A time interval defined by a start timestamp and duration. Maps to ESPI DateTimeInterval.",
             "rdfs:seeAlso": { "@id": "espi:DateTimeInterval" }
         },
+        {
+            "@id": "meter:CoveragePeriod",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Coverage Period",
+            "rdfs:comment": "A summary date range defined by start and end timestamps. Unlike DateTimeInterval (start + duration), this uses start + end for human readability."
+        },
 
+        {
+            "@id": "meter:consumerNumber",
+            "@type": "rdf:Property",
+            "rdfs:label": "consumer number",
+            "rdfs:comment": "Utility account number linking to the customer record (reused from Utility Customer Credential).",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "xsd:string" }
+        },
         {
             "@id": "meter:meterNumber",
             "@type": "rdf:Property",
@@ -80,9 +94,9 @@
             "@id": "meter:coveragePeriod",
             "@type": "rdf:Property",
             "rdfs:label": "coverage period",
-            "rdfs:comment": "Summary date range of the data contained in this credential.",
+            "rdfs:comment": "Summary date range of the data contained in this credential. Uses start + end (not start + duration).",
             "rdfs:domain": { "@id": "meter:MeterDataCredential" },
-            "rdfs:range": { "@id": "meter:DateTimeInterval" }
+            "rdfs:range": { "@id": "meter:CoveragePeriod" }
         },
         {
             "@id": "meter:intervalBlocks",
