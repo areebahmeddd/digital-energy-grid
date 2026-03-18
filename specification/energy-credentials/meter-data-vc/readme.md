@@ -36,7 +36,7 @@ Key use cases:
 | `commodity` | enum | Commodity being metered | `CommodityKind` |
 | `flowDirection` | enum | forward / reverse / net | `FlowDirectionKind` |
 | `uom` | enum | Unit of measure (Wh, kWh, W, kW, ...) | `UnitOfMeasure` |
-| `powerOfTenMultiplier` | integer | Scale factor (0 = ×1, 3 = ×1000) | `UnitMultiplierKind` |
+| `powerOfTenMultiplier` | integer | Scale factor (0 = ×1, 3 = ×1000); optional, defaults to 0 | `UnitMultiplierKind` |
 | `accumulationBehaviour` | enum | How values accumulate (deltaData, cumulative, ...) | `AccumulationBehaviourKind` |
 | `intervalLength` | integer | Interval length in seconds (e.g., 900 = 15 min) | `intervalLength` |
 
@@ -46,17 +46,25 @@ Key use cases:
 |-------|------|-------------|--------------|
 | `timePeriod.start` | datetime | Start of reading interval (ISO 8601) | `DateTimeInterval.start` |
 | `timePeriod.duration` | integer | Duration in seconds | `DateTimeInterval.duration` |
-| `value` | integer | Raw reading value (scaled by powerOfTenMultiplier + uom) | `IntervalReading.value` |
+| `value` | number | Reading value — integer (scaled by powerOfTenMultiplier + uom) or decimal (direct physical quantity) | `IntervalReading.value` |
 
 ## Interpreting Values
 
-The raw `value` field is an integer. To compute the physical quantity:
+The `value` field may be an integer or a decimal number.
+
+**Integer mode (Green Button compatible):** multiply by the scale factor to get the physical quantity:
 
 ```
 physical_value = value × 10^powerOfTenMultiplier  [in units of uom]
 ```
 
 **Example:** `value: 375`, `powerOfTenMultiplier: 0`, `uom: "Wh"` → 375 Wh consumed in that interval.
+
+**Decimal mode (direct):** when `value` is a decimal, `powerOfTenMultiplier` SHOULD be `0` (or omitted) and the value represents the physical quantity directly:
+
+**Example:** `value: 37.5`, `uom: "Wh"` → 37.5 Wh consumed in that interval.
+
+> **Canonicalization:** When using decimal values in signed credentials, implementations MUST use JCS ([RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)) or equivalent canonical serialization before signing to ensure deterministic representation.
 
 ## Green Button Alignment
 
@@ -86,7 +94,8 @@ This credential links to the Utility Customer Credential via the `credentialSubj
 - `attributes.yaml` - OpenAPI 3.1.1 schema definition
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
-- `example.json` - Sample credential with 15-minute residential data (single VC, pretty-printed)
+- `example.json` - Sample credential with 15-minute residential data using integer values (single VC, pretty-printed)
+- `example-decimal.json` - Sample credential using decimal values without powerOfTenMultiplier
 - `example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
 - `ndjson-transport.md` - NDJSON bulk delivery transport specification
 - `readme.md` - This documentation

@@ -186,9 +186,9 @@
             "@id": "meter:value",
             "@type": "rdf:Property",
             "rdfs:label": "value",
-            "rdfs:comment": "Raw reading value (scaled by powerOfTenMultiplier and UOM).",
+            "rdfs:comment": "Reading value — integer (scaled by powerOfTenMultiplier) or decimal (direct physical quantity in the given UOM). Implementations MUST use JCS (RFC 8785) or equivalent canonical serialization for decimal values before signing.",
             "rdfs:domain": { "@id": "meter:IntervalReading" },
-            "rdfs:range": { "@id": "xsd:integer" },
+            "rdfs:range": { "@id": "xsd:decimal" },
             "rdfs:seeAlso": { "@id": "espi:value" }
         },
         {

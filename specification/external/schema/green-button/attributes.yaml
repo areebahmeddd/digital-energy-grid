@@ -122,7 +122,6 @@ components:
         - commodity
         - flowDirection
         - uom
-        - powerOfTenMultiplier
         - accumulationBehaviour
         - intervalLength
       properties:
@@ -134,10 +133,12 @@ components:
           $ref: '#/components/schemas/UnitOfMeasure'
         powerOfTenMultiplier:
           type: integer
+          default: 0
           description: >
             Power-of-ten multiplier applied to the reading value
             (ESPI: UnitMultiplierKind).
             E.g., 0 = ×1, 3 = ×1000 (kilo), -3 = ×0.001 (milli).
+            When value is a decimal, this SHOULD be 0 or omitted.
         accumulationBehaviour:
           $ref: '#/components/schemas/AccumulationBehaviourKind'
         intervalLength:
@@ -158,10 +159,14 @@ components:
         timePeriod:
           $ref: '#/components/schemas/DateTimeInterval'
         value:
-          type: integer
+          type: number
           description: >
-            Raw reading value.  Multiply by 10^powerOfTenMultiplier and
-            apply the UOM from ReadingType to get the physical quantity.
+            Reading value.  May be an integer (Green Button compatible) or
+            a decimal for direct physical representation.  When an integer,
+            multiply by 10^powerOfTenMultiplier and apply the UOM from
+            ReadingType to get the physical quantity.  When a decimal,
+            powerOfTenMultiplier SHOULD be 0 (or omitted) and the value
+            represents the physical quantity directly in the given UOM.
 
     IntervalBlock:
       type: object
