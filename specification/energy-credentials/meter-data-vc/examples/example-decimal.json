@@ -27,8 +27,11 @@
       "flowDirection": "forward",
       "uom": "kWh",
       "accumulationBehaviour": "deltaData",
-      "intervalLength": 900
+      "intervalLength": 900,
+      "currency": "INR",
+      "measurementKind": "energy"
     },
+    "qualityOfReading": "validated",
     "coveragePeriod": {
       "start": "2025-07-14T18:30:00Z",
       "end": "2025-07-14T19:30:00Z"
@@ -45,28 +48,33 @@
               "start": "2025-07-14T18:30:00Z",
               "duration": 900
             },
-            "value": 0.375
+            "value": 0.375,
+            "cost": 2.813
           },
           {
             "timePeriod": {
               "start": "2025-07-14T18:45:00Z",
               "duration": 900
             },
-            "value": 0.41
+            "value": 0.41,
+            "cost": 3.075
           },
           {
             "timePeriod": {
               "start": "2025-07-14T19:00:00Z",
               "duration": 900
             },
-            "value": 0.52
+            "value": 0.52,
+            "cost": 5.2
           },
           {
             "timePeriod": {
               "start": "2025-07-14T19:15:00Z",
               "duration": 900
             },
-            "value": 0.485
+            "value": 0.485,
+            "cost": 4.85,
+            "readingQuality": "estimatedUsingLinearInterpolation"
           }
         ]
       }

@@ -1,0 +1,376 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/billing-summary-vc/schema.json",
+    "title": "Billing Summary Credential Schema",
+    "description": "JSON Schema for the Billing Summary Verifiable Credential. Contains aggregated billing period data with costs and consumption totals, aligned with Green Button (ESPI/NAESB) UsageSummary semantics. Issued by the utility; consumed by credit-check apps, program eligibility services, and energy analytics platforms.\n",
+    "type": "object",
+    "required": [
+        "@context",
+        "id",
+        "type",
+        "issuer",
+        "issuanceDate",
+        "credentialSubject"
+    ],
+    "properties": {
+        "@context": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "contains": {
+                "const": "https://www.w3.org/2018/credentials/v1"
+            },
+            "minItems": 2
+        },
+        "id": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "description": "Unique identifier for the credential in URN UUID format"
+        },
+        "type": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "contains": {
+                "const": "BillingSummaryCredential"
+            },
+            "minItems": 2
+        },
+        "issuer": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "licenseNumber"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "DID of the issuing distribution utility"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Name of the distribution utility"
+                },
+                "licenseNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Regulatory license number issued by the local energy regulator"
+                }
+            }
+        },
+        "issuanceDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time when the credential was issued"
+        },
+        "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional expiration date of the credential"
+        },
+        "credentialStatus": {
+            "type": "object",
+            "required": [
+                "id",
+                "type"
+            ],
+            "description": "Revocation status information for the credential",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL to query the revocation status via DeDi registry"
+                },
+                "type": {
+                    "type": "string",
+                    "const": "dediregistry",
+                    "description": "Type of status check mechanism (DeDi Registry)"
+                }
+            }
+        },
+        "credentialSubject": {
+            "type": "object",
+            "description": "Aggregated billing summary data for a single meter, using Green Button (ESPI/NAESB) UsageSummary semantics.\n",
+            "required": [
+                "id",
+                "consumerNumber",
+                "meterNumber",
+                "serviceKind",
+                "timeZone",
+                "currency",
+                "coveragePeriod",
+                "billingPeriods"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "DID of the customer / credential subject"
+                },
+                "consumerNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Utility account number (links to the customer record; reused from Utility Customer Credential)\n"
+                },
+                "meterNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Meter serial number (links to the physical meter; reused from Utility Customer Credential)\n"
+                },
+                "serviceKind": {
+                    "type": "string",
+                    "description": "Kind of service provided (ESPI: ServiceKind).\n",
+                    "enum": [
+                        "electricity",
+                        "gas",
+                        "water"
+                    ]
+                },
+                "timeZone": {
+                    "type": "string",
+                    "description": "IANA time-zone identifier for the meter location (e.g., \"America/Los_Angeles\").\n",
+                    "examples": [
+                        "Asia/Kolkata",
+                        "America/Los_Angeles"
+                    ]
+                },
+                "currency": {
+                    "type": "string",
+                    "description": "ISO 4217 currency code for all monetary values in this credential.\n",
+                    "examples": [
+                        "USD",
+                        "EUR",
+                        "INR"
+                    ]
+                },
+                "coveragePeriod": {
+                    "type": "object",
+                    "description": "Summary date range of the billing data contained in this credential.\n",
+                    "required": [
+                        "start",
+                        "end"
+                    ],
+                    "properties": {
+                        "start": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Start of the coverage period (ISO 8601)"
+                        },
+                        "end": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "End of the coverage period (ISO 8601)"
+                        }
+                    }
+                },
+                "billingPeriods": {
+                    "type": "array",
+                    "minItems": 1,
+                    "description": "Array of billing period summaries. Each entry represents one billing cycle (typically monthly).\n",
+                    "items": {
+                        "type": "object",
+                        "description": "A single billing period summary (ESPI: UsageSummary + IntervalReading from billing-granularity data).\n",
+                        "required": [
+                            "period",
+                            "billAmount",
+                            "consumption"
+                        ],
+                        "properties": {
+                            "period": {
+                                "type": "object",
+                                "description": "Billing period boundaries (ESPI: billingPeriod / DateTimeInterval).\n",
+                                "required": [
+                                    "start",
+                                    "duration"
+                                ],
+                                "properties": {
+                                    "start": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "description": "Start of the billing period (ISO 8601)"
+                                    },
+                                    "duration": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "description": "Duration of the billing period in seconds"
+                                    }
+                                }
+                            },
+                            "billAmount": {
+                                "type": "number",
+                                "description": "Total bill amount for this period in the credential's currency (ESPI: billLastPeriod). In integer mode (Green Button compatible), value is in thousandths of the currency unit. In decimal mode, value is the direct currency amount.\n"
+                            },
+                            "consumption": {
+                                "type": "object",
+                                "description": "Total consumption for this billing period (ESPI: overallConsumptionLastPeriod).\n",
+                                "required": [
+                                    "value",
+                                    "uom"
+                                ],
+                                "properties": {
+                                    "value": {
+                                        "type": "number",
+                                        "description": "Consumption value. In integer mode, multiply by 10^powerOfTenMultiplier. In decimal mode, represents the physical quantity directly.\n"
+                                    },
+                                    "uom": {
+                                        "type": "string",
+                                        "description": "Unit of measure for the consumption value.\n",
+                                        "enum": [
+                                            "Wh",
+                                            "kWh",
+                                            "W",
+                                            "kW",
+                                            "VA",
+                                            "VAr",
+                                            "V",
+                                            "A",
+                                            "Hz",
+                                            "J",
+                                            "m3"
+                                        ]
+                                    },
+                                    "powerOfTenMultiplier": {
+                                        "type": "integer",
+                                        "default": 0,
+                                        "description": "Power-of-ten multiplier for the consumption value. Defaults to 0.\n"
+                                    }
+                                }
+                            },
+                            "additionalCosts": {
+                                "type": "number",
+                                "description": "Additional charges, surcharges, or fees for this period (ESPI: costAdditionalLastPeriod). Same currency encoding as billAmount.\n"
+                            },
+                            "qualityOfReading": {
+                                "type": "string",
+                                "description": "Quality of the reading data for this billing period (ESPI: QualityOfReading).\n",
+                                "enum": [
+                                    "valid",
+                                    "manuallyEdited",
+                                    "estimatedUsingReferenceDay",
+                                    "estimatedUsingLinearInterpolation",
+                                    "questionable",
+                                    "derived",
+                                    "projected",
+                                    "mixed",
+                                    "raw",
+                                    "normalizedForWeather",
+                                    "other",
+                                    "validated",
+                                    "verified"
+                                ]
+                            },
+                            "lineItems": {
+                                "type": "array",
+                                "description": "Itemised breakdown of charges and credits for this billing period (ESPI: costAdditionalDetailLastPeriod / LineItem). The sum of all lineItems amounts should reconcile with billAmount.\n",
+                                "items": {
+                                    "type": "object",
+                                    "description": "A single charge or credit line item (ESPI: LineItem).\n",
+                                    "required": [
+                                        "itemKind",
+                                        "amount"
+                                    ],
+                                    "properties": {
+                                        "itemKind": {
+                                            "type": "string",
+                                            "description": "Classification of the charge or credit (ESPI: ItemKind). ESPI codes — 1: energyGenerationFee, 2: energyDeliveryFee, 3: energyUsageFee, 4: administrativeFee, 5: tax, 6: energyGenerationCredit, 7: energyDeliveryCredit, 8: administrativeCredit, 9: payment, 10: information.\n",
+                                            "enum": [
+                                                "energyGenerationFee",
+                                                "energyDeliveryFee",
+                                                "energyUsageFee",
+                                                "administrativeFee",
+                                                "tax",
+                                                "energyGenerationCredit",
+                                                "energyDeliveryCredit",
+                                                "administrativeCredit",
+                                                "payment",
+                                                "information"
+                                            ]
+                                        },
+                                        "amount": {
+                                            "type": "number",
+                                            "description": "Amount for this line item in the credential's currency. Same encoding as billAmount (integer mode: thousandths of currency unit; decimal mode: direct). Negative values represent credits.\n"
+                                        },
+                                        "note": {
+                                            "type": "string",
+                                            "description": "Human-readable description of the charge or credit (ESPI: LineItem.note).\n"
+                                        },
+                                        "unitCost": {
+                                            "type": "number",
+                                            "description": "Per-unit cost for this line item (e.g., price per kWh). Same currency encoding as amount (ESPI: LineItem.unitCost).\n"
+                                        },
+                                        "itemPeriod": {
+                                            "type": "object",
+                                            "description": "Time period this line item covers, if different from the billing period (ESPI: LineItem.itemPeriod).\n",
+                                            "required": [
+                                                "start",
+                                                "duration"
+                                            ],
+                                            "properties": {
+                                                "start": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "description": "Start of the item period (ISO 8601)"
+                                                },
+                                                "duration": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "description": "Duration of the item period in seconds"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "proof": {
+            "type": "object",
+            "required": [
+                "type",
+                "created",
+                "verificationMethod",
+                "proofPurpose",
+                "proofValue"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Cryptographic signature type (e.g., Ed25519Signature2020)"
+                },
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the proof was created"
+                },
+                "verificationMethod": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI of the verification method / public key"
+                },
+                "proofPurpose": {
+                    "type": "string",
+                    "enum": [
+                        "assertionMethod",
+                        "authentication"
+                    ],
+                    "description": "Purpose of the proof"
+                },
+                "proofValue": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The cryptographic signature value"
+                }
+            }
+        }
+    }
+}

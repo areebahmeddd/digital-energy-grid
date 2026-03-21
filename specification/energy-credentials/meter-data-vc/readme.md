@@ -26,27 +26,53 @@ Key use cases:
 | `serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
 | `timeZone` | string | Yes | IANA time-zone (e.g., "Asia/Kolkata") | — |
 | `readingType` | object | Yes | What is being measured | `MeterReading.ReadingType` |
+| `qualityOfReading` | enum | No | Overall quality of readings in this credential | `UsageSummary.qualityOfReading` |
 | `coveragePeriod` | object | Yes | Summary date range of data | — |
 | `intervalBlocks` | array | Yes | Blocks of interval readings | `IntervalBlock` |
 
 ### readingType
 
-| Field | Type | Description | ESPI Element |
-|-------|------|-------------|--------------|
-| `commodity` | enum | Commodity being metered | `CommodityKind` |
-| `flowDirection` | enum | forward / reverse / net | `FlowDirectionKind` |
-| `uom` | enum | Unit of measure (Wh, kWh, W, kW, ...) | `UnitOfMeasure` |
-| `powerOfTenMultiplier` | integer | Scale factor (0 = ×1, 3 = ×1000); optional, defaults to 0 | `UnitMultiplierKind` |
-| `accumulationBehaviour` | enum | How values accumulate (deltaData, cumulative, ...) | `AccumulationBehaviourKind` |
-| `intervalLength` | integer | Interval length in seconds (e.g., 900 = 15 min) | `intervalLength` |
+| Field | Type | Required | Description | ESPI Element |
+|-------|------|----------|-------------|--------------|
+| `commodity` | enum | Yes | Commodity being metered | `CommodityKind` |
+| `flowDirection` | enum | Yes | forward / reverse / net | `FlowDirectionKind` |
+| `uom` | enum | Yes | Unit of measure (Wh, kWh, W, kW, ...) | `UnitOfMeasure` |
+| `powerOfTenMultiplier` | integer | No | Scale factor (0 = ×1, 3 = ×1000); defaults to 0 | `UnitMultiplierKind` |
+| `accumulationBehaviour` | enum | Yes | How values accumulate (deltaData, cumulative, ...) | `AccumulationBehaviourKind` |
+| `intervalLength` | integer | Yes | Interval length in seconds (e.g., 900 = 15 min) | `intervalLength` |
+| `currency` | string | No | ISO 4217 currency code (e.g., "USD", "INR"). Required when cost data is present | `currency` |
+| `measurementKind` | enum | No | What is measured: energy, demand, power, voltage, etc. | `MeasurementKind` |
+| `phase` | enum | No | Electrical phase: notApplicable, phaseAN, phaseBN, etc. | `PhaseCodeKind` |
 
 ### intervalBlocks[].intervalReadings[]
 
-| Field | Type | Description | ESPI Element |
-|-------|------|-------------|--------------|
-| `timePeriod.start` | datetime | Start of reading interval (ISO 8601) | `DateTimeInterval.start` |
-| `timePeriod.duration` | integer | Duration in seconds | `DateTimeInterval.duration` |
-| `value` | number | Reading value — integer (scaled by powerOfTenMultiplier + uom) or decimal (direct physical quantity) | `IntervalReading.value` |
+| Field | Type | Required | Description | ESPI Element |
+|-------|------|----------|-------------|--------------|
+| `timePeriod.start` | datetime | Yes | Start of reading interval (ISO 8601) | `DateTimeInterval.start` |
+| `timePeriod.duration` | integer | Yes | Duration in seconds | `DateTimeInterval.duration` |
+| `value` | number | Yes | Reading value — integer (scaled by powerOfTenMultiplier + uom) or decimal (direct physical quantity) | `IntervalReading.value` |
+| `cost` | number | No | Cost for this interval in the currency from readingType.currency. Integer mode: thousandths of currency unit. Decimal mode: direct currency amount | `IntervalReading.cost` |
+| `readingQuality` | enum | No | Quality of this specific reading; overrides credential-level qualityOfReading | `ReadingQuality` |
+
+### qualityOfReading / readingQuality enum values
+
+These map to ESPI `QualityOfReading`:
+
+| Value | ESPI Code | Description |
+|-------|-----------|-------------|
+| `valid` | 0 | Reading has passed all validation checks |
+| `manuallyEdited` | 7 | A human corrected the value |
+| `estimatedUsingReferenceDay` | 8 | Estimated from a similar reference day |
+| `estimatedUsingLinearInterpolation` | 9 | Gap-filled via interpolation |
+| `questionable` | 10 | Failed validation but not yet corrected |
+| `derived` | 11 | Calculated from other readings |
+| `projected` | 12 | Forecast/projected value |
+| `mixed` | 13 | Contains both validated and estimated readings |
+| `raw` | 14 | Unvalidated meter data |
+| `normalizedForWeather` | 15 | Adjusted for weather conditions |
+| `other` | 16 | None of the above |
+| `validated` | 17 | Passed automated validation |
+| `verified` | 18 | Passed manual verification |
 
 ## Interpreting Values
 
@@ -66,6 +92,18 @@ physical_value = value × 10^powerOfTenMultiplier  [in units of uom]
 
 > **Canonicalization:** When using decimal values in signed credentials, implementations MUST use JCS ([RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)) or equivalent canonical serialization before signing to ensure deterministic representation.
 
+## Interpreting Cost
+
+The `cost` field follows the same integer/decimal convention as `value`:
+
+**Integer mode (Green Button compatible):** cost is in thousandths of the currency unit:
+
+**Example:** `cost: 4639`, `currency: "USD"` → $4.639 for that interval.
+
+**Decimal mode (direct):** cost is the direct currency amount:
+
+**Example:** `cost: 4.639`, `currency: "USD"` → $4.639 for that interval.
+
 ## Green Button Alignment
 
 This credential uses human-readable string enum values instead of Green Button's integer codes. The mapping is documented in the Green Button reference schema at `external/schema/green-button/attributes.yaml`.
@@ -80,10 +118,16 @@ This credential uses human-readable string enum values instead of Green Button's
 | `powerOfTenMultiplier` | ReadingType.powerOfTenMultiplier | `espi:UnitMultiplierKind` |
 | `accumulationBehaviour` | ReadingType.accumulationBehaviour | `espi:AccumulationBehaviourKind` |
 | `intervalLength` | ReadingType.intervalLength | `espi:intervalLength` |
+| `currency` | ReadingType.currency | `espi:currency` |
+| `measurementKind` | ReadingType.kind | `espi:MeasurementKind` |
+| `phase` | ReadingType.phase | `espi:PhaseCodeKind` |
+| `qualityOfReading` | UsageSummary.qualityOfReading | `espi:QualityOfReading` |
 | `intervalBlocks` | IntervalBlock | `espi:IntervalBlock` |
 | `intervalReadings` | IntervalReading | `espi:IntervalReading` |
 | `timePeriod` | IntervalReading.timePeriod | `espi:DateTimeInterval` |
 | `value` | IntervalReading.value | `espi:value` |
+| `cost` | IntervalReading.cost | `espi:cost` |
+| `readingQuality` | IntervalReading.ReadingQuality | `espi:ReadingQuality` |
 
 ## Credential Linkage
 
@@ -91,11 +135,11 @@ This credential links to the Utility Customer Credential via the `credentialSubj
 
 ## Files
 
-- `attributes.yaml` - OpenAPI 3.1.1 schema definition
+- `schema.json` - JSON Schema (draft 2020-12) for validation
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
-- `example.json` - Sample credential with 15-minute residential data using integer values (single VC, pretty-printed)
-- `example-decimal.json` - Sample credential using decimal values without powerOfTenMultiplier
+- `example.json` - Sample credential with 15-minute residential data using integer values and cost (single VC, pretty-printed)
+- `example-decimal.json` - Sample credential using decimal values with per-reading quality override
 - `example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
 - `ndjson-transport.md` - NDJSON bulk delivery transport specification
 - `readme.md` - This documentation
@@ -122,8 +166,11 @@ This credential links to the Utility Customer Credential via the `credentialSubj
       "uom": "Wh",
       "powerOfTenMultiplier": 0,
       "accumulationBehaviour": "deltaData",
-      "intervalLength": 900
+      "intervalLength": 900,
+      "currency": "INR",
+      "measurementKind": "energy"
     },
+    "qualityOfReading": "validated",
     "coveragePeriod": {
       "start": "2025-07-14T18:30:00Z",
       "end": "2025-07-14T19:30:00Z"

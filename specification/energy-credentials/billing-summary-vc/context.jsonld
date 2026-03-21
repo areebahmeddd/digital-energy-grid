@@ -1,0 +1,173 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "id": "@id",
+        "type": "@type",
+        "schema": "https://schema.org/",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "billing": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/billing-summary-vc/vocab.jsonld#",
+
+        "BillingSummaryCredential": {
+            "@id": "billing:BillingSummaryCredential",
+            "@context": {
+                "@version": 1.1,
+                "@protected": true,
+                "id": "@id",
+                "type": "@type",
+                "consumerNumber": {
+                    "@id": "billing:consumerNumber",
+                    "@type": "xsd:string"
+                },
+                "meterNumber": {
+                    "@id": "billing:meterNumber",
+                    "@type": "xsd:string"
+                },
+                "serviceKind": {
+                    "@id": "billing:serviceKind",
+                    "@type": "xsd:string"
+                },
+                "timeZone": {
+                    "@id": "billing:timeZone",
+                    "@type": "xsd:string"
+                },
+                "currency": {
+                    "@id": "billing:currency",
+                    "@type": "xsd:string"
+                },
+                "coveragePeriod": {
+                    "@id": "billing:coveragePeriod",
+                    "@type": "@id",
+                    "@context": {
+                        "@version": 1.1,
+                        "@protected": true,
+                        "start": {
+                            "@id": "billing:start",
+                            "@type": "xsd:dateTime"
+                        },
+                        "end": {
+                            "@id": "billing:end",
+                            "@type": "xsd:dateTime"
+                        }
+                    }
+                },
+                "billingPeriods": {
+                    "@id": "billing:billingPeriods",
+                    "@type": "@id",
+                    "@container": "@set",
+                    "@context": {
+                        "@version": 1.1,
+                        "@protected": true,
+                        "period": {
+                            "@id": "billing:period",
+                            "@type": "@id",
+                            "@context": {
+                                "@version": 1.1,
+                                "@protected": true,
+                                "start": {
+                                    "@id": "billing:start",
+                                    "@type": "xsd:dateTime"
+                                },
+                                "duration": {
+                                    "@id": "billing:duration",
+                                    "@type": "xsd:integer"
+                                }
+                            }
+                        },
+                        "billAmount": {
+                            "@id": "billing:billAmount",
+                            "@type": "xsd:decimal"
+                        },
+                        "consumption": {
+                            "@id": "billing:consumption",
+                            "@type": "@id",
+                            "@context": {
+                                "@version": 1.1,
+                                "@protected": true,
+                                "value": {
+                                    "@id": "billing:value",
+                                    "@type": "xsd:decimal"
+                                },
+                                "uom": {
+                                    "@id": "billing:uom",
+                                    "@type": "xsd:string"
+                                },
+                                "powerOfTenMultiplier": {
+                                    "@id": "billing:powerOfTenMultiplier",
+                                    "@type": "xsd:integer"
+                                }
+                            }
+                        },
+                        "additionalCosts": {
+                            "@id": "billing:additionalCosts",
+                            "@type": "xsd:decimal"
+                        },
+                        "qualityOfReading": {
+                            "@id": "billing:qualityOfReading",
+                            "@type": "xsd:string"
+                        },
+                        "lineItems": {
+                            "@id": "billing:lineItems",
+                            "@type": "@id",
+                            "@container": "@set",
+                            "@context": {
+                                "@version": 1.1,
+                                "@protected": true,
+                                "itemKind": {
+                                    "@id": "billing:itemKind",
+                                    "@type": "xsd:string"
+                                },
+                                "amount": {
+                                    "@id": "billing:amount",
+                                    "@type": "xsd:decimal"
+                                },
+                                "note": {
+                                    "@id": "billing:note",
+                                    "@type": "xsd:string"
+                                },
+                                "unitCost": {
+                                    "@id": "billing:unitCost",
+                                    "@type": "xsd:decimal"
+                                },
+                                "itemPeriod": {
+                                    "@id": "billing:itemPeriod",
+                                    "@type": "@id",
+                                    "@context": {
+                                        "@version": 1.1,
+                                        "@protected": true,
+                                        "start": {
+                                            "@id": "billing:start",
+                                            "@type": "xsd:dateTime"
+                                        },
+                                        "duration": {
+                                            "@id": "billing:duration",
+                                            "@type": "xsd:integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        "UtilityIssuer": {
+            "@id": "billing:UtilityIssuer",
+            "@context": {
+                "@version": 1.1,
+                "@protected": true,
+                "id": "@id",
+                "type": "@type",
+                "name": {
+                    "@id": "schema:name",
+                    "@type": "xsd:string"
+                },
+                "licenseNumber": {
+                    "@id": "billing:licenseNumber",
+                    "@type": "xsd:string"
+                }
+            }
+        }
+    }
+}

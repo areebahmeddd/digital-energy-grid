@@ -159,6 +159,61 @@
             "rdfs:range": { "@id": "xsd:integer" }
         },
         {
+            "@id": "meter:currency",
+            "@type": "rdf:Property",
+            "rdfs:label": "currency",
+            "rdfs:comment": "ISO 4217 currency code for cost values. Maps to ESPI currency.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "xsd:string" },
+            "rdfs:seeAlso": { "@id": "espi:currency" }
+        },
+        {
+            "@id": "meter:measurementKind",
+            "@type": "rdf:Property",
+            "rdfs:label": "measurement kind",
+            "rdfs:comment": "What the reading measures (energy, demand, power, etc.). Maps to ESPI MeasurementKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:MeasurementKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:MeasurementKind" }
+        },
+        {
+            "@id": "meter:phase",
+            "@type": "rdf:Property",
+            "rdfs:label": "phase",
+            "rdfs:comment": "Electrical phase being measured. Maps to ESPI PhaseCodeKind.",
+            "rdfs:domain": { "@id": "meter:ReadingType" },
+            "rdfs:range": { "@id": "meter:PhaseCodeKindEnum" },
+            "rdfs:seeAlso": { "@id": "espi:PhaseCodeKind" }
+        },
+        {
+            "@id": "meter:qualityOfReading",
+            "@type": "rdf:Property",
+            "rdfs:label": "quality of reading",
+            "rdfs:comment": "Overall quality of the reading data. Maps to ESPI QualityOfReading.",
+            "rdfs:domain": { "@id": "meter:MeterDataCredential" },
+            "rdfs:range": { "@id": "meter:QualityOfReadingEnum" },
+            "rdfs:seeAlso": { "@id": "espi:QualityOfReading" }
+        },
+        {
+            "@id": "meter:cost",
+            "@type": "rdf:Property",
+            "rdfs:label": "cost",
+            "rdfs:comment": "Cost for an interval reading in the specified currency. In integer mode, value is in thousandths of the currency unit. Maps to ESPI IntervalReading.cost.",
+            "rdfs:domain": { "@id": "meter:IntervalReading" },
+            "rdfs:range": { "@id": "xsd:decimal" },
+            "rdfs:seeAlso": { "@id": "espi:cost" }
+        },
+        {
+            "@id": "meter:readingQuality",
+            "@type": "rdf:Property",
+            "rdfs:label": "reading quality",
+            "rdfs:comment": "Quality indicator for a specific interval reading. Overrides the credential-level qualityOfReading. Maps to ESPI ReadingQuality.",
+            "rdfs:domain": { "@id": "meter:IntervalReading" },
+            "rdfs:range": { "@id": "meter:QualityOfReadingEnum" },
+            "rdfs:seeAlso": { "@id": "espi:ReadingQuality" }
+        },
+
+        {
             "@id": "meter:interval",
             "@type": "rdf:Property",
             "rdfs:label": "interval",
@@ -251,6 +306,24 @@
             "@type": "rdfs:Class",
             "rdfs:label": "Accumulation Behaviour Kind",
             "rdfs:comment": "Enumeration of accumulation behaviours: none, bulkQuantity, continuousCumulative, cumulative, deltaData, indicating, summation, instantaneous."
+        },
+        {
+            "@id": "meter:MeasurementKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Measurement Kind",
+            "rdfs:comment": "Enumeration of measurement kinds: none, energy, demand, power, current, voltage, frequency, powerFactor, apparentPowerFactor, quantityPower, volumetricFlow, currency, date, distance, energizationLoadSide, fan."
+        },
+        {
+            "@id": "meter:PhaseCodeKindEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Phase Code Kind",
+            "rdfs:comment": "Enumeration of electrical phases: notApplicable, phaseAN, phaseBN, phaseCN, phaseAB, phaseBC, phaseCA, phaseABC."
+        },
+        {
+            "@id": "meter:QualityOfReadingEnum",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Quality of Reading",
+            "rdfs:comment": "Enumeration of reading quality: valid, manuallyEdited, estimatedUsingReferenceDay, estimatedUsingLinearInterpolation, questionable, derived, projected, mixed, raw, normalizedForWeather, other, validated, verified."
         }
     ]
 }

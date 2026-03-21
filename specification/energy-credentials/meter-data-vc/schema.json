@@ -219,6 +219,51 @@
                             "type": "integer",
                             "minimum": 1,
                             "description": "Standard interval length in seconds for the readings (e.g., 900 for 15-minute intervals).\n"
+                        },
+                        "currency": {
+                            "type": "string",
+                            "description": "ISO 4217 currency code for cost values in interval readings (ESPI: currency). Required when cost data is present in readings.\n",
+                            "examples": [
+                                "USD",
+                                "EUR",
+                                "INR"
+                            ]
+                        },
+                        "measurementKind": {
+                            "type": "string",
+                            "description": "What the reading measures (ESPI: MeasurementKind / kind). Distinguishes energy from demand, power, voltage, etc. ESPI codes — 0: none, 2: apparentPowerFactor, 3: currency, 4: current, 5: currentAngle, 7: date, 8: demand, 9: distance, 12: energy, 13: energizationLoadSide, 14: fan, 15: frequency, 35: power, 37: powerFactor, 38: quantityPower, 40: voltage, 41: volumetricFlow.\n",
+                            "enum": [
+                                "none",
+                                "energy",
+                                "demand",
+                                "power",
+                                "current",
+                                "voltage",
+                                "frequency",
+                                "powerFactor",
+                                "apparentPowerFactor",
+                                "quantityPower",
+                                "volumetricFlow",
+                                "currency",
+                                "date",
+                                "distance",
+                                "energizationLoadSide",
+                                "fan"
+                            ]
+                        },
+                        "phase": {
+                            "type": "string",
+                            "description": "Electrical phase being measured (ESPI: PhaseCodeKind). Relevant for three-phase commercial/industrial meters. ESPI codes — 0: notApplicable, 16: phaseAN, 32: phaseBN, 64: phaseCN, 128: phaseAB, 256: phaseBC, 512: phaseCA, 768: phaseABC.\n",
+                            "enum": [
+                                "notApplicable",
+                                "phaseAN",
+                                "phaseBN",
+                                "phaseCN",
+                                "phaseAB",
+                                "phaseBC",
+                                "phaseCA",
+                                "phaseABC"
+                            ]
                         }
                     }
                 },
@@ -241,6 +286,25 @@
                             "description": "End of the coverage period (ISO 8601)"
                         }
                     }
+                },
+                "qualityOfReading": {
+                    "type": "string",
+                    "description": "Overall quality of the reading data in this credential (ESPI: QualityOfReading). ESPI codes — 0: valid, 7: manuallyEdited, 8: estimatedUsingReferenceDay, 9: estimatedUsingLinearInterpolation, 10: questionable, 11: derived, 12: projected, 13: mixed, 14: raw, 15: normalizedForWeather, 16: other, 17: validated, 18: verified.\n",
+                    "enum": [
+                        "valid",
+                        "manuallyEdited",
+                        "estimatedUsingReferenceDay",
+                        "estimatedUsingLinearInterpolation",
+                        "questionable",
+                        "derived",
+                        "projected",
+                        "mixed",
+                        "raw",
+                        "normalizedForWeather",
+                        "other",
+                        "validated",
+                        "verified"
+                    ]
                 },
                 "intervalBlocks": {
                     "type": "array",
@@ -308,6 +372,28 @@
                                         "value": {
                                             "type": "number",
                                             "description": "Reading value.  May be an integer (Green Button compatible) or a decimal for direct physical representation.  When an integer, multiply by 10^powerOfTenMultiplier and apply the UOM from ReadingType to get the physical quantity.  When a decimal, powerOfTenMultiplier SHOULD be 0 (or omitted) and the value represents the physical quantity directly in the given UOM.\n"
+                                        },
+                                        "cost": {
+                                            "type": "number",
+                                            "description": "Cost for this interval in the currency specified by readingType.currency (ESPI: IntervalReading.cost). In integer mode (Green Button compatible), the value is in thousandths of the currency unit (e.g., 4639 = $4.639 USD). In decimal mode, the value represents the cost directly in the currency unit.\n"
+                                        },
+                                        "readingQuality": {
+                                            "type": "string",
+                                            "description": "Quality of this specific reading (ESPI: ReadingQuality). Overrides the credential-level qualityOfReading for this interval.\n",
+                                            "enum": [
+                                                "valid",
+                                                "manuallyEdited",
+                                                "estimatedUsingReferenceDay",
+                                                "estimatedUsingLinearInterpolation",
+                                                "questionable",
+                                                "derived",
+                                                "projected",
+                                                "raw",
+                                                "normalizedForWeather",
+                                                "other",
+                                                "validated",
+                                                "verified"
+                                            ]
                                         }
                                     }
                                 }

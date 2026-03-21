@@ -28,8 +28,12 @@
       "uom": "Wh",
       "powerOfTenMultiplier": 0,
       "accumulationBehaviour": "deltaData",
-      "intervalLength": 900
+      "intervalLength": 900,
+      "currency": "INR",
+      "measurementKind": "energy",
+      "phase": "notApplicable"
     },
+    "qualityOfReading": "validated",
     "coveragePeriod": {
       "start": "2025-07-14T18:30:00Z",
       "end": "2025-07-14T19:30:00Z"
@@ -46,28 +50,32 @@
               "start": "2025-07-14T18:30:00Z",
               "duration": 900
             },
-            "value": 375
+            "value": 375,
+            "cost": 2813
           },
           {
             "timePeriod": {
               "start": "2025-07-14T18:45:00Z",
               "duration": 900
             },
-            "value": 410
+            "value": 410,
+            "cost": 3075
           },
           {
             "timePeriod": {
               "start": "2025-07-14T19:00:00Z",
               "duration": 900
             },
-            "value": 520
+            "value": 520,
+            "cost": 5200
           },
           {
             "timePeriod": {
               "start": "2025-07-14T19:15:00Z",
               "duration": 900
             },
-            "value": 485
+            "value": 485,
+            "cost": 4850
           }
         ]
       }

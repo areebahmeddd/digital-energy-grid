@@ -60,6 +60,18 @@
                         "intervalLength": {
                             "@id": "meter:intervalLength",
                             "@type": "xsd:integer"
+                        },
+                        "currency": {
+                            "@id": "meter:currency",
+                            "@type": "xsd:string"
+                        },
+                        "measurementKind": {
+                            "@id": "meter:measurementKind",
+                            "@type": "xsd:string"
+                        },
+                        "phase": {
+                            "@id": "meter:phase",
+                            "@type": "xsd:string"
                         }
                     }
                 },
@@ -78,6 +90,10 @@
                             "@type": "xsd:dateTime"
                         }
                     }
+                },
+                "qualityOfReading": {
+                    "@id": "meter:qualityOfReading",
+                    "@type": "xsd:string"
                 },
                 "intervalBlocks": {
                     "@id": "meter:intervalBlocks",
@@ -128,6 +144,14 @@
                                 "value": {
                                     "@id": "meter:value",
                                     "@type": "xsd:decimal"
+                                },
+                                "cost": {
+                                    "@id": "meter:cost",
+                                    "@type": "xsd:decimal"
+                                },
+                                "readingQuality": {
+                                    "@id": "meter:readingQuality",
+                                    "@type": "xsd:string"
                                 }
                             }
                         }

@@ -16,6 +16,7 @@ This collection provides schemas for credentials issued by electricity distribut
 | [Storage Profile Credential](./storage-profile-vc/) | Battery/energy storage capability | Virtual power plants, demand response |
 | [Program Enrollment Credential](./program-enrollment-vc/) | Energy program participation | Demand response, ToU programs |
 | [Meter Data Credential](./meter-data-vc/) | Historical interval meter readings | Demand forecasting, P2P trading |
+| [Billing Summary Credential](./billing-summary-vc/) | Aggregated billing period costs and consumption | Credit checks, program eligibility, cost analytics |
 
 ## Credential Relationships
 
@@ -40,11 +41,12 @@ This collection provides schemas for credentials issued by electricity distribut
                ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                    Data Credentials                            │
-├──────────────────────────────────────────────────────────────┤
-│ Meter Data Credential                                         │
-│ - Historical interval readings (Green Button / ESPI aligned) │
-│ - 15-min / hourly kWh data for demand forecasting            │
-└──────────────────────────────────────────────────────────────┘
+├─────────────────────────────┬────────────────────────────────┤
+│ Meter Data Credential       │ Billing Summary Credential     │
+│ - 15-min interval readings  │ - Monthly billing totals       │
+│ - Green Button / ESPI       │ - Cost + consumption per period│
+│ - Demand forecasting        │ - Credit checks, eligibility   │
+└─────────────────────────────┴────────────────────────────────┘
 ```
 
 All profile credentials link to the customer via the `credentialSubject.id` field (customer DID).
@@ -97,10 +99,21 @@ energy-credentials/
 │   ├── example.json
 │   └── readme.md
 ├── meter-data-vc/             # Historical meter readings (Green Button aligned)
-│   ├── attributes.yaml
+│   ├── schema.json
 │   ├── context.jsonld
 │   ├── vocab.jsonld
-│   ├── example.json
+│   ├── examples/
+│   │   ├── example.json
+│   │   ├── example-decimal.json
+│   │   └── example.ndjson
+│   ├── ndjson-transport.md
+│   └── readme.md
+├── billing-summary-vc/        # Aggregated billing period data
+│   ├── schema.json
+│   ├── context.jsonld
+│   ├── vocab.jsonld
+│   ├── examples/
+│   │   └── example.json
 │   └── readme.md
 └── readme.md                  # This file
 ```
