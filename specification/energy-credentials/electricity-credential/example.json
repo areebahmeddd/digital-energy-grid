@@ -14,7 +14,7 @@
   "validFrom": "2025-01-13T10:30:00Z",
   "validUntil": "2026-01-13T10:30:00Z",
   "credentialStatus": {
-    "id": "https://dedi.global/dedi/query/https://example-utility.com/issuers/energy-dept/VC_revocation_registry",
+    "id": "https://dedi.global/dedi/query/example-utility.com/vc-revocation-registry",
     "type": "dediregistry"
   },
   "credentialSubject": {
