@@ -8,8 +8,8 @@
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "energy": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/context.jsonld#",
 
-        "EnergyProfileCredential": {
-            "@id": "energy:EnergyProfileCredential",
+        "ElectricityCredential": {
+            "@id": "energy:ElectricityCredential",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
@@ -18,29 +18,41 @@
             }
         },
 
-        "consumerProfile": {
-            "@id": "energy:consumerProfile",
+        "customerProfile": {
+            "@id": "energy:customerProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "consumerNumber": {
-                    "@id": "energy:consumerNumber",
+                "customerNumber": {
+                    "@id": "energy:customerNumber",
                     "@type": "xsd:string"
                 },
                 "meterNumber": {
                     "@id": "energy:meterNumber",
                     "@type": "xsd:string"
                 },
+                "meterType": {
+                    "@id": "energy:meterType",
+                    "@type": "xsd:string"
+                },
+                "maskedIdType": {
+                    "@id": "energy:maskedIdType",
+                    "@type": "xsd:string"
+                },
                 "maskedIdNumber": {
                     "@id": "energy:maskedIdNumber",
                     "@type": "xsd:string"
+                },
+                "serviceConnectionDate": {
+                    "@id": "energy:serviceConnectionDate",
+                    "@type": "xsd:date"
                 }
             }
         },
 
-        "consumerDetails": {
-            "@id": "energy:consumerDetails",
+        "customerDetails": {
+            "@id": "energy:customerDetails",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
@@ -78,10 +90,6 @@
                             "@type": "xsd:string"
                         }
                     }
-                },
-                "serviceConnectionDate": {
-                    "@id": "energy:serviceConnectionDate",
-                    "@type": "xsd:date"
                 }
             }
         },

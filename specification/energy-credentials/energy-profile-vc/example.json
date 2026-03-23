@@ -1,29 +1,33 @@
 {
   "@context": [
-    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
     "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/context.jsonld"
   ],
   "id": "urn:uuid:e5f6a7b8-9012-34ab-cdef-567890123456",
-  "type": ["VerifiableCredential", "EnergyProfileCredential"],
+  "type": ["VerifiableCredential", "ElectricityCredential"],
   "issuer": {
-    "id": "did:web:example-utility.com",
+    "id": "https://example-utility.com/issuers/energy-dept",
     "name": "Example Energy Utility",
     "licenseNumber": "REG-2025-00001"
   },
-  "issuanceDate": "2025-01-13T10:30:00Z",
+  "validFrom": "2025-01-13T10:30:00Z",
+  "validUntil": "2026-01-13T10:30:00Z",
   "credentialStatus": {
-    "id": "https://dedi.global/dedi/query/did:web:example-utility.com/VC_revocation_registry",
+    "id": "https://dedi.global/dedi/query/https://example-utility.com/issuers/energy-dept/VC_revocation_registry",
     "type": "dediregistry"
   },
   "credentialSubject": {
-    "id": "did:example:consumer:abc123",
-    "consumerProfile": {
-      "consumerNumber": "UTIL-2025-001234567",
+    "id": "did:example:customer:abc123",
+    "customerProfile": {
+      "customerNumber": "UTIL-2025-001234567",
       "meterNumber": "MET2025789456123",
-      "maskedIdNumber": "XXXX-XXXX-1234"
+      "meterType": "Smart",
+      "maskedIdType": "Aadhaar",
+      "maskedIdNumber": "XXXX-XXXX-1234",
+      "serviceConnectionDate": "2025-01-10"
     },
-    "consumerDetails": {
+    "customerDetails": {
       "fullName": "Jane Doe",
       "installationAddress": {
         "fullAddress": "123 Energy Street, Unit 4",
@@ -32,8 +36,7 @@
         "stateProvince": "Example State",
         "postalCode": "12345",
         "country": "US"
-      },
-      "serviceConnectionDate": "2025-01-10"
+      }
     },
     "consumptionProfile": {
       "premisesType": "Residential",
@@ -60,7 +63,7 @@
   "proof": {
     "type": "Ed25519Signature2020",
     "created": "2025-01-13T10:30:00Z",
-    "verificationMethod": "did:web:example-utility.com#key-1",
+    "verificationMethod": "https://example-utility.com/issuers/energy-dept#key-1",
     "proofPurpose": "assertionMethod",
     "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndTaXoT..."
   }

@@ -1,8 +1,8 @@
-# Energy Profile Credential
+# Electricity Credential
 
 ## Overview
 
-The **Energy Profile Credential** is a unified W3C Verifiable Credential that combines five equal-level profile sections into a single `credentialSubject` object. The consumer's DID (`id`) appears once at the top level, and the five profiles sit as equal-level sibling properties.
+The **Electricity Credential** is a unified W3C Verifiable Credential (VC Data Model 2.0) that combines five equal-level profile sections into a single `credentialSubject` object. The customer's DID (`id`) is optional per the W3C VC Data Model, and the five profiles sit as equal-level sibling properties.
 
 This credential is issued per meter — each meter will have its own credential.
 
@@ -10,31 +10,40 @@ This credential is issued per meter — each meter will have its own credential.
 
 ```
 credentialSubject
-├── id                    (consumer DID — declared once)
-├── consumerProfile       (identity: meter, consumer number, masked ID)
-├── consumerDetails       (name, address, connection date)
+├── id                    (optional customer DID)
+├── customerProfile       (identity: meter, customer number, masked ID, connection date)
+├── customerDetails       (name, address)
 ├── consumptionProfile    (premises, connection type, load, tariff)
 ├── generationProfile     (DER type, capacity, commissioning)
 └── storageProfile        (battery capacity, power rating, type)
 ```
 
-### consumerProfile
-Core consumer identity fields:
+## Validity Period
+
+Per the [W3C VC Data Model 2.0 validity period](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#validity-period), this credential uses:
+
+- **`validFrom`** (required) — date and time from which the credential is valid
+- **`validUntil`** (optional) — date and time until which the credential is valid
+
+### customerProfile
+Core customer identity fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `consumerNumber` | string | Yes | Full consumer account number assigned by the utility |
+| `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | Yes | Unique meter serial number |
+| `meterType` | enum | Yes | Smart, Conventional, or Prepaid |
+| `maskedIdType` | string | No | Type of government-issued ID (e.g., Aadhaar, SSN, Passport) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
+| `serviceConnectionDate` | date | Yes | Date when the electricity connection was activated |
 
-### consumerDetails
+### customerDetails
 Personal and address information:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
 | `installationAddress` | object | Yes | Address of the installation (fullAddress, city, district, stateProvince, postalCode, country) |
-| `serviceConnectionDate` | date | Yes | Date when the connection was activated |
 
 ### consumptionProfile
 Connection and consumption characteristics:
@@ -79,7 +88,7 @@ Battery/energy storage capability:
 
 ## Issuer
 
-This credential is issued by electricity distribution utilities identified by their DID (`did:web:`) and regulatory license number.
+This credential is issued by electricity distribution utilities identified by their URL and regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer `id` is a URL (e.g., `https://example-utility.com/issuers/energy-dept`).
 
 ## Revocation
 

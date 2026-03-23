@@ -1,15 +1,15 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/schema.json",
-    "title": "Energy Profile Credential Schema",
-    "description": "JSON Schema for a unified energy profile credential that combines consumer identity, consumer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential. Issued by electricity distribution utilities.",
+    "title": "Electricity Credential Schema",
+    "description": "JSON Schema for a unified electricity credential that combines customer identity, customer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by electricity distribution utilities.",
     "type": "object",
     "required": [
         "@context",
         "id",
         "type",
         "issuer",
-        "issuanceDate",
+        "validFrom",
         "credentialSubject"
     ],
     "properties": {
@@ -19,7 +19,7 @@
                 "type": "string"
             },
             "contains": {
-                "const": "https://www.w3.org/2018/credentials/v1"
+                "const": "https://www.w3.org/ns/credentials/v2"
             },
             "minItems": 2
         },
@@ -35,7 +35,7 @@
                 "type": "string"
             },
             "contains": {
-                "const": "EnergyProfileCredential"
+                "const": "ElectricityCredential"
             },
             "minItems": 2
         },
@@ -46,7 +46,7 @@
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "DID of the issuing distribution utility"
+                    "description": "URL of the issuing distribution utility"
                 },
                 "name": {
                     "type": "string",
@@ -60,15 +60,15 @@
                 }
             }
         },
-        "issuanceDate": {
+        "validFrom": {
             "type": "string",
             "format": "date-time",
-            "description": "Date and time when the credential was issued"
+            "description": "Date and time from which the credential is valid (W3C VC Data Model 2.0)"
         },
-        "expirationDate": {
+        "validUntil": {
             "type": "string",
             "format": "date-time",
-            "description": "Optional expiration date of the credential"
+            "description": "Date and time until which the credential is valid (W3C VC Data Model 2.0)"
         },
         "credentialStatus": {
             "type": "object",
@@ -89,19 +89,19 @@
         },
         "credentialSubject": {
             "type": "object",
-            "description": "Single subject with five equal-level profile sections: consumerProfile, consumerDetails, consumptionProfile, generationProfile, storageProfile",
-            "required": ["id", "consumerProfile", "consumerDetails", "consumptionProfile"],
+            "description": "Single subject with five equal-level profile sections: customerProfile, customerDetails, consumptionProfile, generationProfile, storageProfile",
+            "required": ["customerProfile", "customerDetails", "consumptionProfile"],
             "properties": {
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "DID of the customer/credential subject"
+                    "description": "Optional DID of the customer/credential subject"
                 },
-                "consumerProfile": {
-                    "$ref": "#/$defs/ConsumerProfile"
+                "customerProfile": {
+                    "$ref": "#/$defs/CustomerProfile"
                 },
-                "consumerDetails": {
-                    "$ref": "#/$defs/ConsumerDetails"
+                "customerDetails": {
+                    "$ref": "#/$defs/CustomerDetails"
                 },
                 "consumptionProfile": {
                     "$ref": "#/$defs/ConsumptionProfile"
@@ -146,15 +146,15 @@
         }
     },
     "$defs": {
-        "ConsumerProfile": {
+        "CustomerProfile": {
             "type": "object",
-            "description": "Core consumer identity: consumer number, meter number, masked ID",
-            "required": ["consumerNumber", "meterNumber"],
+            "description": "Core customer identity: customer number, meter number, masked ID, service connection date",
+            "required": ["customerNumber", "meterNumber", "meterType", "serviceConnectionDate"],
             "properties": {
-                "consumerNumber": {
+                "customerNumber": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Full consumer account number assigned by the utility"
+                    "description": "Full customer account number assigned by the utility"
                 },
                 "meterNumber": {
                     "type": "string",
@@ -162,17 +162,32 @@
                     "maxLength": 50,
                     "description": "Unique meter serial number"
                 },
+                "meterType": {
+                    "type": "string",
+                    "enum": ["Smart", "Conventional", "Prepaid"],
+                    "description": "Type of electricity meter installed"
+                },
+                "maskedIdType": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Type of government-issued ID that has been masked (e.g., 'Aadhaar', 'SSN', 'Passport')"
+                },
                 "maskedIdNumber": {
                     "type": "string",
                     "minLength": 1,
                     "description": "Masked government ID for privacy-preserving verification (e.g., 'XXXX-XXXX-1234')"
+                },
+                "serviceConnectionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date when the electricity connection was activated"
                 }
             }
         },
-        "ConsumerDetails": {
+        "CustomerDetails": {
             "type": "object",
-            "description": "Consumer personal and address information",
-            "required": ["fullName", "installationAddress", "serviceConnectionDate"],
+            "description": "Customer personal and address information",
+            "required": ["fullName", "installationAddress"],
             "properties": {
                 "fullName": {
                     "type": "string",
@@ -216,11 +231,6 @@
                             "description": "ISO 3166-1 alpha-2 country code"
                         }
                     }
-                },
-                "serviceConnectionDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Date when the connection was activated"
                 }
             }
         },
