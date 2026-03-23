@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/schema.json",
     "title": "Energy Profile Credential Schema",
-    "description": "JSON Schema for a unified energy profile credential that combines consumer identity, consumer details, consumption characteristics, generation capability, and storage capability as equal-level subjects within a single W3C Verifiable Credential. Issued by electricity distribution utilities.",
+    "description": "JSON Schema for a unified energy profile credential that combines consumer identity, consumer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential. Issued by electricity distribution utilities.",
     "type": "object",
     "required": [
         "@context",
@@ -88,17 +88,30 @@
             }
         },
         "credentialSubject": {
-            "type": "array",
-            "description": "Array of five equal-level subjects: ConsumerProfile, ConsumerDetails, ConsumptionProfile, GenerationProfile, StorageProfile",
-            "minItems": 1,
-            "items": {
-                "oneOf": [
-                    { "$ref": "#/$defs/ConsumerProfile" },
-                    { "$ref": "#/$defs/ConsumerDetails" },
-                    { "$ref": "#/$defs/ConsumptionProfile" },
-                    { "$ref": "#/$defs/GenerationProfile" },
-                    { "$ref": "#/$defs/StorageProfile" }
-                ]
+            "type": "object",
+            "description": "Single subject with five equal-level profile sections: consumerProfile, consumerDetails, consumptionProfile, generationProfile, storageProfile",
+            "required": ["id", "consumerProfile", "consumerDetails", "consumptionProfile"],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "DID of the customer/credential subject"
+                },
+                "consumerProfile": {
+                    "$ref": "#/$defs/ConsumerProfile"
+                },
+                "consumerDetails": {
+                    "$ref": "#/$defs/ConsumerDetails"
+                },
+                "consumptionProfile": {
+                    "$ref": "#/$defs/ConsumptionProfile"
+                },
+                "generationProfile": {
+                    "$ref": "#/$defs/GenerationProfile"
+                },
+                "storageProfile": {
+                    "$ref": "#/$defs/StorageProfile"
+                }
             }
         },
         "proof": {
@@ -135,18 +148,9 @@
     "$defs": {
         "ConsumerProfile": {
             "type": "object",
-            "description": "Core consumer identity: meter ID, consumer ID, masked ID",
-            "required": ["id", "type", "consumerNumber", "meterNumber"],
+            "description": "Core consumer identity: consumer number, meter number, masked ID",
+            "required": ["consumerNumber", "meterNumber"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer/credential subject"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "ConsumerProfile"
-                },
                 "consumerNumber": {
                     "type": "string",
                     "minLength": 1,
@@ -168,17 +172,8 @@
         "ConsumerDetails": {
             "type": "object",
             "description": "Consumer personal and address information",
-            "required": ["id", "type", "fullName", "installationAddress", "serviceConnectionDate"],
+            "required": ["fullName", "installationAddress", "serviceConnectionDate"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer/credential subject"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "ConsumerDetails"
-                },
                 "fullName": {
                     "type": "string",
                     "minLength": 1,
@@ -232,17 +227,8 @@
         "ConsumptionProfile": {
             "type": "object",
             "description": "Connection and consumption characteristics for load management and tariff purposes",
-            "required": ["id", "type", "premisesType", "connectionType", "sanctionedLoadKW", "tariffCategoryCode"],
+            "required": ["premisesType", "connectionType", "sanctionedLoadKW", "tariffCategoryCode"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer/credential subject"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "ConsumptionProfile"
-                },
                 "premisesType": {
                     "type": "string",
                     "enum": ["Residential", "Commercial", "Industrial", "Agricultural"],
@@ -269,17 +255,8 @@
         "GenerationProfile": {
             "type": "object",
             "description": "DER (Distributed Energy Resource) generation capability",
-            "required": ["id", "type", "generationType", "capacityKW", "commissioningDate"],
+            "required": ["generationType", "capacityKW", "commissioningDate"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer/credential subject"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "GenerationProfile"
-                },
                 "assetId": {
                     "type": "string",
                     "minLength": 1,
@@ -318,17 +295,8 @@
         "StorageProfile": {
             "type": "object",
             "description": "Battery/energy storage capability",
-            "required": ["id", "type", "storageCapacityKWh", "powerRatingKW", "commissioningDate"],
+            "required": ["storageCapacityKWh", "powerRatingKW", "commissioningDate"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer/credential subject"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "StorageProfile"
-                },
                 "assetId": {
                     "type": "string",
                     "minLength": 1,

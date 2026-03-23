@@ -18,13 +18,12 @@
             }
         },
 
-        "ConsumerProfile": {
-            "@id": "energy:ConsumerProfile",
+        "consumerProfile": {
+            "@id": "energy:consumerProfile",
+            "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "id": "@id",
-                "type": "@type",
                 "consumerNumber": {
                     "@id": "energy:consumerNumber",
                     "@type": "xsd:string"
@@ -40,13 +39,12 @@
             }
         },
 
-        "ConsumerDetails": {
-            "@id": "energy:ConsumerDetails",
+        "consumerDetails": {
+            "@id": "energy:consumerDetails",
+            "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "id": "@id",
-                "type": "@type",
                 "fullName": {
                     "@id": "schema:name",
                     "@type": "xsd:string"
@@ -88,13 +86,12 @@
             }
         },
 
-        "ConsumptionProfile": {
-            "@id": "energy:ConsumptionProfile",
+        "consumptionProfile": {
+            "@id": "energy:consumptionProfile",
+            "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "id": "@id",
-                "type": "@type",
                 "premisesType": {
                     "@id": "energy:premisesType",
                     "@type": "xsd:string"
@@ -114,13 +111,12 @@
             }
         },
 
-        "GenerationProfile": {
-            "@id": "energy:GenerationProfile",
+        "generationProfile": {
+            "@id": "energy:generationProfile",
+            "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "id": "@id",
-                "type": "@type",
                 "assetId": {
                     "@id": "energy:assetId",
                     "@type": "xsd:string"
@@ -148,13 +144,12 @@
             }
         },
 
-        "StorageProfile": {
-            "@id": "energy:StorageProfile",
+        "storageProfile": {
+            "@id": "energy:storageProfile",
+            "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
-                "id": "@id",
-                "type": "@type",
                 "assetId": {
                     "@id": "energy:storageAssetId",
                     "@type": "xsd:string"

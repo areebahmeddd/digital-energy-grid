@@ -16,17 +16,14 @@
     "id": "https://dedi.global/dedi/query/did:web:example-utility.com/VC_revocation_registry",
     "type": "dediregistry"
   },
-  "credentialSubject": [
-    {
-      "id": "did:example:consumer:abc123",
-      "type": "ConsumerProfile",
+  "credentialSubject": {
+    "id": "did:example:consumer:abc123",
+    "consumerProfile": {
       "consumerNumber": "UTIL-2025-001234567",
       "meterNumber": "MET2025789456123",
       "maskedIdNumber": "XXXX-XXXX-1234"
     },
-    {
-      "id": "did:example:consumer:abc123",
-      "type": "ConsumerDetails",
+    "consumerDetails": {
       "fullName": "Jane Doe",
       "installationAddress": {
         "fullAddress": "123 Energy Street, Unit 4",
@@ -38,17 +35,13 @@
       },
       "serviceConnectionDate": "2025-01-10"
     },
-    {
-      "id": "did:example:consumer:abc123",
-      "type": "ConsumptionProfile",
+    "consumptionProfile": {
       "premisesType": "Residential",
       "connectionType": "Single-phase",
       "sanctionedLoadKW": 5,
       "tariffCategoryCode": "RES-01"
     },
-    {
-      "id": "did:example:consumer:abc123",
-      "type": "GenerationProfile",
+    "generationProfile": {
       "assetId": "DER-SOLAR-001",
       "generationType": "Solar",
       "capacityKW": 3,
@@ -56,16 +49,14 @@
       "manufacturer": "SunPower Corporation",
       "modelNumber": "SPR-X22-360"
     },
-    {
-      "id": "did:example:consumer:abc123",
-      "type": "StorageProfile",
+    "storageProfile": {
       "assetId": "BESS-001",
       "storageCapacityKWh": 10,
       "powerRatingKW": 5,
       "commissioningDate": "2025-01-12",
       "storageType": "LithiumIon"
     }
-  ],
+  },
   "proof": {
     "type": "Ed25519Signature2020",
     "created": "2025-01-13T10:30:00Z",
