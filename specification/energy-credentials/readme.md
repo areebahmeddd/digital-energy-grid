@@ -15,6 +15,7 @@ This collection provides schemas for credentials issued by electricity distribut
 | [Generation Profile Credential](./generation-profile-vc/) | DER generation capability | Grid management, net metering, renewable tracking |
 | [Storage Profile Credential](./storage-profile-vc/) | Battery/energy storage capability | Virtual power plants, demand response |
 | [Program Enrollment Credential](./program-enrollment-vc/) | Energy program participation | Demand response, ToU programs |
+| [Electricity Credential](./electricity-credential/) | Unified credential combining all profiles | Single credential per meter for consumer/prosumer identity |
 
 ## Credential Relationships
 
@@ -78,6 +79,11 @@ energy-credentials/
 │   ├── example.json
 │   └── readme.md
 ├── program-enrollment-vc/     # Program participation
+│   ├── schema.json
+│   ├── context.jsonld
+│   ├── example.json
+│   └── readme.md
+├── electricity-credential/    # Unified credential (all profiles in one)
 │   ├── schema.json
 │   ├── context.jsonld
 │   ├── example.json

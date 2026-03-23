@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/schema.json",
+    "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/schema.json",
     "title": "Electricity Credential Schema",
     "description": "JSON Schema for a unified electricity credential that combines customer identity, customer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by electricity distribution utilities.",
     "type": "object",

@@ -6,7 +6,7 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "energy": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/energy-profile-vc/context.jsonld#",
+        "energy": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/context.jsonld#",
 
         "ElectricityCredential": {
             "@id": "energy:ElectricityCredential",
