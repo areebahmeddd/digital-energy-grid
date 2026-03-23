@@ -89,8 +89,8 @@
         },
         "credentialSubject": {
             "type": "object",
-            "description": "Single subject with five equal-level profile sections: customerProfile, customerDetails, consumptionProfile, generationProfile, storageProfile",
-            "required": ["customerProfile", "customerDetails", "consumptionProfile"],
+            "description": "Single subject with five profile sections: customerProfile (required), customerDetails, consumptionProfile, generationProfile, storageProfile (all optional except customerProfile)",
+            "required": ["customerProfile"],
             "properties": {
                 "id": {
                     "type": "string",

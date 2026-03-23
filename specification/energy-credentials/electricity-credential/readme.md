@@ -11,11 +11,11 @@ This credential is issued per meter — each meter will have its own credential.
 ```
 credentialSubject
 ├── id                    (optional customer DID)
-├── customerProfile       (identity: meter, customer number, masked ID)
-├── customerDetails       (name, address, connection date)
-├── consumptionProfile    (premises, connection type, load, tariff)
-├── generationProfile     (DER type, capacity, commissioning)
-└── storageProfile        (battery capacity, power rating, type)
+├── customerProfile       (required — identity: meter, customer number, masked ID)
+├── customerDetails       (optional — name, address, connection date)
+├── consumptionProfile    (optional — premises, connection type, load, tariff)
+├── generationProfile     (optional — DER type, capacity, commissioning)
+└── storageProfile        (optional — battery capacity, power rating, type)
 ```
 
 ## Validity Period
