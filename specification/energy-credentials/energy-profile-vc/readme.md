@@ -4,6 +4,8 @@
 
 The **Energy Profile Credential** is a unified W3C Verifiable Credential that combines five equal-level profile sections into a single `credentialSubject` object. The consumer's DID (`id`) appears once at the top level, and the five profiles sit as equal-level sibling properties.
 
+This credential is issued per meter — each meter will have its own credential.
+
 ## Credential Structure
 
 ```
