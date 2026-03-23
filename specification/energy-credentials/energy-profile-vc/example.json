@@ -24,8 +24,7 @@
       "meterNumber": "MET2025789456123",
       "meterType": "Smart",
       "maskedIdType": "Aadhaar",
-      "maskedIdNumber": "XXXX-XXXX-1234",
-      "serviceConnectionDate": "2025-01-10"
+      "maskedIdNumber": "XXXX-XXXX-1234"
     },
     "customerDetails": {
       "fullName": "Jane Doe",
@@ -36,7 +35,8 @@
         "stateProvince": "Example State",
         "postalCode": "12345",
         "country": "US"
-      }
+      },
+      "serviceConnectionDate": "2025-01-10"
     },
     "consumptionProfile": {
       "premisesType": "Residential",

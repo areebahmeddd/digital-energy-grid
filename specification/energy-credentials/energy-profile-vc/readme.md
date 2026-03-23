@@ -11,8 +11,8 @@ This credential is issued per meter — each meter will have its own credential.
 ```
 credentialSubject
 ├── id                    (optional customer DID)
-├── customerProfile       (identity: meter, customer number, masked ID, connection date)
-├── customerDetails       (name, address)
+├── customerProfile       (identity: meter, customer number, masked ID)
+├── customerDetails       (name, address, connection date)
 ├── consumptionProfile    (premises, connection type, load, tariff)
 ├── generationProfile     (DER type, capacity, commissioning)
 └── storageProfile        (battery capacity, power rating, type)
@@ -35,7 +35,6 @@ Core customer identity fields:
 | `meterType` | enum | Yes | Smart, Conventional, or Prepaid |
 | `maskedIdType` | string | No | Type of government-issued ID (e.g., Aadhaar, SSN, Passport) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
-| `serviceConnectionDate` | date | Yes | Date when the electricity connection was activated |
 
 ### customerDetails
 Personal and address information:
@@ -44,6 +43,7 @@ Personal and address information:
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
 | `installationAddress` | object | Yes | Address of the installation (fullAddress, city, district, stateProvince, postalCode, country) |
+| `serviceConnectionDate` | date | Yes | Date when the electricity connection was activated |
 
 ### consumptionProfile
 Connection and consumption characteristics:

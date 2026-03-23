@@ -148,8 +148,8 @@
     "$defs": {
         "CustomerProfile": {
             "type": "object",
-            "description": "Core customer identity: customer number, meter number, masked ID, service connection date",
-            "required": ["customerNumber", "meterNumber", "meterType", "serviceConnectionDate"],
+            "description": "Core customer identity: customer number, meter number, masked ID",
+            "required": ["customerNumber", "meterNumber", "meterType"],
             "properties": {
                 "customerNumber": {
                     "type": "string",
@@ -176,18 +176,13 @@
                     "type": "string",
                     "minLength": 1,
                     "description": "Masked government ID for privacy-preserving verification (e.g., 'XXXX-XXXX-1234')"
-                },
-                "serviceConnectionDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Date when the electricity connection was activated"
                 }
             }
         },
         "CustomerDetails": {
             "type": "object",
             "description": "Customer personal and address information",
-            "required": ["fullName", "installationAddress"],
+            "required": ["fullName", "installationAddress", "serviceConnectionDate"],
             "properties": {
                 "fullName": {
                     "type": "string",
@@ -231,6 +226,11 @@
                             "description": "ISO 3166-1 alpha-2 country code"
                         }
                     }
+                },
+                "serviceConnectionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date when the electricity connection was activated"
                 }
             }
         },

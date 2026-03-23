@@ -43,10 +43,6 @@
                 "maskedIdNumber": {
                     "@id": "energy:maskedIdNumber",
                     "@type": "xsd:string"
-                },
-                "serviceConnectionDate": {
-                    "@id": "energy:serviceConnectionDate",
-                    "@type": "xsd:date"
                 }
             }
         },
@@ -60,6 +56,10 @@
                 "fullName": {
                     "@id": "schema:name",
                     "@type": "xsd:string"
+                },
+                "serviceConnectionDate": {
+                    "@id": "energy:serviceConnectionDate",
+                    "@type": "xsd:date"
                 },
                 "installationAddress": {
                     "@id": "energy:installationAddress",
