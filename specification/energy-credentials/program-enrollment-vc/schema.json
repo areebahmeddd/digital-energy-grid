@@ -185,7 +185,7 @@
                 "maskedIdType": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Type of government-issued ID that has been masked (e.g., 'Aadhaar', 'SSN', 'Passport')"
+                    "description": "Type of government-issued ID that has been masked (e.g., 'SSN', 'Passport', 'NationalID')"
                 },
                 "maskedIdNumber": {
                     "type": "string",

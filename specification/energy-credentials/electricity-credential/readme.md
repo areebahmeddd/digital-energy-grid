@@ -33,7 +33,7 @@ Core customer identity fields:
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | Yes | Unique meter serial number |
 | `meterType` | enum | Yes | Smart, Conventional, or Prepaid |
-| `maskedIdType` | string | No | Type of government-issued ID (e.g., Aadhaar, SSN, Passport) |
+| `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
 
 ### customerDetails

@@ -23,7 +23,7 @@
       "customerNumber": "UTIL-2025-001234567",
       "meterNumber": "MET2025789456123",
       "meterType": "Smart",
-      "maskedIdType": "Aadhaar",
+      "maskedIdType": "SSN",
       "maskedIdNumber": "XXXX-XXXX-1234"
     },
     "customerDetails": {

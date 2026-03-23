@@ -38,7 +38,7 @@ Core customer identity fields — same structure as [Electricity Credential](../
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | No | Unique meter serial number |
 | `meterType` | enum | No | Smart, Conventional, or Prepaid |
-| `maskedIdType` | string | No | Type of government-issued ID (e.g., Aadhaar, SSN, Passport) |
+| `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
 
 ### customerDetails (optional)
