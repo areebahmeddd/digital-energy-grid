@@ -10,49 +10,67 @@ This credential is issued by electricity distribution utilities when a consumer 
 - **Time of Use**: Consumer opts into time-based pricing programs
 - **Net Metering**: Consumer is enrolled in net metering for solar exports
 
-## Fields
+## Credential Structure
 
-| Field | Description | Required |
-| :---- | :---- | :----: |
-| consumerNumber | Unique consumer account number | Yes |
-| fullName | Consumer name | No |
-| programName | Human-readable program name | Yes |
-| programCode | Unique program identifier | Yes |
-| enrollmentDate | Date of enrollment | Yes |
-| validUntil | End date when enrollment expires | No |
+```
+credentialSubject
+├── id                    (optional customer DID)
+├── customerProfile       (optional: customer number, meter, masked ID)
+├── customerDetails       (optional: name, address, connection date)
+├── programName           (required)
+├── programCode           (required)
+├── enrollmentDate        (required)
+└── enrollmentValidUntil  (optional)
+```
+
+## Validity Period
+
+Per the [W3C VC Data Model 2.0 validity period](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#validity-period), this credential uses:
+
+- **`validFrom`** (required) — date and time from which the credential is valid
+- **`validUntil`** (optional) — date and time until which the credential is valid
+
+### customerProfile (optional)
+Core customer identity fields — same structure as [Electricity Credential](../electricity-credential/):
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `customerNumber` | string | Yes | Full customer account number assigned by the utility |
+| `meterNumber` | string | No | Unique meter serial number |
+| `meterType` | enum | No | Smart, Conventional, or Prepaid |
+| `maskedIdType` | string | No | Type of government-issued ID (e.g., Aadhaar, SSN, Passport) |
+| `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
+
+### customerDetails (optional)
+Personal and address information — same structure as [Electricity Credential](../electricity-credential/):
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fullName` | string | Yes | Full name of the customer as per ID proof |
+| `installationAddress` | object | No | Address of the installation |
+| `serviceConnectionDate` | date | No | Date when the electricity connection was activated |
+
+### Enrollment Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `programName` | string | Yes | Human-readable program name |
+| `programCode` | string | Yes | Unique program identifier |
+| `enrollmentDate` | date | Yes | Date of enrollment |
+| `enrollmentValidUntil` | date | No | End date when enrollment expires |
 
 ## Files
 
-- `schema.json` - JSON Schema for validation
-- `context.jsonld` - JSON-LD context for semantic interoperability
-- `example.json` - Sample P2P trading enrollment credential
+| File | Description |
+|------|-------------|
+| `context.jsonld` | JSON-LD context defining semantic mappings |
+| `schema.json` | JSON Schema (draft 2020-12) for credential validation |
+| `example.json` | Sample P2P trading enrollment credential |
 
-## Usage
+## Issuer
 
-```json
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://schema.org/",
-    "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/program-enrollment-vc/context.jsonld"
-  ],
-  "type": ["VerifiableCredential", "UtilityProgramEnrollmentCredential"],
-  "credentialSubject": {
-    "id": "did:example:consumer:abc123",
-    "consumerNumber": "UTIL-2025-001234567",
-    "programName": "Peer-to-Peer Energy Trading",
-    "programCode": "P2P-2025",
-    "enrollmentDate": "2025-01-13"
-  }
-}
-```
+This credential is issued by electricity distribution utilities identified by their URL and regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer `id` is a URL (e.g., `https://example-utility.com/issuers/energy-dept`).
 
-Context URL:
-```
-https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/program-enrollment-vc/context.jsonld
-```
+## Revocation
 
-Schema URL:
-```
-https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/program-enrollment-vc/schema.json
-```
+Credential revocation is managed via the DeDi Registry (`dediregistry` status type).

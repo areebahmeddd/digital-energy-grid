@@ -9,7 +9,7 @@
         "id",
         "type",
         "issuer",
-        "issuanceDate",
+        "validFrom",
         "credentialSubject"
     ],
     "properties": {
@@ -19,7 +19,7 @@
                 "type": "string"
             },
             "contains": {
-                "const": "https://www.w3.org/2018/credentials/v1"
+                "const": "https://www.w3.org/ns/credentials/v2"
             },
             "minItems": 2
         },
@@ -46,7 +46,7 @@
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "DID of the issuing distribution utility"
+                    "description": "URL of the issuing distribution utility"
                 },
                 "name": {
                     "type": "string",
@@ -60,15 +60,15 @@
                 }
             }
         },
-        "issuanceDate": {
+        "validFrom": {
             "type": "string",
             "format": "date-time",
-            "description": "Date and time when the credential was issued"
+            "description": "Date and time from which the credential is valid (W3C VC Data Model 2.0)"
         },
-        "expirationDate": {
+        "validUntil": {
             "type": "string",
             "format": "date-time",
-            "description": "Optional expiration date of the credential"
+            "description": "Date and time until which the credential is valid (W3C VC Data Model 2.0)"
         },
         "credentialStatus": {
             "type": "object",
@@ -90,8 +90,6 @@
         "credentialSubject": {
             "type": "object",
             "required": [
-                "id",
-                "consumerNumber",
                 "programName",
                 "programCode",
                 "enrollmentDate"
@@ -100,18 +98,13 @@
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "DID of the consumer/credential subject"
+                    "description": "Optional DID of the consumer/credential subject"
                 },
-                "consumerNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Unique consumer/customer account number assigned by the utility"
+                "customerProfile": {
+                    "$ref": "#/$defs/CustomerProfile"
                 },
-                "fullName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200,
-                    "description": "Consumer name (optional)"
+                "customerDetails": {
+                    "$ref": "#/$defs/CustomerDetails"
                 },
                 "programName": {
                     "type": "string",
@@ -129,7 +122,7 @@
                     "format": "date",
                     "description": "Date when the consumer enrolled in the program"
                 },
-                "validUntil": {
+                "enrollmentValidUntil": {
                     "type": "string",
                     "format": "date",
                     "description": "Optional end date when the enrollment expires"
@@ -163,6 +156,96 @@
                     "type": "string",
                     "minLength": 1,
                     "description": "The cryptographic signature value"
+                }
+            }
+        }
+    },
+    "$defs": {
+        "CustomerProfile": {
+            "type": "object",
+            "description": "Core customer identity: customer number, meter number, masked ID",
+            "required": ["customerNumber"],
+            "properties": {
+                "customerNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Full customer account number assigned by the utility"
+                },
+                "meterNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Unique meter serial number"
+                },
+                "meterType": {
+                    "type": "string",
+                    "enum": ["Smart", "Conventional", "Prepaid"],
+                    "description": "Type of electricity meter installed"
+                },
+                "maskedIdType": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Type of government-issued ID that has been masked (e.g., 'Aadhaar', 'SSN', 'Passport')"
+                },
+                "maskedIdNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Masked government ID for privacy-preserving verification (e.g., 'XXXX-XXXX-1234')"
+                }
+            }
+        },
+        "CustomerDetails": {
+            "type": "object",
+            "description": "Customer personal and address information",
+            "required": ["fullName"],
+            "properties": {
+                "fullName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "Full name of the customer as per ID proof"
+                },
+                "installationAddress": {
+                    "type": "object",
+                    "required": ["fullAddress", "postalCode", "country"],
+                    "properties": {
+                        "fullAddress": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500,
+                            "description": "Complete street address of the installation"
+                        },
+                        "city": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "City name"
+                        },
+                        "district": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "District or county name"
+                        },
+                        "stateProvince": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "State, province, or region name"
+                        },
+                        "postalCode": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Postal or ZIP code (format varies by country)"
+                        },
+                        "country": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$",
+                            "description": "ISO 3166-1 alpha-2 country code"
+                        }
+                    }
+                },
+                "serviceConnectionDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date when the electricity connection was activated"
                 }
             }
         }
