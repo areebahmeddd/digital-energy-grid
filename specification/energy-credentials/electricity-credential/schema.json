@@ -41,7 +41,7 @@
         },
         "issuer": {
             "type": "object",
-            "required": ["id", "name", "licenseNumber"],
+            "required": ["id", "name"],
             "properties": {
                 "id": {
                     "type": "string",
