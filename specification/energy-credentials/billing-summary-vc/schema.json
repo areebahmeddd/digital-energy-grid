@@ -2,14 +2,14 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/billing-summary-vc/schema.json",
     "title": "Billing Summary Credential Schema",
-    "description": "JSON Schema for the Billing Summary Verifiable Credential. Contains aggregated billing period data with costs and consumption totals, aligned with Green Button (ESPI/NAESB) UsageSummary semantics. Issued by the utility; consumed by credit-check apps, program eligibility services, and energy analytics platforms.\n",
+    "description": "JSON Schema for the Billing Summary Verifiable Credential. Combines customer identity (customerProfile) with aggregated billing period data (billingSummary) containing costs and consumption totals, aligned with Green Button (ESPI/NAESB) UsageSummary semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by credit-check apps, program eligibility services, and energy analytics platforms.",
     "type": "object",
     "required": [
         "@context",
         "id",
         "type",
         "issuer",
-        "issuanceDate",
+        "validFrom",
         "credentialSubject"
     ],
     "properties": {
@@ -19,7 +19,7 @@
                 "type": "string"
             },
             "contains": {
-                "const": "https://www.w3.org/2018/credentials/v1"
+                "const": "https://www.w3.org/ns/credentials/v2"
             },
             "minItems": 2
         },
@@ -41,16 +41,12 @@
         },
         "issuer": {
             "type": "object",
-            "required": [
-                "id",
-                "name",
-                "licenseNumber"
-            ],
+            "required": ["id", "name"],
             "properties": {
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "DID of the issuing distribution utility"
+                    "description": "URL of the issuing distribution utility"
                 },
                 "name": {
                     "type": "string",
@@ -64,28 +60,25 @@
                 }
             }
         },
-        "issuanceDate": {
+        "validFrom": {
             "type": "string",
             "format": "date-time",
-            "description": "Date and time when the credential was issued"
+            "description": "Date and time from which the credential is valid (W3C VC Data Model 2.0)"
         },
-        "expirationDate": {
+        "validUntil": {
             "type": "string",
             "format": "date-time",
-            "description": "Optional expiration date of the credential"
+            "description": "Date and time until which the credential is valid (W3C VC Data Model 2.0)"
         },
         "credentialStatus": {
             "type": "object",
-            "required": [
-                "id",
-                "type"
-            ],
+            "required": ["id", "type"],
             "description": "Revocation status information for the credential",
             "properties": {
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL to query the revocation status via DeDi registry"
+                    "description": "URL to query the revocation status of the credential via DeDi registry"
                 },
                 "type": {
                     "type": "string",
@@ -96,11 +89,91 @@
         },
         "credentialSubject": {
             "type": "object",
-            "description": "Aggregated billing summary data for a single meter, using Green Button (ESPI/NAESB) UsageSummary semantics.\n",
+            "description": "Single subject with customerProfile (identity) and billingSummary (aggregated billing data) as equal-level properties.",
+            "required": ["customerProfile", "billingSummary"],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Optional DID of the customer/credential subject"
+                },
+                "customerProfile": {
+                    "$ref": "#/$defs/CustomerProfile"
+                },
+                "billingSummary": {
+                    "$ref": "#/$defs/BillingSummary"
+                }
+            }
+        },
+        "proof": {
+            "type": "object",
+            "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Cryptographic signature type (e.g., Ed25519Signature2020)"
+                },
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the proof was created"
+                },
+                "verificationMethod": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI of the verification method/public key"
+                },
+                "proofPurpose": {
+                    "type": "string",
+                    "enum": ["assertionMethod", "authentication"],
+                    "description": "Purpose of the proof"
+                },
+                "proofValue": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The cryptographic signature value"
+                }
+            }
+        }
+    },
+    "$defs": {
+        "CustomerProfile": {
+            "type": "object",
+            "description": "Core customer identity: customer number, meter number, masked ID",
+            "required": ["customerNumber", "meterNumber", "meterType"],
+            "properties": {
+                "customerNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Full customer account number assigned by the utility"
+                },
+                "meterNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "Unique meter serial number"
+                },
+                "meterType": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Type of electricity meter installed (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse)"
+                },
+                "maskedIdType": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Type of government-issued ID that has been masked (e.g., 'SSN', 'Passport', 'NationalID')"
+                },
+                "maskedIdNumber": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Masked government ID for privacy-preserving verification (e.g., 'XXXX-XXXX-1234')"
+                }
+            }
+        },
+        "BillingSummary": {
+            "type": "object",
+            "description": "Aggregated billing summary data for a single meter, using Green Button (ESPI/NAESB) UsageSummary semantics.",
             "required": [
-                "id",
-                "consumerNumber",
-                "meterNumber",
                 "serviceKind",
                 "timeZone",
                 "currency",
@@ -108,25 +181,9 @@
                 "billingPeriods"
             ],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the customer / credential subject"
-                },
-                "consumerNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Utility account number (links to the customer record; reused from Utility Customer Credential)\n"
-                },
-                "meterNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 50,
-                    "description": "Meter serial number (links to the physical meter; reused from Utility Customer Credential)\n"
-                },
                 "serviceKind": {
                     "type": "string",
-                    "description": "Kind of service provided (ESPI: ServiceKind).\n",
+                    "description": "Kind of service provided (ESPI: ServiceKind).",
                     "enum": [
                         "electricity",
                         "gas",
@@ -135,7 +192,7 @@
                 },
                 "timeZone": {
                     "type": "string",
-                    "description": "IANA time-zone identifier for the meter location (e.g., \"America/Los_Angeles\").\n",
+                    "description": "IANA time-zone identifier for the meter location (e.g., \"America/Los_Angeles\").",
                     "examples": [
                         "Asia/Kolkata",
                         "America/Los_Angeles"
@@ -143,7 +200,7 @@
                 },
                 "currency": {
                     "type": "string",
-                    "description": "ISO 4217 currency code for all monetary values in this credential.\n",
+                    "description": "ISO 4217 currency code for all monetary values in this credential.",
                     "examples": [
                         "USD",
                         "EUR",
@@ -152,7 +209,7 @@
                 },
                 "coveragePeriod": {
                     "type": "object",
-                    "description": "Summary date range of the billing data contained in this credential.\n",
+                    "description": "Summary date range of the billing data contained in this credential.",
                     "required": [
                         "start",
                         "end"
@@ -173,10 +230,10 @@
                 "billingPeriods": {
                     "type": "array",
                     "minItems": 1,
-                    "description": "Array of billing period summaries. Each entry represents one billing cycle (typically monthly).\n",
+                    "description": "Array of billing period summaries. Each entry represents one billing cycle (typically monthly).",
                     "items": {
                         "type": "object",
-                        "description": "A single billing period summary (ESPI: UsageSummary + IntervalReading from billing-granularity data).\n",
+                        "description": "A single billing period summary (ESPI: UsageSummary + IntervalReading from billing-granularity data).",
                         "required": [
                             "period",
                             "billAmount",
@@ -185,7 +242,7 @@
                         "properties": {
                             "period": {
                                 "type": "object",
-                                "description": "Billing period boundaries (ESPI: billingPeriod / DateTimeInterval).\n",
+                                "description": "Billing period boundaries (ESPI: billingPeriod / DateTimeInterval).",
                                 "required": [
                                     "start",
                                     "duration"
@@ -205,11 +262,11 @@
                             },
                             "billAmount": {
                                 "type": "number",
-                                "description": "Total bill amount for this period in the credential's currency (ESPI: billLastPeriod). In integer mode (Green Button compatible), value is in thousandths of the currency unit. In decimal mode, value is the direct currency amount.\n"
+                                "description": "Total bill amount for this period in the credential's currency (ESPI: billLastPeriod). In integer mode (Green Button compatible), value is in thousandths of the currency unit. In decimal mode, value is the direct currency amount."
                             },
                             "consumption": {
                                 "type": "object",
-                                "description": "Total consumption for this billing period (ESPI: overallConsumptionLastPeriod).\n",
+                                "description": "Total consumption for this billing period (ESPI: overallConsumptionLastPeriod).",
                                 "required": [
                                     "value",
                                     "uom"
@@ -217,11 +274,11 @@
                                 "properties": {
                                     "value": {
                                         "type": "number",
-                                        "description": "Consumption value. In integer mode, multiply by 10^powerOfTenMultiplier. In decimal mode, represents the physical quantity directly.\n"
+                                        "description": "Consumption value. In integer mode, multiply by 10^powerOfTenMultiplier. In decimal mode, represents the physical quantity directly."
                                     },
                                     "uom": {
                                         "type": "string",
-                                        "description": "Unit of measure for the consumption value.\n",
+                                        "description": "Unit of measure for the consumption value.",
                                         "enum": [
                                             "Wh",
                                             "kWh",
@@ -239,17 +296,17 @@
                                     "powerOfTenMultiplier": {
                                         "type": "integer",
                                         "default": 0,
-                                        "description": "Power-of-ten multiplier for the consumption value. Defaults to 0.\n"
+                                        "description": "Power-of-ten multiplier for the consumption value. Defaults to 0."
                                     }
                                 }
                             },
                             "additionalCosts": {
                                 "type": "number",
-                                "description": "Additional charges, surcharges, or fees for this period (ESPI: costAdditionalLastPeriod). Same currency encoding as billAmount.\n"
+                                "description": "Additional charges, surcharges, or fees for this period (ESPI: costAdditionalLastPeriod). Same currency encoding as billAmount."
                             },
                             "qualityOfReading": {
                                 "type": "string",
-                                "description": "Quality of the reading data for this billing period (ESPI: QualityOfReading).\n",
+                                "description": "Quality of the reading data for this billing period (ESPI: QualityOfReading).",
                                 "enum": [
                                     "valid",
                                     "manuallyEdited",
@@ -268,10 +325,10 @@
                             },
                             "lineItems": {
                                 "type": "array",
-                                "description": "Itemised breakdown of charges and credits for this billing period (ESPI: costAdditionalDetailLastPeriod / LineItem). The sum of all lineItems amounts should reconcile with billAmount.\n",
+                                "description": "Itemised breakdown of charges and credits for this billing period (ESPI: costAdditionalDetailLastPeriod / LineItem). The sum of all lineItems amounts should reconcile with billAmount.",
                                 "items": {
                                     "type": "object",
-                                    "description": "A single charge or credit line item (ESPI: LineItem).\n",
+                                    "description": "A single charge or credit line item (ESPI: LineItem).",
                                     "required": [
                                         "itemKind",
                                         "amount"
@@ -279,7 +336,7 @@
                                     "properties": {
                                         "itemKind": {
                                             "type": "string",
-                                            "description": "Classification of the charge or credit (ESPI: ItemKind). ESPI codes — 1: energyGenerationFee, 2: energyDeliveryFee, 3: energyUsageFee, 4: administrativeFee, 5: tax, 6: energyGenerationCredit, 7: energyDeliveryCredit, 8: administrativeCredit, 9: payment, 10: information.\n",
+                                            "description": "Classification of the charge or credit (ESPI: ItemKind). ESPI codes — 1: energyGenerationFee, 2: energyDeliveryFee, 3: energyUsageFee, 4: administrativeFee, 5: tax, 6: energyGenerationCredit, 7: energyDeliveryCredit, 8: administrativeCredit, 9: payment, 10: information.",
                                             "enum": [
                                                 "energyGenerationFee",
                                                 "energyDeliveryFee",
@@ -295,19 +352,19 @@
                                         },
                                         "amount": {
                                             "type": "number",
-                                            "description": "Amount for this line item in the credential's currency. Same encoding as billAmount (integer mode: thousandths of currency unit; decimal mode: direct). Negative values represent credits.\n"
+                                            "description": "Amount for this line item in the credential's currency. Same encoding as billAmount (integer mode: thousandths of currency unit; decimal mode: direct). Negative values represent credits."
                                         },
                                         "note": {
                                             "type": "string",
-                                            "description": "Human-readable description of the charge or credit (ESPI: LineItem.note).\n"
+                                            "description": "Human-readable description of the charge or credit (ESPI: LineItem.note)."
                                         },
                                         "unitCost": {
                                             "type": "number",
-                                            "description": "Per-unit cost for this line item (e.g., price per kWh). Same currency encoding as amount (ESPI: LineItem.unitCost).\n"
+                                            "description": "Per-unit cost for this line item (e.g., price per kWh). Same currency encoding as amount (ESPI: LineItem.unitCost)."
                                         },
                                         "itemPeriod": {
                                             "type": "object",
-                                            "description": "Time period this line item covers, if different from the billing period (ESPI: LineItem.itemPeriod).\n",
+                                            "description": "Time period this line item covers, if different from the billing period (ESPI: LineItem.itemPeriod).",
                                             "required": [
                                                 "start",
                                                 "duration"
@@ -330,45 +387,6 @@
                             }
                         }
                     }
-                }
-            }
-        },
-        "proof": {
-            "type": "object",
-            "required": [
-                "type",
-                "created",
-                "verificationMethod",
-                "proofPurpose",
-                "proofValue"
-            ],
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "description": "Cryptographic signature type (e.g., Ed25519Signature2020)"
-                },
-                "created": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "Timestamp when the proof was created"
-                },
-                "verificationMethod": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URI of the verification method / public key"
-                },
-                "proofPurpose": {
-                    "type": "string",
-                    "enum": [
-                        "assertionMethod",
-                        "authentication"
-                    ],
-                    "description": "Purpose of the proof"
-                },
-                "proofValue": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The cryptographic signature value"
                 }
             }
         }
