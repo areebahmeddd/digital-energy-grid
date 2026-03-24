@@ -1,0 +1,39 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "sec": "https://w3id.org/security#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/ProgramEnrollmentCredential/v2.0/",
+    "ProgramEnrollmentCredential": "deg:ProgramEnrollmentCredential",
+    "credentialSubject": "deg:credentialSubject",
+    "consumerNumber": {
+      "@id": "deg:consumerNumber",
+      "@type": "xsd:string"
+    },
+    "fullName": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "programName": {
+      "@id": "deg:programName",
+      "@type": "xsd:string"
+    },
+    "programCode": {
+      "@id": "deg:programCode",
+      "@type": "xsd:string"
+    },
+    "enrollmentDate": {
+      "@id": "deg:enrollmentDate",
+      "@type": "xsd:date"
+    },
+    "validUntil": {
+      "@id": "schema:validUntil",
+      "@type": "xsd:date"
+    }
+  },
+  "@graph": []
+}

@@ -1,0 +1,65 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "sec": "https://w3id.org/security#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/UtilityCustomerCredential/v2.0/",
+    "UtilityCustomerCredential": "deg:UtilityCustomerCredential",
+    "credentialSubject": "deg:credentialSubject",
+    "consumerNumber": {
+      "@id": "deg:consumerNumber",
+      "@type": "xsd:string"
+    },
+    "maskedIdNumber": {
+      "@id": "deg:maskedIdNumber",
+      "@type": "xsd:string"
+    },
+    "fullName": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "installationAddress": {
+      "@id": "deg:installationAddress",
+      "@type": "@id",
+      "@context": {
+        "fullAddress": {
+          "@id": "schema:streetAddress",
+          "@type": "xsd:string"
+        },
+        "city": {
+          "@id": "schema:addressLocality",
+          "@type": "xsd:string"
+        },
+        "district": {
+          "@id": "deg:district",
+          "@type": "xsd:string"
+        },
+        "stateProvince": {
+          "@id": "schema:addressRegion",
+          "@type": "xsd:string"
+        },
+        "postalCode": {
+          "@id": "schema:postalCode",
+          "@type": "xsd:string"
+        },
+        "country": {
+          "@id": "schema:addressCountry",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "meterNumber": {
+      "@id": "deg:meterNumber",
+      "@type": "xsd:string"
+    },
+    "serviceConnectionDate": {
+      "@id": "deg:serviceConnectionDate",
+      "@type": "xsd:date"
+    }
+  },
+  "@graph": []
+}

@@ -1,0 +1,25 @@
+$id: "https://schema.beckn.io/P2PTrade/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: P2PTrade
+description: >
+  JSON Schema for Peer-to-Peer energy trading contracts on the DEG network.
+  P2PTrade is a subclass of EnergyContract (which is itself a subclass of
+  beckn:Contract) and represents the current recommended schema for P2P
+  energy trading agreements between prosumers.
+
+  P2PTrade supersedes the deprecated EnergyContract schema. It inherits all
+  Contract properties and is associated with the EnergyTrade domain schema
+  which defines the full set of P2P-specific attributes (offer, order,
+  delivery, resource, customer, orderItem).
+x-tags:
+  - energy-trade
+  - p2p-trading
+  - contract
+  - energy
+type: object
+additionalProperties: false
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyContract/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": P2PTrade

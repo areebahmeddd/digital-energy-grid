@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/GenerationProfileCredential/v2.0/",
+    "energyCred": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:GenerationProfileCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Generation Profile Credential",
+      "rdfs:comment": "Verifiable Credential for DER generation capability. Subclass of EnergyCredential.",
+      "rdfs:subClassOf": { "@id": "energyCred:EnergyCredential" }
+    },
+    {
+      "@id": "deg:generationType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Generation type",
+      "rdfs:comment": "Type of distributed energy generation (Solar, Wind, MicroHydro, Other).",
+      "rdfs:domain": "deg:GenerationProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:capacityKW",
+      "@type": "rdf:Property",
+      "rdfs:label": "Capacity (kW)",
+      "rdfs:comment": "Installed generation capacity in kilowatts (kW).",
+      "rdfs:domain": "deg:GenerationProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Commissioning date",
+      "rdfs:comment": "Date when the generation or storage system was activated.",
+      "schema:rangeIncludes": { "@id": "xsd:date" }
+    },
+    {
+      "@id": "deg:assetId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Asset ID",
+      "rdfs:comment": "Unique identifier for a generation or storage asset.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

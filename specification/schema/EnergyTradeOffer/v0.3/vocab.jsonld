@@ -1,0 +1,110 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/schema/EnergyTrade/v0.3/#",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "beckn:EnergyTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Offer",
+      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes."
+    },
+    {
+      "@id": "beckn:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift",
+      "rdfs:comment": "Gift parameters for P2P energy gifting, enabling prosumers to gift energy to specific recipients via privacy-preserving discovery and secret-based claim verification."
+    },
+    {
+      "@id": "beckn:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model",
+      "rdfs:comment": "Pricing model classification (PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED).",
+      "rdfs:domain": "beckn:EnergyTradeOffer",
+      "schema:rangeIncludes": "beckn:PricingModel"
+    },
+    {
+      "@id": "beckn:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window",
+      "rdfs:comment": "Time window when the offer can be selected/accepted.",
+      "rdfs:domain": "beckn:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "beckn:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window",
+      "rdfs:comment": "Specific time period when energy delivery occurs.",
+      "rdfs:domain": "beckn:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "beckn:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift",
+      "rdfs:comment": "Optional gift parameters for energy gifting on this offer.",
+      "rdfs:domain": "beckn:EnergyTradeOffer",
+      "schema:rangeIncludes": "beckn:EnergyGift"
+    },
+    {
+      "@id": "beckn:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash",
+      "rdfs:comment": "SHA-256 hash of the recipient's phone number (E.164 format) for privacy-preserving gift discovery.",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "beckn:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier",
+      "rdfs:comment": "SHA-256 hash of a claim secret shared out-of-band from gifter to recipient for gift claim validation.",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "beckn:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at",
+      "rdfs:comment": "Gift expiration timestamp in UTC (ISO 8601 with Z suffix).",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:dateTime"
+    },
+    {
+      "@id": "beckn:PricingModel",
+      "@type": "schema:Enumeration",
+      "schema:name": "Pricing Model",
+      "rdfs:comment": "Enumeration of supported pricing models for energy trade offers."
+    },
+    {
+      "@id": "beckn:PricingModelPerKwh",
+      "@type": "beckn:PricingModel",
+      "schema:name": "PER_KWH",
+      "schema:identifier": "PER_KWH"
+    },
+    {
+      "@id": "beckn:PricingModelTimeOfDay",
+      "@type": "beckn:PricingModel",
+      "schema:name": "TIME_OF_DAY",
+      "schema:identifier": "TIME_OF_DAY"
+    },
+    {
+      "@id": "beckn:PricingModelSubscription",
+      "@type": "beckn:PricingModel",
+      "schema:name": "SUBSCRIPTION",
+      "schema:identifier": "SUBSCRIPTION"
+    },
+    {
+      "@id": "beckn:PricingModelFixed",
+      "@type": "beckn:PricingModel",
+      "schema:name": "FIXED",
+      "schema:identifier": "FIXED"
+    }
+  ]
+}

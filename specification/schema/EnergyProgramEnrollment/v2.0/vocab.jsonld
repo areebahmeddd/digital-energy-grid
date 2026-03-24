@@ -1,0 +1,544 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyProgramEnrollment/v2.0/",
+    "degLegacy": "https://schema.beckn.io/deg/EnergyEnrollment/v2.0/",
+    "schema": "https://schema.org/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "vc": "https://www.w3.org/2018/credentials#",
+    "did": "https://www.w3.org/ns/did/v1#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyProgramEnrollment",
+      "@type": "rdfs:Class",
+      "rdfs:subClassOf": {
+        "@id": "schema:ProgramMembership"
+      },
+      "owl:equivalentClass": { "@id": "degLegacy:EnergyEnrollment" },
+      "rdfs:comment": "Program enrollment/subscription for energy domain programs (VPPs, demand response, P2P trading, community solar). Extends schema:ProgramMembership. Successor to deg:EnergyEnrollment (see owl:equivalentClass). Attaches to Fulfillment.fulfillmentAttributes (init requests) and Contract.orderAttributes (confirm responses)."
+    },
+    {
+      "@id": "vc:VerifiableCredential",
+      "@type": "@id",
+      "rdfs:comment": "A W3C Verifiable Credential (https://www.w3.org/TR/vc-data-model-2.0/) used in enrollment. This is a wrapper/reference object that contains the credential data (as JWT or JSON-LD), metadata, and URLs. The actual credential follows W3C VC Data Model v2.0 structure."
+    },
+    {
+      "@id": "deg:CredentialVerification",
+      "@type": "@id",
+      "rdfs:comment": "Results of credential verification performed by BPP. Contains status and list of verified credentials."
+    },
+    {
+      "@id": "deg:ConflictCheck",
+      "@type": "@id",
+      "rdfs:comment": "Results of conflict checking with existing enrollments. Indicates if conflicts exist and provides details of conflicting enrollments."
+    },
+    {
+      "@id": "deg:ConflictingEnrollment",
+      "@type": "@id",
+      "rdfs:comment": "Details of a conflicting enrollment that prevents the requested enrollment from proceeding."
+    },
+    {
+      "@id": "deg:VerifiedCredential",
+      "@type": "@id",
+      "rdfs:comment": "Details of a credential that has been verified by the BPP, including verification timestamp."
+    },
+    {
+      "@id": "deg:ConsentRevocation",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:CancelAction"
+      },
+      "rdfs:comment": "Consent revocation. Extends schema:CancelAction for revoking consent/permissions."
+    },
+    {
+      "@id": "deg:Unenrollment",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:LeaveAction"
+      },
+      "rdfs:comment": "Unenrollment/unsubscription. Extends schema:LeaveAction for leaving a program/membership."
+    },
+    {
+      "@id": "deg:Customer",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:Person"
+      },
+      "rdfs:comment": "Customer/subscriber entity. Extends schema:Person. Represents the user being enrolled in a program. Can also be schema:Organization for business subscriptions."
+    },
+    {
+      "@id": "deg:Instrument",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:ItemList"
+      },
+      "rdfs:comment": "Collection of assets (meters, DERs) associated with an enrollment. Extends schema:ItemList as a container for enrollable items."
+    },
+    {
+      "@id": "deg:Meter",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:Product"
+      },
+      "rdfs:comment": "Electricity meter entity. Extends schema:Product. Represents a physical meter tracking consumption, generation, or net flow."
+    },
+    {
+      "@id": "deg:DER",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:Product"
+      },
+      "rdfs:comment": "Distributed Energy Resource. Extends schema:Product. Represents a distributed asset such as solar PV, EV, home batteries, V2G, or smart loads."
+    },
+    {
+      "@id": "deg:enrollmentId",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:membershipNumber"
+      },
+      "rdfs:comment": "Unique identifier for the enrollment/subscription. Equivalent to schema:membershipNumber."
+    },
+    {
+      "@id": "deg:programId",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:programName"
+      },
+      "rdfs:comment": "Identifier/name of the program. Equivalent to schema:programName."
+    },
+    {
+      "@id": "deg:status",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:reservationStatus"
+      },
+      "rdfs:comment": "Enrollment status. Equivalent to schema:reservationStatus. Values: ACTIVE (Confirmed), PENDING (Pending), CANCELLED (Cancelled), SUSPENDED (Hold)."
+    },
+    {
+      "@id": "deg:startDate",
+      "@type": "xsd:dateTime",
+      "owl:equivalentProperty": {
+        "@id": "schema:validFrom"
+      },
+      "rdfs:comment": "When enrollment becomes active. Equivalent to schema:validFrom."
+    },
+    {
+      "@id": "deg:endDate",
+      "@type": "xsd:dateTime",
+      "owl:equivalentProperty": {
+        "@id": "schema:validThrough"
+      },
+      "rdfs:comment": "When enrollment expires/ends. Equivalent to schema:validThrough."
+    },
+    {
+      "@id": "deg:enrolledAt",
+      "@type": "xsd:dateTime",
+      "owl:equivalentProperty": {
+        "@id": "schema:dateCreated"
+      },
+      "rdfs:comment": "When enrollment was created/confirmed. Equivalent to schema:dateCreated."
+    },
+    {
+      "@id": "deg:meters",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of MeterEnrollment objects specifying meters to enroll. Required in confirm request - order will only be confirmed if at least one meter is specified."
+    },
+    {
+      "@id": "deg:ders",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of DER identifiers associated with the enrollment. Used in enrollment credentials."
+    },
+    {
+      "@id": "deg:credential",
+      "@type": "@id",
+      "rdfs:comment": "Enrollment credential object. Contains the signed Verifiable Credential proving enrollment."
+    },
+    {
+      "@id": "deg:credentialId",
+      "@type": "xsd:string",
+      "rdfs:comment": "Unique identifier for the credential. Used to reference credentials in verification and conflict checking."
+    },
+    {
+      "@id": "deg:credentialData",
+      "@type": "xsd:string",
+      "rdfs:comment": "The credential data itself, typically a JWT or JSON-LD string containing the W3C Verifiable Credential (https://www.w3.org/TR/vc-data-model-2.0/). When decoded, must conform to W3C VC Data Model v2.0 structure."
+    },
+    {
+      "@id": "deg:credentialUrl",
+      "@type": "@id",
+      "rdfs:comment": "URL where the credential can be accessed or retrieved. Used for enrollment credentials returned in on_confirm."
+    },
+    {
+      "@id": "deg:verificationUrl",
+      "@type": "@id",
+      "rdfs:comment": "URL for verifying the credential. Used for third-party verification of enrollment credentials."
+    },
+    {
+      "@id": "deg:format",
+      "@type": "xsd:string",
+      "rdfs:comment": "Credential format as per W3C VC Data Model v2.0. Values: VC-JWT (JWT-encoded VC), VC-JSON-LD (JSON-LD encoded VC), or other W3C Verifiable Credential formats."
+    },
+    {
+      "@id": "vc:issuanceDate",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the credential was issued (ISO 8601). Maps to W3C VC issuanceDate property."
+    },
+    {
+      "@id": "vc:expirationDate",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the credential expires (ISO 8601). Maps to W3C VC expirationDate property. May be null for non-expiring credentials."
+    },
+    {
+      "@id": "deg:credentialVerification",
+      "@type": "@id",
+      "rdfs:comment": "Credential verification results object. Returned in on_init response after BPP verifies provided credentials."
+    },
+    {
+      "@id": "deg:verifiedCredentials",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of VerifiedCredential objects representing credentials that were successfully verified."
+    },
+    {
+      "@id": "deg:verifiedAt",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the credential was verified by BPP (ISO 8601)."
+    },
+    {
+      "@id": "deg:conflictCheck",
+      "@type": "@id",
+      "rdfs:comment": "Conflict check results object. Returned in on_init response after BPP checks for conflicts with existing enrollments."
+    },
+    {
+      "@id": "deg:hasConflict",
+      "@type": "xsd:boolean",
+      "rdfs:comment": "Boolean indicating whether a conflict exists with existing enrollments. True if conflict found, false otherwise."
+    },
+    {
+      "@id": "deg:conflictingEnrollments",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of ConflictingEnrollment objects detailing conflicts found during conflict checking."
+    },
+    {
+      "@id": "deg:conflictReason",
+      "@type": "xsd:string",
+      "rdfs:comment": "Human-readable description of why the conflict exists. Explains the nature of the conflict."
+    },
+    {
+      "@id": "deg:conflictType",
+      "@type": "xsd:string",
+      "rdfs:comment": "Type of conflict. Values: METER_ALREADY_ENROLLED, DER_ALREADY_ENROLLED, PROGRAM_CONFLICT, etc."
+    },
+    {
+      "@id": "deg:checkedAt",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the conflict check was performed by BPP (ISO 8601)."
+    },
+    {
+      "@id": "deg:message",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:description"
+      },
+      "rdfs:comment": "Human-readable message. Equivalent to schema:description."
+    },
+    {
+      "@id": "deg:loggedAt",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the enrollment was logged in BPP's audit system (ISO 8601). Returned in on_confirm response."
+    },
+    {
+      "@id": "deg:logReference",
+      "@type": "xsd:string",
+      "rdfs:comment": "Reference identifier for the enrollment log entry. Used for audit trail and record keeping."
+    },
+    {
+      "@id": "deg:credentials",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of VerifiableCredential objects (W3C VC Data Model v2.0) provided in init request. Contains VCs for meter ownership, program eligibility, DER certification, etc."
+    },
+    {
+      "@id": "deg:existingEnrollments",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of VerifiableCredential objects (W3C VC Data Model v2.0) representing existing enrollments. Provided in init request to help BPP check for conflicts."
+    },
+    {
+      "@id": "vc:type",
+      "@type": "xsd:string",
+      "rdfs:comment": "Credential type as per W3C VC Data Model v2.0. Must include 'VerifiableCredential' plus specific types: MeterOwnershipCredential, ProgramEligibilityCredential, DERCertificationCredential, ProgramEnrollmentCredential."
+    },
+    {
+      "@id": "deg:derId",
+      "@type": "xsd:string",
+      "rdfs:comment": "DER identifier associated with a DER certification credential. Links the credential to a specific DER."
+    },
+    {
+      "@id": "deg:updateType",
+      "@type": "xsd:string",
+      "rdfs:comment": "Type of update being performed. Values: CONSENT_REVOCATION, UNENROLLMENT."
+    },
+    {
+      "@id": "deg:consentRevocation",
+      "@type": "@id",
+      "rdfs:comment": "Consent revocation details object. Contains information about the consent being revoked."
+    },
+    {
+      "@id": "deg:unenrollment",
+      "@type": "@id",
+      "rdfs:comment": "Unenrollment details object. Contains information about the enrollment being cancelled."
+    },
+    {
+      "@id": "deg:consentCredentialId",
+      "@type": "xsd:string",
+      "rdfs:comment": "Identifier of the consent credential being revoked. References the Verifiable Credential ID."
+    },
+    {
+      "@id": "deg:consentType",
+      "@type": "xsd:string",
+      "rdfs:comment": "Type of consent being revoked. Values: DATA_COLLECTION, DER_CONTROL, CROSS_UTILITY_SHARING."
+    },
+    {
+      "@id": "deg:revokedAt",
+      "@type": "xsd:dateTime",
+      "owl:equivalentProperty": {
+        "@id": "schema:endTime"
+      },
+      "rdfs:comment": "When revocation occurred. Equivalent to schema:endTime for actions."
+    },
+    {
+      "@id": "deg:effectiveDate",
+      "@type": "xsd:dateTime",
+      "owl:equivalentProperty": {
+        "@id": "schema:scheduledTime"
+      },
+      "rdfs:comment": "When revocation takes effect. Equivalent to schema:scheduledTime."
+    },
+    {
+      "@id": "deg:statusListUrl",
+      "@type": "@id",
+      "rdfs:comment": "URL of the W3C VC status list where the revoked credential is recorded. Used for verification."
+    },
+    {
+      "@id": "deg:statusListIndex",
+      "@type": "xsd:string",
+      "rdfs:comment": "Index in the status list where this credential's revocation status is recorded. Used for efficient status checking."
+    },
+    {
+      "@id": "deg:cancelledAt",
+      "@type": "xsd:dateTime",
+      "rdfs:comment": "Timestamp when the enrollment was cancelled (ISO 8601)."
+    },
+    {
+      "@id": "deg:enrollmentCredentialStatus",
+      "@type": "@id",
+      "rdfs:comment": "Status information for the enrollment credential after revocation. Contains status list details."
+    },
+    {
+      "@id": "deg:consentsRevoked",
+      "@type": "@id",
+      "@container": "@set",
+      "rdfs:comment": "Array of consent credentials that were revoked as part of unenrollment."
+    },
+    {
+      "@id": "deg:revokeAllConsents",
+      "@type": "xsd:boolean",
+      "rdfs:comment": "Boolean indicating whether all associated consents should be revoked during unenrollment."
+    },
+    {
+      "@id": "deg:UserAuth",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:AuthenticateAction"
+      },
+      "rdfs:comment": "User authentication base type. Extends schema:AuthenticateAction."
+    },
+    {
+      "@id": "deg:UserAuthRequest",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuth"
+      },
+      "rdfs:comment": "User authentication request (BAP → BPP). Contains credentials for verification."
+    },
+    {
+      "@id": "deg:UserAuthResponse",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuth"
+      },
+      "rdfs:comment": "User authentication response (BPP → BAP). Contains verification results."
+    },
+    {
+      "@id": "deg:userAuth",
+      "@type": "@id",
+      "owl:equivalentProperty": {
+        "@id": "schema:actionStatus"
+      },
+      "rdfs:comment": "Authentication object. UserAuthRequest for requests, UserAuthResponse for responses."
+    },
+    {
+      "@id": "deg:OtpAuthRequest",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuthRequest"
+      },
+      "rdfs:comment": "OTP authentication request. Contains mobile number and optionally OTP+nguid."
+    },
+    {
+      "@id": "deg:OtpAuthResponse",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuthResponse"
+      },
+      "rdfs:comment": "OTP authentication response. Contains nguid, verification status, and message."
+    },
+    {
+      "@id": "deg:OAuth2AuthRequest",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuthRequest"
+      },
+      "rdfs:comment": "OAuth2/OIDC authentication request. Contains JWT tokens (accessToken, idToken)."
+    },
+    {
+      "@id": "deg:OAuth2AuthResponse",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "UserAuthResponse"
+      },
+      "rdfs:comment": "OAuth2/OIDC authentication response. Contains verification result and extracted claims."
+    },
+    {
+      "@id": "deg:authMethod",
+      "@type": "xsd:string",
+      "rdfs:comment": "Authentication method discriminator. Values: OTP, OAUTH2, OIDC."
+    },
+    {
+      "@id": "deg:accessToken",
+      "@type": "xsd:string",
+      "rdfs:comment": "OAuth2 access token (bearer token) for authentication."
+    },
+    {
+      "@id": "deg:tokenType",
+      "@type": "xsd:string",
+      "rdfs:comment": "Token type, usually 'Bearer' for OAuth2."
+    },
+    {
+      "@id": "deg:idToken",
+      "@type": "xsd:string",
+      "rdfs:comment": "OIDC ID token (JWT) containing user identity claims."
+    },
+    {
+      "@id": "deg:refreshToken",
+      "@type": "xsd:string",
+      "rdfs:comment": "OAuth2 refresh token for obtaining new access tokens."
+    },
+    {
+      "@id": "deg:scope",
+      "@type": "xsd:string",
+      "rdfs:comment": "OAuth2 scopes granted to the token. Space-separated list."
+    },
+    {
+      "@id": "deg:issuer",
+      "@type": "@id",
+      "owl:equivalentProperty": {
+        "@id": "schema:issuedBy"
+      },
+      "rdfs:comment": "OIDC issuer URL. Equivalent to schema:issuedBy."
+    },
+    {
+      "@id": "deg:subject",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:identifier"
+      },
+      "rdfs:comment": "Subject identifier (user ID) from token. Related to schema:identifier."
+    },
+    {
+      "@id": "deg:MeterEnrollment",
+      "@type": "@id",
+      "rdfs:subClassOf": {
+        "@id": "schema:IndividualProduct"
+      },
+      "rdfs:comment": "A specific product instance for enrollment. Extends schema:IndividualProduct. Represents a device/asset being subscribed (meter, SIM, device, etc.)."
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:serialNumber"
+      },
+      "rdfs:comment": "Primary device identifier. Equivalent to schema:serialNumber."
+    },
+    {
+      "@id": "deg:meterNumber",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:productID"
+      },
+      "rdfs:comment": "Secondary/display identifier. Equivalent to schema:productID."
+    },
+    {
+      "@id": "deg:utilityId",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:provider"
+      },
+      "rdfs:comment": "Service provider identifier. Related to schema:provider."
+    },
+    {
+      "@id": "deg:utilityCustomerId",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:accountId"
+      },
+      "rdfs:comment": "Customer account identifier at the utility. Equivalent to schema:accountId. Links the authenticated user to their billing account."
+    },
+    {
+      "@id": "deg:connectionType",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:category"
+      },
+      "rdfs:comment": "Service category. Equivalent to schema:category (residential, commercial, etc.)."
+    },
+    {
+      "@id": "deg:sanctionedLoad",
+      "@type": "xsd:decimal",
+      "rdfs:comment": "Capacity/limit for the connection (kW). Domain-specific; no direct schema.org equivalent."
+    },
+    {
+      "@id": "deg:mobile",
+      "@type": "xsd:string",
+      "owl:equivalentProperty": {
+        "@id": "schema:telephone"
+      },
+      "rdfs:comment": "Mobile phone number. Equivalent to schema:telephone."
+    },
+    {
+      "@id": "deg:otp",
+      "@type": "xsd:string",
+      "rdfs:comment": "One-time password entered by user for verification. Sent by BPP via SMS to mobile number."
+    },
+    {
+      "@id": "deg:nguid",
+      "@type": "xsd:string",
+      "rdfs:comment": "Network GUID / session token for OTP verification. Generated by BPP, returned in on_init, required in confirm."
+    },
+    {
+      "@id": "deg:verified",
+      "@type": "xsd:boolean",
+      "rdfs:comment": "Boolean indicating whether OTP verification was successful. Only present in on_confirm response."
+    }
+  ]
+}

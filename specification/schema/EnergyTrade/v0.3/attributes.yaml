@@ -1,0 +1,431 @@
+openapi: 3.1.1
+info:
+  title: Energy Trade — Combined Attribute Schemas (v0.3)
+  version: 0.3.0
+  x-profile-id: profiles/energy-trade/energy_trade/v0.3
+  description: >
+    Combined attribute schemas for P2P energy trading. This file consolidates all
+    energy trading attribute schemas for easier cross-referencing and maintenance.
+
+    Includes schemas for:
+    - EnergyTradeOffer (Offer.offerAttributes) - Pricing models, delivery windows, and optional gift parameters
+    - EnergyGift (EnergyTradeOffer.gift) - Gift discovery (lookupHash), claim verification, and expiration
+    - EnergyTradeOrder (Order.orderAttributes) - Platform and utility identifiers
+    - EnergyTradeDelivery (orderItemAttributes.fulfillmentAttributes) - Delivery tracking
+    - EnergyResource (Item.itemAttributes) - Energy source characteristics
+    - EnergyCustomer (Buyer.buyerAttributes, Provider.providerAttributes) - Customer info: meterId, sanctionedLoad, utilityCustomerId, utilityId
+    - EnergyOrderItem (orderItemAttributes) - Order item wrapper
+
+components:
+  schemas:
+    ########################################################################
+    # OFFER.ATTRIBUTES — EnergyTradeOffer (P2P Energy Trading)
+    ########################################################################
+    EnergyTradeOffer:
+      type: object
+      additionalProperties: false
+      required: [pricingModel]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyTradeOffer
+      description: >
+        Offer attributes for P2P energy trading. Attached to Offer.offerAttributes
+        to provide pricing models, availability windows, and delivery details.
+        NOTE: Price (beckn:price) is specified on the parent Offer object, not here.
+        The price.applicableQuantity specifies the max energy quantity for this delivery window.
+      properties:
+
+        pricingModel:
+          type: string
+          enum: [PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED]
+          description: Pricing model classification used for the energy trade offer.
+          example: "PER_KWH"
+          x-jsonld: { "@id": pricingModel }
+
+        validityWindow:
+          allOf:
+            - $ref: 'https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/attributes.yaml#/components/schemas/TimePeriod'
+            - type: object
+              description: >
+                Time window during which this offer can be selected/accepted. Typically set
+                to expire before delivery starts (e.g., 4 hours before delivery start time)
+                to allow for scheduling and grid coordination. After this window closes,
+                the offer is no longer available for selection.
+              required: ["schema:startTime", "schema:endTime"]
+          x-jsonld: { "@id": validityWindow }
+
+        deliveryWindow:
+          allOf:
+            - $ref: 'https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/attributes.yaml#/components/schemas/TimePeriod'
+            - type: object
+              description: >
+                Specific time period (start and end time) when energy delivery occurs.
+                Different from validityWindow which indicates when the offer can be selected.
+                This represents the actual delivery time window. All times MUST be in UTC
+                (ISO 8601 with Z suffix).
+              required: ["schema:startTime", "schema:endTime"]
+              properties:
+                "schema:startTime":
+                  type: string
+                  format: date-time
+                  pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+                  description: Start time in UTC (ISO 8601 format with Z suffix).
+                  example: "2025-06-15T09:00:00Z"
+                "schema:endTime":
+                  type: string
+                  format: date-time
+                  pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+                  description: End time in UTC (ISO 8601 format with Z suffix).
+                  example: "2025-06-15T10:00:00Z"
+          x-jsonld: { "@id": deliveryWindow }
+
+        gift:
+          $ref: '#/components/schemas/EnergyGift'
+          description: >
+            Optional gift parameters for energy gifting. When present, indicates this offer
+            is a gift from a prosumer (gifter) to a specific recipient, discoverable by
+            lookupHash of the recipient's phone and claimable using a shared secret.
+            Gift offers are typically listed at price 0 on the catalog.
+          x-jsonld: { "@id": gift }
+
+    ########################################################################
+    # OFFER.ATTRIBUTES — EnergyGift (Energy Gifting)
+    ########################################################################
+    EnergyGift:
+      type: object
+      additionalProperties: false
+      required: [lookupHash, claimVerifier, expiresAt]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyGift
+      description: >
+        Gift parameters for P2P energy gifting. Enables a prosumer (gifter) to make an
+        energy offer available at 0 price on the catalog, discoverable by the SHA-256 hash
+        of the recipient's phone number and claimable via a secret shared out-of-band
+        from the gifter to the recipient.
+      properties:
+
+        lookupHash:
+          type: string
+          pattern: '^[A-Fa-f0-9]{64}$'
+          description: >
+            SHA-256 hash of the recipient's phone number (E.164 format, e.g. +919876543210).
+            Used for privacy-preserving discovery — the catalog can be searched by this hash
+            so that only the intended recipient finds the gift offer.
+          example: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+          x-jsonld: { "@id": lookupHash }
+
+        claimVerifier:
+          type: string
+          pattern: '^[A-Fa-f0-9]{64}$'
+          description: >
+            SHA-256 hash of a claim secret shared out-of-band from the gifter to the
+            recipient. The recipient proves ownership by presenting the pre-image (the
+            original secret) which is hashed and compared to this value during claim
+            validation.
+          example: "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5"
+          x-jsonld: { "@id": claimVerifier }
+
+        expiresAt:
+          type: string
+          format: date-time
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+          description: >
+            Gift expiration timestamp in UTC (ISO 8601 with Z suffix). After this time
+            the gift offer is no longer claimable and may be removed from the catalog.
+          example: "2025-07-01T00:00:00Z"
+          x-jsonld: { "@id": expiresAt }
+
+    ########################################################################
+    # ORDER.ATTRIBUTES — EnergyTradeOrder (P2P Energy Trading)
+    ########################################################################
+    EnergyTradeOrder:
+      type: object
+      additionalProperties: false
+      required: [bap_id, bpp_id]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyTradeOrder
+      description: >
+        Order attributes for P2P energy trading. Attached to Order.orderAttributes
+        to identify BAP and BPP participants involved in a trade.
+        NOTE: Utility IDs for inter-discom trading are captured in EnergyCustomer
+        (buyerAttributes.utilityId and providerAttributes.utilityId).
+      properties:
+
+        bap_id:
+          type: string
+          description: Beckn Application Platform (BAP) identifier. The subscriber ID of the buyer/consumer platform initiating the trade order.
+          example: "bap.energymarket.io"
+          x-jsonld: { "@id": bap_id }
+
+        bpp_id:
+          type: string
+          description: Beckn Provider Platform (BPP) identifier. The subscriber ID of the seller/provider platform fulfilling the trade order.
+          example: "bpp.solarprovider.io"
+          x-jsonld: { "@id": bpp_id }
+
+        total_quantity:
+          allOf:
+            - $ref: 'https://raw.githubusercontent.com/beckn/protocol-specifications-new/refs/heads/main/schema/core/v2/attributes.yaml#/components/schemas/Quantity'
+            - type: object
+              description: >
+                Total quantity of energy for this trade order. Units should be in kWh.
+              properties:
+                unitText:
+                  default: "kWh"
+                unitCode:
+                  default: "KWH"
+          example:
+            unitQuantity: 50.0
+            unitText: "kWh"
+            unitCode: "KWH"
+          x-jsonld: { "@id": total_quantity }
+
+    ########################################################################
+    # FULFILLMENT.ATTRIBUTES — EnergyTradeDelivery (P2P Energy Trading)
+    ########################################################################
+    EnergyTradeDelivery:
+      type: object
+      additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyTradeDelivery
+      description: >
+        Fulfillment attributes for energy trade deliveries. Attached to
+        orderItemAttributes.fulfillmentAttributes to track physical transfer of energy
+        including delivery status, meter readings, and energy allocation data.
+        consumedEnergy = energy TO customer (imported),
+        producedEnergy = energy FROM customer (exported to grid).
+      properties:
+
+        deliveryStatus:
+          type: string
+          enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED]
+          description: Delivery status for the energy transfer.
+          example: "IN_PROGRESS"
+          x-jsonld: { "@id": deliveryStatus }
+
+        deliveryMode:
+          type: string
+          enum: [EV_CHARGING, BATTERY_SWAP, V2G, GRID_INJECTION]
+          description: Mode of energy delivery for this fulfillment.
+          example: "GRID_INJECTION"
+          x-jsonld: { "@id": deliveryMode }
+
+        deliveredQuantity:
+          type: number
+          minimum: 0
+          description: Total quantity delivered so far in kilowatt-hours (kWh).
+          example: 15.0
+          x-jsonld: { "@id": deliveredQuantity }
+
+        meterReadings:
+          type: array
+          description: >
+            Array of meter readings for this orderItem. Each reading covers a time window
+            and reports energy delivered/received during that period. Times are in UTC (ISO 8601 with Z suffix).
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              beckn:timeWindow:
+                type: object
+                description: Time period for this meter reading (UTC).
+                additionalProperties: false
+                properties:
+                  "@type":
+                    type: string
+                    enum: ["beckn:TimePeriod"]
+                  schema:startTime:
+                    type: string
+                    format: date-time
+                    pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+                    description: Start time in UTC (ISO 8601 with Z suffix).
+                  schema:endTime:
+                    type: string
+                    format: date-time
+                    pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+                    description: End time in UTC (ISO 8601 with Z suffix).
+                required: ["schema:startTime", "schema:endTime"]
+              consumedEnergy:
+                type: number
+                minimum: 0
+                description: >
+                  Energy consumed by the customer (imported from grid) in this time window (kWh).
+                  Per IEC 61968/ESPI flowDirection=1.
+                x-jsonld: { "@id": consumedEnergy }
+              producedEnergy:
+                type: number
+                minimum: 0
+                description: >
+                  Energy produced by the customer (exported to grid) in this time window (kWh).
+                  Per IEC 61968/ESPI flowDirection=19.
+                x-jsonld: { "@id": producedEnergy }
+              allocatedEnergy:
+                type: number
+                minimum: 0
+                description: Net energy allocated for this trade in this time window (kWh).
+                x-jsonld: { "@id": allocatedEnergy }
+              unit:
+                type: string
+                enum: ["kWh", "MWh", "Wh"]
+                default: "kWh"
+                description: Unit of measurement for energy values.
+                x-jsonld: { "@id": "schema:unitText" }
+            required: ["beckn:timeWindow", "allocatedEnergy", "unit"]
+          x-jsonld: { "@id": meterReadings }
+
+        curtailedQuantity:
+          type: number
+          minimum: 0
+          description: >
+            Quantity curtailed from original contracted amount (kWh).
+            Used by BAP/BPP to reconcile payment vs. original contracted quantity.
+          example: 5.0
+          x-jsonld: { "@id": curtailedQuantity }
+
+        curtailmentReason:
+          type: string
+          enum: [GRID_OUTAGE, EMERGENCY, CONGESTION, MAINTENANCE, OTHER]
+          description: Reason for curtailment. Useful for audit trail and dispute resolution.
+          example: "GRID_OUTAGE"
+          x-jsonld: { "@id": curtailmentReason }
+
+        lastUpdated:
+          type: string
+          format: date-time
+          description: Last delivery update timestamp in UTC (ISO 8601 with Z suffix).
+          example: "2024-10-04T15:30:00Z"
+          x-jsonld: { "@id": "schema:dateModified" }
+
+    ########################################################################
+    # ITEM.ATTRIBUTES — EnergyResource (P2P Energy Trading)
+    ########################################################################
+    EnergyResource:
+      type: object
+      additionalProperties: false
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResource
+      description: >
+        Item attributes for energy resources. Attached to Item.itemAttributes to provide
+        energy-specific characteristics including source type and meter identifiers.
+      properties:
+
+        sourceType:
+          type: string
+          enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
+          description: Type of energy source. Source verification occurs at onboarding but can change post-onboarding (e.g., switching from solar to diesel). Source type influences price but not workflow.
+          example: "SOLAR"
+          x-jsonld: { "@id": sourceType }
+
+        meterId:
+          type: string
+          description: Source meter identifier in DER address format (der://meter/{id}). Used for discovery and fulfillment tracking.
+          example: "der://meter/100200300"
+          x-jsonld: { "@id": meterId }
+
+    ########################################################################
+    # CUSTOMER.ATTRIBUTES — EnergyCustomer (P2P Energy Trading & Enrollment)
+    ########################################################################
+    EnergyCustomer:
+      type: object
+      additionalProperties: false
+      required: ["meterId"]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyCustomer
+      description: >
+        Customer attributes for energy flows. Used for consumers, producers, or prosumers in:
+        - orderItemAttributes (init request): Contains meterId for delivery destination
+        - orderItemAttributes (responses): Contains meterId for delivery destination
+        - buyerAttributes (enrollment): Contains meterId and sanctionedLoad for customer identification
+      properties:
+
+        meterId:
+          type: string
+          description: >
+            Meter identifier in DER address format (der://meter/{id}). Used for customer identification
+            and energy delivery tracking in P2P trading flows.
+          example: "der://meter/98765456"
+          x-jsonld: { "@id": meterId }
+
+        sanctionedLoad:
+          type: number
+          minimum: 0
+          description: >
+            Sanctioned load capacity in kilowatts (kW). Optional field representing the approved
+            electrical load capacity for the customer's connection. Used for load management and
+            regulatory compliance.
+          example: 15.0
+          x-jsonld: { "@id": sanctionedLoad }
+
+        utilityCustomerId:
+          type: string
+          description: >
+            Customer's account identifier with the utility company (e.g., PG&E customer number).
+            Used for billing, service identification, and utility system integration.
+          example: "UTIL-CUST-123456"
+          x-jsonld: { "@id": utilityCustomerId }
+
+        utilityId:
+          type: string
+          description: >
+            Utility/DISCOM identifier for the customer's service territory (e.g., "TPDDL-DL", "BESCOM-KA").
+            Used in inter-utility/inter-DISCOM P2P trading to identify which utility serves this customer.
+            Should match the corresponding utilityIdSeller or utilityIdBuyer in orderAttributes for
+            cross-utility transactions.
+          example: "TPDDL-DL"
+          x-jsonld: { "@id": utilityId }
+
+    ########################################################################
+    # ORDERITEM.ATTRIBUTES — EnergyOrderItem (P2P Energy Trading)
+    ########################################################################
+    EnergyOrderItem:
+      type: object
+      additionalProperties: false
+      required:
+        - providerAttributes
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyOrderItem
+      description: >
+        Order item attributes for P2P energy trading. Wraps customer information
+        and optional fulfillment tracking data. Use this schema for
+        beckn:orderItemAttributes in P2P energy trading flows.
+      properties:
+
+        providerAttributes:
+          type: object
+          description: >
+            Provider/customer information for this order item, including meter ID and utility account.
+          additionalProperties: true
+          properties:
+            "@context":
+              type: string
+              format: uri
+              description: URI to the EnergyCustomer context.jsonld
+            "@type":
+              type: string
+              enum: ["EnergyCustomer"]
+              description: Type identifier for provider attributes
+          x-jsonld: { "@id": providerAttributes }
+
+        fulfillmentAttributes:
+          type: object
+          description: >
+            Optional fulfillment tracking for this order item.
+            Only populated in on_status and on_update responses (not in init/confirm flows).
+            Contains delivery status, meter readings, and energy allocation data.
+          additionalProperties: true
+          properties:
+            "@context":
+              type: string
+              format: uri
+              description: URI to the EnergyTradeDelivery context.jsonld
+            "@type":
+              type: string
+              enum: ["EnergyTradeDelivery"]
+              description: Type identifier for fulfillment attributes
+          x-jsonld: { "@id": fulfillmentAttributes }

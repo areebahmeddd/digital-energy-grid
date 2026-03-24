@@ -1,0 +1,34 @@
+$id: "https://schema.beckn.io/EnergyResource/v0.3"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyResource
+description: >
+  Item attributes for energy resources. Attached to Item.itemAttributes to provide
+  energy-specific characteristics including source type and meter identifiers.
+
+  This is the v0.3 schema, originally defined as a component in EnergyTrade/v0.3/attributes.yaml.
+x-tags:
+  - energy-trade
+  - p2p-trading
+  - item
+  - energy-resource
+type: object
+additionalProperties: false
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyResource
+properties:
+
+  sourceType:
+    type: string
+    enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
+    description: Type of energy source. Source verification occurs at onboarding but can change post-onboarding (e.g., switching from solar to diesel). Source type influences price but not workflow.
+    example: "SOLAR"
+    x-jsonld:
+      "@id": sourceType
+
+  meterId:
+    type: string
+    description: Source meter identifier in DER address format (der://meter/{id}). Used for discovery and fulfillment tracking.
+    example: "der://meter/100200300"
+    x-jsonld:
+      "@id": meterId

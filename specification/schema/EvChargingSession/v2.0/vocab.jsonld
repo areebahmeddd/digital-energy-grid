@@ -1,0 +1,396 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EvChargingSession/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:ChargingSession",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EV Charging Session",
+      "rdfs:comment": "A charging session for an electric vehicle"
+    },
+    {
+      "@id": "deg:sessionStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Session status",
+      "rdfs:comment": "High-level charging session state (PENDING, ACTIVE, COMPLETED, INTERRUPTED).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "deg:SessionStatus",
+      "owl:equivalentProperty": "beckn:fulfillmentStatus"
+    },
+    {
+      "@id": "deg:connectorStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Connector status",
+      "rdfs:comment": "Charging connector status (from OCPP status codes).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "deg:ConnectorStatus"
+    },
+    {
+      "@id": "deg:buyerFinderFee",
+      "@type": "rdf:Property",
+      "rdfs:label": "Buyer finder fee",
+      "rdfs:comment": "Commission payable by provider to the BAP for this offer.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:PriceSpecification"
+    },
+    {
+      "@id": "deg:connectorType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Connector type",
+      "rdfs:comment": "Physical connector type supported by the EVSE/charger (e.g., CCS2, Type2, CHAdeMO, GB/T).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "deg:ConnectorType"
+    },
+    {
+      "@id": "deg:maxPowerKW",
+      "@type": "rdf:Property",
+      "rdfs:label": "Maximum power (kW)",
+      "rdfs:comment": "Maximum charging power supported by the EVSE in kilowatts.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:meteredEnergyKWh",
+      "@type": "rdf:Property",
+      "rdfs:label": "Metered energy (kWh)",
+      "rdfs:comment": "Energy dispensed during a charging session, in kilowatt-hours.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:meteredDurationMinutes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Metered duration (minutes)",
+      "rdfs:comment": "Duration of the charging session, in minutes.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:chargingTelemetry",
+      "@type": "rdf:Property",
+      "rdfs:label": "Charging telemetry",
+      "rdfs:comment": "List of charging intervals with telemetry metrics (OCPI-style).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:ItemList"
+    },
+    {
+      "@id": "deg:eventTime",
+      "@type": "rdf:Property",
+      "rdfs:label": "Event time",
+      "rdfs:comment": "Telemetry event timestamp (UTC).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:DateTime"
+    },
+    {
+      "@id": "deg:metrics",
+      "@type": "rdf:Property",
+      "rdfs:label": "Metrics",
+      "rdfs:comment": "Array of telemetry metrics using schema.org QuantitativeValue (name, value, unitCode).",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": [
+        "schema:QuantitativeValue",
+        "schema:ItemList"
+      ]
+    },
+    {
+      "@id": "deg:totalCost",
+      "@type": "rdf:Property",
+      "rdfs:label": "Total cost",
+      "rdfs:comment": "Total session cost as a price specification.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:PriceSpecification"
+    },
+    {
+      "@id": "deg:exclVat",
+      "@type": "rdf:Property",
+      "rdfs:label": "Excl. VAT amount",
+      "rdfs:comment": "Total amount excluding VAT.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:inclVat",
+      "@type": "rdf:Property",
+      "rdfs:label": "Incl. VAT amount",
+      "rdfs:comment": "Total amount including VAT.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:reservationId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Reservation ID",
+      "rdfs:comment": "Server-assigned reservation identifier for a scheduled session.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "deg:gracePeriodMinutes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Grace period (minutes)",
+      "rdfs:comment": "Minutes allowed after scheduled start before releasing the slot.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Integer"
+    },
+    {
+      "@id": "deg:vehicleMake",
+      "@type": "rdf:Property",
+      "rdfs:label": "Vehicle make",
+      "rdfs:comment": "Vehicle make/brand recorded for the session.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": [
+        "schema:Brand",
+        "schema:Text"
+      ]
+    },
+    {
+      "@id": "deg:vehicleModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Vehicle model",
+      "rdfs:comment": "Vehicle model recorded for the session.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Text"
+    },
+    {
+      "@id": "deg:preferences",
+      "@type": "rdf:Property",
+      "rdfs:label": "Preferences",
+      "rdfs:comment": "Charging session preferences including time windows.",
+      "rdfs:domain": "deg:ChargingSession",
+      "schema:rangeIncludes": "schema:Thing"
+    },
+    {
+      "@id": "deg:SessionStatus",
+      "@type": "schema:Enumeration",
+      "schema:name": "Session Status",
+      "rdfs:comment": "Enumeration of supported charging session lifecycle states.",
+      "schema:hasEnumerationMember": [
+        {
+          "@id": "deg:SessionStatusPending"
+        },
+        {
+          "@id": "deg:SessionStatusActive"
+        },
+        {
+          "@id": "deg:SessionStatusCompleted"
+        },
+        {
+          "@id": "deg:SessionStatusInterrupted"
+        }
+      ]
+    },
+    {
+      "@id": "deg:SessionStatusPending",
+      "@type": [
+        "deg:SessionStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "PENDING",
+      "schema:identifier": "PENDING"
+    },
+    {
+      "@id": "deg:SessionStatusActive",
+      "@type": [
+        "deg:SessionStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "ACTIVE",
+      "schema:identifier": "ACTIVE"
+    },
+    {
+      "@id": "deg:SessionStatusCompleted",
+      "@type": [
+        "deg:SessionStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "COMPLETED",
+      "schema:identifier": "COMPLETED"
+    },
+    {
+      "@id": "deg:SessionStatusInterrupted",
+      "@type": [
+        "deg:SessionStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "INTERRUPTED",
+      "schema:identifier": "INTERRUPTED"
+    },
+    {
+      "@id": "deg:ConnectorStatus",
+      "@type": "schema:Enumeration",
+      "schema:name": "Connector Status",
+      "rdfs:comment": "Enumeration of charging connector statuses (from OCPP status codes).",
+      "schema:hasEnumerationMember": [
+        {
+          "@id": "deg:ConnectorStatusAvailable"
+        },
+        {
+          "@id": "deg:ConnectorStatusPreparing"
+        },
+        {
+          "@id": "deg:ConnectorStatusUnavailable"
+        }
+      ]
+    },
+    {
+      "@id": "deg:ConnectorStatusAvailable",
+      "@type": [
+        "deg:ConnectorStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "AVAILABLE",
+      "schema:identifier": "AVAILABLE"
+    },
+    {
+      "@id": "deg:ConnectorStatusPreparing",
+      "@type": [
+        "deg:ConnectorStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "PREPARING",
+      "schema:identifier": "PREPARING"
+    },
+    {
+      "@id": "deg:ConnectorStatusUnavailable",
+      "@type": [
+        "deg:ConnectorStatus",
+        "schema:Enumeration"
+      ],
+      "schema:name": "UNAVAILABLE",
+      "schema:identifier": "UNAVAILABLE"
+    },
+    {
+      "@id": "deg:ConnectorType",
+      "@type": "schema:Enumeration",
+      "schema:name": "Connector Type",
+      "rdfs:comment": "Enumeration of electric vehicle connector interface types.",
+      "schema:hasEnumerationMember": [
+        {
+          "@id": "deg:ConnectorTypeCCS2"
+        },
+        {
+          "@id": "deg:ConnectorTypeType2"
+        },
+        {
+          "@id": "deg:ConnectorTypeCHAdeMO"
+        },
+        {
+          "@id": "deg:ConnectorTypeGBT"
+        }
+      ]
+    },
+    {
+      "@id": "deg:ConnectorTypeCCS2",
+      "@type": [
+        "deg:ConnectorType",
+        "schema:Enumeration"
+      ],
+      "schema:name": "CCS2",
+      "schema:identifier": "CCS2"
+    },
+    {
+      "@id": "deg:ConnectorTypeType2",
+      "@type": [
+        "deg:ConnectorType",
+        "schema:Enumeration"
+      ],
+      "schema:name": "Type2",
+      "schema:identifier": "Type2"
+    },
+    {
+      "@id": "deg:ConnectorTypeCHAdeMO",
+      "@type": [
+        "deg:ConnectorType",
+        "schema:Enumeration"
+      ],
+      "schema:name": "CHAdeMO",
+      "schema:identifier": "CHAdeMO"
+    },
+    {
+      "@id": "deg:ConnectorTypeGBT",
+      "@type": [
+        "deg:ConnectorType",
+        "schema:Enumeration"
+      ],
+      "schema:name": "GB/T",
+      "schema:identifier": "GB_T",
+      "schema:alternateName": "GB-T"
+    },
+    {
+      "@id": "deg:TelemetryMetric",
+      "@type": "schema:Enumeration",
+      "schema:name": "Telemetry Metric",
+      "rdfs:comment": "Enumeration of telemetry metric names used in session telemetry.",
+      "schema:hasEnumerationMember": [
+        {
+          "@id": "deg:TelemetryMetricEnergy"
+        },
+        {
+          "@id": "deg:TelemetryMetricPower"
+        },
+        {
+          "@id": "deg:TelemetryMetricCurrent"
+        },
+        {
+          "@id": "deg:TelemetryMetricVoltage"
+        },
+        {
+          "@id": "deg:TelemetryMetricStateOfCharge"
+        }
+      ]
+    },
+    {
+      "@id": "deg:TelemetryMetricEnergy",
+      "@type": [
+        "deg:TelemetryMetric",
+        "schema:Enumeration"
+      ],
+      "schema:name": "ENERGY",
+      "schema:identifier": "ENERGY"
+    },
+    {
+      "@id": "deg:TelemetryMetricPower",
+      "@type": [
+        "deg:TelemetryMetric",
+        "schema:Enumeration"
+      ],
+      "schema:name": "POWER",
+      "schema:identifier": "POWER"
+    },
+    {
+      "@id": "deg:TelemetryMetricCurrent",
+      "@type": [
+        "deg:TelemetryMetric",
+        "schema:Enumeration"
+      ],
+      "schema:name": "CURRENT",
+      "schema:identifier": "CURRENT"
+    },
+    {
+      "@id": "deg:TelemetryMetricVoltage",
+      "@type": [
+        "deg:TelemetryMetric",
+        "schema:Enumeration"
+      ],
+      "schema:name": "VOLTAGE",
+      "schema:identifier": "VOLTAGE"
+    },
+    {
+      "@id": "deg:TelemetryMetricStateOfCharge",
+      "@type": [
+        "deg:TelemetryMetric",
+        "schema:Enumeration"
+      ],
+      "schema:name": "STATE_OF_CHARGE",
+      "schema:identifier": "STATE_OF_CHARGE",
+      "schema:alternateName": "SOC"
+    }
+  ]
+}

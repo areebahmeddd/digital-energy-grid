@@ -1,0 +1,101 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "name": "schema:name",
+    "description": "schema:description",
+    "price": "schema:price",
+    "priceCurrency": "schema:priceCurrency",
+    "startTime": "schema:startTime",
+    "endTime": "schema:endTime",
+    "amount": "schema:amount",
+    "currency": "schema:currency",
+    "lastUpdated": "schema:dateModified",
+    "unit": "schema:unitText",
+    "EnergyTradeOffer": "deg:EnergyTradeOffer",
+    "EnergyTradeDelivery": "deg:EnergyTradeDelivery",
+    "EnergyResource": "deg:EnergyResource",
+    "EnergyCustomer": "deg:EnergyCustomer",
+    "EnergyOrderItem": "deg:EnergyOrderItem",
+    "EnergyGift": "deg:EnergyGift",
+    "pricingModel": {
+      "@id": "deg:pricingModel",
+      "@type": "@id"
+    },
+    "validityWindow": "deg:validityWindow",
+    "deliveryWindow": "deg:deliveryWindow",
+    "gift": "deg:gift",
+    "lookupHash": "deg:lookupHash",
+    "claimVerifier": "deg:claimVerifier",
+    "expiresAt": "deg:expiresAt",
+    "deliveryStatus": {
+      "@id": "deg:deliveryStatus",
+      "@type": "@id"
+    },
+    "deliveryMode": {
+      "@id": "deg:deliveryMode",
+      "@type": "@id"
+    },
+    "deliveredQuantity": "deg:deliveredQuantity",
+    "meterReadings": "deg:meterReadings",
+    "consumedEnergy": "deg:consumedEnergy",
+    "producedEnergy": "deg:producedEnergy",
+    "allocatedEnergy": "deg:allocatedEnergy",
+    "curtailedQuantity": "deg:curtailedQuantity",
+    "curtailmentReason": {
+      "@id": "deg:curtailmentReason",
+      "@type": "@id"
+    },
+    "sourceType": {
+      "@id": "deg:sourceType",
+      "@type": "@id"
+    },
+    "meterId": "deg:meterId",
+    "sanctionedLoad": "deg:sanctionedLoad",
+    "utilityCustomerId": "deg:utilityCustomerId",
+    "utilityId": "deg:utilityId",
+    "providerAttributes": "deg:providerAttributes",
+    "fulfillmentAttributes": "deg:fulfillmentAttributes",
+    "PER_KWH": "deg:PricingModelPerKwh",
+    "PER-KWH": "deg:PricingModelPerKwh",
+    "TIME_OF_DAY": "deg:PricingModelTimeOfDay",
+    "TIME-OF-DAY": "deg:PricingModelTimeOfDay",
+    "SUBSCRIPTION": "deg:PricingModelSubscription",
+    "FIXED": "deg:PricingModelFixed",
+    "PENDING": "deg:DeliveryStatusPending",
+    "IN_PROGRESS": "deg:DeliveryStatusInProgress",
+    "IN-PROGRESS": "deg:DeliveryStatusInProgress",
+    "COMPLETED": "deg:DeliveryStatusCompleted",
+    "FAILED": "deg:DeliveryStatusFailed",
+    "EV_CHARGING": "deg:DeliveryModeEvCharging",
+    "EV-CHARGING": "deg:DeliveryModeEvCharging",
+    "BATTERY_SWAP": "deg:DeliveryModeBatterySwap",
+    "BATTERY-SWAP": "deg:DeliveryModeBatterySwap",
+    "V2G": "deg:DeliveryModeV2G",
+    "GRID_INJECTION": "deg:DeliveryModeGridInjection",
+    "GRID-INJECTION": "deg:DeliveryModeGridInjection",
+    "SOLAR": "deg:SourceTypeSolar",
+    "BATTERY": "deg:SourceTypeBattery",
+    "GRID": "deg:SourceTypeGrid",
+    "HYBRID": "deg:SourceTypeHybrid",
+    "RENEWABLE": "deg:SourceTypeRenewable",
+    "GRID_OUTAGE": "deg:CurtailmentReasonGridOutage",
+    "EMERGENCY": "deg:CurtailmentReasonEmergency",
+    "CONGESTION": "deg:CurtailmentReasonCongestion",
+    "MAINTENANCE": "deg:CurtailmentReasonMaintenance",
+    "OTHER": "deg:CurtailmentReasonOther",
+    "deg": "https://schema.beckn.io/deg/EnergyTrade/v2.0/",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyTrade",
+      "owl:equivalentClass": { "@id": "https://schema.beckn.io/deg/P2PTrade/v2.0#P2PTrade" },
+      "@comment": "deg:EnergyTrade is deprecated and equivalent to deg:P2PTrade. All new implementations should use P2PTrade/v2.0. See beckn:Order owl:equivalentClass beckn:Contract for the parent-class migration."
+    }
+  ]
+}

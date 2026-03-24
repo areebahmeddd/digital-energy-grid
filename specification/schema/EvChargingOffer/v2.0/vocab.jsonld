@@ -1,0 +1,94 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EvChargingOffer/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:ChargingOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EV Charging Offer",
+      "rdfs:comment": "An offer specification for electric vehicle charging"
+    },
+    {
+      "@id": "deg:tariffModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Tariff model",
+      "rdfs:comment": "Charging tariff basis: PER_KWH, PER_MINUTE, SUBSCRIPTION, TIME_OF_DAY.",
+      "rdfs:domain": "deg:ChargingOffer",
+      "schema:rangeIncludes": "deg:TariffModel"
+    },
+    {
+      "@id": "deg:idleFeePolicy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Idle fee policy",
+      "rdfs:comment": "Idle fee policy specification for post-charge idle fees associated with an offer (reuses Beckn PriceSpecification).",
+      "rdfs:domain": "deg:ChargingOffer",
+      "schema:rangeIncludes": "schema:PriceSpecification"
+    },
+    {
+      "@id": "deg:TariffModel",
+      "@type": "schema:Enumeration",
+      "schema:name": "Tariff Model",
+      "rdfs:comment": "Enumeration of supported tariff models for charging offers.",
+      "schema:hasEnumerationMember": [
+        {
+          "@id": "deg:TariffModelPerKwh"
+        },
+        {
+          "@id": "deg:TariffModelPerMinute"
+        },
+        {
+          "@id": "deg:TariffModelSubscription"
+        },
+        {
+          "@id": "deg:TariffModelTimeOfDay"
+        }
+      ]
+    },
+    {
+      "@id": "deg:TariffModelPerKwh",
+      "@type": [
+        "deg:TariffModel",
+        "schema:Enumeration"
+      ],
+      "schema:name": "PER_KWH",
+      "schema:identifier": "PER_KWH",
+      "schema:alternateName": "PER-KWH"
+    },
+    {
+      "@id": "deg:TariffModelPerMinute",
+      "@type": [
+        "deg:TariffModel",
+        "schema:Enumeration"
+      ],
+      "schema:name": "PER_MINUTE",
+      "schema:identifier": "PER_MINUTE",
+      "schema:alternateName": "PER-MINUTE"
+    },
+    {
+      "@id": "deg:TariffModelSubscription",
+      "@type": [
+        "deg:TariffModel",
+        "schema:Enumeration"
+      ],
+      "schema:name": "SUBSCRIPTION",
+      "schema:identifier": "SUBSCRIPTION"
+    },
+    {
+      "@id": "deg:TariffModelTimeOfDay",
+      "@type": [
+        "deg:TariffModel",
+        "schema:Enumeration"
+      ],
+      "schema:name": "TIME_OF_DAY",
+      "schema:identifier": "TIME_OF_DAY",
+      "schema:alternateName": "TIME-OF-DAY"
+    }
+  ]
+}

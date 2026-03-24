@@ -1,0 +1,126 @@
+{
+  "@context": [
+    "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
+    "https://www.w3.org/ns/credentials/v2",
+    "../vocab.jsonld",
+    {
+      "@comment": "Schema.org semantic mappings for cross-domain interoperability",
+      "schema": "https://schema.org/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "fulfillments": {
+        "@id": "beckn:fulfillments",
+        "@type": "beckn:Fulfillment",
+        "@container": "@set"
+      },
+      "items": {
+        "@id": "beckn:items",
+        "@type": "beckn:Item",
+        "@container": "@set"
+      },
+      "provider": {
+        "@id": "beckn:provider",
+        "@type": "beckn:Provider"
+      },
+      "descriptor": {
+        "@id": "beckn:descriptor",
+        "@type": "beckn:Descriptor"
+      },
+      "customer": {
+        "@id": "beckn:customer",
+        "@type": "beckn:Customer"
+      },
+      "instrument": {
+        "@id": "beckn:instrument",
+        "@type": "beckn:Instrument"
+      },
+      "meters": {
+        "@id": "meters",
+        "@type": "MeterEnrollment",
+        "@container": "@set"
+      },
+      "ders": {
+        "@id": "ders",
+        "@type": "beckn:DER",
+        "@container": "@set"
+      },
+      "person": {
+        "@id": "beckn:person",
+        "@type": "schema:Person"
+      },
+      "state": {
+        "@id": "beckn:state",
+        "@type": "beckn:State"
+      },
+      "credentials": {
+        "@id": "credentials",
+        "@type": "VerifiableCredential",
+        "@container": "@set"
+      },
+      "existingEnrollments": {
+        "@id": "existingEnrollments",
+        "@type": "VerifiableCredential",
+        "@container": "@set"
+      },
+      "credentialVerification": {
+        "@id": "credentialVerification",
+        "@type": "CredentialVerification"
+      },
+      "verifiedCredentials": {
+        "@id": "verifiedCredentials",
+        "@type": "VerifiedCredential",
+        "@container": "@set"
+      },
+      "conflictCheck": {
+        "@id": "conflictCheck",
+        "@type": "ConflictCheck"
+      },
+      "conflictingEnrollments": {
+        "@id": "conflictingEnrollments",
+        "@type": "ConflictingEnrollment",
+        "@container": "@set"
+      },
+      "consentRevocation": {
+        "@id": "consentRevocation",
+        "@type": "ConsentRevocation"
+      },
+      "unenrollment": {
+        "@id": "unenrollment",
+        "@type": "Unenrollment"
+      },
+      "credential": {
+        "@id": "credential",
+        "@type": "VerifiableCredential"
+      },
+      "userAuth": {
+        "@id": "userAuth",
+        "@type": "UserAuth"
+      },
+      "UserAuth": "beckn:UserAuth",
+      "UserAuthRequest": "beckn:UserAuthRequest",
+      "UserAuthResponse": "beckn:UserAuthResponse",
+      "OtpAuthRequest": "beckn:OtpAuthRequest",
+      "OtpAuthResponse": "beckn:OtpAuthResponse",
+      "OAuth2AuthRequest": "beckn:OAuth2AuthRequest",
+      "OAuth2AuthResponse": "beckn:OAuth2AuthResponse",
+      "MeterEnrollment": "beckn:MeterEnrollment",
+      "authMethod": "beckn:authMethod",
+      "mobile": "beckn:mobile",
+      "otp": "beckn:otp",
+      "nguid": "beckn:nguid",
+      "accessToken": "beckn:accessToken",
+      "tokenType": "beckn:tokenType",
+      "idToken": "beckn:idToken",
+      "refreshToken": "beckn:refreshToken",
+      "scope": "beckn:scope",
+      "issuer": { "@id": "beckn:issuer", "@type": "@id" },
+      "subject": "beckn:subject",
+      "verified": "beckn:verified",
+      "meterId": "beckn:meterId",
+      "meterNumber": "beckn:meterNumber",
+      "utilityId": "beckn:utilityId",
+      "utilityCustomerId": "beckn:utilityCustomerId",
+      "connectionType": "beckn:connectionType",
+      "sanctionedLoad": "beckn:sanctionedLoad"
+    }
+  ]
+}

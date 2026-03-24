@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/UtilityCustomerCredential/v2.0/",
+    "energyCred": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:UtilityCustomerCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Utility Customer Credential",
+      "rdfs:comment": "Barebones identity credential for privacy-preserving customer identification. Subclass of EnergyCredential.",
+      "rdfs:subClassOf": { "@id": "energyCred:EnergyCredential" }
+    },
+    {
+      "@id": "deg:maskedIdNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "Masked ID number",
+      "rdfs:comment": "Masked government ID (e.g., 'XXXX-XXXX-1234') for additional privacy-preserving verification.",
+      "rdfs:domain": "deg:UtilityCustomerCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:installationAddress",
+      "@type": "rdf:Property",
+      "rdfs:label": "Installation address",
+      "rdfs:comment": "Address of the electricity installation/connection premises.",
+      "rdfs:domain": "deg:UtilityCustomerCredential"
+    },
+    {
+      "@id": "deg:serviceConnectionDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Service connection date",
+      "rdfs:comment": "Date when the electricity connection was activated.",
+      "rdfs:domain": "deg:UtilityCustomerCredential",
+      "schema:rangeIncludes": { "@id": "xsd:date" }
+    },
+    {
+      "@id": "deg:district",
+      "@type": "rdf:Property",
+      "rdfs:label": "District",
+      "rdfs:comment": "District or county name in an installation address.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

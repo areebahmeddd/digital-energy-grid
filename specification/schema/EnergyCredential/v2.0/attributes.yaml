@@ -1,0 +1,123 @@
+$id: "https://schema.beckn.io/EnergyCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyCredential
+description: >
+  Base class for all DEG energy-sector Verifiable Credentials issued by
+  electricity distribution utilities. EnergyCredential is a subclass of
+  beckn:Credential that adds the common envelope properties shared by all
+  DEG energy credentials: a structured issuer object (with regulatory
+  licenseNumber), issuance/expiration dates, DeDi registry-based revocation
+  status, and a W3C-style cryptographic proof.
+
+  Concrete credential types (ConsumptionProfile, GenerationProfile,
+  StorageProfile, ProgramEnrollment, UtilityCustomer) subclass
+  EnergyCredential and add domain-specific credentialSubject properties.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/Credential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyCredential
+properties:
+
+  issuer:
+    description: The electricity distribution utility issuing this energy credential.
+    x-jsonld:
+      "@id": "schema:issuer"
+    type: object
+    required: [id, name, licenseNumber]
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the issuing distribution utility.
+        x-jsonld:
+          "@id": "@id"
+      name:
+        type: string
+        minLength: 1
+        description: Name of the distribution utility.
+        x-jsonld:
+          "@id": "schema:name"
+      licenseNumber:
+        type: string
+        minLength: 1
+        description: Regulatory license number issued by the local energy regulator.
+        x-jsonld:
+          "@id": deg:licenseNumber
+
+  issuanceDate:
+    type: string
+    format: date-time
+    description: Date and time when the credential was issued (ISO 8601).
+    x-jsonld:
+      "@id": "schema:dateCreated"
+
+  expirationDate:
+    type: string
+    format: date-time
+    description: Optional expiration date of the credential (ISO 8601).
+    x-jsonld:
+      "@id": "schema:expires"
+
+  credentialStatus:
+    description: Revocation status information for the credential via DeDi registry.
+    x-jsonld:
+      "@id": deg:credentialStatus
+    type: object
+    required: [id, type]
+    properties:
+      id:
+        type: string
+        format: uri
+        description: URL to query the revocation status of the credential via DeDi registry.
+        x-jsonld:
+          "@id": "@id"
+      type:
+        type: string
+        const: dediregistry
+        description: Type of status check mechanism (DeDi Registry).
+        x-jsonld:
+          "@id": "@type"
+
+  proof:
+    description: Cryptographic proof/signature for the credential (W3C Verifiable Credential proof).
+    x-jsonld:
+      "@id": "sec:proof"
+    type: object
+    required: [type, created, verificationMethod, proofPurpose, proofValue]
+    properties:
+      type:
+        type: string
+        description: Cryptographic signature type (e.g., Ed25519Signature2020).
+        x-jsonld:
+          "@id": "@type"
+      created:
+        type: string
+        format: date-time
+        description: Timestamp when the proof was created.
+        x-jsonld:
+          "@id": "schema:dateCreated"
+      verificationMethod:
+        type: string
+        format: uri
+        description: URI of the verification method/public key.
+        x-jsonld:
+          "@id": "sec:verificationMethod"
+      proofPurpose:
+        type: string
+        enum: [assertionMethod, authentication]
+        description: Purpose of the proof.
+        x-jsonld:
+          "@id": "sec:proofPurpose"
+      proofValue:
+        type: string
+        minLength: 1
+        description: The cryptographic signature value.
+        x-jsonld:
+          "@id": "sec:proofValue"

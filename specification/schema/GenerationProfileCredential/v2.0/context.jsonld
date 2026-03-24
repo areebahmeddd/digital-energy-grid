@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "sec": "https://w3id.org/security#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/GenerationProfileCredential/v2.0/",
+    "GenerationProfileCredential": "deg:GenerationProfileCredential",
+    "credentialSubject": "deg:credentialSubject",
+    "consumerNumber": {
+      "@id": "deg:consumerNumber",
+      "@type": "xsd:string"
+    },
+    "fullName": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "meterNumber": {
+      "@id": "deg:meterNumber",
+      "@type": "xsd:string"
+    },
+    "assetId": {
+      "@id": "deg:assetId",
+      "@type": "xsd:string"
+    },
+    "generationType": {
+      "@id": "deg:generationType",
+      "@type": "xsd:string"
+    },
+    "capacityKW": {
+      "@id": "deg:capacityKW",
+      "@type": "xsd:decimal"
+    },
+    "commissioningDate": {
+      "@id": "deg:commissioningDate",
+      "@type": "xsd:date"
+    },
+    "manufacturer": {
+      "@id": "schema:manufacturer",
+      "@type": "xsd:string"
+    },
+    "modelNumber": {
+      "@id": "schema:model",
+      "@type": "xsd:string"
+    }
+  },
+  "@graph": []
+}

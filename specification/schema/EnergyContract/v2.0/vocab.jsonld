@@ -1,0 +1,20 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyContract/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyContract",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Contract",
+      "rdfs:comment": "A subclass of beckn:Contract representing energy-specific contracts on the DEG network. Parent class for P2PTrade and other DEG energy contract types.",
+      "rdfs:subClassOf": { "@id": "beckn:Contract" }
+    }
+  ]
+}

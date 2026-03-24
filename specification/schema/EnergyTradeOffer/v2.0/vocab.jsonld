@@ -1,0 +1,81 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Offer",
+      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes."
+    },
+    {
+      "@id": "deg:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model",
+      "rdfs:comment": "Pricing model classification (PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED).",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "deg:PricingModel"
+    },
+    {
+      "@id": "deg:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window",
+      "rdfs:comment": "Time window when the offer can be selected/accepted.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "deg:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window",
+      "rdfs:comment": "Specific time period when energy delivery occurs.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "deg:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift",
+      "rdfs:comment": "Optional gift parameters for energy gifting on this offer.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/EnergyGift/v2.0/EnergyGift" }
+    },
+    {
+      "@id": "deg:PricingModel",
+      "@type": "schema:Enumeration",
+      "schema:name": "Pricing Model",
+      "rdfs:comment": "Enumeration of supported pricing models for energy trade offers."
+    },
+    {
+      "@id": "deg:PricingModelPerKwh",
+      "@type": "deg:PricingModel",
+      "schema:name": "PER_KWH",
+      "schema:identifier": "PER_KWH"
+    },
+    {
+      "@id": "deg:PricingModelTimeOfDay",
+      "@type": "deg:PricingModel",
+      "schema:name": "TIME_OF_DAY",
+      "schema:identifier": "TIME_OF_DAY"
+    },
+    {
+      "@id": "deg:PricingModelSubscription",
+      "@type": "deg:PricingModel",
+      "schema:name": "SUBSCRIPTION",
+      "schema:identifier": "SUBSCRIPTION"
+    },
+    {
+      "@id": "deg:PricingModelFixed",
+      "@type": "deg:PricingModel",
+      "schema:name": "FIXED",
+      "schema:identifier": "FIXED"
+    }
+  ]
+}

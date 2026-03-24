@@ -1,0 +1,16 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyGift/v2.0/",
+    "EnergyGift": "deg:EnergyGift",
+    "lookupHash": "deg:lookupHash",
+    "claimVerifier": "deg:claimVerifier",
+    "expiresAt": "deg:expiresAt"
+  },
+  "@graph": []
+}

@@ -1,0 +1,45 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/StorageProfileCredential/v2.0/",
+    "energyCred": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:StorageProfileCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Storage Profile Credential",
+      "rdfs:comment": "Verifiable Credential for battery/energy storage capability. Subclass of EnergyCredential.",
+      "rdfs:subClassOf": { "@id": "energyCred:EnergyCredential" }
+    },
+    {
+      "@id": "deg:storageCapacityKWh",
+      "@type": "rdf:Property",
+      "rdfs:label": "Storage capacity (kWh)",
+      "rdfs:comment": "Battery storage capacity in kilowatt-hours (kWh).",
+      "rdfs:domain": "deg:StorageProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:powerRatingKW",
+      "@type": "rdf:Property",
+      "rdfs:label": "Power rating (kW)",
+      "rdfs:comment": "Battery charge/discharge power rating in kilowatts (kW).",
+      "rdfs:domain": "deg:StorageProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:storageType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Storage type",
+      "rdfs:comment": "Type of battery storage technology (LithiumIon, LeadAcid, FlowBattery, Other).",
+      "rdfs:domain": "deg:StorageProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

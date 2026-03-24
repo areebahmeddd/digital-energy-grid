@@ -1,0 +1,92 @@
+$id: "https://schema.beckn.io/ConsumptionProfileCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ConsumptionProfileCredential
+description: >
+  Verifiable Credential for electricity connection and consumption characteristics.
+  Issued by distribution utilities to consumers and prosumers for load management
+  and tariff determination purposes. ConsumptionProfileCredential is a subclass
+  of EnergyCredential (which is a subclass of beckn:Credential).
+
+  The credential subject contains connection-specific attributes including
+  premises type, connection type, sanctioned load, and tariff category.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+  - consumption
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": ConsumptionProfileCredential
+properties:
+
+  credentialSubject:
+    description: >
+      The credential subject containing connection and consumption characteristics
+      of the energy consumer.
+    x-jsonld:
+      "@id": deg:credentialSubject
+    type: object
+    required:
+      - id
+      - consumerNumber
+      - fullName
+      - premisesType
+      - connectionType
+      - sanctionedLoadKW
+      - tariffCategoryCode
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the customer/credential subject (links to customer).
+        x-jsonld:
+          "@id": "@id"
+      consumerNumber:
+        type: string
+        minLength: 1
+        description: Full consumer account number assigned by the utility.
+        x-jsonld:
+          "@id": deg:consumerNumber
+      fullName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Consumer name.
+        x-jsonld:
+          "@id": "schema:name"
+      premisesType:
+        type: string
+        enum: [Residential, Commercial, Industrial, Agricultural]
+        description: Type of premises for the electricity connection.
+        x-jsonld:
+          "@id": deg:premisesType
+      connectionType:
+        type: string
+        enum: [Single-phase, Three-phase]
+        description: Type of electrical connection.
+        x-jsonld:
+          "@id": deg:connectionType
+      sanctionedLoadKW:
+        type: number
+        minimum: 0.5
+        maximum: 10000
+        description: Sanctioned/approved electrical load in kilowatts (kW).
+        x-jsonld:
+          "@id": deg:sanctionedLoadKW
+      tariffCategoryCode:
+        type: string
+        minLength: 1
+        description: Billing/tariff category code assigned by the utility.
+        x-jsonld:
+          "@id": deg:tariffCategoryCode
+      meterNumber:
+        type: string
+        minLength: 1
+        maxLength: 50
+        description: Meter serial number (optional, for linking to specific meter).
+        x-jsonld:
+          "@id": deg:meterNumber
