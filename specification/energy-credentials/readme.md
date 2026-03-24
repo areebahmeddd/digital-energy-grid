@@ -18,7 +18,7 @@ This collection provides schemas for credentials issued by energy providers to c
 Both credentials share the same `customerProfile` and `customerDetails` object structures:
 
 - **customerProfile** — customer number, meter number, meter type, masked government ID
-- **customerDetails** — full name, installation address (with optional geo tagging and plus codes), service connection date
+- **customerDetails** — full name, installation address (with optional geo tagging and Open Location Code), service connection date
 
 In the Customer Credential these are required; in the Program Enrollment Credential they are optional.
 

@@ -244,10 +244,10 @@
                             },
                             "required": ["latitude", "longitude"]
                         },
-                        "plusCode": {
+                        "openLocationCode": {
                             "type": "string",
                             "pattern": "^[23456789CFGHJMPQRVWX]{4,8}\\+[23456789CFGHJMPQRVWX]{0,4}$",
-                            "description": "Google Plus Code (Open Location Code) for the installation location"
+                            "description": "Open Location Code (OLC) for the installation location"
                         }
                     }
                 },

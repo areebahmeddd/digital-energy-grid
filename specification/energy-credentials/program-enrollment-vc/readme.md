@@ -47,7 +47,7 @@ Personal and address information — same structure as [Customer Credential](../
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
-| `installationAddress` | object | No | Address of the installation (includes optional `geo` and `plusCode`) |
+| `installationAddress` | object | No | Address of the installation (includes optional `geo` and `openLocationCode`) |
 | `serviceConnectionDate` | date | No | Date when the electricity connection was activated |
 
 ### Enrollment Fields

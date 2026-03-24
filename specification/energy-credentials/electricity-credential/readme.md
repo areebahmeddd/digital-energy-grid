@@ -56,7 +56,7 @@ Personal and address information:
 | `postalCode` | string | Yes | Postal or ZIP code (format varies by country) |
 | `country` | string | Yes | ISO 3166-1 alpha-2 country code |
 | `geo` | object | No | Geographic coordinates (`latitude`, `longitude` in decimal degrees, WGS84) |
-| `plusCode` | string | No | Google Plus Code (Open Location Code) for the installation location |
+| `openLocationCode` | string | No | Open Location Code (OLC) for the installation location |
 
 The address object reuses [schema.org](https://schema.org/) vocabulary (`streetAddress`, `addressLocality`, `addressRegion`, `postalCode`, `addressCountry`, `geo`, `latitude`, `longitude`).
 

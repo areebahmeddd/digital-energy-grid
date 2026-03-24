@@ -103,8 +103,8 @@
                                 }
                             }
                         },
-                        "plusCode": {
-                            "@id": "deg:plusCode",
+                        "openLocationCode": {
+                            "@id": "deg:openLocationCode",
                             "@type": "xsd:string"
                         }
                     }
