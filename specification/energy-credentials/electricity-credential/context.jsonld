@@ -6,7 +6,7 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "deg": "https://beckn.github.io/DEG/specification/energy-credentials/electricity-credential/context.jsonld#",
+        "deg": "https://github.com/beckn/DEG/blob/main/specification/energy-credentials/electricity-credential/context.jsonld#",
 
         "CustomerCredential": {
             "@id": "deg:CustomerCredential",

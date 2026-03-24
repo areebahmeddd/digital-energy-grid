@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://beckn.github.io/DEG/specification/energy-credentials/program-enrollment-vc/schema.json",
+    "$id": "https://github.com/beckn/DEG/blob/main/specification/energy-credentials/program-enrollment-vc/schema.json",
     "title": "Utility Program Enrollment Credential Schema",
     "description": "JSON Schema for verifying Program Enrollment Credentials issued by energy providers when consumers enroll in programs like P2P trading, demand flexibility, virtual power plants, etc.",
     "type": "object",

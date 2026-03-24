@@ -2,7 +2,7 @@
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://beckn.github.io/DEG/specification/energy-credentials/program-enrollment-vc/context.jsonld"
+    "https://github.com/beckn/DEG/blob/main/specification/energy-credentials/program-enrollment-vc/context.jsonld"
   ],
   "id": "urn:uuid:7f8e9d0c-5678-1234-abcd-123456789abc",
   "type": ["VerifiableCredential", "UtilityProgramEnrollmentCredential"],
