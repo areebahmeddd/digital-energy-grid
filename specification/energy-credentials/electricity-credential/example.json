@@ -36,6 +36,7 @@
         "postalCode": "12345",
         "country": "US",
         "geo": {
+          "@type": "GeoCoordinates",
           "latitude": 37.7749,
           "longitude": -122.4194
         },
