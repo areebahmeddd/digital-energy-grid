@@ -1,8 +1,8 @@
-# Electricity Credential
+# Customer Credential
 
 ## Overview
 
-The **Electricity Credential** is a unified W3C Verifiable Credential (VC Data Model 2.0) that combines five equal-level profile sections into a single `credentialSubject` object. The customer's DID (`id`) is optional per the W3C VC Data Model, and the five profiles sit as equal-level sibling properties.
+The **Customer Credential** is a unified W3C Verifiable Credential (VC Data Model 2.0) that combines five equal-level profile sections into a single `credentialSubject` object. The customer's DID (`id`) is optional per the W3C VC Data Model, and the five profiles sit as equal-level sibling properties.
 
 This credential is issued per meter — each meter will have its own credential.
 
@@ -32,7 +32,7 @@ Core customer identity fields:
 |-------|------|----------|-------------|
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | Yes | Unique meter serial number |
-| `meterType` | enum | Yes | Smart, Conventional, or Prepaid |
+| `meterType` | string | Yes | Type of meter (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse) |
 | `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
 
@@ -42,8 +42,23 @@ Personal and address information:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
-| `installationAddress` | object | Yes | Address of the installation (fullAddress, city, district, stateProvince, postalCode, country) |
+| `installationAddress` | object | Yes | Address of the installation (see below) |
 | `serviceConnectionDate` | date | Yes | Date when the electricity connection was activated |
+
+#### installationAddress
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fullAddress` | string | Yes | Complete street address of the installation |
+| `city` | string | No | City name |
+| `district` | string | No | District or county name |
+| `stateProvince` | string | No | State, province, or region name |
+| `postalCode` | string | Yes | Postal or ZIP code (format varies by country) |
+| `country` | string | Yes | ISO 3166-1 alpha-2 country code |
+| `geo` | object | No | Geographic coordinates (`latitude`, `longitude` in decimal degrees, WGS84) |
+| `plusCode` | string | No | Google Plus Code (Open Location Code) for the installation location |
+
+The address object reuses [schema.org](https://schema.org/) vocabulary (`streetAddress`, `addressLocality`, `addressRegion`, `postalCode`, `addressCountry`, `geo`, `latitude`, `longitude`).
 
 ### consumptionProfile
 Connection and consumption characteristics:
@@ -88,7 +103,7 @@ Battery/energy storage capability:
 
 ## Issuer
 
-This credential is issued by electricity distribution utilities identified by their URL and regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer `id` is a URL (e.g., `https://example-utility.com/issuers/energy-dept`).
+This credential is issued by energy providers identified by their URL and optional regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer uses the standard `issuer` property with `id` (URL) and `name`, plus an optional `licenseNumber`.
 
 ## Revocation
 

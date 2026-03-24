@@ -1,6 +1,6 @@
 # Utility Program Enrollment Credential
 
-This credential is issued by electricity distribution utilities when a consumer enrolls in an energy program. Programs can include peer-to-peer trading, demand flexibility, virtual power plants, and other grid services.
+This credential is issued by energy providers when a consumer enrolls in an energy program. Programs can include peer-to-peer trading, demand flexibility, virtual power plants, and other grid services.
 
 ## Use Cases
 
@@ -31,23 +31,23 @@ Per the [W3C VC Data Model 2.0 validity period](https://www.w3.org/TR/2025/REC-v
 - **`validUntil`** (optional) — date and time until which the credential is valid
 
 ### customerProfile (optional)
-Core customer identity fields — same structure as [Electricity Credential](../electricity-credential/):
+Core customer identity fields — same structure as [Customer Credential](../electricity-credential/):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | No | Unique meter serial number |
-| `meterType` | enum | No | Smart, Conventional, or Prepaid |
+| `meterType` | string | No | Type of meter (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse) |
 | `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
 | `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
 
 ### customerDetails (optional)
-Personal and address information — same structure as [Electricity Credential](../electricity-credential/):
+Personal and address information — same structure as [Customer Credential](../electricity-credential/):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
-| `installationAddress` | object | No | Address of the installation |
+| `installationAddress` | object | No | Address of the installation (includes optional `geo` and `plusCode`) |
 | `serviceConnectionDate` | date | No | Date when the electricity connection was activated |
 
 ### Enrollment Fields
@@ -69,7 +69,7 @@ Personal and address information — same structure as [Electricity Credential](
 
 ## Issuer
 
-This credential is issued by electricity distribution utilities identified by their URL and regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer `id` is a URL (e.g., `https://example-utility.com/issuers/energy-dept`).
+This credential is issued by energy providers identified by their URL and optional regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer uses the standard `issuer` property with `id` (URL) and `name`, plus an optional `licenseNumber`.
 
 ## Revocation
 

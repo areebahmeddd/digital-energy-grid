@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/schema.json",
-    "title": "Electricity Credential Schema",
-    "description": "JSON Schema for a unified electricity credential that combines customer identity, customer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by electricity distribution utilities.",
+    "title": "Customer Credential Schema",
+    "description": "JSON Schema for a unified customer credential that combines customer identity, customer details, consumption characteristics, generation capability, and storage capability as equal-level properties within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by energy providers.",
     "type": "object",
     "required": [
         "@context",
@@ -35,7 +35,7 @@
                 "type": "string"
             },
             "contains": {
-                "const": "ElectricityCredential"
+                "const": "CustomerCredential"
             },
             "minItems": 2
         },
@@ -46,12 +46,12 @@
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL of the issuing distribution utility"
+                    "description": "URL of the issuing provider"
                 },
                 "name": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Name of the distribution utility"
+                    "description": "Name of the provider"
                 },
                 "licenseNumber": {
                     "type": "string",
@@ -164,8 +164,8 @@
                 },
                 "meterType": {
                     "type": "string",
-                    "enum": ["Smart", "Conventional", "Prepaid"],
-                    "description": "Type of electricity meter installed"
+                    "minLength": 1,
+                    "description": "Type of electricity meter installed (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse)"
                 },
                 "maskedIdType": {
                     "type": "string",
@@ -224,6 +224,30 @@
                             "type": "string",
                             "pattern": "^[A-Z]{2}$",
                             "description": "ISO 3166-1 alpha-2 country code"
+                        },
+                        "geo": {
+                            "type": "object",
+                            "description": "Geographic coordinates of the installation",
+                            "properties": {
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90,
+                                    "maximum": 90,
+                                    "description": "Latitude in decimal degrees (WGS84)"
+                                },
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180,
+                                    "maximum": 180,
+                                    "description": "Longitude in decimal degrees (WGS84)"
+                                }
+                            },
+                            "required": ["latitude", "longitude"]
+                        },
+                        "plusCode": {
+                            "type": "string",
+                            "pattern": "^[23456789CFGHJMPQRVWX]{4,8}\\+[23456789CFGHJMPQRVWX]{0,4}$",
+                            "description": "Google Plus Code (Open Location Code) for the installation location"
                         }
                     }
                 },

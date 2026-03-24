@@ -6,10 +6,10 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "energy": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/context.jsonld#",
+        "deg": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/context.jsonld#",
 
-        "ElectricityCredential": {
-            "@id": "energy:ElectricityCredential",
+        "CustomerCredential": {
+            "@id": "deg:CustomerCredential",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
@@ -19,36 +19,36 @@
         },
 
         "customerProfile": {
-            "@id": "energy:customerProfile",
+            "@id": "deg:customerProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
                 "customerNumber": {
-                    "@id": "energy:customerNumber",
+                    "@id": "deg:customerNumber",
                     "@type": "xsd:string"
                 },
                 "meterNumber": {
-                    "@id": "energy:meterNumber",
+                    "@id": "deg:meterNumber",
                     "@type": "xsd:string"
                 },
                 "meterType": {
-                    "@id": "energy:meterType",
+                    "@id": "deg:meterType",
                     "@type": "xsd:string"
                 },
                 "maskedIdType": {
-                    "@id": "energy:maskedIdType",
+                    "@id": "deg:maskedIdType",
                     "@type": "xsd:string"
                 },
                 "maskedIdNumber": {
-                    "@id": "energy:maskedIdNumber",
+                    "@id": "deg:maskedIdNumber",
                     "@type": "xsd:string"
                 }
             }
         },
 
         "customerDetails": {
-            "@id": "energy:customerDetails",
+            "@id": "deg:customerDetails",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
@@ -58,11 +58,11 @@
                     "@type": "xsd:string"
                 },
                 "serviceConnectionDate": {
-                    "@id": "energy:serviceConnectionDate",
+                    "@id": "deg:serviceConnectionDate",
                     "@type": "xsd:date"
                 },
                 "installationAddress": {
-                    "@id": "energy:installationAddress",
+                    "@id": "deg:installationAddress",
                     "@type": "@id",
                     "@context": {
                         "fullAddress": {
@@ -74,7 +74,7 @@
                             "@type": "xsd:string"
                         },
                         "district": {
-                            "@id": "energy:district",
+                            "@id": "deg:district",
                             "@type": "xsd:string"
                         },
                         "stateProvince": {
@@ -88,6 +88,24 @@
                         "country": {
                             "@id": "schema:addressCountry",
                             "@type": "xsd:string"
+                        },
+                        "geo": {
+                            "@id": "schema:geo",
+                            "@type": "@id",
+                            "@context": {
+                                "latitude": {
+                                    "@id": "schema:latitude",
+                                    "@type": "xsd:decimal"
+                                },
+                                "longitude": {
+                                    "@id": "schema:longitude",
+                                    "@type": "xsd:decimal"
+                                }
+                            }
+                        },
+                        "plusCode": {
+                            "@id": "deg:plusCode",
+                            "@type": "xsd:string"
                         }
                     }
                 }
@@ -95,50 +113,50 @@
         },
 
         "consumptionProfile": {
-            "@id": "energy:consumptionProfile",
+            "@id": "deg:consumptionProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
                 "premisesType": {
-                    "@id": "energy:premisesType",
+                    "@id": "deg:premisesType",
                     "@type": "xsd:string"
                 },
                 "connectionType": {
-                    "@id": "energy:connectionType",
+                    "@id": "deg:connectionType",
                     "@type": "xsd:string"
                 },
                 "sanctionedLoadKW": {
-                    "@id": "energy:sanctionedLoadKW",
+                    "@id": "deg:sanctionedLoadKW",
                     "@type": "xsd:decimal"
                 },
                 "tariffCategoryCode": {
-                    "@id": "energy:tariffCategoryCode",
+                    "@id": "deg:tariffCategoryCode",
                     "@type": "xsd:string"
                 }
             }
         },
 
         "generationProfile": {
-            "@id": "energy:generationProfile",
+            "@id": "deg:generationProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
                 "assetId": {
-                    "@id": "energy:assetId",
+                    "@id": "deg:assetId",
                     "@type": "xsd:string"
                 },
                 "generationType": {
-                    "@id": "energy:generationType",
+                    "@id": "deg:generationType",
                     "@type": "xsd:string"
                 },
                 "capacityKW": {
-                    "@id": "energy:capacityKW",
+                    "@id": "deg:capacityKW",
                     "@type": "xsd:decimal"
                 },
                 "commissioningDate": {
-                    "@id": "energy:commissioningDate",
+                    "@id": "deg:commissioningDate",
                     "@type": "xsd:date"
                 },
                 "manufacturer": {
@@ -146,57 +164,44 @@
                     "@type": "xsd:string"
                 },
                 "modelNumber": {
-                    "@id": "energy:modelNumber",
+                    "@id": "deg:modelNumber",
                     "@type": "xsd:string"
                 }
             }
         },
 
         "storageProfile": {
-            "@id": "energy:storageProfile",
+            "@id": "deg:storageProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
                 "assetId": {
-                    "@id": "energy:storageAssetId",
+                    "@id": "deg:storageAssetId",
                     "@type": "xsd:string"
                 },
                 "storageCapacityKWh": {
-                    "@id": "energy:storageCapacityKWh",
+                    "@id": "deg:storageCapacityKWh",
                     "@type": "xsd:decimal"
                 },
                 "powerRatingKW": {
-                    "@id": "energy:powerRatingKW",
+                    "@id": "deg:powerRatingKW",
                     "@type": "xsd:decimal"
                 },
                 "commissioningDate": {
-                    "@id": "energy:storageCommissioningDate",
+                    "@id": "deg:storageCommissioningDate",
                     "@type": "xsd:date"
                 },
                 "storageType": {
-                    "@id": "energy:storageType",
+                    "@id": "deg:storageType",
                     "@type": "xsd:string"
                 }
             }
         },
 
-        "UtilityIssuer": {
-            "@id": "energy:UtilityIssuer",
-            "@context": {
-                "@version": 1.1,
-                "@protected": true,
-                "id": "@id",
-                "type": "@type",
-                "name": {
-                    "@id": "schema:name",
-                    "@type": "xsd:string"
-                },
-                "licenseNumber": {
-                    "@id": "energy:licenseNumber",
-                    "@type": "xsd:string"
-                }
-            }
+        "licenseNumber": {
+            "@id": "deg:licenseNumber",
+            "@type": "xsd:string"
         }
     }
 }

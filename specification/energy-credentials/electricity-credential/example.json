@@ -5,7 +5,7 @@
     "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/electricity-credential/context.jsonld"
   ],
   "id": "urn:uuid:e5f6a7b8-9012-34ab-cdef-567890123456",
-  "type": ["VerifiableCredential", "ElectricityCredential"],
+  "type": ["VerifiableCredential", "CustomerCredential"],
   "issuer": {
     "id": "https://example-utility.com/issuers/energy-dept",
     "name": "Example Energy Utility",
@@ -34,7 +34,12 @@
         "district": "Metro District",
         "stateProvince": "Example State",
         "postalCode": "12345",
-        "country": "US"
+        "country": "US",
+        "geo": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "plusCode": "849VCWC8+R9"
       },
       "serviceConnectionDate": "2025-01-10"
     },

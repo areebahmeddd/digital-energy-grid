@@ -6,10 +6,10 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "energy": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/program-enrollment-vc/context.jsonld#",
+        "deg": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/program-enrollment-vc/context.jsonld#",
 
         "UtilityProgramEnrollmentCredential": {
-            "@id": "energy:UtilityProgramEnrollmentCredential",
+            "@id": "deg:UtilityProgramEnrollmentCredential",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
@@ -19,36 +19,36 @@
         },
 
         "customerProfile": {
-            "@id": "energy:customerProfile",
+            "@id": "deg:customerProfile",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
                 "customerNumber": {
-                    "@id": "energy:customerNumber",
+                    "@id": "deg:customerNumber",
                     "@type": "xsd:string"
                 },
                 "meterNumber": {
-                    "@id": "energy:meterNumber",
+                    "@id": "deg:meterNumber",
                     "@type": "xsd:string"
                 },
                 "meterType": {
-                    "@id": "energy:meterType",
+                    "@id": "deg:meterType",
                     "@type": "xsd:string"
                 },
                 "maskedIdType": {
-                    "@id": "energy:maskedIdType",
+                    "@id": "deg:maskedIdType",
                     "@type": "xsd:string"
                 },
                 "maskedIdNumber": {
-                    "@id": "energy:maskedIdNumber",
+                    "@id": "deg:maskedIdNumber",
                     "@type": "xsd:string"
                 }
             }
         },
 
         "customerDetails": {
-            "@id": "energy:customerDetails",
+            "@id": "deg:customerDetails",
             "@type": "@id",
             "@context": {
                 "@version": 1.1,
@@ -58,11 +58,11 @@
                     "@type": "xsd:string"
                 },
                 "serviceConnectionDate": {
-                    "@id": "energy:serviceConnectionDate",
+                    "@id": "deg:serviceConnectionDate",
                     "@type": "xsd:date"
                 },
                 "installationAddress": {
-                    "@id": "energy:installationAddress",
+                    "@id": "deg:installationAddress",
                     "@type": "@id",
                     "@context": {
                         "fullAddress": {
@@ -74,7 +74,7 @@
                             "@type": "xsd:string"
                         },
                         "district": {
-                            "@id": "energy:district",
+                            "@id": "deg:district",
                             "@type": "xsd:string"
                         },
                         "stateProvince": {
@@ -88,6 +88,24 @@
                         "country": {
                             "@id": "schema:addressCountry",
                             "@type": "xsd:string"
+                        },
+                        "geo": {
+                            "@id": "schema:geo",
+                            "@type": "@id",
+                            "@context": {
+                                "latitude": {
+                                    "@id": "schema:latitude",
+                                    "@type": "xsd:decimal"
+                                },
+                                "longitude": {
+                                    "@id": "schema:longitude",
+                                    "@type": "xsd:decimal"
+                                }
+                            }
+                        },
+                        "plusCode": {
+                            "@id": "deg:plusCode",
+                            "@type": "xsd:string"
                         }
                     }
                 }
@@ -95,38 +113,25 @@
         },
 
         "programName": {
-            "@id": "energy:programName",
+            "@id": "deg:programName",
             "@type": "xsd:string"
         },
         "programCode": {
-            "@id": "energy:programCode",
+            "@id": "deg:programCode",
             "@type": "xsd:string"
         },
         "enrollmentDate": {
-            "@id": "energy:enrollmentDate",
+            "@id": "deg:enrollmentDate",
             "@type": "xsd:date"
         },
         "enrollmentValidUntil": {
-            "@id": "energy:enrollmentValidUntil",
+            "@id": "deg:enrollmentValidUntil",
             "@type": "xsd:date"
         },
 
-        "UtilityIssuer": {
-            "@id": "energy:UtilityIssuer",
-            "@context": {
-                "@version": 1.1,
-                "@protected": true,
-                "id": "@id",
-                "type": "@type",
-                "name": {
-                    "@id": "schema:name",
-                    "@type": "xsd:string"
-                },
-                "licenseNumber": {
-                    "@id": "energy:licenseNumber",
-                    "@type": "xsd:string"
-                }
-            }
+        "licenseNumber": {
+            "@id": "deg:licenseNumber",
+            "@type": "xsd:string"
         }
     }
 }
