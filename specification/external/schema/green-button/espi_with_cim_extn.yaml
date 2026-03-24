@@ -157,6 +157,142 @@ components:
         - registration
         - relayControl
 
+    ComTechnologyKind:
+      type: string
+      description: >
+        Communication technology used by end devices
+        (IEC 61968 Metering::ComFunction.technology).
+      enum:
+        - cellular
+        - ethernet
+        - homePlug
+        - pager
+        - phone
+        - plc
+        - rf
+        - rfMesh
+        - zigbee
+
+    ComDirectionKind:
+      type: string
+      description: >
+        Communication direction capability of an end device
+        (IEC 61968 Metering::ComFunction.direction).
+        biDirectional = two-way AMI; fromDevice = one-way AMR.
+      enum:
+        - biDirectional
+        - fromDevice
+        - toDevice
+
+    ReadingReasonKind:
+      type: string
+      description: >
+        Reason for a meter reading
+        (IEC 61968 Metering::ReadingReasonKind).
+      enum:
+        - billing
+        - demandReset
+        - inquiry
+        - installation
+        - loadManagement
+        - loadResearch
+        - moveIn
+        - moveOut
+        - other
+        - removal
+        - serviceConnect
+        - serviceDisconnect
+
+    MacroPeriodKind:
+      type: string
+      description: >
+        Overall period of interest for a reading type
+        (IEC 61968 Metering::MacroPeriodKind).
+      enum:
+        - none
+        - billingPeriod
+        - daily
+        - monthly
+        - seasonal
+        - weekly
+        - specifiedPeriod
+
+    MeasuringPeriodKind:
+      type: string
+      description: >
+        Time attribute of the base measurement interval
+        (IEC 61968 Metering::MeasuringPeriodKind).
+        Includes simple intervals, fixed blocks, and rolling blocks.
+      enum:
+        # Simple intervals
+        - none
+        - oneMinute
+        - twoMinute
+        - threeMinute
+        - fiveMinute
+        - tenMinute
+        - fifteenMinute
+        - twentyMinute
+        - thirtyMinute
+        - sixtyMinute
+        - twentyfourHour
+        - present
+        - previous
+        # Fixed blocks
+        - fixedBlock1Min
+        - fixedBlock5Min
+        - fixedBlock10Min
+        - fixedBlock15Min
+        - fixedBlock20Min
+        - fixedBlock30Min
+        - fixedBlock60Min
+        # Rolling blocks (60-min)
+        - rollingBlock60MinIntvl5MinSubIntvl
+        - rollingBlock60MinIntvl10MinSubIntvl
+        - rollingBlock60MinIntvl12MinSubIntvl
+        - rollingBlock60MinIntvl15MinSubIntvl
+        - rollingBlock60MinIntvl20MinSubIntvl
+        - rollingBlock60MinIntvl30MinSubIntvl
+        # Rolling blocks (30-min)
+        - rollingBlock30MinIntvl2MinSubIntvl
+        - rollingBlock30MinIntvl3MinSubIntvl
+        - rollingBlock30MinIntvl5MinSubIntvl
+        - rollingBlock30MinIntvl6MinSubIntvl
+        - rollingBlock30MinIntvl10MinSubIntvl
+        - rollingBlock30MinIntvl15MinSubIntvl
+        # Rolling blocks (15-min)
+        - rollingBlock15MinIntvl1MinSubIntvl
+        - rollingBlock15MinIntvl3MinSubIntvl
+        - rollingBlock15MinIntvl5MinSubIntvl
+        # Rolling blocks (10-min)
+        - rollingBlock10MinIntvl1MinSubIntvl
+        - rollingBlock10MinIntvl2MinSubIntvl
+        - rollingBlock10MinIntvl5MinSubIntvl
+        # Rolling blocks (5-min)
+        - rollingBlock5MinIntvl1MinSubIntvl
+
+    AggregateKind:
+      type: string
+      description: >
+        Aggregation operation applied to a reading type
+        (IEC 61968 Metering::AggregateKind).
+      enum:
+        - none
+        - average
+        - excess
+        - fifthMaximum
+        - fourthMaximum
+        - highThreshold
+        - lowThreshold
+        - maximum
+        - minimum
+        - nominal
+        - normal
+        - secondMaximum
+        - secondMinimum
+        - sum
+        - thirdMaximum
+
     ReadingQualityType:
       type: string
       description: >
@@ -320,6 +456,16 @@ components:
         status:
           type: string
           description: Current operational state.
+        comTechnology:
+          $ref: '#/components/schemas/ComTechnologyKind'
+          description: >
+            Communication technology used by this device
+            (from CIM ComFunction).
+        comDirection:
+          $ref: '#/components/schemas/ComDirectionKind'
+          description: >
+            Communication direction capability.
+            biDirectional = two-way AMI; fromDevice = one-way AMR.
         endDeviceInfo:
           $ref: '#/components/schemas/EndDeviceInfo'
 
@@ -978,6 +1124,23 @@ components:
           type: string
           format: uuid
           description: Unique identifier for this reading set.
+        readingReason:
+          $ref: '#/components/schemas/ReadingReasonKind'
+          description: >
+            (Optional) Why this reading was taken (billing, inquiry, moveIn, etc.).
+        macroPeriod:
+          $ref: '#/components/schemas/MacroPeriodKind'
+          description: >
+            (Optional) Overall period of interest (billing, daily, monthly, etc.).
+        measuringPeriod:
+          $ref: '#/components/schemas/MeasuringPeriodKind'
+          description: >
+            (Optional) Base measurement interval (fifteenMinute, sixtyMinute,
+            rollingBlock, etc.).
+        aggregate:
+          $ref: '#/components/schemas/AggregateKind'
+          description: >
+            (Optional) Aggregation applied (average, maximum, sum, etc.).
         meter:
           $ref: '#/components/schemas/Meter'
           description: >
