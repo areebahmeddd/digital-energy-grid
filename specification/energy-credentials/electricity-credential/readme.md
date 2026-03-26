@@ -11,39 +11,86 @@ This credential is issued per meter — each meter will have its own credential.
 ```
 credentialSubject
 ├── id                    (optional customer DID)
-├── customerProfile       (required — identity: meter, customer number, masked ID)
+├── customerProfile       (required — identity: meter, customer number, idRef)
 ├── customerDetails       (required — name, address, connection date)
 ├── consumptionProfile    (optional — premises, connection type, load, tariff)
 ├── generationProfile     (optional — DER type, capacity, commissioning)
 └── storageProfile        (optional — battery capacity, power rating, type)
 ```
 
+## Issuer
+
+The credential is issued by energy providers. The issuer object contains:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | URI | Yes | DID or URL of the issuing provider |
+| `name` | string | Yes | Name of the provider |
+| `idRef` | object | No | Regulatory identity reference — see [idRef](#idref) |
+
+Example:
+```json
+"issuer": {
+  "id": "did:web:bescom.karnataka.gov.in",
+  "name": "BESCOM - Bangalore Electricity Supply Company",
+  "idRef": {
+    "issuedBy": "did:web:kerc.karnataka.gov.in",
+    "subjectId": "kerc.karnataka.gov.in:AABPC12345"
+  }
+}
+```
+
 ## Validity Period
 
 Per the [W3C VC Data Model 2.0 validity period](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#validity-period), this credential uses:
 
-- **`validFrom`** (required) — date and time from which the credential is valid
-- **`validUntil`** (optional) — date and time until which the credential is valid
+- **`validFrom`** (required) — date-time from which the credential is valid
+- **`validUntil`** (optional) — date-time until which the credential is valid
+
+All date-time values include an explicit timezone offset (e.g., `2025-01-13T10:30:00-05:00`).
+
+## Revocation
+
+Credential revocation is managed via DeDi. See [credentialStatus](../readme.md#credentialstatus) in the top-level readme.
+
+## Profile Sections
 
 ### customerProfile
+
 Core customer identity fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | Yes | Unique meter serial number |
-| `meterType` | string | Yes | Type of meter (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse) |
-| `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
-| `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
+| `meterType` | enum | Yes | Type of meter — see [meterType enum](#metertype-enum) |
+| `idRef` | object | No | External identity reference (e.g., government ID) — see [idRef](#idref) |
+
+#### meterType enum
+
+Values derived from Green Button / ESPI meter kind classifications:
+
+| Value | Description |
+|-------|-------------|
+| `AMR` | Automated Meter Reading |
+| `AMI` | Advanced Metering Infrastructure (smart meter) |
+| `Electromechanical` | Traditional electromechanical meter |
+| `Forward` | Forward-only (import) meter |
+| `Reverse` | Reverse-only (export) meter |
+| `Bidirectional` | Bidirectional meter (import + export) |
+| `Prepaid` | Prepaid/token-based meter |
+| `NetMeter` | Net metering meter |
+| `Other` | Other meter type |
 
 ### customerDetails
+
 Personal and address information:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
 | `installationAddress` | object | Yes | Address of the installation (see below) |
-| `serviceConnectionDate` | date | Yes | Date when the electricity connection was activated |
+| `serviceConnectionDate` | date-time | Yes | Date and time when the electricity connection was activated |
 
 #### installationAddress
 
@@ -61,28 +108,31 @@ Personal and address information:
 The address object reuses [schema.org](https://schema.org/) vocabulary (`streetAddress`, `addressLocality`, `addressRegion`, `postalCode`, `addressCountry`, `geo`, `latitude`, `longitude`).
 
 ### consumptionProfile
+
 Connection and consumption characteristics:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `premisesType` | enum | Yes | Residential, Commercial, Industrial, or Agricultural |
-| `connectionType` | enum | Yes | Single-phase or Three-phase |
+| `premisesType` | enum | Yes | `Residential`, `Commercial`, `Industrial`, or `Agricultural` |
+| `connectionType` | enum | Yes | `Single-phase` or `Three-phase` |
 | `sanctionedLoadKW` | number | Yes | Sanctioned electrical load in kW |
 | `tariffCategoryCode` | string | Yes | Billing/tariff category code |
 
 ### generationProfile
+
 DER generation capability:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `assetId` | string | No | Unique identifier for the generation asset |
-| `generationType` | enum | Yes | Solar, Wind, MicroHydro, or Other |
+| `generationType` | enum | Yes | `Solar`, `Wind`, `MicroHydro`, or `Other` |
 | `capacityKW` | number | Yes | Installed generation capacity in kW |
-| `commissioningDate` | date | Yes | Date when the system was activated |
+| `commissioningDate` | date-time | Yes | Date and time when the system was activated |
 | `manufacturer` | string | No | Equipment manufacturer |
 | `modelNumber` | string | No | Equipment model number |
 
 ### storageProfile
+
 Battery/energy storage capability:
 
 | Field | Type | Required | Description |
@@ -90,8 +140,28 @@ Battery/energy storage capability:
 | `assetId` | string | No | Unique identifier for the storage asset |
 | `storageCapacityKWh` | number | Yes | Storage capacity in kWh |
 | `powerRatingKW` | number | Yes | Charge/discharge power rating in kW |
-| `commissioningDate` | date | Yes | Date when the system was activated |
-| `storageType` | enum | No | LithiumIon, LeadAcid, FlowBattery, or Other |
+| `commissioningDate` | date-time | Yes | Date and time when the system was activated |
+| `storageType` | enum | No | `LithiumIon`, `LeadAcid`, `FlowBattery`, or `Other` |
+
+## idRef
+
+A reusable identity reference pattern. In this credential it appears in:
+
+- **`issuer.idRef`** — the utility's regulatory registration
+- **`customerProfile.idRef`** — the customer's external identity
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `issuedBy` | URI (DID) | Yes | DID of the authority that issued the identity |
+| `subjectId` | string | Yes | Identifier in the format `authority-domain:id-value` |
+
+Example (customer's government ID):
+```json
+"idRef": {
+  "issuedBy": "did:web:ssa.gov",
+  "subjectId": "ssa.gov:XXX-XX-1234"
+}
+```
 
 ## Files
 
@@ -100,11 +170,3 @@ Battery/energy storage capability:
 | `context.jsonld` | JSON-LD context defining semantic mappings for all five profile sections |
 | `schema.json` | JSON Schema (draft 2020-12) for credential validation |
 | `example.json` | Sample credential with all five profiles populated |
-
-## Issuer
-
-This credential is issued by energy providers identified by their URL and optional regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer uses the standard `issuer` property with `id` (URL) and `name`, plus an optional `licenseNumber`.
-
-## Revocation
-
-Credential revocation is managed via the DeDi Registry (`dediregistry` status type).

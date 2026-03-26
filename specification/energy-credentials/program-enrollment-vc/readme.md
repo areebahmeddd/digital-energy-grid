@@ -15,7 +15,7 @@ This credential is issued by energy providers when a consumer enrolls in an ener
 ```
 credentialSubject
 ├── id                    (optional customer DID)
-├── customerProfile       (optional: customer number, meter, masked ID)
+├── customerProfile       (optional: customer number, meter, idRef)
 ├── customerDetails       (optional: name, address, connection date)
 ├── programName           (required)
 ├── programCode           (required)
@@ -23,32 +23,51 @@ credentialSubject
 └── enrollmentValidUntil  (optional)
 ```
 
+## Issuer
+
+The credential is issued by energy providers. The issuer object contains:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | URI | Yes | DID or URL of the issuing provider |
+| `name` | string | Yes | Name of the provider |
+| `idRef` | object | No | Regulatory identity reference — see [idRef](../electricity-credential/readme.md#idref) |
+
 ## Validity Period
 
 Per the [W3C VC Data Model 2.0 validity period](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#validity-period), this credential uses:
 
-- **`validFrom`** (required) — date and time from which the credential is valid
-- **`validUntil`** (optional) — date and time until which the credential is valid
+- **`validFrom`** (required) — date-time from which the credential is valid
+- **`validUntil`** (optional) — date-time until which the credential is valid
+
+All date-time values include an explicit timezone offset (e.g., `2025-01-13T11:00:00-05:00`).
+
+## Revocation
+
+Credential revocation is managed via DeDi. See [credentialStatus](../readme.md#credentialstatus) in the top-level readme.
+
+## Profile Sections
 
 ### customerProfile (optional)
-Core customer identity fields — same structure as [Customer Credential](../electricity-credential/):
+
+Core customer identity fields — same structure as [Customer Credential](../electricity-credential/readme.md#customerprofile):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `customerNumber` | string | Yes | Full customer account number assigned by the utility |
 | `meterNumber` | string | No | Unique meter serial number |
-| `meterType` | string | No | Type of meter (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse) |
-| `maskedIdType` | string | No | Type of government-issued ID (e.g., SSN, Passport, NationalID) |
-| `maskedIdNumber` | string | No | Masked government ID for privacy-preserving verification |
+| `meterType` | enum | No | Type of meter — see [meterType enum](../electricity-credential/readme.md#metertype-enum) |
+| `idRef` | object | No | External identity reference — see [idRef](../electricity-credential/readme.md#idref) |
 
 ### customerDetails (optional)
-Personal and address information — same structure as [Customer Credential](../electricity-credential/):
+
+Personal and address information — same structure as [Customer Credential](../electricity-credential/readme.md#customerdetails):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fullName` | string | Yes | Full name of the customer as per ID proof |
 | `installationAddress` | object | No | Address of the installation (includes optional `geo` and `openLocationCode`) |
-| `serviceConnectionDate` | date | No | Date when the electricity connection was activated |
+| `serviceConnectionDate` | date-time | No | Date and time when the electricity connection was activated |
 
 ### Enrollment Fields
 
@@ -56,8 +75,8 @@ Personal and address information — same structure as [Customer Credential](../
 |-------|------|----------|-------------|
 | `programName` | string | Yes | Human-readable program name |
 | `programCode` | string | Yes | Unique program identifier |
-| `enrollmentDate` | date | Yes | Date of enrollment |
-| `enrollmentValidUntil` | date | No | End date when enrollment expires |
+| `enrollmentDate` | date-time | Yes | Date and time of enrollment |
+| `enrollmentValidUntil` | date-time | No | End date and time when enrollment expires |
 
 ## Files
 
@@ -66,11 +85,3 @@ Personal and address information — same structure as [Customer Credential](../
 | `context.jsonld` | JSON-LD context defining semantic mappings |
 | `schema.json` | JSON Schema (draft 2020-12) for credential validation |
 | `example.json` | Sample P2P trading enrollment credential |
-
-## Issuer
-
-This credential is issued by energy providers identified by their URL and optional regulatory license number. Per the [W3C VC Data Model 2.0 issuer specification](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/#issuer), the issuer uses the standard `issuer` property with `id` (URL) and `name`, plus an optional `licenseNumber`.
-
-## Revocation
-
-Credential revocation is managed via the DeDi Registry (`dediregistry` status type).

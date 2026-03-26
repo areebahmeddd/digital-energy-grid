@@ -6,8 +6,7 @@
         "type": "@type",
         "schema": "https://schema.org/",
         "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "deg": "https://github.com/beckn/DEG/blob/main/specification/energy-credentials/electricity-credential/context.jsonld#",
-
+        "deg": "https://schema.beckn.io/deg#",
         "CustomerCredential": {
             "@id": "deg:CustomerCredential",
             "@context": {
@@ -17,7 +16,6 @@
                 "type": "@type"
             }
         },
-
         "customerProfile": {
             "@id": "deg:customerProfile",
             "@type": "@id",
@@ -36,17 +34,22 @@
                     "@id": "deg:meterType",
                     "@type": "xsd:string"
                 },
-                "maskedIdType": {
-                    "@id": "deg:maskedIdType",
-                    "@type": "xsd:string"
-                },
-                "maskedIdNumber": {
-                    "@id": "deg:maskedIdNumber",
-                    "@type": "xsd:string"
+                "idRef": {
+                    "@id": "deg:idRef",
+                    "@type": "@id",
+                    "@context": {
+                        "issuedBy": {
+                            "@id": "deg:issuedBy",
+                            "@type": "@id"
+                        },
+                        "subjectId": {
+                            "@id": "deg:subjectId",
+                            "@type": "xsd:string"
+                        }
+                    }
                 }
             }
         },
-
         "customerDetails": {
             "@id": "deg:customerDetails",
             "@type": "@id",
@@ -59,7 +62,7 @@
                 },
                 "serviceConnectionDate": {
                     "@id": "deg:serviceConnectionDate",
-                    "@type": "xsd:date"
+                    "@type": "xsd:dateTime"
                 },
                 "installationAddress": {
                     "@id": "deg:installationAddress",
@@ -111,7 +114,6 @@
                 }
             }
         },
-
         "consumptionProfile": {
             "@id": "deg:consumptionProfile",
             "@type": "@id",
@@ -136,7 +138,6 @@
                 }
             }
         },
-
         "generationProfile": {
             "@id": "deg:generationProfile",
             "@type": "@id",
@@ -157,7 +158,7 @@
                 },
                 "commissioningDate": {
                     "@id": "deg:commissioningDate",
-                    "@type": "xsd:date"
+                    "@type": "xsd:dateTime"
                 },
                 "manufacturer": {
                     "@id": "schema:manufacturer",
@@ -169,7 +170,6 @@
                 }
             }
         },
-
         "storageProfile": {
             "@id": "deg:storageProfile",
             "@type": "@id",
@@ -190,7 +190,7 @@
                 },
                 "commissioningDate": {
                     "@id": "deg:storageCommissioningDate",
-                    "@type": "xsd:date"
+                    "@type": "xsd:dateTime"
                 },
                 "storageType": {
                     "@id": "deg:storageType",
@@ -198,10 +198,33 @@
                 }
             }
         },
-
-        "licenseNumber": {
-            "@id": "deg:licenseNumber",
-            "@type": "xsd:string"
+        "idRef": {
+            "@id": "deg:idRef",
+            "@type": "@id",
+            "@context": {
+                "issuedBy": {
+                    "@id": "deg:issuedBy",
+                    "@type": "@id"
+                },
+                "subjectId": {
+                    "@id": "deg:subjectId",
+                    "@type": "xsd:string"
+                }
+            }
+        },
+        "credentialStatus": {
+            "@id": "deg:credentialStatus",
+            "@type": "@id",
+            "@context": {
+                "statusPurpose": {
+                    "@id": "deg:statusPurpose",
+                    "@type": "xsd:string"
+                },
+                "statusListCredential": {
+                    "@id": "deg:statusListCredential",
+                    "@type": "@id"
+                }
+            }
         }
     }
 }
