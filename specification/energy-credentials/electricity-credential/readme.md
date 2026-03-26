@@ -26,7 +26,7 @@ The credential is issued by energy providers. The issuer object contains:
 |-------|------|----------|-------------|
 | `id` | URI | Yes | DID or URL of the issuing provider |
 | `name` | string | Yes | Name of the provider |
-| `idRef` | object | No | Regulatory identity reference — see [idRef](#idref) |
+| `idRef` | object | No | (Any) Identity reference — see [idRef](#idref) |
 
 Example:
 ```json
