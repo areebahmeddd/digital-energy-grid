@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/schema.json",
+    "$id": "https://schema.beckn.io/meter-data-vc/schema.json",
     "title": "Meter Data Credential Schema",
     "description": "JSON Schema for the Meter Data Verifiable Credential. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterData) aligned with Green Button (ESPI/NAESB) semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by trading apps for demand forecasting.",
     "type": "object",

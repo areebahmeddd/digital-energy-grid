@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/billing-summary-vc/schema.json",
+    "$id": "https://schema.beckn.io/billing-summary-vc/schema.json",
     "title": "Billing Summary Credential Schema",
     "description": "JSON Schema for the Billing Summary Verifiable Credential. Combines customer identity (customerProfile) with aggregated billing period data (billingSummary) containing costs and consumption totals, aligned with Green Button (ESPI/NAESB) UsageSummary semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by credit-check apps, program eligibility services, and energy analytics platforms.",
     "type": "object",

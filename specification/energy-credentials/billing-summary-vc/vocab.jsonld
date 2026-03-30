@@ -5,7 +5,7 @@
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "schema": "https://schema.org/",
         "espi": "http://naesb.org/espi#",
-        "billing": "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/billing-summary-vc/vocab.jsonld#"
+        "billing": "https://schema.beckn.io/billing-summary-vc/vocab.jsonld#"
     },
     "@graph": [
         {

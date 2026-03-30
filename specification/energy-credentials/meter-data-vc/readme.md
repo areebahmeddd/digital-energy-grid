@@ -151,7 +151,7 @@ This credential links to the Utility Customer Credential via the `credentialSubj
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
     "https://schema.org/",
-    "https://nfh-trust-labs.github.io/vc-schemas/energy-credentials/meter-data-vc/context.jsonld"
+    "https://schema.beckn.io/meter-data-vc/context.jsonld"
   ],
   "type": ["VerifiableCredential", "MeterDataCredential"],
   "credentialSubject": {
