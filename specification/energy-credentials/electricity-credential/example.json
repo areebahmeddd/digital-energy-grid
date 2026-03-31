@@ -2,12 +2,13 @@
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/customerCredential",
-    "https://schema.beckn.io/customerProfile",
-    "https://schema.beckn.io/customerDetails",
-    "https://schema.beckn.io/consumptionProfile",
-    "https://schema.beckn.io/generationProfile",
-    "https://schema.beckn.io/storageProfile"
+    "https://schema.beckn.io/Location/2.0/context.jsonld",
+    "https://schema.beckn.io/deg/CustomerCredential/context.jsonld",
+    "https://schema.beckn.io/deg/CustomerProfile/context.jsonld",
+    "https://schema.beckn.io/deg/CustomerDetails/context.jsonld",
+    "https://schema.beckn.io/deg/ConsumptionProfile/context.jsonld",
+    "https://schema.beckn.io/deg/GenerationProfile/context.jsonld",
+    "https://schema.beckn.io/deg/StorageProfile/context.jsonld"
   ],
   "id": "urn:uuid:e5f6a7b8-9012-34ab-cdef-567890123456",
   "type": [
