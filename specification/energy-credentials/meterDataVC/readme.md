@@ -21,14 +21,15 @@ Key use cases:
 | Field | Type | Required | Description | Green Button Source |
 |-------|------|----------|-------------|---------------------|
 | `id` | string (DID) | Yes | Customer DID (links to customer) | — |
-| `consumerNumber` | string | Yes | Utility account number (links to customer record) | — |
-| `meterNumber` | string | Yes | Meter serial number | — |
-| `serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
-| `timeZone` | string | Yes | IANA time-zone (e.g., "Asia/Kolkata") | — |
-| `readingType` | object | Yes | What is being measured | `MeterReading.ReadingType` |
-| `qualityOfReading` | enum | No | Overall quality of readings in this credential | `UsageSummary.qualityOfReading` |
-| `coveragePeriod` | object | Yes | Summary date range of data | — |
-| `intervalBlocks` | array | Yes | Blocks of interval readings | `IntervalBlock` |
+| `customerProfile.customerNumber` | string | Yes | Utility account number (links to customer record) | — |
+| `customerProfile.meterNumber` | string | Yes | Meter serial number | — |
+| `customerProfile.meterType` | string | Yes | Meter type (Smart, Conventional, etc.) | — |
+| `meterDataGB.serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
+| `meterDataGB.timeZone` | string | Yes | IANA time-zone (e.g., "Asia/Kolkata") | — |
+| `meterDataGB.readingType` | object | Yes | What is being measured | `MeterReading.ReadingType` |
+| `meterDataGB.qualityOfReading` | enum | No | Overall quality of readings in this credential | `UsageSummary.qualityOfReading` |
+| `meterDataGB.coveragePeriod` | object | Yes | Summary date range of data | — |
+| `meterDataGB.intervalBlocks` | array | Yes | Blocks of interval readings | `IntervalBlock` |
 
 ### readingType
 
@@ -106,7 +107,7 @@ The `cost` field follows the same integer/decimal convention as `value`:
 
 ## Green Button Alignment
 
-This credential uses human-readable string enum values instead of Green Button's integer codes. The mapping is documented in the Green Button reference schema at `external/schema/green-button/attributes.yaml`.
+This credential uses Green Button / ESPI numeric enum codes directly. The full ESPI schema and enum reference is at `external/schema/espiGreenButton/attributes.yaml`. See `external/schema/espiGreenButton/README.md` for the enum lookup tables.
 
 | JSON Property | Green Button Source | ESPI Element |
 |---|---|---|
@@ -131,7 +132,7 @@ This credential uses human-readable string enum values instead of Green Button's
 
 ## Credential Linkage
 
-This credential links to the Utility Customer Credential via the `credentialSubject.id` (customer DID), `consumerNumber` (utility account number), and `meterNumber` fields. A customer may have multiple Meter Data Credentials covering different time periods or meters.
+This credential links to the Customer Credential via the `credentialSubject.id` (customer DID), `customerProfile.customerNumber` (utility account number), and `customerProfile.meterNumber` fields. A customer may have multiple Meter Data Credentials covering different time periods or meters.
 
 ## Files
 
@@ -149,33 +150,45 @@ This credential links to the Utility Customer Credential via the `credentialSubj
 ```json
 {
   "@context": [
-    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/meter-data-vc/context.jsonld"
+    "https://schema.beckn.io/EnergyMeterDataGB/context.jsonld"
   ],
   "type": ["VerifiableCredential", "MeterDataCredential"],
+  "issuer": {
+    "id": "did:web:example-utility.com",
+    "type": "idRef",
+    "name": "Example Energy Utility",
+    "issuedBy": "did:web:example-utility.com",
+    "subjectId": "REG-2025-00001"
+  },
   "credentialSubject": {
     "id": "did:example:consumer:abc123",
-    "consumerNumber": "UTIL-2025-001234567",
-    "meterNumber": "MET2025789456123",
-    "serviceKind": "electricity",
-    "timeZone": "Asia/Kolkata",
-    "readingType": {
-      "commodity": "electricitySecondaryMetered",
-      "flowDirection": "forward",
-      "uom": "Wh",
-      "powerOfTenMultiplier": 0,
-      "accumulationBehaviour": "deltaData",
-      "intervalLength": 900,
-      "currency": "INR",
-      "measurementKind": "energy"
+    "customerProfile": {
+      "customerNumber": "UTIL-2025-001234567",
+      "meterNumber": "MET2025789456123",
+      "meterType": "Smart"
     },
-    "qualityOfReading": "validated",
-    "coveragePeriod": {
-      "start": "2025-07-14T18:30:00Z",
-      "end": "2025-07-14T19:30:00Z"
-    },
-    "intervalBlocks": [ ... ]
+    "meterDataGB": {
+      "serviceKind": "electricity",
+      "timeZone": "Asia/Kolkata",
+      "readingType": {
+        "commodity": "electricitySecondaryMetered",
+        "flowDirection": "forward",
+        "uom": "Wh",
+        "powerOfTenMultiplier": 0,
+        "accumulationBehaviour": "deltaData",
+        "intervalLength": 900,
+        "currency": "INR",
+        "measurementKind": "energy"
+      },
+      "qualityOfReading": "validated",
+      "coveragePeriod": {
+        "start": "2025-07-14T18:30:00Z",
+        "end": "2025-07-14T19:30:00Z"
+      },
+      "intervalBlocks": [ ... ]
+    }
   }
 }
 ```

@@ -27,7 +27,7 @@ The Billing Summary Credential and Meter Data Credential are complementary but s
 | Audience | Forecasting, P2P trading | Credit checks, eligibility |
 | ESPI source | IntervalBlock + IntervalReading | UsageSummary + billing IntervalReading |
 
-Both credentials link to the same customer via DID, consumerNumber, and meterNumber.
+Both credentials link to the same customer via DID, customerProfile.customerNumber, and customerProfile.meterNumber.
 
 ## Fields
 
@@ -36,13 +36,14 @@ Both credentials link to the same customer via DID, consumerNumber, and meterNum
 | Field | Type | Required | Description | Green Button Source |
 |-------|------|----------|-------------|---------------------|
 | `id` | string (DID) | Yes | Customer DID | — |
-| `consumerNumber` | string | Yes | Utility account number | — |
-| `meterNumber` | string | Yes | Meter serial number | — |
-| `serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
-| `timeZone` | string | Yes | IANA time-zone | — |
-| `currency` | string | Yes | ISO 4217 currency code | `UsageSummary.currency` |
-| `coveragePeriod` | object | Yes | Summary date range | — |
-| `billingPeriods` | array | Yes | Array of billing period summaries | `UsageSummary` |
+| `customerProfile.customerNumber` | string | Yes | Utility account number | — |
+| `customerProfile.meterNumber` | string | Yes | Meter serial number | — |
+| `customerProfile.meterType` | string | Yes | Meter type (Smart, Conventional, etc.) | — |
+| `billingSummary.serviceKind` | enum | Yes | electricity / gas / water | `UsagePoint.ServiceKind` |
+| `billingSummary.timeZone` | string | Yes | IANA time-zone | — |
+| `billingSummary.currency` | string | Yes | ISO 4217 currency code | `UsageSummary.currency` |
+| `billingSummary.coveragePeriod` | object | Yes | Summary date range | — |
+| `billingSummary.billingPeriods` | array | Yes | Array of billing period summaries | `UsageSummary` |
 
 ### billingPeriods[]
 
@@ -127,7 +128,7 @@ Follows the same integer/decimal convention as the Meter Data Credential:
 
 ## Credential Linkage
 
-This credential links to the Utility Customer Credential via the `credentialSubject.id` (customer DID), `consumerNumber`, and `meterNumber` fields. A customer may have multiple Billing Summary Credentials covering different time periods or meters.
+This credential links to the Customer Credential via the `credentialSubject.id` (customer DID), `customerProfile.customerNumber`, and `customerProfile.meterNumber` fields. A customer may have multiple Billing Summary Credentials covering different time periods or meters.
 
 ## Files
 
@@ -142,30 +143,42 @@ This credential links to the Utility Customer Credential via the `credentialSubj
 ```json
 {
   "@context": [
-    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/billing-summary-vc/context.jsonld"
+    "https://schema.beckn.io/EnergyBillingSummary/context.jsonld"
   ],
   "type": ["VerifiableCredential", "BillingSummaryCredential"],
+  "issuer": {
+    "id": "did:web:pge.com",
+    "type": "idRef",
+    "name": "Pacific Gas and Electric Company",
+    "issuedBy": "did:web:pge.com",
+    "subjectId": "CPUC-U-39-E"
+  },
   "credentialSubject": {
     "id": "did:example:consumer:pge-5230743477",
-    "consumerNumber": "5230743477",
-    "meterNumber": "PGE-MTR-001",
-    "serviceKind": "electricity",
-    "timeZone": "America/Los_Angeles",
-    "currency": "USD",
-    "coveragePeriod": {
-      "start": "2025-07-01T07:00:00Z",
-      "end": "2025-12-31T08:00:00Z"
+    "customerProfile": {
+      "customerNumber": "5230743477",
+      "meterNumber": "PGE-MTR-001",
+      "meterType": "Smart"
     },
-    "billingPeriods": [
-      {
-        "period": { "start": "2025-07-01T07:00:00Z", "duration": 2592000 },
-        "billAmount": 14223000,
-        "consumption": { "value": 326979, "uom": "Wh", "powerOfTenMultiplier": 3 },
-        "qualityOfReading": "valid"
-      }
-    ]
+    "billingSummary": {
+      "serviceKind": "electricity",
+      "timeZone": "America/Los_Angeles",
+      "currency": "USD",
+      "coveragePeriod": {
+        "start": "2025-07-01T07:00:00Z",
+        "end": "2025-12-31T08:00:00Z"
+      },
+      "billingPeriods": [
+        {
+          "period": { "start": "2025-07-01T07:00:00Z", "duration": 2592000 },
+          "billAmount": 14223000,
+          "consumption": { "value": 326979, "uom": "Wh", "powerOfTenMultiplier": 3 },
+          "qualityOfReading": "valid"
+        }
+      ]
+    }
   }
 }
 ```

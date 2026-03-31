@@ -2,19 +2,23 @@
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/meter-data-vc/context.jsonld"
+    "https://schema.beckn.io/EnergyMeterDataGB/context.jsonld"
   ],
   "id": "urn:uuid:a1b2c3d4-5678-90ab-cdef-1234567890ab",
   "type": ["VerifiableCredential", "MeterDataCredential"],
   "issuer": {
     "id": "did:web:example-utility.com",
+    "type": "idRef",
     "name": "Example Energy Utility",
-    "licenseNumber": "REG-2025-00001"
+    "issuedBy": "did:web:example-utility.com",
+    "subjectId": "REG-2025-00001"
   },
   "validFrom": "2025-07-15T06:00:00Z",
   "credentialStatus": {
     "id": "https://dedi.global/dedi/query/did:web:example-utility.com/VC_revocation_registry",
-    "type": "dediregistry"
+    "type": "dedi",
+    "statusPurpose": "revocation",
+    "statusListCredential": "https://dedi.global/dedi/lookup/did:web:example-utility.com/VC_revocation_registry"
   },
   "credentialSubject": {
     "id": "did:example:consumer:abc123",
@@ -23,62 +27,58 @@
       "meterNumber": "MET2025789456123",
       "meterType": "Smart"
     },
-    "meterData": {
-      "serviceKind": "electricity",
+    "meterDataGB": {
+      "ServiceCategory": { "kind": 0 },
       "timeZone": "Asia/Kolkata",
-      "readingType": {
-        "commodity": "electricitySecondaryMetered",
-        "flowDirection": "forward",
-        "uom": "kWh",
-        "accumulationBehaviour": "deltaData",
+      "ReadingType": {
+        "commodity": 1,
+        "flowDirection": 1,
+        "uom": 72,
+        "accumulationBehaviour": 4,
         "intervalLength": 900,
-        "currency": "INR",
-        "measurementKind": "energy"
+        "currency": 356,
+        "kind": 12
       },
-      "qualityOfReading": "validated",
-      "coveragePeriod": {
-        "start": "2025-07-14T18:30:00Z",
-        "end": "2025-07-14T19:30:00Z"
-      },
-      "intervalBlocks": [
+      "qualityOfReading": 17,
+      "IntervalBlock": [
         {
           "interval": {
-            "start": "2025-07-14T18:30:00Z",
+            "start": "2025-07-15T00:00:00+05:30",
             "duration": 3600
           },
-          "intervalReadings": [
+          "IntervalReading": [
             {
               "timePeriod": {
-                "start": "2025-07-14T18:30:00Z",
+                "start": "2025-07-15T00:00:00+05:30",
                 "duration": 900
               },
               "value": 0.375,
-              "cost": 2.813
+              "cost": 281300
             },
             {
               "timePeriod": {
-                "start": "2025-07-14T18:45:00Z",
+                "start": "2025-07-15T00:15:00+05:30",
                 "duration": 900
               },
               "value": 0.41,
-              "cost": 3.075
+              "cost": 307500
             },
             {
               "timePeriod": {
-                "start": "2025-07-14T19:00:00Z",
+                "start": "2025-07-15T00:30:00+05:30",
                 "duration": 900
               },
               "value": 0.52,
-              "cost": 5.2
+              "cost": 520000
             },
             {
               "timePeriod": {
-                "start": "2025-07-14T19:15:00Z",
+                "start": "2025-07-15T00:45:00+05:30",
                 "duration": 900
               },
               "value": 0.485,
-              "cost": 4.85,
-              "readingQuality": "estimatedUsingLinearInterpolation"
+              "cost": 485000,
+              "ReadingQuality": { "quality": 9 }
             }
           ]
         }

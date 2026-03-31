@@ -10,8 +10,8 @@
             "xsd": "http://www.w3.org/2001/XMLSchema#",
             "energy": "https://schema.beckn.io/energy/",
 
-            "BillingSummaryCredential": {
-                "@id": "energy:BillingSummaryCredential",
+            "MeterDataCredential": {
+                "@id": "energy:MeterDataCredential",
                 "@context": {
                     "@version": 1.1,
                     "@protected": true,
@@ -45,8 +45,8 @@
                             }
                         }
                     },
-                    "billingSummary": {
-                        "@id": "energy:billingSummary",
+                    "meterDataGB": {
+                        "@id": "energy:meterDataGB",
                         "@type": "@id",
                         "@context": {
                             "@version": 1.1,

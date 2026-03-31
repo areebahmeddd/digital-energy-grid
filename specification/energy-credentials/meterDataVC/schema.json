@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://schema.beckn.io/meter-data-vc/schema.json",
+    "$id": "https://schema.beckn.io/meterDataVC/schema.json",
     "title": "Meter Data Credential Schema",
-    "description": "JSON Schema for the Meter Data Verifiable Credential. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterData) aligned with Green Button (ESPI/NAESB) semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by trading apps for demand forecasting.",
+    "description": "JSON Schema for the Meter Data Verifiable Credential. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterDataGB) aligned with Green Button (ESPI/NAESB) semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by trading apps for demand forecasting.",
     "type": "object",
     "required": [
         "@context",
@@ -41,22 +41,32 @@
         },
         "issuer": {
             "type": "object",
-            "required": ["id", "name"],
+            "required": ["id", "type", "name", "issuedBy", "subjectId"],
             "properties": {
                 "id": {
                     "type": "string",
                     "format": "uri",
-                    "description": "URL of the issuing distribution utility"
+                    "description": "DID of the issuing distribution utility"
+                },
+                "type": {
+                    "type": "string",
+                    "const": "idRef",
+                    "description": "Identity reference type"
                 },
                 "name": {
                     "type": "string",
                     "minLength": 1,
                     "description": "Name of the distribution utility"
                 },
-                "licenseNumber": {
+                "issuedBy": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "DID or URI of the issuing authority"
+                },
+                "subjectId": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Regulatory license number issued by the local energy regulator"
+                    "description": "Regulatory registration number of the issuing utility"
                 }
             }
         },
@@ -72,8 +82,8 @@
         },
         "credentialStatus": {
             "type": "object",
-            "required": ["id", "type"],
-            "description": "Revocation status information for the credential",
+            "required": ["id", "type", "statusPurpose"],
+            "description": "Revocation status information for the credential using DeDi registry",
             "properties": {
                 "id": {
                     "type": "string",
@@ -82,15 +92,25 @@
                 },
                 "type": {
                     "type": "string",
-                    "const": "dediregistry",
-                    "description": "Type of status check mechanism (DeDi Registry)"
+                    "const": "dedi",
+                    "description": "Type of status check mechanism (DeDi)"
+                },
+                "statusPurpose": {
+                    "type": "string",
+                    "enum": ["revocation", "suspension"],
+                    "description": "Purpose of the credential status entry"
+                },
+                "statusListCredential": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL of the DeDi status list credential used for lookup"
                 }
             }
         },
         "credentialSubject": {
             "type": "object",
-            "description": "Single subject with customerProfile (identity) and meterData (time-series readings) as equal-level properties.",
-            "required": ["customerProfile", "meterData"],
+            "description": "Single subject with customerProfile (identity) and meterDataGB (time-series readings) as equal-level properties.",
+            "required": ["customerProfile", "meterDataGBGB"],
             "properties": {
                 "id": {
                     "type": "string",
@@ -100,7 +120,7 @@
                 "customerProfile": {
                     "$ref": "#/$defs/CustomerProfile"
                 },
-                "meterData": {
+                "meterDataGBGB": {
                     "$ref": "#/$defs/MeterData"
                 }
             }
