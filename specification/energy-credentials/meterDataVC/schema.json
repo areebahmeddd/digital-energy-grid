@@ -195,7 +195,10 @@
             "properties": {
                 "timePeriod": { "$ref": "#/$defs/DateTimeInterval" },
                 "value": { "type": "number", "description": "Reading value — integer (scaled by powerOfTenMultiplier) or decimal (direct physical quantity)." },
-                "cost": { "type": "integer", "description": "Cost in hundred-thousandths (1e-5) of the currency specified in ReadingType." },
+                "cost": {
+                    "type": "number",
+                    "description": "Cost for this interval. Integer = hundred-thousandths (1e-5) of currency (ESPI native). Float (has decimal point) = exact cost in currency unit."
+                },
                 "ReadingQuality": { "$ref": "#/$defs/ReadingQuality" },
                 "consumptionTier": { "type": "integer" },
                 "tou": { "type": "integer" },

@@ -87,17 +87,19 @@ Both credentials link to the same customer via DID, customerProfile.customerNumb
 
 ## Interpreting Values
 
-### Bill Amount
+### Monetary Fields (billLastPeriod, costAdditionalLastPeriod, amount, unitCost)
 
-Follows the same integer/decimal convention as the Meter Data Credential:
+All monetary fields accept both integer and float values. JSON has a single `number` type — there is no schema-level way to distinguish `1422300000` from `1422300000.0`. The interpretation is a **convention** determined by whether the serialized value contains a decimal point:
 
-**Integer mode (Green Button compatible):** value is in thousandths of the currency unit.
+**Integer mode (ESPI/Green Button native):** value is in hundred-thousandths (1e-5) of the currency unit.
 
-**Example:** `billAmount: 14223000`, `currency: "USD"` → $14,223.00
+**Example:** `billLastPeriod: 1422300000`, `currency: "INR"` → 1422300000 × 10⁻⁵ = ₹14,223.00
 
-**Decimal mode (direct):** value is the direct currency amount.
+**Float mode (exact):** value is the direct currency amount. A decimal point signals this mode.
 
-**Example:** `billAmount: 14223.00`, `currency: "USD"` → $14,223.00
+**Example:** `billLastPeriod: 14223.00`, `currency: "INR"` → ₹14,223.00
+
+> **Note:** JSON parsers may normalize `14223.0` to `14223`, losing the decimal point. Implementations SHOULD use integer mode for ESPI compatibility and only use float mode when the source system provides exact currency amounts. When in doubt, treat a whole number as integer mode (hundred-thousandths).
 
 ### Consumption
 

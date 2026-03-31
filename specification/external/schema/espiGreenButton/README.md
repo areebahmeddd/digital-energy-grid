@@ -156,9 +156,17 @@ This schema provides the core metering and billing types used by the Meter Data 
 
 ## Cost Encoding
 
-All monetary values (`cost`, `billLastPeriod`, `costAdditionalLastPeriod`, `amount`, `unitCost`) are integers in **hundred-thousandths** (1e-5) of the currency unit.
+All monetary values (`cost`, `billLastPeriod`, `costAdditionalLastPeriod`, `amount`, `unitCost`) accept both integer and float:
 
-Example: `cost: 281300` with `currency: 840` (USD) = $2.813
+**Integer mode (ESPI native):** value is in **hundred-thousandths** (1e-5) of the currency unit.
+
+Example: `cost: 281300` with `currency: 840` (USD) → 281300 × 10⁻⁵ = $2.813
+
+**Float mode (exact):** value is the direct currency amount. A decimal point signals this mode.
+
+Example: `cost: 2.813` with `currency: "USD"` → $2.813
+
+> **Note:** JSON has a single `number` type — there is no schema-level way to enforce integer vs float. The distinction is a serialization convention: if the value contains a decimal point, it is treated as exact; otherwise as hundred-thousandths. JSON parsers may normalize `281300.0` to `281300`, so implementations SHOULD prefer integer mode for ESPI compatibility.
 
 ## Timestamps
 

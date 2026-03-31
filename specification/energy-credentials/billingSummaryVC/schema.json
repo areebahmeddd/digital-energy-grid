@@ -133,9 +133,15 @@
                         { "type": "string", "enum": ["energyGenerationFee", "energyDeliveryFee", "energyUsageFee", "administrativeFee", "tax", "energyGenerationCredit", "energyDeliveryCredit", "administrativeCredit", "payment", "information"] }
                     ]
                 },
-                "amount": { "type": "integer", "description": "Amount in hundred-thousandths (1e-5) of the currency. Negative = credit." },
+                "amount": {
+                    "type": "number",
+                    "description": "Line item amount. Integer = hundred-thousandths (1e-5) of currency. Float (decimal point) = exact currency amount. Negative = credit."
+                },
                 "note": { "type": "string" },
-                "unitCost": { "type": "integer", "description": "Per-unit cost in hundred-thousandths (1e-5) of the currency." },
+                "unitCost": {
+                    "type": "number",
+                    "description": "Per-unit cost. Integer = hundred-thousandths (1e-5) of currency. Float (decimal point) = exact."
+                },
                 "rounding": { "type": "integer" },
                 "dateTime": { "type": "string", "format": "date-time" },
                 "measurement": { "$ref": "#/$defs/SummaryMeasurement" },
@@ -147,9 +153,15 @@
             "required": ["billingPeriod", "billLastPeriod", "overallConsumptionLastPeriod"],
             "properties": {
                 "billingPeriod": { "$ref": "#/$defs/DateTimeInterval" },
-                "billLastPeriod": { "type": "integer", "description": "Bill amount in hundred-thousandths (1e-5) of the currency." },
-                "billToDate": { "type": "integer" },
-                "costAdditionalLastPeriod": { "type": "integer", "description": "Additional charges in hundred-thousandths (1e-5) of the currency." },
+                "billLastPeriod": {
+                    "type": "number",
+                    "description": "Bill amount for the period. Integer = hundred-thousandths (1e-5) of currency. Float (decimal point) = exact."
+                },
+                "billToDate": { "type": "number" },
+                "costAdditionalLastPeriod": {
+                    "type": "number",
+                    "description": "Additional charges/fees. Integer = hundred-thousandths (1e-5) of currency. Float (decimal point) = exact."
+                },
                 "costAdditionalDetailLastPeriod": {
                     "type": "array",
                     "items": { "$ref": "#/$defs/LineItem" }

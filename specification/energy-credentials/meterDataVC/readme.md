@@ -52,7 +52,7 @@ Key use cases:
 | `timePeriod.start` | datetime | Yes | Start of reading interval (ISO 8601) | `DateTimeInterval.start` |
 | `timePeriod.duration` | integer | Yes | Duration in seconds | `DateTimeInterval.duration` |
 | `value` | number | Yes | Reading value — integer (scaled by powerOfTenMultiplier + uom) or decimal (direct physical quantity) | `IntervalReading.value` |
-| `cost` | number | No | Cost for this interval in the currency from readingType.currency. Integer mode: thousandths of currency unit. Decimal mode: direct currency amount | `IntervalReading.cost` |
+| `cost` | number | No | Cost for this interval. Integer = hundred-thousandths (1e-5) of currency. Float = exact cost in currency unit | `IntervalReading.cost` |
 | `readingQuality` | enum | No | Quality of this specific reading; overrides credential-level qualityOfReading | `ReadingQuality` |
 
 ### qualityOfReading / readingQuality enum values
@@ -95,15 +95,17 @@ physical_value = value × 10^powerOfTenMultiplier  [in units of uom]
 
 ## Interpreting Cost
 
-The `cost` field follows the same integer/decimal convention as `value`:
+The `cost` field accepts both integer and float values. JSON has a single `number` type — there is no schema-level way to distinguish `281300` from `281300.0`. The interpretation is a **convention** determined by whether the serialized value contains a decimal point:
 
-**Integer mode (Green Button compatible):** cost is in thousandths of the currency unit:
+**Integer mode (ESPI/Green Button native):** cost is in hundred-thousandths (1e-5) of the currency unit:
 
-**Example:** `cost: 4639`, `currency: "USD"` → $4.639 for that interval.
+**Example:** `cost: 281300`, `currency: "INR"` → 281300 × 10⁻⁵ = ₹2.813 for that interval.
 
-**Decimal mode (direct):** cost is the direct currency amount:
+**Float mode (exact):** cost is the direct currency amount. A decimal point signals this mode:
 
-**Example:** `cost: 4.639`, `currency: "USD"` → $4.639 for that interval.
+**Example:** `cost: 2.813`, `currency: "INR"` → ₹2.813 for that interval.
+
+> **Note:** JSON parsers may normalize `281300.0` to `281300`, losing the decimal point. Implementations SHOULD use integer mode for ESPI compatibility and only use float mode when the source system provides exact currency amounts. When in doubt, treat a whole number as integer mode (hundred-thousandths).
 
 ## Green Button Alignment
 
