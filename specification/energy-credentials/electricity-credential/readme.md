@@ -94,18 +94,27 @@ Personal and address information:
 
 #### installationAddress
 
+Follows the [beckn Location schema](https://github.com/beckn/protocol-specifications/blob/master/schema/Location.yaml) with an additional `openLocationCode` field.
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `fullAddress` | string | Yes | Complete street address of the installation |
-| `city` | string | No | City name |
+| `id` | string | No | Unique identifier for the location |
+| `descriptor` | object | No | Physical description of the location (`name`, `code`, `short_desc`, `long_desc`) |
+| `map_url` | string (uri) | No | URL to the map of the location |
+| `gps` | string | No | GPS coordinates as `"lat,lng"` string (e.g., `"12.9716,77.5946"`) |
+| `address` | string | Yes | Complete postal address of the installation |
+| `city` | object | No | City — `{ name: string, code: string }` |
 | `district` | string | No | District or county name |
-| `stateProvince` | string | No | State, province, or region name |
-| `postalCode` | string | Yes | Postal or ZIP code (format varies by country) |
-| `country` | string | Yes | ISO 3166-1 alpha-2 country code |
-| `geo` | object | No | Geographic coordinates (`latitude`, `longitude` in decimal degrees, WGS84) |
+| `state` | object | No | State — `{ name: string, code: string }` |
+| `country` | object | Yes | Country — `{ name: string, code: string }` (ISO 3166-1 alpha-2 code required) |
+| `area_code` | string | Yes | Area code or postal/ZIP code |
+| `circle` | object | No | Circular geo-fence — `{ gps: string, radius: Scalar }` |
+| `polygon` | string | No | Boundary polygon of the location |
+| `3dspace` | string | No | Three dimensional region describing the location |
+| `rating` | string | No | Rating of the location |
 | `openLocationCode` | string | No | Open Location Code (OLC) for the installation location |
 
-The address object reuses [schema.org](https://schema.org/) vocabulary (`streetAddress`, `addressLocality`, `addressRegion`, `postalCode`, `addressCountry`, `geo`, `latitude`, `longitude`).
+The address object aligns with the [beckn protocol Location schema](https://github.com/beckn/protocol-specifications/blob/master/schema/Location.yaml) and reuses [schema.org](https://schema.org/) vocabulary where applicable.
 
 ### consumptionProfile
 

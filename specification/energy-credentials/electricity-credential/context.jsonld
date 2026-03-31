@@ -65,46 +65,119 @@
                     "@type": "xsd:dateTime"
                 },
                 "installationAddress": {
-                    "@id": "deg:installationAddress",
+                    "@id": "beckn:Location",
                     "@type": "@id",
                     "@context": {
-                        "fullAddress": {
-                            "@id": "schema:streetAddress",
+                        "beckn": "https://schema.beckn.io/",
+                        "descriptor": {
+                            "@id": "beckn:descriptor",
+                            "@type": "@id",
+                            "@context": {
+                                "name": {
+                                    "@id": "beckn:name",
+                                    "@type": "xsd:string"
+                                },
+                                "code": {
+                                    "@id": "beckn:code",
+                                    "@type": "xsd:string"
+                                },
+                                "short_desc": {
+                                    "@id": "beckn:short_desc",
+                                    "@type": "xsd:string"
+                                },
+                                "long_desc": {
+                                    "@id": "beckn:long_desc",
+                                    "@type": "xsd:string"
+                                }
+                            }
+                        },
+                        "map_url": {
+                            "@id": "beckn:map_url",
+                            "@type": "@id"
+                        },
+                        "gps": {
+                            "@id": "beckn:gps",
+                            "@type": "xsd:string"
+                        },
+                        "address": {
+                            "@id": "beckn:address",
                             "@type": "xsd:string"
                         },
                         "city": {
-                            "@id": "schema:addressLocality",
-                            "@type": "xsd:string"
-                        },
-                        "district": {
-                            "@id": "deg:district",
-                            "@type": "xsd:string"
-                        },
-                        "stateProvince": {
-                            "@id": "schema:addressRegion",
-                            "@type": "xsd:string"
-                        },
-                        "postalCode": {
-                            "@id": "schema:postalCode",
-                            "@type": "xsd:string"
-                        },
-                        "country": {
-                            "@id": "schema:addressCountry",
-                            "@type": "xsd:string"
-                        },
-                        "geo": {
-                            "@id": "schema:geo",
+                            "@id": "beckn:city",
                             "@type": "@id",
                             "@context": {
-                                "latitude": {
-                                    "@id": "schema:latitude",
-                                    "@type": "xsd:decimal"
+                                "name": {
+                                    "@id": "beckn:name",
+                                    "@type": "xsd:string"
                                 },
-                                "longitude": {
-                                    "@id": "schema:longitude",
-                                    "@type": "xsd:decimal"
+                                "code": {
+                                    "@id": "beckn:code",
+                                    "@type": "xsd:string"
                                 }
                             }
+                        },
+                        "district": {
+                            "@id": "beckn:district",
+                            "@type": "xsd:string"
+                        },
+                        "state": {
+                            "@id": "beckn:state",
+                            "@type": "@id",
+                            "@context": {
+                                "name": {
+                                    "@id": "beckn:name",
+                                    "@type": "xsd:string"
+                                },
+                                "code": {
+                                    "@id": "beckn:code",
+                                    "@type": "xsd:string"
+                                }
+                            }
+                        },
+                        "country": {
+                            "@id": "beckn:country",
+                            "@type": "@id",
+                            "@context": {
+                                "name": {
+                                    "@id": "beckn:name",
+                                    "@type": "xsd:string"
+                                },
+                                "code": {
+                                    "@id": "beckn:code",
+                                    "@type": "xsd:string"
+                                }
+                            }
+                        },
+                        "area_code": {
+                            "@id": "beckn:area_code",
+                            "@type": "xsd:string"
+                        },
+                        "circle": {
+                            "@id": "beckn:circle",
+                            "@type": "@id",
+                            "@context": {
+                                "gps": {
+                                    "@id": "beckn:gps",
+                                    "@type": "xsd:string"
+                                },
+                                "radius": {
+                                    "@id": "beckn:radius",
+                                    "@type": "@id"
+                                }
+                            }
+                        },
+                        "polygon": {
+                            "@id": "beckn:polygon",
+                            "@type": "xsd:string"
+                        },
+                        "3dspace": {
+                            "@id": "beckn:3dspace",
+                            "@type": "xsd:string"
+                        },
+                        "rating": {
+                            "@id": "beckn:rating",
+                            "@type": "xsd:string"
                         },
                         "openLocationCode": {
                             "@id": "deg:openLocationCode",

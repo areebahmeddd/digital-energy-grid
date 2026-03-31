@@ -44,17 +44,27 @@
     "customerDetails": {
       "fullName": "Jane Doe",
       "installationAddress": {
-        "fullAddress": "123 Energy Street, Unit 4",
-        "city": "Metro City",
-        "district": "Metro District",
-        "stateProvince": "Example State",
-        "postalCode": "12345",
-        "country": "US",
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 37.7749,
-          "longitude": -122.4194
+        "id": "LOC-001",
+        "descriptor": {
+          "name": "Jane Doe Residence",
+          "short_desc": "Residential installation at 123 Energy Street"
         },
+        "gps": "37.7749,-122.4194",
+        "address": "123 Energy Street, Unit 4",
+        "city": {
+          "name": "Metro City",
+          "code": "METRO"
+        },
+        "district": "Metro District",
+        "state": {
+          "name": "Example State",
+          "code": "EX"
+        },
+        "country": {
+          "name": "United States",
+          "code": "US"
+        },
+        "area_code": "12345",
         "openLocationCode": "849VCWC8+R9"
       },
       "serviceConnectionDate": "2025-01-10T00:00:00-05:00"
