@@ -1,4 +1,4 @@
-"""Validate meter-data-vc examples against schema.json using pytest."""
+"""Validate meterDataVC examples against schema.json using pytest."""
 
 import json
 from pathlib import Path

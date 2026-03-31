@@ -1,4 +1,4 @@
-"""Validate billing-summary-vc examples against schema.json using pytest."""
+"""Validate billingSummaryVC examples against schema.json using pytest."""
 
 import json
 from pathlib import Path

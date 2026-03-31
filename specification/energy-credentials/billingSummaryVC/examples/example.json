@@ -28,9 +28,9 @@
       "meterType": "Smart"
     },
     "billingSummary": {
-      "ServiceCategory": { "kind": 0 },
+      "ServiceCategory": { "kind": "electricity" },
       "timeZone": "America/Los_Angeles",
-      "currency": 356,
+      "currency": "INR",
       "UsageSummary": [
         {
           "billingPeriod": {
@@ -40,30 +40,30 @@
           "billLastPeriod": 1422300000,
           "overallConsumptionLastPeriod": {
             "value": 326979,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 0,
-          "qualityOfReading": 0,
+          "qualityOfReading": "valid",
           "costAdditionalDetailLastPeriod": [
             {
-              "itemKind": 1,
+              "itemKind": "energyGenerationFee",
               "amount": 853400000,
               "note": "Generation charge",
               "unitCost": 2612000
             },
             {
-              "itemKind": 2,
+              "itemKind": "energyDeliveryFee",
               "amount": 326700000,
               "note": "Transmission and distribution"
             },
             {
-              "itemKind": 3,
+              "itemKind": "energyUsageFee",
               "amount": 171100000,
               "note": "Demand charge — peak period"
             },
             {
-              "itemKind": 5,
+              "itemKind": "tax",
               "amount": 71100000,
               "note": "State and local taxes"
             }
@@ -77,44 +77,44 @@
           "billLastPeriod": 2156900000,
           "overallConsumptionLastPeriod": {
             "value": 475940,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 12500000,
-          "qualityOfReading": 0,
+          "qualityOfReading": "valid",
           "costAdditionalDetailLastPeriod": [
             {
-              "itemKind": 1,
+              "itemKind": "energyGenerationFee",
               "amount": 1243200000,
               "note": "Generation charge"
             },
             {
-              "itemKind": 2,
+              "itemKind": "energyDeliveryFee",
               "amount": 475900000,
               "note": "Transmission and distribution"
             },
             {
-              "itemKind": 3,
+              "itemKind": "energyUsageFee",
               "amount": 285400000,
               "note": "Demand charge — peak period"
             },
             {
-              "itemKind": 5,
+              "itemKind": "tax",
               "amount": 102400000,
               "note": "State and local taxes"
             },
             {
-              "itemKind": 6,
+              "itemKind": "energyGenerationCredit",
               "amount": -37500000,
               "note": "P2P solar energy trade credit — 150 kWh exported"
             },
             {
-              "itemKind": 4,
+              "itemKind": "administrativeFee",
               "amount": 12500000,
               "note": "Late payment penalty"
             },
             {
-              "itemKind": 10,
+              "itemKind": "information",
               "amount": 0,
               "note": "Net metering settlement period: Jul 15 – Aug 14"
             }
@@ -128,11 +128,11 @@
           "billLastPeriod": 1410800000,
           "overallConsumptionLastPeriod": {
             "value": 451595,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 0,
-          "qualityOfReading": 0
+          "qualityOfReading": "valid"
         },
         {
           "billingPeriod": {
@@ -142,11 +142,11 @@
           "billLastPeriod": 1097300000,
           "overallConsumptionLastPeriod": {
             "value": 290118,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 0,
-          "qualityOfReading": 0
+          "qualityOfReading": "valid"
         },
         {
           "billingPeriod": {
@@ -156,11 +156,11 @@
           "billLastPeriod": 1364700000,
           "overallConsumptionLastPeriod": {
             "value": 349186,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 0,
-          "qualityOfReading": 0
+          "qualityOfReading": "valid"
         },
         {
           "billingPeriod": {
@@ -170,11 +170,11 @@
           "billLastPeriod": 1050100000,
           "overallConsumptionLastPeriod": {
             "value": 276577,
-            "uom": 72,
+            "uom": "Wh",
             "powerOfTenMultiplier": 3
           },
           "costAdditionalLastPeriod": 0,
-          "qualityOfReading": 0
+          "qualityOfReading": "valid"
         }
       ]
     }

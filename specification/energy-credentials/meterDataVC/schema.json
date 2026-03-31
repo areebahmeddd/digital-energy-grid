@@ -1,482 +1,236 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://schema.beckn.io/meterDataVC/schema.json",
+    "$id": "https://schema.beckn.io/EnergyMeterDataGB/schema.json",
     "title": "Meter Data Credential Schema",
-    "description": "JSON Schema for the Meter Data Verifiable Credential. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterDataGB) aligned with Green Button (ESPI/NAESB) semantics within a single W3C Verifiable Credential (VC Data Model 2.0). Issued by the utility; consumed by trading apps for demand forecasting.",
+    "description": "JSON Schema for the Meter Data Verifiable Credential. Uses ESPI/Green Button types and numeric enum codes. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterDataGB) within a W3C VC 2.0 envelope.",
     "type": "object",
-    "required": [
-        "@context",
-        "id",
-        "type",
-        "issuer",
-        "validFrom",
-        "credentialSubject"
-    ],
+    "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
     "properties": {
         "@context": {
             "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "contains": {
-                "const": "https://www.w3.org/ns/credentials/v2"
-            },
+            "items": { "type": "string" },
+            "contains": { "const": "https://www.w3.org/ns/credentials/v2" },
             "minItems": 2
         },
         "id": {
             "type": "string",
             "format": "uri",
-            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-            "description": "Unique identifier for the credential in URN UUID format"
+            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         },
         "type": {
             "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "contains": {
-                "const": "MeterDataCredential"
-            },
+            "items": { "type": "string" },
+            "contains": { "const": "MeterDataCredential" },
             "minItems": 2
         },
-        "issuer": {
+        "issuer": { "$ref": "#/$defs/Issuer" },
+        "validFrom": { "type": "string", "format": "date-time" },
+        "validUntil": { "type": "string", "format": "date-time" },
+        "credentialStatus": { "$ref": "#/$defs/CredentialStatus" },
+        "credentialSubject": {
+            "type": "object",
+            "required": ["customerProfile", "meterDataGB"],
+            "properties": {
+                "id": { "type": "string", "format": "uri" },
+                "customerProfile": { "$ref": "#/$defs/CustomerProfile" },
+                "meterDataGB": { "$ref": "#/$defs/MeterDataGB" }
+            }
+        },
+        "proof": { "$ref": "#/$defs/Proof" }
+    },
+    "$defs": {
+        "Issuer": {
             "type": "object",
             "required": ["id", "type", "name", "issuedBy", "subjectId"],
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID of the issuing distribution utility"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "idRef",
-                    "description": "Identity reference type"
-                },
-                "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Name of the distribution utility"
-                },
-                "issuedBy": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "DID or URI of the issuing authority"
-                },
-                "subjectId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Regulatory registration number of the issuing utility"
-                }
+                "id": { "type": "string", "format": "uri" },
+                "type": { "type": "string", "const": "idRef" },
+                "name": { "type": "string", "minLength": 1 },
+                "issuedBy": { "type": "string", "format": "uri" },
+                "subjectId": { "type": "string", "minLength": 1 }
             }
         },
-        "validFrom": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date and time from which the credential is valid (W3C VC Data Model 2.0)"
-        },
-        "validUntil": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date and time until which the credential is valid (W3C VC Data Model 2.0)"
-        },
-        "credentialStatus": {
+        "CredentialStatus": {
             "type": "object",
             "required": ["id", "type", "statusPurpose"],
-            "description": "Revocation status information for the credential using DeDi registry",
             "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URL to query the revocation status of the credential via DeDi registry"
-                },
-                "type": {
-                    "type": "string",
-                    "const": "dedi",
-                    "description": "Type of status check mechanism (DeDi)"
-                },
-                "statusPurpose": {
-                    "type": "string",
-                    "enum": ["revocation", "suspension"],
-                    "description": "Purpose of the credential status entry"
-                },
-                "statusListCredential": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URL of the DeDi status list credential used for lookup"
-                }
+                "id": { "type": "string", "format": "uri" },
+                "type": { "type": "string", "const": "dedi" },
+                "statusPurpose": { "type": "string", "enum": ["revocation", "suspension"] },
+                "statusListCredential": { "type": "string", "format": "uri" }
             }
         },
-        "credentialSubject": {
-            "type": "object",
-            "description": "Single subject with customerProfile (identity) and meterDataGB (time-series readings) as equal-level properties.",
-            "required": ["customerProfile", "meterDataGBGB"],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "Optional DID of the customer/credential subject"
-                },
-                "customerProfile": {
-                    "$ref": "#/$defs/CustomerProfile"
-                },
-                "meterDataGBGB": {
-                    "$ref": "#/$defs/MeterData"
-                }
-            }
-        },
-        "proof": {
+        "Proof": {
             "type": "object",
             "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
             "properties": {
-                "type": {
-                    "type": "string",
-                    "description": "Cryptographic signature type (e.g., Ed25519Signature2020)"
-                },
-                "created": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "Timestamp when the proof was created"
-                },
-                "verificationMethod": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URI of the verification method/public key"
-                },
-                "proofPurpose": {
-                    "type": "string",
-                    "enum": ["assertionMethod", "authentication"],
-                    "description": "Purpose of the proof"
-                },
-                "proofValue": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "The cryptographic signature value"
-                }
+                "type": { "type": "string" },
+                "created": { "type": "string", "format": "date-time" },
+                "verificationMethod": { "type": "string", "format": "uri" },
+                "proofPurpose": { "type": "string", "enum": ["assertionMethod", "authentication"] },
+                "proofValue": { "type": "string", "minLength": 1 }
             }
-        }
-    },
-    "$defs": {
+        },
         "CustomerProfile": {
             "type": "object",
-            "description": "Core customer identity: customer number, meter number, masked ID",
             "required": ["customerNumber", "meterNumber", "meterType"],
             "properties": {
-                "customerNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Full customer account number assigned by the utility"
-                },
-                "meterNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 50,
-                    "description": "Unique meter serial number"
-                },
-                "meterType": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Type of electricity meter installed (e.g., Smart, Conventional, Prepaid, Bidirectional, Forward, Reverse)"
-                },
-                "maskedIdType": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Type of government-issued ID that has been masked (e.g., 'SSN', 'Passport', 'NationalID')"
-                },
-                "maskedIdNumber": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Masked government ID for privacy-preserving verification (e.g., 'XXXX-XXXX-1234')"
+                "customerNumber": { "type": "string", "minLength": 1 },
+                "meterNumber": { "type": "string", "minLength": 1, "maxLength": 50 },
+                "meterType": { "type": "string", "minLength": 1 },
+                "maskedIdType": { "type": "string", "minLength": 1 },
+                "maskedIdNumber": { "type": "string", "minLength": 1 }
+            }
+        },
+        "DateTimeInterval": {
+            "type": "object",
+            "required": ["start", "duration"],
+            "properties": {
+                "start": { "type": "string", "format": "date-time" },
+                "duration": { "type": "integer", "minimum": 0 }
+            }
+        },
+        "ServiceCategory": {
+            "type": "object",
+            "required": ["kind"],
+            "properties": {
+                "kind": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
+                        { "type": "string", "enum": ["electricity", "gas", "water", "time", "heat", "refuse", "sewerage", "rates", "tvLicense", "internet"] }
+                    ],
+                    "description": "ESPI ServiceKind. 0=electricity, 1=gas, 2=water, 3=time, 4=heat, 5=refuse, 6=sewerage, 7=rates, 8=tvLicense, 9=internet."
                 }
             }
         },
-        "MeterData": {
-            "type": "object",
-            "description": "Historical meter reading data for a single meter, using Green Button (ESPI/NAESB) semantics.",
-            "required": [
-                "serviceKind",
-                "timeZone",
-                "readingType",
-                "coveragePeriod",
-                "intervalBlocks"
+        "QualityOfReading": {
+            "oneOf": [
+                { "type": "integer", "enum": [0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] },
+                { "type": "string", "enum": ["valid", "manuallyEdited", "estimatedUsingReferenceDay", "estimatedUsingLinearInterpolation", "questionable", "derived", "projected", "mixed", "raw", "normalizedForWeather", "other", "validated", "verified", "billingApproved"] }
             ],
+            "description": "ESPI QualityOfReading. 0=valid, 7=manuallyEdited, 8=estimatedUsingReferenceDay, 9=estimatedUsingLinearInterpolation, 10=questionable, 11=derived, 12=projected, 13=mixed, 14=raw, 15=normalizedForWeather, 16=other, 17=validated, 18=verified, 19=billingApproved."
+        },
+        "ReadingType": {
+            "type": "object",
+            "required": ["commodity", "flowDirection", "uom", "accumulationBehaviour", "intervalLength"],
             "properties": {
-                "serviceKind": {
-                    "type": "string",
-                    "description": "Kind of service provided (ESPI: ServiceKind). ESPI codes — 0: electricity, 1: gas, 2: water.",
-                    "enum": [
-                        "electricity",
-                        "gas",
-                        "water"
-                    ]
-                },
-                "timeZone": {
-                    "type": "string",
-                    "description": "IANA time-zone identifier for the meter location (e.g., \"Asia/Kolkata\"). Critical for demand-forecasting models that need local solar time.",
-                    "examples": [
-                        "Asia/Kolkata",
-                        "America/New_York"
-                    ]
-                },
-                "readingType": {
-                    "type": "object",
-                    "description": "Describes what is being measured (ESPI: ReadingType). Each field maps to a Green Button ReadingType sub-element.",
-                    "required": [
-                        "commodity",
-                        "flowDirection",
-                        "uom",
-                        "accumulationBehaviour",
-                        "intervalLength"
+                "commodity": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+                        { "type": "string", "enum": ["none", "electricitySecondaryMetered", "electricityPrimaryMetered", "communication", "air", "insulativeGas", "insulativeOil", "naturalGas", "propane", "potableWater", "steam", "wasteWater"] }
                     ],
-                    "properties": {
-                        "commodity": {
-                            "type": "string",
-                            "description": "Commodity being metered (ESPI: CommodityKind). ESPI codes — 0: none, 1: electricitySecondaryMetered, 2: electricityPrimaryMetered, 4: air, 7: naturalGas, 8: propane, 9: potableWater, 10: steam, 11: wasteWater.",
-                            "enum": [
-                                "none",
-                                "electricitySecondaryMetered",
-                                "electricityPrimaryMetered",
-                                "air",
-                                "naturalGas",
-                                "propane",
-                                "potableWater",
-                                "steam",
-                                "wasteWater"
-                            ]
-                        },
-                        "flowDirection": {
-                            "type": "string",
-                            "description": "Direction of energy flow being measured (ESPI: FlowDirectionKind). ESPI codes — 0: none, 1: forward, 2: lagging, 3: leading, 4: net, 5: q1plusQ2, 19: reverse.",
-                            "enum": [
-                                "none",
-                                "forward",
-                                "reverse",
-                                "net",
-                                "lagging",
-                                "leading"
-                            ]
-                        },
-                        "uom": {
-                            "type": "string",
-                            "description": "Unit of measure for the reading (ESPI: UnitOfMeasure / UOM). ESPI codes — 5: A (current), 29: V (voltage), 31: J, 33: Hz, 38: W (real power), 42: m3, 61: VA, 63: VAr, 71: Wh (real energy), 72: kWh.",
-                            "enum": [
-                                "Wh",
-                                "kWh",
-                                "W",
-                                "kW",
-                                "VA",
-                                "VAr",
-                                "V",
-                                "A",
-                                "Hz",
-                                "J",
-                                "m3"
-                            ]
-                        },
-                        "powerOfTenMultiplier": {
-                            "type": "integer",
-                            "default": 0,
-                            "description": "Power-of-ten multiplier applied to the reading value (ESPI: UnitMultiplierKind). E.g., 0 = ×1, 3 = ×1000 (kilo), -3 = ×0.001 (milli). When value is a decimal, this SHOULD be 0 or omitted."
-                        },
-                        "accumulationBehaviour": {
-                            "type": "string",
-                            "description": "How the reading value accumulates over time (ESPI: AccumulationBehaviourKind). ESPI codes — 0: none, 1: bulkQuantity, 2: continuousCumulative, 3: cumulative, 4: deltaData, 6: indicating, 9: summation, 12: instantaneous.",
-                            "enum": [
-                                "none",
-                                "bulkQuantity",
-                                "continuousCumulative",
-                                "cumulative",
-                                "deltaData",
-                                "indicating",
-                                "summation",
-                                "instantaneous"
-                            ]
-                        },
-                        "intervalLength": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "description": "Standard interval length in seconds for the readings (e.g., 900 for 15-minute intervals)."
-                        },
-                        "currency": {
-                            "type": "string",
-                            "description": "ISO 4217 currency code for cost values in interval readings (ESPI: currency). Required when cost data is present in readings.",
-                            "examples": [
-                                "USD",
-                                "EUR",
-                                "INR"
-                            ]
-                        },
-                        "measurementKind": {
-                            "type": "string",
-                            "description": "What the reading measures (ESPI: MeasurementKind / kind). Distinguishes energy from demand, power, voltage, etc. ESPI codes — 0: none, 2: apparentPowerFactor, 3: currency, 4: current, 5: currentAngle, 7: date, 8: demand, 9: distance, 12: energy, 13: energizationLoadSide, 14: fan, 15: frequency, 35: power, 37: powerFactor, 38: quantityPower, 40: voltage, 41: volumetricFlow.",
-                            "enum": [
-                                "none",
-                                "energy",
-                                "demand",
-                                "power",
-                                "current",
-                                "voltage",
-                                "frequency",
-                                "powerFactor",
-                                "apparentPowerFactor",
-                                "quantityPower",
-                                "volumetricFlow",
-                                "currency",
-                                "date",
-                                "distance",
-                                "energizationLoadSide",
-                                "fan"
-                            ]
-                        },
-                        "phase": {
-                            "type": "string",
-                            "description": "Electrical phase being measured (ESPI: PhaseCodeKind). Relevant for three-phase commercial/industrial meters. ESPI codes — 0: notApplicable, 16: phaseAN, 32: phaseBN, 64: phaseCN, 128: phaseAB, 256: phaseBC, 512: phaseCA, 768: phaseABC.",
-                            "enum": [
-                                "notApplicable",
-                                "phaseAN",
-                                "phaseBN",
-                                "phaseCN",
-                                "phaseAB",
-                                "phaseBC",
-                                "phaseCA",
-                                "phaseABC"
-                            ]
-                        }
-                    }
+                    "description": "ESPI CommodityKind. 0=none, 1=electricitySecondaryMetered, 2=electricityPrimaryMetered, 7=naturalGas, 9=potableWater."
                 },
-                "coveragePeriod": {
-                    "type": "object",
-                    "description": "Summary date range of the data contained in this credential.",
-                    "required": [
-                        "start",
-                        "end"
+                "flowDirection": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 1, 2, 3, 4, 5, 19, 20] },
+                        { "type": "string", "enum": ["none", "forward", "lagging", "leading", "net", "q1plusQ2", "reverse", "total"] }
                     ],
-                    "properties": {
-                        "start": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "Start of the coverage period (ISO 8601)"
-                        },
-                        "end": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "End of the coverage period (ISO 8601)"
-                        }
-                    }
+                    "description": "ESPI FlowDirectionKind. 0=none, 1=forward, 4=net, 19=reverse, 20=total."
                 },
-                "qualityOfReading": {
-                    "type": "string",
-                    "description": "Overall quality of the reading data in this credential (ESPI: QualityOfReading). ESPI codes — 0: valid, 7: manuallyEdited, 8: estimatedUsingReferenceDay, 9: estimatedUsingLinearInterpolation, 10: questionable, 11: derived, 12: projected, 13: mixed, 14: raw, 15: normalizedForWeather, 16: other, 17: validated, 18: verified.",
-                    "enum": [
-                        "valid",
-                        "manuallyEdited",
-                        "estimatedUsingReferenceDay",
-                        "estimatedUsingLinearInterpolation",
-                        "questionable",
-                        "derived",
-                        "projected",
-                        "mixed",
-                        "raw",
-                        "normalizedForWeather",
-                        "other",
-                        "validated",
-                        "verified"
-                    ]
+                "uom": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [5, 29, 31, 33, 38, 42, 61, 63, 72] },
+                        { "type": "string", "enum": ["A", "V", "J", "Hz", "W", "m3", "VA", "VAr", "Wh"] }
+                    ],
+                    "description": "ESPI UnitSymbolKind. 5=A, 29=V, 31=J, 33=Hz, 38=W, 42=m3, 61=VA, 63=VAr, 72=Wh."
                 },
-                "intervalBlocks": {
+                "powerOfTenMultiplier": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "ESPI UnitMultiplierKind. 0=x1, 3=kilo, -3=milli, 6=mega, etc."
+                },
+                "accumulationBehaviour": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 1, 2, 3, 4, 6, 9, 10, 12, 13, 14] },
+                        { "type": "string", "enum": ["none", "bulkQuantity", "continuousCumulative", "cumulative", "deltaData", "indicating", "summation", "timeDelay", "instantaneous", "latchingQuantity", "boundedQuantity"] }
+                    ],
+                    "description": "ESPI AccumulationBehaviourKind. 0=none, 4=deltaData, 12=instantaneous."
+                },
+                "intervalLength": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Standard interval length in seconds (e.g., 900 for 15 min)."
+                },
+                "currency": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 36, 124, 156, 208, 356, 392, 578, 643, 752, 756, 826, 840, 978] },
+                        { "type": "string", "enum": ["other", "AUD", "CAD", "CNY", "DKK", "INR", "JPY", "NOK", "RUB", "SEK", "CHF", "GBP", "USD", "EUR"] }
+                    ],
+                    "description": "ISO 4217 numeric currency code. 840=USD, 978=EUR, 356=INR."
+                },
+                "kind": {
+                    "oneOf": [
+                        { "type": "integer" },
+                        { "type": "string", "enum": ["none", "energy", "demand", "power", "current", "voltage", "frequency", "powerFactor", "apparentPowerFactor", "quantityPower", "volumetricFlow"] }
+                    ],
+                    "description": "ESPI MeasurementKind. 0=none, 12=energy, 37=power, 38=demand."
+                },
+                "phase": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 16, 32, 64, 128, 256, 512, 768] },
+                        { "type": "string", "enum": ["notApplicable", "phaseAN", "phaseBN", "phaseCN", "phaseAB", "phaseBC", "phaseCA", "phaseABC"] }
+                    ],
+                    "description": "ESPI PhaseCodeKind. 0=N/A, 128=A, 64=B, 32=C, 768=ABC."
+                },
+                "dataQualifier": { "type": "integer", "description": "ESPI DataQualifierKind. 0=none, 2=average, 8=maximum, 9=minimum." },
+                "defaultQuality": { "$ref": "#/$defs/QualityOfReading" },
+                "timeAttribute": { "type": "integer", "description": "ESPI TimePeriodOfInterest." },
+                "measuringPeriod": { "type": "integer", "description": "ESPI TimeAttributeKind." },
+                "consumptionTier": { "type": "integer" },
+                "tou": { "type": "integer" },
+                "cpp": { "type": "integer" }
+            }
+        },
+        "ReadingQuality": {
+            "type": "object",
+            "required": ["quality"],
+            "properties": {
+                "quality": { "$ref": "#/$defs/QualityOfReading" }
+            }
+        },
+        "IntervalReading": {
+            "type": "object",
+            "required": ["timePeriod", "value"],
+            "properties": {
+                "timePeriod": { "$ref": "#/$defs/DateTimeInterval" },
+                "value": { "type": "number", "description": "Reading value — integer (scaled by powerOfTenMultiplier) or decimal (direct physical quantity)." },
+                "cost": { "type": "integer", "description": "Cost in hundred-thousandths (1e-5) of the currency specified in ReadingType." },
+                "ReadingQuality": { "$ref": "#/$defs/ReadingQuality" },
+                "consumptionTier": { "type": "integer" },
+                "tou": { "type": "integer" },
+                "cpp": { "type": "integer" }
+            }
+        },
+        "IntervalBlock": {
+            "type": "object",
+            "required": ["interval", "IntervalReading"],
+            "properties": {
+                "interval": { "$ref": "#/$defs/DateTimeInterval" },
+                "IntervalReading": {
                     "type": "array",
                     "minItems": 1,
-                    "description": "Array of interval blocks containing the actual meter readings. Each block covers a contiguous time span.",
-                    "items": {
-                        "type": "object",
-                        "description": "A contiguous block of interval readings (ESPI: IntervalBlock).",
-                        "required": [
-                            "interval",
-                            "intervalReadings"
-                        ],
-                        "properties": {
-                            "interval": {
-                                "type": "object",
-                                "description": "A time interval defined by a start timestamp and a duration in seconds (ESPI: DateTimeInterval).",
-                                "required": [
-                                    "start",
-                                    "duration"
-                                ],
-                                "properties": {
-                                    "start": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "description": "Start of the interval (ISO 8601)"
-                                    },
-                                    "duration": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "description": "Duration of the interval in seconds"
-                                    }
-                                }
-                            },
-                            "intervalReadings": {
-                                "type": "array",
-                                "minItems": 1,
-                                "items": {
-                                    "type": "object",
-                                    "description": "A single metered reading within a block (ESPI: IntervalReading).",
-                                    "required": [
-                                        "timePeriod",
-                                        "value"
-                                    ],
-                                    "properties": {
-                                        "timePeriod": {
-                                            "type": "object",
-                                            "description": "A time interval defined by a start timestamp and a duration in seconds (ESPI: DateTimeInterval).",
-                                            "required": [
-                                                "start",
-                                                "duration"
-                                            ],
-                                            "properties": {
-                                                "start": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "description": "Start of the interval (ISO 8601)"
-                                                },
-                                                "duration": {
-                                                    "type": "integer",
-                                                    "minimum": 0,
-                                                    "description": "Duration of the interval in seconds"
-                                                }
-                                            }
-                                        },
-                                        "value": {
-                                            "type": "number",
-                                            "description": "Reading value. May be an integer (Green Button compatible) or a decimal for direct physical representation. When an integer, multiply by 10^powerOfTenMultiplier and apply the UOM from ReadingType to get the physical quantity. When a decimal, powerOfTenMultiplier SHOULD be 0 (or omitted) and the value represents the physical quantity directly in the given UOM."
-                                        },
-                                        "cost": {
-                                            "type": "number",
-                                            "description": "Cost for this interval in the currency specified by readingType.currency (ESPI: IntervalReading.cost). In integer mode (Green Button compatible), the value is in thousandths of the currency unit (e.g., 4639 = $4.639 USD). In decimal mode, the value represents the cost directly in the currency unit."
-                                        },
-                                        "readingQuality": {
-                                            "type": "string",
-                                            "description": "Quality of this specific reading (ESPI: ReadingQuality). Overrides the credential-level qualityOfReading for this interval.",
-                                            "enum": [
-                                                "valid",
-                                                "manuallyEdited",
-                                                "estimatedUsingReferenceDay",
-                                                "estimatedUsingLinearInterpolation",
-                                                "questionable",
-                                                "derived",
-                                                "projected",
-                                                "raw",
-                                                "normalizedForWeather",
-                                                "other",
-                                                "validated",
-                                                "verified"
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    "items": { "$ref": "#/$defs/IntervalReading" }
+                }
+            }
+        },
+        "MeterDataGB": {
+            "type": "object",
+            "description": "ESPI/Green Button meter reading data for a single meter.",
+            "required": ["ServiceCategory", "timeZone", "ReadingType", "IntervalBlock"],
+            "properties": {
+                "ServiceCategory": { "$ref": "#/$defs/ServiceCategory" },
+                "timeZone": {
+                    "type": "string",
+                    "description": "IANA time-zone identifier (e.g., Asia/Kolkata). Not an ESPI property.",
+                    "examples": ["Asia/Kolkata", "America/New_York"]
+                },
+                "ReadingType": { "$ref": "#/$defs/ReadingType" },
+                "qualityOfReading": { "$ref": "#/$defs/QualityOfReading" },
+                "IntervalBlock": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/IntervalBlock" }
                 }
             }
         }

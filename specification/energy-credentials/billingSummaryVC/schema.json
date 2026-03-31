@@ -1,0 +1,201 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schema.beckn.io/EnergyBillingSummary/schema.json",
+    "title": "Billing Summary Credential Schema",
+    "description": "JSON Schema for the Billing Summary Verifiable Credential. Uses ESPI/Green Button types (UsageSummary, SummaryMeasurement, LineItem) and numeric enum codes. Combines customer identity (customerProfile) with aggregated billing data (billingSummary) within a W3C VC 2.0 envelope.",
+    "type": "object",
+    "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
+    "properties": {
+        "@context": {
+            "type": "array",
+            "items": { "type": "string" },
+            "contains": { "const": "https://www.w3.org/ns/credentials/v2" },
+            "minItems": 2
+        },
+        "id": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "type": {
+            "type": "array",
+            "items": { "type": "string" },
+            "contains": { "const": "BillingSummaryCredential" },
+            "minItems": 2
+        },
+        "issuer": { "$ref": "#/$defs/Issuer" },
+        "validFrom": { "type": "string", "format": "date-time" },
+        "validUntil": { "type": "string", "format": "date-time" },
+        "credentialStatus": { "$ref": "#/$defs/CredentialStatus" },
+        "credentialSubject": {
+            "type": "object",
+            "required": ["customerProfile", "billingSummary"],
+            "properties": {
+                "id": { "type": "string", "format": "uri" },
+                "customerProfile": { "$ref": "#/$defs/CustomerProfile" },
+                "billingSummary": { "$ref": "#/$defs/BillingSummary" }
+            }
+        },
+        "proof": { "$ref": "#/$defs/Proof" }
+    },
+    "$defs": {
+        "Issuer": {
+            "type": "object",
+            "required": ["id", "type", "name", "issuedBy", "subjectId"],
+            "properties": {
+                "id": { "type": "string", "format": "uri" },
+                "type": { "type": "string", "const": "idRef" },
+                "name": { "type": "string", "minLength": 1 },
+                "issuedBy": { "type": "string", "format": "uri" },
+                "subjectId": { "type": "string", "minLength": 1 }
+            }
+        },
+        "CredentialStatus": {
+            "type": "object",
+            "required": ["id", "type", "statusPurpose"],
+            "properties": {
+                "id": { "type": "string", "format": "uri" },
+                "type": { "type": "string", "const": "dedi" },
+                "statusPurpose": { "type": "string", "enum": ["revocation", "suspension"] },
+                "statusListCredential": { "type": "string", "format": "uri" }
+            }
+        },
+        "Proof": {
+            "type": "object",
+            "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
+            "properties": {
+                "type": { "type": "string" },
+                "created": { "type": "string", "format": "date-time" },
+                "verificationMethod": { "type": "string", "format": "uri" },
+                "proofPurpose": { "type": "string", "enum": ["assertionMethod", "authentication"] },
+                "proofValue": { "type": "string", "minLength": 1 }
+            }
+        },
+        "CustomerProfile": {
+            "type": "object",
+            "required": ["customerNumber", "meterNumber", "meterType"],
+            "properties": {
+                "customerNumber": { "type": "string", "minLength": 1 },
+                "meterNumber": { "type": "string", "minLength": 1, "maxLength": 50 },
+                "meterType": { "type": "string", "minLength": 1 },
+                "maskedIdType": { "type": "string", "minLength": 1 },
+                "maskedIdNumber": { "type": "string", "minLength": 1 }
+            }
+        },
+        "DateTimeInterval": {
+            "type": "object",
+            "required": ["start", "duration"],
+            "properties": {
+                "start": { "type": "string", "format": "date-time" },
+                "duration": { "type": "integer", "minimum": 0 }
+            }
+        },
+        "ServiceCategory": {
+            "type": "object",
+            "required": ["kind"],
+            "properties": {
+                "kind": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
+                        { "type": "string", "enum": ["electricity", "gas", "water", "time", "heat", "refuse", "sewerage", "rates", "tvLicense", "internet"] }
+                    ]
+                }
+            }
+        },
+        "QualityOfReading": {
+            "oneOf": [
+                { "type": "integer", "enum": [0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] },
+                { "type": "string", "enum": ["valid", "manuallyEdited", "estimatedUsingReferenceDay", "estimatedUsingLinearInterpolation", "questionable", "derived", "projected", "mixed", "raw", "normalizedForWeather", "other", "validated", "verified", "billingApproved"] }
+            ]
+        },
+        "SummaryMeasurement": {
+            "type": "object",
+            "required": ["value", "uom"],
+            "properties": {
+                "value": { "type": "number" },
+                "uom": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [5, 29, 31, 33, 38, 42, 61, 63, 72] },
+                        { "type": "string", "enum": ["A", "V", "J", "Hz", "W", "m3", "VA", "VAr", "Wh"] }
+                    ]
+                },
+                "powerOfTenMultiplier": { "type": "integer", "default": 0 },
+                "timeStamp": { "type": "string", "format": "date-time" }
+            }
+        },
+        "LineItem": {
+            "type": "object",
+            "required": ["itemKind", "amount"],
+            "properties": {
+                "itemKind": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+                        { "type": "string", "enum": ["energyGenerationFee", "energyDeliveryFee", "energyUsageFee", "administrativeFee", "tax", "energyGenerationCredit", "energyDeliveryCredit", "administrativeCredit", "payment", "information"] }
+                    ]
+                },
+                "amount": { "type": "integer", "description": "Amount in hundred-thousandths (1e-5) of the currency. Negative = credit." },
+                "note": { "type": "string" },
+                "unitCost": { "type": "integer", "description": "Per-unit cost in hundred-thousandths (1e-5) of the currency." },
+                "rounding": { "type": "integer" },
+                "dateTime": { "type": "string", "format": "date-time" },
+                "measurement": { "$ref": "#/$defs/SummaryMeasurement" },
+                "itemPeriod": { "$ref": "#/$defs/DateTimeInterval" }
+            }
+        },
+        "UsageSummary": {
+            "type": "object",
+            "required": ["billingPeriod", "billLastPeriod", "overallConsumptionLastPeriod"],
+            "properties": {
+                "billingPeriod": { "$ref": "#/$defs/DateTimeInterval" },
+                "billLastPeriod": { "type": "integer", "description": "Bill amount in hundred-thousandths (1e-5) of the currency." },
+                "billToDate": { "type": "integer" },
+                "costAdditionalLastPeriod": { "type": "integer", "description": "Additional charges in hundred-thousandths (1e-5) of the currency." },
+                "costAdditionalDetailLastPeriod": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/LineItem" }
+                },
+                "currency": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 36, 124, 156, 208, 356, 392, 578, 643, 752, 756, 826, 840, 978] },
+                        { "type": "string", "enum": ["other", "AUD", "CAD", "CNY", "DKK", "INR", "JPY", "NOK", "RUB", "SEK", "CHF", "GBP", "USD", "EUR"] }
+                    ]
+                },
+                "commodity": {
+                    "oneOf": [
+                        { "type": "integer" },
+                        { "type": "string" }
+                    ]
+                },
+                "overallConsumptionLastPeriod": { "$ref": "#/$defs/SummaryMeasurement" },
+                "currentBillingPeriodOverAllConsumption": { "$ref": "#/$defs/SummaryMeasurement" },
+                "peakDemand": { "$ref": "#/$defs/SummaryMeasurement" },
+                "qualityOfReading": { "$ref": "#/$defs/QualityOfReading" }
+            }
+        },
+        "BillingSummary": {
+            "type": "object",
+            "description": "ESPI/Green Button billing summary data for a single meter.",
+            "required": ["ServiceCategory", "timeZone", "currency", "UsageSummary"],
+            "properties": {
+                "ServiceCategory": { "$ref": "#/$defs/ServiceCategory" },
+                "timeZone": {
+                    "type": "string",
+                    "description": "IANA time-zone identifier. Not an ESPI property.",
+                    "examples": ["Asia/Kolkata", "America/Los_Angeles"]
+                },
+                "currency": {
+                    "oneOf": [
+                        { "type": "integer", "enum": [0, 36, 124, 156, 208, 356, 392, 578, 643, 752, 756, 826, 840, 978] },
+                        { "type": "string", "enum": ["other", "AUD", "CAD", "CNY", "DKK", "INR", "JPY", "NOK", "RUB", "SEK", "CHF", "GBP", "USD", "EUR"] }
+                    ],
+                    "description": "ISO 4217 numeric currency code for all monetary values."
+                },
+                "UsageSummary": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/UsageSummary" }
+                }
+            }
+        }
+    }
+}

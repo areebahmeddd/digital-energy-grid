@@ -28,20 +28,20 @@
       "meterType": "Smart"
     },
     "meterDataGB": {
-      "ServiceCategory": { "kind": 0 },
+      "ServiceCategory": { "kind": "electricity" },
       "timeZone": "Asia/Kolkata",
       "ReadingType": {
-        "commodity": 1,
-        "flowDirection": 1,
-        "uom": 72,
+        "commodity": "electricitySecondaryMetered",
+        "flowDirection": "forward",
+        "uom": "Wh",
         "powerOfTenMultiplier": 0,
-        "accumulationBehaviour": 4,
+        "accumulationBehaviour": "deltaData",
         "intervalLength": 900,
-        "currency": 356,
-        "kind": 12,
-        "phase": 0
+        "currency": "INR",
+        "kind": "energy",
+        "phase": "notApplicable"
       },
-      "qualityOfReading": 17,
+      "qualityOfReading": "validated",
       "IntervalBlock": [
         {
           "interval": {
