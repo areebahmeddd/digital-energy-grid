@@ -1,0 +1,21 @@
+{
+    "@context": [
+        "https://schema.beckn.io/external/espi/context.jsonld",
+        {
+            "@version": 1.1,
+            "@protected": true,
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+            "energy": "https://schema.beckn.io/energy/",
+
+            "MeterDataGB": "energy:MeterDataGB",
+            "meterDataGB": {
+                "@id": "energy:meterDataGB",
+                "@type": "@id"
+            },
+            "timeZone": {
+                "@id": "energy:timeZone",
+                "@type": "xsd:string"
+            }
+        }
+    ]
+}

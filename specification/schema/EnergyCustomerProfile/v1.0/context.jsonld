@@ -1,0 +1,42 @@
+{
+    "@context": {
+        "@version": 1.1,
+        "@protected": true,
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "energy": "https://schema.beckn.io/energy/",
+
+        "CustomerProfile": "energy:CustomerProfile",
+        "customerProfile": {
+            "@id": "energy:customerProfile",
+            "@type": "@id"
+        },
+        "customerNumber": {
+            "@id": "energy:customerNumber",
+            "@type": "xsd:string"
+        },
+        "meterNumber": {
+            "@id": "energy:meterNumber",
+            "@type": "xsd:string"
+        },
+        "meterType": {
+            "@id": "energy:meterType",
+            "@type": "xsd:string"
+        },
+        "idRef": {
+            "@id": "energy:idRef",
+            "@type": "@id",
+            "@context": {
+                "@version": 1.1,
+                "@protected": true,
+                "issuedBy": {
+                    "@id": "energy:issuedBy",
+                    "@type": "@id"
+                },
+                "subjectId": {
+                    "@id": "energy:subjectId",
+                    "@type": "xsd:string"
+                }
+            }
+        }
+    }
+}
