@@ -1,6 +1,7 @@
 {
     "@context": [
         "https://schema.beckn.io/external/espi/context.jsonld",
+        "https://schema.beckn.io/deg/CustomerProfile/context.jsonld",
         {
             "@version": 1.1,
             "@protected": true,
@@ -17,34 +18,6 @@
                     "@protected": true,
                     "id": "@id",
                     "type": "@type",
-                    "customerProfile": {
-                        "@id": "energy:customerProfile",
-                        "@type": "@id",
-                        "@context": {
-                            "@version": 1.1,
-                            "@protected": true,
-                            "customerNumber": {
-                                "@id": "energy:customerNumber",
-                                "@type": "xsd:string"
-                            },
-                            "meterNumber": {
-                                "@id": "energy:meterNumber",
-                                "@type": "xsd:string"
-                            },
-                            "meterType": {
-                                "@id": "energy:meterType",
-                                "@type": "xsd:string"
-                            },
-                            "maskedIdType": {
-                                "@id": "energy:maskedIdType",
-                                "@type": "xsd:string"
-                            },
-                            "maskedIdNumber": {
-                                "@id": "energy:maskedIdNumber",
-                                "@type": "xsd:string"
-                            }
-                        }
-                    },
                     "billingSummary": {
                         "@id": "energy:billingSummary",
                         "@type": "@id",
@@ -56,22 +29,6 @@
                                 "@type": "xsd:string"
                             }
                         }
-                    }
-                }
-            },
-
-            "idRef": {
-                "@id": "energy:idRef",
-                "@context": {
-                    "@version": 1.1,
-                    "@protected": true,
-                    "issuedBy": {
-                        "@id": "energy:issuedBy",
-                        "@type": "@id"
-                    },
-                    "subjectId": {
-                        "@id": "energy:subjectId",
-                        "@type": "xsd:string"
                     }
                 }
             }

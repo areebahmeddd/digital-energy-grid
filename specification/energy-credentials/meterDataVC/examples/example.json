@@ -25,7 +25,7 @@
     "customerProfile": {
       "customerNumber": "UTIL-2025-001234567",
       "meterNumber": "MET2025789456123",
-      "meterType": "Smart"
+      "meterType": "AMI"
     },
     "meterDataGB": {
       "ServiceCategory": { "kind": "electricity" },

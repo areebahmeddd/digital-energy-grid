@@ -25,7 +25,7 @@
     "customerProfile": {
       "customerNumber": "5230743477",
       "meterNumber": "PGE-MTR-001",
-      "meterType": "Smart"
+      "meterType": "AMI"
     },
     "billingSummary": {
       "ServiceCategory": { "kind": "electricity" },

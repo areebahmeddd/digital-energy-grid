@@ -73,13 +73,26 @@
         },
         "CustomerProfile": {
             "type": "object",
+            "description": "Shared customer identity from DEG CustomerProfile (PR #208). Terms resolve to deg: namespace.",
             "required": ["customerNumber", "meterNumber", "meterType"],
             "properties": {
-                "customerNumber": { "type": "string", "minLength": 1 },
-                "meterNumber": { "type": "string", "minLength": 1, "maxLength": 50 },
-                "meterType": { "type": "string", "minLength": 1 },
-                "maskedIdType": { "type": "string", "minLength": 1 },
-                "maskedIdNumber": { "type": "string", "minLength": 1 }
+                "customerNumber": { "type": "string", "minLength": 1, "description": "Utility account number (deg:customerNumber)" },
+                "meterNumber": { "type": "string", "minLength": 1, "maxLength": 50, "description": "Meter serial number (deg:meterNumber)" },
+                "meterType": {
+                    "type": "string",
+                    "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"],
+                    "description": "Meter type per DEG CustomerProfile enum (deg:meterType)"
+                },
+                "idRef": { "$ref": "#/$defs/IdRef" }
+            }
+        },
+        "IdRef": {
+            "type": "object",
+            "description": "Reusable identity reference from DEG (deg:idRef). Links an authority DID to a subject identifier.",
+            "required": ["issuedBy", "subjectId"],
+            "properties": {
+                "issuedBy": { "type": "string", "format": "uri", "description": "DID or URI of the issuing authority (deg:issuedBy)" },
+                "subjectId": { "type": "string", "minLength": 1, "description": "Identifier within the authority's system (deg:subjectId)" }
             }
         },
         "DateTimeInterval": {

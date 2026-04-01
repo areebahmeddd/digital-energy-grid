@@ -12,34 +12,7 @@
             "@id": "energy:MeterDataCredential",
             "@type": "rdfs:Class",
             "rdfs:label": "Meter Data Credential",
-            "rdfs:comment": "A W3C Verifiable Credential containing historical time-series meter reading data. Uses ESPI/Green Button types (IntervalBlock, ReadingType, IntervalReading) for the metering payload."
-        },
-        {
-            "@id": "energy:customerProfile",
-            "@type": "rdf:Property",
-            "rdfs:label": "customer profile",
-            "rdfs:comment": "Container for customer identity attributes within a credential subject."
-        },
-        {
-            "@id": "energy:customerNumber",
-            "@type": "rdf:Property",
-            "rdfs:label": "customer number",
-            "rdfs:comment": "Utility account number assigned to the customer.",
-            "rdfs:range": { "@id": "xsd:string" }
-        },
-        {
-            "@id": "energy:meterNumber",
-            "@type": "rdf:Property",
-            "rdfs:label": "meter number",
-            "rdfs:comment": "Unique serial number of the physical meter.",
-            "rdfs:range": { "@id": "xsd:string" }
-        },
-        {
-            "@id": "energy:meterType",
-            "@type": "rdf:Property",
-            "rdfs:label": "meter type",
-            "rdfs:comment": "Type of meter installed (e.g., Smart, Conventional, Prepaid, Bidirectional).",
-            "rdfs:range": { "@id": "xsd:string" }
+            "rdfs:comment": "A W3C Verifiable Credential containing historical time-series meter reading data. Uses ESPI/Green Button types (IntervalBlock, ReadingType, IntervalReading) for the metering payload. Customer identity terms (customerProfile, customerNumber, meterNumber, meterType, idRef) are imported from the shared DEG CustomerProfile context."
         },
         {
             "@id": "energy:meterDataGB",
@@ -52,26 +25,6 @@
             "@type": "rdf:Property",
             "rdfs:label": "time zone",
             "rdfs:comment": "IANA time-zone identifier for the meter location (e.g., Asia/Kolkata). Not an ESPI property — added for demand-forecasting models that need local solar time.",
-            "rdfs:range": { "@id": "xsd:string" }
-        },
-        {
-            "@id": "energy:idRef",
-            "@type": "rdfs:Class",
-            "rdfs:label": "Identity Reference",
-            "rdfs:comment": "Reusable identity reference linking an issuing authority (DID) to a subject identifier."
-        },
-        {
-            "@id": "energy:issuedBy",
-            "@type": "rdf:Property",
-            "rdfs:label": "issued by",
-            "rdfs:comment": "DID or URI of the issuing authority.",
-            "rdfs:range": { "@id": "xsd:anyURI" }
-        },
-        {
-            "@id": "energy:subjectId",
-            "@type": "rdf:Property",
-            "rdfs:label": "subject ID",
-            "rdfs:comment": "Identifier within the issuing authority's system (e.g., regulatory registration number).",
             "rdfs:range": { "@id": "xsd:string" }
         }
     ]
