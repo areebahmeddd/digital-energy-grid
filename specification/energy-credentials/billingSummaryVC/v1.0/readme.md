@@ -132,12 +132,17 @@ All monetary fields accept both integer and float values. JSON has a single `num
 
 This credential links to the Customer Credential via the `credentialSubject.id` (customer DID), `customerProfile.customerNumber`, and `customerProfile.meterNumber` fields. A customer may have multiple Billing Summary Credentials covering different time periods or meters.
 
+## Version
+
+This is **v1.0** of the Billing Summary Credential schema.
+
 ## Files
 
 - `schema.json` - JSON Schema (draft 2020-12) for validation
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
 - `examples/example.json` - Sample credential with 6 monthly billing periods from real PG&E data structure
+- `test/test_billing_summary_schema.py` - Pytest validation of examples against schema
 - `readme.md` - This documentation
 
 ## Usage
@@ -147,7 +152,7 @@ This credential links to the Customer Credential via the `credentialSubject.id` 
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/EnergyBillingSummary/context.jsonld"
+    "https://schema.beckn.io/EnergyBillingSummary/v1.0/context.jsonld"
   ],
   "type": ["VerifiableCredential", "BillingSummaryCredential"],
   "issuer": {

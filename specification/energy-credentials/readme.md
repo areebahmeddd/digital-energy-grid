@@ -15,8 +15,8 @@ This collection provides schemas for credentials issued by electricity distribut
 | [Generation Profile Credential](./generation-profile-vc/) | DER generation capability | Grid management, net metering, renewable tracking |
 | [Storage Profile Credential](./storage-profile-vc/) | Battery/energy storage capability | Virtual power plants, demand response |
 | [Program Enrollment Credential](./program-enrollment-vc/) | Energy program participation | Demand response, ToU programs |
-| [Meter Data Credential](./meter-data-vc/) | Historical interval meter readings | Demand forecasting, P2P trading |
-| [Billing Summary Credential](./billing-summary-vc/) | Aggregated billing period costs and consumption | Credit checks, program eligibility, cost analytics |
+| [Meter Data Credential](./meterDataVC/v1.0/) | Historical interval meter readings | Demand forecasting, P2P trading |
+| [Billing Summary Credential](./billingSummaryVC/v1.0/) | Aggregated billing period costs and consumption | Credit checks, program eligibility, cost analytics |
 
 ## Credential Relationships
 
@@ -98,23 +98,30 @@ energy-credentials/
 │   ├── context.jsonld
 │   ├── example.json
 │   └── readme.md
-├── meter-data-vc/             # Historical meter readings (Green Button aligned)
-│   ├── schema.json
-│   ├── context.jsonld
-│   ├── vocab.jsonld
-│   ├── examples/
-│   │   ├── example.json
-│   │   ├── example-decimal.json
-│   │   └── example.ndjson
-│   ├── ndjson-transport.md
-│   └── readme.md
-├── billing-summary-vc/        # Aggregated billing period data
-│   ├── schema.json
-│   ├── context.jsonld
-│   ├── vocab.jsonld
-│   ├── examples/
-│   │   └── example.json
-│   └── readme.md
+├── meterDataVC/               # Historical meter readings (Green Button aligned)
+│   └── v1.0/
+│       ├── schema.json
+│       ├── context.jsonld
+│       ├── vocab.jsonld
+│       ├── examples/
+│       │   ├── example.json
+│       │   ├── example-decimal.json
+│       │   └── example.ndjson
+│       ├── test/
+│       │   ├── test_meter_data_schema.py
+│       │   └── validate_examples.py
+│       ├── ndjson-transport.md
+│       └── readme.md
+├── billingSummaryVC/          # Aggregated billing period data
+│   └── v1.0/
+│       ├── schema.json
+│       ├── context.jsonld
+│       ├── vocab.jsonld
+│       ├── examples/
+│       │   └── example.json
+│       ├── test/
+│       │   └── test_billing_summary_schema.py
+│       └── readme.md
 └── readme.md                  # This file
 ```
 

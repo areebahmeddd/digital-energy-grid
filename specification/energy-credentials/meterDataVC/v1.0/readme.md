@@ -136,15 +136,21 @@ This credential uses Green Button / ESPI numeric enum codes directly. The full E
 
 This credential links to the Customer Credential via the `credentialSubject.id` (customer DID), `customerProfile.customerNumber` (utility account number), and `customerProfile.meterNumber` fields. A customer may have multiple Meter Data Credentials covering different time periods or meters.
 
+## Version
+
+This is **v1.0** of the Meter Data Credential schema.
+
 ## Files
 
 - `schema.json` - JSON Schema (draft 2020-12) for validation
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
-- `example.json` - Sample credential with 15-minute residential data using integer values and cost (single VC, pretty-printed)
-- `example-decimal.json` - Sample credential using decimal values with per-reading quality override
-- `example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
+- `examples/example.json` - Sample credential with 15-minute residential data using integer values and cost (single VC, pretty-printed)
+- `examples/example-decimal.json` - Sample credential using decimal values with per-reading quality override
+- `examples/example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
 - `ndjson-transport.md` - NDJSON bulk delivery transport specification
+- `test/test_meter_data_schema.py` - Pytest validation of examples against schema
+- `test/validate_examples.py` - Standalone validation script
 - `readme.md` - This documentation
 
 ## Usage
@@ -154,7 +160,7 @@ This credential links to the Customer Credential via the `credentialSubject.id` 
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/EnergyMeterDataGB/context.jsonld"
+    "https://schema.beckn.io/EnergyMeterDataGB/v1.0/context.jsonld"
   ],
   "type": ["VerifiableCredential", "MeterDataCredential"],
   "issuer": {
