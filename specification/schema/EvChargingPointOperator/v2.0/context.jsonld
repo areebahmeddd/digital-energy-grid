@@ -1,0 +1,27 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "ChargingPointOperator": "deg:ChargingPointOperator",
+    "name": "schema:name",
+    "description": "schema:description",
+    "url": "schema:url",
+    "sameAs": "schema:sameAs",
+    "identifier": "schema:identifier",
+    "areaServed": "schema:areaServed",
+    "operatorName": "deg:operatorName",
+    "operatorCode": "deg:operatorCode",
+    "supportEmail": "deg:supportEmail",
+    "supportPhone": "deg:supportPhone",
+    "gstNumber": "deg:gstNumber",
+    "cin": "deg:cin",
+    "msme": "deg:msme",
+    "operatorContact": "deg:operatorContact",
+    "deg": "https://schema.beckn.io/deg/EvChargingPointOperator/v2.0/"
+  },
+  "@graph": []
+}

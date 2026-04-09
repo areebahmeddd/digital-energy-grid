@@ -1,0 +1,24 @@
+{
+  "name": "@beckn/deg-discom-signing-kit",
+  "version": "1.0.0",
+  "description": "Beckn protocol payload signing for DEG (Digital Energy Grid) — Ed25519 + BLAKE2-512",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "beckn",
+    "deg",
+    "signing",
+    "ed25519",
+    "blake2"
+  ],
+  "license": "MIT"
+}

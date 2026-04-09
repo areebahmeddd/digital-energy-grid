@@ -1,0 +1,123 @@
+$id: "https://schema.beckn.io/UtilityCustomerCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: UtilityCustomerCredential
+description: >
+  Barebones identity credential for privacy-preserving customer identification.
+  Issued by distribution utilities as the base identity anchor for DEG energy
+  customers. UtilityCustomerCredential is a subclass of EnergyCredential.
+
+  The credential subject captures core customer identity attributes: consumer
+  number, full name, installation address, meter number, and service connection
+  date. An optional masked government ID enables additional privacy-preserving
+  verification.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+  - identity
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": UtilityCustomerCredential
+properties:
+
+  credentialSubject:
+    description: >
+      The credential subject containing utility customer identity attributes.
+    x-jsonld:
+      "@id": deg:credentialSubject
+    type: object
+    required:
+      - id
+      - consumerNumber
+      - fullName
+      - installationAddress
+      - meterNumber
+      - serviceConnectionDate
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the customer/credential subject.
+        x-jsonld:
+          "@id": "@id"
+      consumerNumber:
+        type: string
+        minLength: 1
+        description: Full consumer account number assigned by the utility.
+        x-jsonld:
+          "@id": deg:consumerNumber
+      maskedIdNumber:
+        type: string
+        minLength: 1
+        description: Optional masked government ID (e.g., driving license, national ID) for additional verification (e.g., 'XXXX-XXXX-1234').
+        x-jsonld:
+          "@id": deg:maskedIdNumber
+      fullName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Full name of the customer as per ID proof.
+        x-jsonld:
+          "@id": "schema:name"
+      installationAddress:
+        description: Address of the electricity installation/connection.
+        x-jsonld:
+          "@id": deg:installationAddress
+          "@type": "@id"
+        type: object
+        required: [fullAddress, postalCode, country]
+        properties:
+          fullAddress:
+            type: string
+            minLength: 1
+            maxLength: 500
+            description: Complete street address of the installation.
+            x-jsonld:
+              "@id": "schema:streetAddress"
+          city:
+            type: string
+            minLength: 1
+            description: City name.
+            x-jsonld:
+              "@id": "schema:addressLocality"
+          district:
+            type: string
+            minLength: 1
+            description: District or county name.
+            x-jsonld:
+              "@id": deg:district
+          stateProvince:
+            type: string
+            minLength: 1
+            description: State, province, or region name.
+            x-jsonld:
+              "@id": "schema:addressRegion"
+          postalCode:
+            type: string
+            minLength: 1
+            description: Postal or ZIP code (format varies by country).
+            x-jsonld:
+              "@id": "schema:postalCode"
+          country:
+            type: string
+            pattern: '^[A-Z]{2}$'
+            description: ISO 3166-1 alpha-2 country code.
+            x-jsonld:
+              "@id": "schema:addressCountry"
+      meterNumber:
+        type: string
+        minLength: 1
+        maxLength: 50
+        description: Unique meter serial number.
+        x-jsonld:
+          "@id": deg:meterNumber
+      serviceConnectionDate:
+        type: string
+        format: date
+        description: Date when the connection was activated.
+        x-jsonld:
+          "@id": deg:serviceConnectionDate

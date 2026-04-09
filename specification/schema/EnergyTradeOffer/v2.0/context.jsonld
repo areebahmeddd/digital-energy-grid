@@ -1,0 +1,28 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/",
+    "startTime": "schema:startTime",
+    "endTime": "schema:endTime",
+    "EnergyTradeOffer": "deg:EnergyTradeOffer",
+    "pricingModel": {
+      "@id": "deg:pricingModel",
+      "@type": "@id"
+    },
+    "validityWindow": "deg:validityWindow",
+    "deliveryWindow": "deg:deliveryWindow",
+    "gift": "deg:gift",
+    "PER_KWH": "deg:PricingModelPerKwh",
+    "PER-KWH": "deg:PricingModelPerKwh",
+    "TIME_OF_DAY": "deg:PricingModelTimeOfDay",
+    "TIME-OF-DAY": "deg:PricingModelTimeOfDay",
+    "SUBSCRIPTION": "deg:PricingModelSubscription",
+    "FIXED": "deg:PricingModelFixed"
+  },
+  "@graph": []
+}

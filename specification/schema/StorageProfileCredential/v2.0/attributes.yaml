@@ -1,0 +1,99 @@
+$id: "https://schema.beckn.io/StorageProfileCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: StorageProfileCredential
+description: >
+  Verifiable Credential for battery/energy storage capability. Issued by
+  distribution utilities to customers with home batteries, EV batteries,
+  or other energy storage assets. StorageProfileCredential is a subclass
+  of EnergyCredential.
+
+  The credential subject captures storage-specific attributes including
+  storage capacity in kWh, power rating in kW, commissioning date, and
+  optional storage technology type.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+  - storage
+  - battery
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": StorageProfileCredential
+properties:
+
+  credentialSubject:
+    description: >
+      The credential subject containing battery/energy storage capability
+      characteristics.
+    x-jsonld:
+      "@id": deg:credentialSubject
+    type: object
+    required:
+      - id
+      - consumerNumber
+      - storageCapacityKWh
+      - powerRatingKW
+      - commissioningDate
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the customer/credential subject (links to customer).
+        x-jsonld:
+          "@id": "@id"
+      consumerNumber:
+        type: string
+        minLength: 1
+        description: Consumer account number assigned by the utility.
+        x-jsonld:
+          "@id": deg:consumerNumber
+      fullName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Consumer name (optional).
+        x-jsonld:
+          "@id": "schema:name"
+      meterNumber:
+        type: string
+        minLength: 1
+        maxLength: 50
+        description: Meter serial number associated with this storage asset (optional).
+        x-jsonld:
+          "@id": deg:meterNumber
+      assetId:
+        type: string
+        minLength: 1
+        description: Unique identifier for the storage asset (optional, useful when customer has multiple batteries).
+        x-jsonld:
+          "@id": deg:assetId
+      storageCapacityKWh:
+        type: number
+        minimum: 0.1
+        maximum: 10000
+        description: Battery storage capacity in kilowatt-hours (kWh).
+        x-jsonld:
+          "@id": deg:storageCapacityKWh
+      powerRatingKW:
+        type: number
+        minimum: 0.1
+        maximum: 10000
+        description: Battery charge/discharge power rating in kilowatts (kW).
+        x-jsonld:
+          "@id": deg:powerRatingKW
+      commissioningDate:
+        type: string
+        format: date
+        description: Date when the storage system was activated.
+        x-jsonld:
+          "@id": deg:commissioningDate
+      storageType:
+        type: string
+        enum: [LithiumIon, LeadAcid, FlowBattery, Other]
+        description: Type of battery storage technology (optional).
+        x-jsonld:
+          "@id": deg:storageType

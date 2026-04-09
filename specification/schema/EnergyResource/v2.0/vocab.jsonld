@@ -1,0 +1,71 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyResource/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyResource",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource",
+      "rdfs:comment": "Item attributes for energy resources, attached to Item.itemAttributes."
+    },
+    {
+      "@id": "deg:sourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Source type",
+      "rdfs:comment": "Type of energy source (SOLAR, BATTERY, GRID, HYBRID, RENEWABLE).",
+      "rdfs:domain": "deg:EnergyResource",
+      "schema:rangeIncludes": "deg:SourceType"
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID",
+      "rdfs:comment": "Meter identifier in DER address format (der://meter/{id}).",
+      "rdfs:domain": "deg:EnergyResource",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:SourceType",
+      "@type": "schema:Enumeration",
+      "schema:name": "Source Type",
+      "rdfs:comment": "Enumeration of energy source types."
+    },
+    {
+      "@id": "deg:SourceTypeSolar",
+      "@type": "deg:SourceType",
+      "schema:name": "SOLAR",
+      "schema:identifier": "SOLAR"
+    },
+    {
+      "@id": "deg:SourceTypeBattery",
+      "@type": "deg:SourceType",
+      "schema:name": "BATTERY",
+      "schema:identifier": "BATTERY"
+    },
+    {
+      "@id": "deg:SourceTypeGrid",
+      "@type": "deg:SourceType",
+      "schema:name": "GRID",
+      "schema:identifier": "GRID"
+    },
+    {
+      "@id": "deg:SourceTypeHybrid",
+      "@type": "deg:SourceType",
+      "schema:name": "HYBRID",
+      "schema:identifier": "HYBRID"
+    },
+    {
+      "@id": "deg:SourceTypeRenewable",
+      "@type": "deg:SourceType",
+      "schema:name": "RENEWABLE",
+      "schema:identifier": "RENEWABLE"
+    }
+  ]
+}

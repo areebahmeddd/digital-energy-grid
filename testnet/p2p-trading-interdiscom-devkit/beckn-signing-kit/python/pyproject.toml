@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beckn-deg-signing-kit"
+version = "1.0.0"
+description = "Beckn protocol payload signing for DEG (Digital Energy Grid) — Ed25519 + BLAKE2-512"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["beckn", "deg", "signing", "ed25519", "blake2"]
+dependencies = [
+    "cryptography>=41.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[tool.setuptools]
+py-modules = ["signer", "verifier"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]

@@ -1,0 +1,182 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/schema/EnergyTrade/v0.3/#",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "beckn:EnergyTradeDelivery",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Delivery",
+      "rdfs:comment": "Fulfillment attributes for energy trade deliveries, attached to orderItemAttributes.fulfillmentAttributes."
+    },
+    {
+      "@id": "beckn:deliveryStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery status",
+      "rdfs:comment": "Delivery status for the energy transfer (PENDING, IN_PROGRESS, COMPLETED, FAILED).",
+      "rdfs:domain": "beckn:EnergyTradeDelivery",
+      "schema:rangeIncludes": "beckn:DeliveryStatus"
+    },
+    {
+      "@id": "beckn:deliveryMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery mode",
+      "rdfs:comment": "Mode of energy delivery (EV_CHARGING, BATTERY_SWAP, V2G, GRID_INJECTION).",
+      "schema:rangeIncludes": "beckn:DeliveryMode"
+    },
+    {
+      "@id": "beckn:deliveredQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivered quantity",
+      "rdfs:comment": "Total quantity delivered so far in kilowatt-hours (kWh).",
+      "rdfs:domain": "beckn:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "beckn:meterReadings",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter readings",
+      "rdfs:comment": "Array of meter readings for this orderItem.",
+      "rdfs:domain": "beckn:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:ItemList"
+    },
+    {
+      "@id": "beckn:consumedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumed energy",
+      "rdfs:comment": "Energy consumed by the customer (imported from grid) in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "beckn:producedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Produced energy",
+      "rdfs:comment": "Energy produced by the customer (exported to grid) in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "beckn:allocatedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Allocated energy",
+      "rdfs:comment": "Net energy allocated for this trade in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "beckn:curtailedQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailed quantity",
+      "rdfs:comment": "Quantity curtailed from original contracted amount (kWh).",
+      "rdfs:domain": "beckn:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "beckn:curtailmentReason",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailment reason",
+      "rdfs:comment": "Reason for curtailment (GRID_OUTAGE, EMERGENCY, CONGESTION, MAINTENANCE, OTHER).",
+      "rdfs:domain": "beckn:EnergyTradeDelivery",
+      "schema:rangeIncludes": "beckn:CurtailmentReason"
+    },
+    {
+      "@id": "beckn:DeliveryStatus",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Status",
+      "rdfs:comment": "Enumeration of delivery statuses."
+    },
+    {
+      "@id": "beckn:DeliveryStatusPending",
+      "@type": "beckn:DeliveryStatus",
+      "schema:name": "PENDING",
+      "schema:identifier": "PENDING"
+    },
+    {
+      "@id": "beckn:DeliveryStatusInProgress",
+      "@type": "beckn:DeliveryStatus",
+      "schema:name": "IN_PROGRESS",
+      "schema:identifier": "IN_PROGRESS"
+    },
+    {
+      "@id": "beckn:DeliveryStatusCompleted",
+      "@type": "beckn:DeliveryStatus",
+      "schema:name": "COMPLETED",
+      "schema:identifier": "COMPLETED"
+    },
+    {
+      "@id": "beckn:DeliveryStatusFailed",
+      "@type": "beckn:DeliveryStatus",
+      "schema:name": "FAILED",
+      "schema:identifier": "FAILED"
+    },
+    {
+      "@id": "beckn:DeliveryMode",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Mode",
+      "rdfs:comment": "Enumeration of energy delivery modes."
+    },
+    {
+      "@id": "beckn:DeliveryModeEvCharging",
+      "@type": "beckn:DeliveryMode",
+      "schema:name": "EV_CHARGING",
+      "schema:identifier": "EV_CHARGING"
+    },
+    {
+      "@id": "beckn:DeliveryModeBatterySwap",
+      "@type": "beckn:DeliveryMode",
+      "schema:name": "BATTERY_SWAP",
+      "schema:identifier": "BATTERY_SWAP"
+    },
+    {
+      "@id": "beckn:DeliveryModeV2G",
+      "@type": "beckn:DeliveryMode",
+      "schema:name": "V2G",
+      "schema:identifier": "V2G"
+    },
+    {
+      "@id": "beckn:DeliveryModeGridInjection",
+      "@type": "beckn:DeliveryMode",
+      "schema:name": "GRID_INJECTION",
+      "schema:identifier": "GRID_INJECTION"
+    },
+    {
+      "@id": "beckn:CurtailmentReason",
+      "@type": "schema:Enumeration",
+      "schema:name": "Curtailment Reason",
+      "rdfs:comment": "Enumeration of reasons for energy curtailment."
+    },
+    {
+      "@id": "beckn:CurtailmentReasonGridOutage",
+      "@type": "beckn:CurtailmentReason",
+      "schema:name": "GRID_OUTAGE",
+      "schema:identifier": "GRID_OUTAGE"
+    },
+    {
+      "@id": "beckn:CurtailmentReasonEmergency",
+      "@type": "beckn:CurtailmentReason",
+      "schema:name": "EMERGENCY",
+      "schema:identifier": "EMERGENCY"
+    },
+    {
+      "@id": "beckn:CurtailmentReasonCongestion",
+      "@type": "beckn:CurtailmentReason",
+      "schema:name": "CONGESTION",
+      "schema:identifier": "CONGESTION"
+    },
+    {
+      "@id": "beckn:CurtailmentReasonMaintenance",
+      "@type": "beckn:CurtailmentReason",
+      "schema:name": "MAINTENANCE",
+      "schema:identifier": "MAINTENANCE"
+    },
+    {
+      "@id": "beckn:CurtailmentReasonOther",
+      "@type": "beckn:CurtailmentReason",
+      "schema:name": "OTHER",
+      "schema:identifier": "OTHER"
+    }
+  ]
+}

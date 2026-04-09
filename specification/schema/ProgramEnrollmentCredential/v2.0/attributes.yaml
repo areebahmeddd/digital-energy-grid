@@ -1,0 +1,82 @@
+$id: "https://schema.beckn.io/ProgramEnrollmentCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ProgramEnrollmentCredential
+description: >
+  Verifiable Credential for energy program enrollment. Issued by distribution
+  utilities when consumers enroll in programs such as P2P energy trading,
+  demand flexibility, virtual power plants, or time-of-use tariffs.
+  ProgramEnrollmentCredential is a subclass of EnergyCredential.
+
+  The credential subject captures enrollment-specific attributes: the program
+  name and code, enrollment date, and optional expiry date.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+  - program-enrollment
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": ProgramEnrollmentCredential
+properties:
+
+  credentialSubject:
+    description: >
+      The credential subject containing energy program enrollment details.
+    x-jsonld:
+      "@id": deg:credentialSubject
+    type: object
+    required:
+      - id
+      - consumerNumber
+      - programName
+      - programCode
+      - enrollmentDate
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the consumer/credential subject.
+        x-jsonld:
+          "@id": "@id"
+      consumerNumber:
+        type: string
+        minLength: 1
+        description: Unique consumer/customer account number assigned by the utility.
+        x-jsonld:
+          "@id": deg:consumerNumber
+      fullName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Consumer name (optional).
+        x-jsonld:
+          "@id": "schema:name"
+      programName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Human-readable name of the program (e.g., Peer-to-Peer Energy Trading).
+        x-jsonld:
+          "@id": deg:programName
+      programCode:
+        type: string
+        minLength: 1
+        description: Unique program identifier code.
+        x-jsonld:
+          "@id": deg:programCode
+      enrollmentDate:
+        type: string
+        format: date
+        description: Date when the consumer enrolled in the program.
+        x-jsonld:
+          "@id": deg:enrollmentDate
+      validUntil:
+        type: string
+        format: date
+        description: Optional end date when the enrollment expires.
+        x-jsonld:
+          "@id": "schema:validUntil"

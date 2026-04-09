@@ -1,0 +1,132 @@
+{
+  "@context": [
+    "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
+    "https://www.w3.org/ns/credentials/v2",
+    "./vocab.jsonld",
+    {
+      "@comment": "Schema.org semantic mappings for cross-domain interoperability",
+      "schema": "https://schema.org/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "fulfillments": {
+        "@id": "beckn:fulfillments",
+        "@type": "beckn:Fulfillment",
+        "@container": "@set"
+      },
+      "items": {
+        "@id": "beckn:items",
+        "@type": "beckn:Item",
+        "@container": "@set"
+      },
+      "provider": {
+        "@id": "beckn:provider",
+        "@type": "beckn:Provider"
+      },
+      "descriptor": {
+        "@id": "beckn:descriptor",
+        "@type": "beckn:Descriptor"
+      },
+      "customer": {
+        "@id": "beckn:customer",
+        "@type": "deg:Customer"
+      },
+      "instrument": {
+        "@id": "beckn:instrument",
+        "@type": "deg:Instrument"
+      },
+      "meters": {
+        "@id": "meters",
+        "@type": "MeterEnrollment",
+        "@container": "@set"
+      },
+      "ders": {
+        "@id": "ders",
+        "@type": "deg:DER",
+        "@container": "@set"
+      },
+      "person": {
+        "@id": "beckn:person",
+        "@type": "schema:Person"
+      },
+      "state": {
+        "@id": "beckn:state",
+        "@type": "beckn:State"
+      },
+      "credentials": {
+        "@id": "credentials",
+        "@type": "VerifiableCredential",
+        "@container": "@set"
+      },
+      "existingEnrollments": {
+        "@id": "existingEnrollments",
+        "@type": "VerifiableCredential",
+        "@container": "@set"
+      },
+      "credentialVerification": {
+        "@id": "credentialVerification",
+        "@type": "CredentialVerification"
+      },
+      "verifiedCredentials": {
+        "@id": "verifiedCredentials",
+        "@type": "VerifiedCredential",
+        "@container": "@set"
+      },
+      "conflictCheck": {
+        "@id": "conflictCheck",
+        "@type": "ConflictCheck"
+      },
+      "conflictingEnrollments": {
+        "@id": "conflictingEnrollments",
+        "@type": "ConflictingEnrollment",
+        "@container": "@set"
+      },
+      "consentRevocation": {
+        "@id": "consentRevocation",
+        "@type": "ConsentRevocation"
+      },
+      "unenrollment": {
+        "@id": "unenrollment",
+        "@type": "Unenrollment"
+      },
+      "credential": {
+        "@id": "credential",
+        "@type": "VerifiableCredential"
+      },
+      "userAuth": {
+        "@id": "userAuth",
+        "@type": "UserAuth"
+      },
+      "UserAuth": "deg:UserAuth",
+      "UserAuthRequest": "deg:UserAuthRequest",
+      "UserAuthResponse": "deg:UserAuthResponse",
+      "OtpAuthRequest": "deg:OtpAuthRequest",
+      "OtpAuthResponse": "deg:OtpAuthResponse",
+      "OAuth2AuthRequest": "deg:OAuth2AuthRequest",
+      "OAuth2AuthResponse": "deg:OAuth2AuthResponse",
+      "MeterEnrollment": "deg:MeterEnrollment",
+      "authMethod": "deg:authMethod",
+      "mobile": "deg:mobile",
+      "otp": "deg:otp",
+      "nguid": "deg:nguid",
+      "accessToken": "deg:accessToken",
+      "tokenType": "deg:tokenType",
+      "idToken": "deg:idToken",
+      "refreshToken": "deg:refreshToken",
+      "scope": "deg:scope",
+      "issuer": {
+        "@id": "deg:issuer",
+        "@type": "@id"
+      },
+      "subject": "deg:subject",
+      "verified": "deg:verified",
+      "meterId": "deg:meterId",
+      "meterNumber": "deg:meterNumber",
+      "utilityId": "deg:utilityId",
+      "utilityCustomerId": "deg:utilityCustomerId",
+      "connectionType": "deg:connectionType",
+      "sanctionedLoad": "deg:sanctionedLoad",
+      "beckn": "https://schema.beckn.io/core/v2.0/",
+      "deg": "https://schema.beckn.io/deg/EnergyProgramEnrollment/v2.0/",
+      "@comment": "deg:EnergyProgramEnrollment is the successor to deg:EnergyEnrollment. owl:equivalentClass declared in vocab.jsonld."
+    }
+  ]
+}

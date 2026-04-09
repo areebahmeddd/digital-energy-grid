@@ -1,0 +1,74 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/ConsumptionProfileCredential/v2.0/",
+    "energyCred": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:ConsumptionProfileCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Consumption Profile Credential",
+      "rdfs:comment": "Verifiable Credential for electricity connection and consumption characteristics. Subclass of EnergyCredential.",
+      "rdfs:subClassOf": { "@id": "energyCred:EnergyCredential" }
+    },
+    {
+      "@id": "deg:consumerNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumer number",
+      "rdfs:comment": "Consumer account number assigned by the distribution utility.",
+      "rdfs:domain": "deg:ConsumptionProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:premisesType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Premises type",
+      "rdfs:comment": "Type of premises for the electricity connection (Residential, Commercial, Industrial, Agricultural).",
+      "rdfs:domain": "deg:ConsumptionProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:connectionType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Connection type",
+      "rdfs:comment": "Type of electrical connection (Single-phase or Three-phase).",
+      "rdfs:domain": "deg:ConsumptionProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:sanctionedLoadKW",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load (kW)",
+      "rdfs:comment": "Sanctioned/approved electrical load in kilowatts (kW).",
+      "rdfs:domain": "deg:ConsumptionProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:tariffCategoryCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Tariff category code",
+      "rdfs:comment": "Billing/tariff category code assigned by the distribution utility.",
+      "rdfs:domain": "deg:ConsumptionProfileCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:meterNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter number",
+      "rdfs:comment": "Meter serial number for linking to a specific meter.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:credentialSubject",
+      "@type": "rdf:Property",
+      "rdfs:label": "Credential subject",
+      "rdfs:comment": "The subject of an energy verifiable credential."
+    }
+  ]
+}
