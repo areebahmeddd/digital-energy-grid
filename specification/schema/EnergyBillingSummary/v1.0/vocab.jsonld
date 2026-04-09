@@ -19,12 +19,6 @@
             "@type": "rdf:Property",
             "rdfs:label": "billing Summary",
             "rdfs:comment": "Container for ESPI billing summary data within a credential subject."
-        },
-        {
-            "@id": "energy:BillingSummaryCredential",
-            "@type": "rdfs:Class",
-            "rdfs:label": "Billing Summary Credential",
-            "rdfs:comment": "A W3C Verifiable Credential containing aggregated billing period data using ESPI/Green Button types."
         }
     ]
 }

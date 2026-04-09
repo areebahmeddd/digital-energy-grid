@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://schema.beckn.io/EnergyBillingSummary/v1.0/schema.json",
-    "title": "Billing Summary Credential Schema",
+    "$id": "https://schema.beckn.io/EnergyBillingSummaryCredential/v1.0/schema.json",
+    "title": "Energy Billing Summary Credential Schema",
     "description": "JSON Schema for the Billing Summary Verifiable Credential. Uses ESPI/Green Button types (UsageSummary, SummaryMeasurement, LineItem) and numeric enum codes. Combines customer identity (customerProfile) with aggregated billing data (billingSummary) within a W3C VC 2.0 envelope.",
     "type": "object",
     "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
@@ -20,7 +20,7 @@
         "type": {
             "type": "array",
             "items": { "type": "string" },
-            "contains": { "const": "BillingSummaryCredential" },
+            "contains": { "const": "EnergyBillingSummaryCredential" },
             "minItems": 2
         },
         "issuer": { "$ref": "#/$defs/Issuer" },

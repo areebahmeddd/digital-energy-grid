@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://schema.beckn.io/EnergyMeterDataGB/v1.0/schema.json",
-    "title": "Meter Data Credential Schema",
+    "$id": "https://schema.beckn.io/EnergyMeterDataCredential/v1.0/schema.json",
+    "title": "Energy Meter Data Credential Schema",
     "description": "JSON Schema for the Meter Data Verifiable Credential. Uses ESPI/Green Button types (from https://naesb.org/espi.xsd) and numeric enum codes. Combines customer identity (customerProfile) with historical time-series interval meter readings (meterDataGB) within a W3C VC 2.0 envelope.",
     "type": "object",
     "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
@@ -20,7 +20,7 @@
         "type": {
             "type": "array",
             "items": { "type": "string" },
-            "contains": { "const": "MeterDataCredential" },
+            "contains": { "const": "EnergyMeterDataCredential" },
             "minItems": 2
         },
         "issuer": { "$ref": "#/$defs/Issuer" },

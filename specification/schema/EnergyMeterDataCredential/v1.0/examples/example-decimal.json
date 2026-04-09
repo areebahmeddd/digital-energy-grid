@@ -4,8 +4,8 @@
     "https://schema.org/",
     "https://schema.beckn.io/EnergyMeterDataGB/v1.0/context.jsonld"
   ],
-  "id": "urn:uuid:d4e5f6a7-8901-23bc-def0-456789012345",
-  "type": ["VerifiableCredential", "MeterDataCredential"],
+  "id": "urn:uuid:a1b2c3d4-5678-90ab-cdef-1234567890ab",
+  "type": ["VerifiableCredential", "EnergyMeterDataCredential"],
   "issuer": {
     "id": "did:web:example-utility.com",
     "type": "idRef",
@@ -34,18 +34,16 @@
         "commodity": "electricitySecondaryMetered",
         "flowDirection": "forward",
         "uom": "Wh",
-        "powerOfTenMultiplier": 0,
         "accumulationBehaviour": "deltaData",
         "intervalLength": 900,
         "currency": "INR",
-        "kind": "energy",
-        "phase": "notApplicable"
+        "kind": "energy"
       },
       "qualityOfReading": "validated",
       "IntervalBlock": [
         {
           "interval": {
-            "start": "2025-07-14T18:30:00Z",
+            "start": "2025-07-15T00:00:00+05:30",
             "duration": 3600
           },
           "IntervalReading": [
@@ -54,7 +52,7 @@
                 "start": "2025-07-15T00:00:00+05:30",
                 "duration": 900
               },
-              "value": 375,
+              "value": 0.375,
               "cost": 281300
             },
             {
@@ -62,7 +60,7 @@
                 "start": "2025-07-15T00:15:00+05:30",
                 "duration": 900
               },
-              "value": 410,
+              "value": 0.41,
               "cost": 307500
             },
             {
@@ -70,7 +68,7 @@
                 "start": "2025-07-15T00:30:00+05:30",
                 "duration": 900
               },
-              "value": 520,
+              "value": 0.52,
               "cost": 520000
             },
             {
@@ -78,8 +76,9 @@
                 "start": "2025-07-15T00:45:00+05:30",
                 "duration": 900
               },
-              "value": 485,
-              "cost": 485000
+              "value": 0.485,
+              "cost": 485000,
+              "ReadingQuality": { "quality": "estimatedUsingLinearInterpolation" }
             }
           ]
         }

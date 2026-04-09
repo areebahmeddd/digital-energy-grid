@@ -162,7 +162,7 @@ This is **v1.0** of the Meter Data Credential schema.
     "https://schema.org/",
     "https://schema.beckn.io/EnergyMeterDataGB/v1.0/context.jsonld"
   ],
-  "type": ["VerifiableCredential", "MeterDataCredential"],
+  "type": ["VerifiableCredential", "EnergyMeterDataCredential"],
   "issuer": {
     "id": "did:web:example-utility.com",
     "type": "idRef",

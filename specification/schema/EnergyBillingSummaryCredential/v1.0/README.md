@@ -154,7 +154,7 @@ This is **v1.0** of the Billing Summary Credential schema.
     "https://schema.org/",
     "https://schema.beckn.io/EnergyBillingSummary/v1.0/context.jsonld"
   ],
-  "type": ["VerifiableCredential", "BillingSummaryCredential"],
+  "type": ["VerifiableCredential", "EnergyBillingSummaryCredential"],
   "issuer": {
     "id": "did:web:pge.com",
     "type": "idRef",

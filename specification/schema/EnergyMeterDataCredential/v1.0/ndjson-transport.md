@@ -23,17 +23,17 @@ Content-Type: application/x-ndjson
 
 ### Body
 
-Each line is a single JSON object — one `MeterDataCredential` VC as defined in `attributes.yaml`. Lines are separated by `\n` (U+000A). No trailing comma, no array brackets.
+Each line is a single JSON object — one `EnergyMeterDataCredential` VC as defined in `attributes.yaml`. Lines are separated by `\n` (U+000A). No trailing comma, no array brackets.
 
 ```
-{"@context":[...],"id":"urn:uuid:aaa...","type":["VerifiableCredential","MeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
-{"@context":[...],"id":"urn:uuid:bbb...","type":["VerifiableCredential","MeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
-{"@context":[...],"id":"urn:uuid:ccc...","type":["VerifiableCredential","MeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
+{"@context":[...],"id":"urn:uuid:aaa...","type":["VerifiableCredential","EnergyMeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
+{"@context":[...],"id":"urn:uuid:bbb...","type":["VerifiableCredential","EnergyMeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
+{"@context":[...],"id":"urn:uuid:ccc...","type":["VerifiableCredential","EnergyMeterDataCredential"],"issuer":{...},"credentialSubject":{...},"proof":{...}}
 ```
 
 ### Constraints
 
-- Each line MUST be valid JSON and MUST conform to the `MeterDataCredential` schema.
+- Each line MUST be valid JSON and MUST conform to the `EnergyMeterDataCredential` schema.
 - Each line MUST contain a `proof` — every VC is independently verifiable.
 - Lines MUST NOT contain embedded newlines (JSON strings with `\n` must use the escaped form `\\n`).
 - The stream MAY end with a trailing newline.
