@@ -1,0 +1,86 @@
+# OVER_INTERNET topology (explicit: `docker compose -f docker-compose.yml -f docker-compose.over-internet.yml up`).
+#
+# BAP-side and BPP-side services live on separate, mutually unreachable
+# docker networks (bap_side, bpp_side). Each side has its own redis
+# (aliased as `redis` inside its network). The beckn-router is the ONLY
+# container with a foot in both networks; it accepts inbound public traffic
+# on :9000 and routes /bap/* and /bpp/* to the respective onix adapter on
+# its own side.
+#
+# Effect: onix-bap cannot resolve or reach onix-bpp on the docker bridge.
+# The only path between BAP and BPP is the public URL fronting the router,
+# so any successful workflow run proves end-to-end internet traversal.
+#
+# Run full stack:
+#   docker compose -f docker-compose.yml -f docker-compose.over-internet.yml up -d
+# Run only BPP side:
+#   docker compose -f docker-compose.yml -f docker-compose.over-internet.yml \
+#     up -d onix-bpp sandbox-bpp redis-bpp beckn-router
+# Run only BAP side:
+#   docker compose -f docker-compose.yml -f docker-compose.over-internet.yml \
+#     up -d onix-bap sandbox-bap redis-bap beckn-router
+#
+# Expose the router to the public internet: copy ngrok.yml.example to
+# ngrok.yml, paste your authtoken, then:
+#   ngrok start --all --config ngrok.yml
+# Point workflows at the tunnel URL:
+#   PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh
+#   PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
+
+services:
+  # ---------- BAP side ----------
+  redis-bap:
+    image: redis:alpine
+    hostname: redis
+    networks:
+      - bap_side
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-bap:
+    networks:
+      - bap_side
+
+  sandbox-bap:
+    networks:
+      - bap_side
+
+  # ---------- BPP side ----------
+  redis-bpp:
+    image: redis:alpine
+    hostname: redis
+    networks:
+      - bpp_side
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-bpp:
+    networks:
+      - bpp_side
+
+  sandbox-bpp:
+    networks:
+      - bpp_side
+
+  # ---------- Public-facing path router (only container on both sides) ----------
+  beckn-router:
+    image: caddy:alpine
+    ports:
+      - "9000:9000"
+    networks:
+      - bap_side
+      - bpp_side
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+
+networks:
+  bap_side:
+    driver: bridge
+  bpp_side:
+    driver: bridge

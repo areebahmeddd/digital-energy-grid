@@ -1,28 +1,19 @@
+# Base stack: BAP and BPP adapter + sandbox services.
+#
+# This file alone is not runnable — it leaves network topology and redis
+# placement to an overlay file:
+#
+#   Local (shared bridge, direct onix-bap <-> onix-bpp):
+#     docker compose up -d
+#     # auto-applies docker-compose.override.yml
+#
+#   Over-internet (split networks + path router, forces public-URL traversal):
+#     docker compose -f docker-compose.yml -f docker-compose.over-internet.yml up -d
+
 services:
-  # ============================================
-  # Core Infrastructure Services
-  # ============================================
-
-  # Redis - Caching Service
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - beckn_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   onix-bap:
     image: fidedocker/onix-adapter:1.5.1
-    container_name: onix-bap
     platform: linux/amd64
-    networks:
-      - beckn_network
     ports:
       - "8081:8081"
     environment:
@@ -40,10 +31,7 @@ services:
 
   onix-bpp:
     image: fidedocker/onix-adapter:1.5.1
-    container_name: onix-bpp
     platform: linux/amd64
-    networks:
-      - beckn_network
     ports:
       - "8082:8082"
     environment:
@@ -60,7 +48,6 @@ services:
     command: ["./server", "--config=/app/config/local-simple-bpp.yaml"]
 
   sandbox-bap:
-    container_name: sandbox-bap
     image: fidedocker/sandbox-2.0:latest
     environment:
       - NODE_ENV=production
@@ -73,11 +60,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
-    networks:
-      - beckn_network
 
   sandbox-bpp:
-    container_name: sandbox-bpp
     image: fidedocker/sandbox-2.0:latest
     environment:
       - NODE_ENV=production
@@ -90,10 +74,3 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
-    networks:
-      - beckn_network
-
-networks:
-  beckn_network:
-    name: beckn_network
-    driver: bridge

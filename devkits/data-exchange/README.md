@@ -75,7 +75,7 @@ BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
 ```bash
 # 1. Start infrastructure (shared across both use cases)
 cd install
-docker compose -f docker-compose-adapter.yml up -d
+docker compose up -d   # local topology (docker-compose.override.yml auto-applied)
 
 # 2. Verify services
 curl http://localhost:8081/health   # BAP adapter
@@ -100,8 +100,9 @@ data-exchange/
 │   ├── local-simple-bpp.yaml            #   BPP adapter (port 8082)
 │   └── local-simple-routing-*.yaml      #   Routing rules
 ├── install/
-│   ├── docker-compose-adapter.yml       # Default stack (shared docker bridge)
-│   ├── docker-compose-over-internet.yml # Isolated-network stack + path router
+│   ├── docker-compose.yml               # Base: BAP + BPP adapters and sandboxes
+│   ├── docker-compose.override.yml      # LOCAL topology (auto-applied: shared bridge)
+│   ├── docker-compose.over-internet.yml # OVER_INTERNET topology (split nets + router)
 │   ├── Caddyfile                        #   path router config (:9000)
 │   └── ngrok.yml.example                #   template for ngrok agent
 ├── scripts/
@@ -133,12 +134,12 @@ data-exchange/
 
 ## Run end-to-end over the public internet
 
-By default (`docker-compose-adapter.yml`) BAP and BPP share a docker bridge
-and reach each other by container DNS names (`onix-bap`, `onix-bpp`). To
-exercise the protocol with both sides talking strictly over the public
-internet, the devkit ships an alternative compose file that puts the two
-sides on **separate, mutually unreachable** docker networks and exposes them
-through a single ngrok tunnel.
+By default (`docker-compose.override.yml`, auto-applied) BAP and BPP share a
+docker bridge and reach each other by container DNS names (`onix-bap`,
+`onix-bpp`). To exercise the protocol with both sides talking strictly over
+the public internet, the devkit ships `docker-compose.over-internet.yml`
+which, when layered on the base, puts the two sides on **separate, mutually
+unreachable** docker networks and exposes them through a single ngrok tunnel.
 
 ```
                        internet
@@ -188,10 +189,11 @@ Body-digest signing is unaffected by the URL change, so registry entries for
 # 1. Stop the default stack if it's running (the airtight stack uses the
 #    same host ports 8081/8082/3001/3002; only one stack at a time).
 cd install
-docker compose -f docker-compose-adapter.yml down 2>/dev/null
+docker compose down 2>/dev/null
 
-# 2. Bring up the airtight stack (separate networks per side + router on :9000)
-docker compose -f docker-compose-over-internet.yml up -d
+# 2. Bring up the airtight stack (separate networks per side + router on :9000).
+#    Passing -f disables auto-pickup of docker-compose.override.yml.
+docker compose -f docker-compose.yml -f docker-compose.over-internet.yml up -d
 curl -s http://localhost:9000   # → "beckn-router ok"
 
 # 3. (Optional) Verify isolation: from inside bap_side, onix-bpp must be NXDOMAIN
@@ -252,16 +254,7 @@ step you should see three rows recorded by the public tunnel:
 
 ```bash
 cd install
-docker compose -f docker-compose-over-internet.yml down
-# kill the ngrok agent in its terminal (Ctrl-C) or:  pkill -f 'ngrok start'
-```
-
-### Cleanup
-
-```bash
-# Stop the proxy and tunnel
-cd install
-docker compose -f docker-compose-adapter.yml --profile internet down
+docker compose -f docker-compose.yml -f docker-compose.over-internet.yml down
 # kill the ngrok agent in its terminal (Ctrl-C) or:  pkill -f 'ngrok start'
 ```
 

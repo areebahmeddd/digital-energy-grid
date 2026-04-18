@@ -1,0 +1,43 @@
+# LOCAL topology (auto-applied by `docker compose up`).
+#
+# All services share a single docker bridge. onix-bap reaches onix-bpp
+# directly by container DNS. Single redis is shared by both sides.
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - beckn_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-bap:
+    container_name: onix-bap
+    networks:
+      - beckn_network
+
+  onix-bpp:
+    container_name: onix-bpp
+    networks:
+      - beckn_network
+
+  sandbox-bap:
+    container_name: sandbox-bap
+    networks:
+      - beckn_network
+
+  sandbox-bpp:
+    container_name: sandbox-bpp
+    networks:
+      - beckn_network
+
+networks:
+  beckn_network:
+    name: beckn_network
+    driver: bridge
