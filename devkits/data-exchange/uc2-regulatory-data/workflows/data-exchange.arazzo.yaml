@@ -8,7 +8,7 @@ info:
     Scenario: BESCOM (discom) submits ARR filing data to
     APERC (state regulator) with in-message delivery.
 
-    Run via the workflow runner (from usecase2/workflows/):
+    Run via the workflow runner (from uc2-regulatory-data/workflows/):
 
       Local-bridge mode (default, BAP↔BPP via Caddy router inside docker —
       `docker compose up -d` in install/):

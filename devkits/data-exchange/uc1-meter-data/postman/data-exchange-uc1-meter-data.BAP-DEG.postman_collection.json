@@ -1,9 +1,9 @@
 {
   "info": {
     "_postman_id": "ddec813b-3183-45e5-aa2a-560719a2b87b",
-    "name": "data-exchange-usecase1.BAP-DEG",
+    "name": "data-exchange-uc1-meter-data.BAP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Postman collection for Buyer Application Platform implementing data-exchange-usecase1 APIs based on Beckn Protocol v2"
+    "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc1-meter-data APIs based on Beckn Protocol v2"
   },
   "item": [
     {

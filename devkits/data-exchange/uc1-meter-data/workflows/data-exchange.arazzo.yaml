@@ -8,7 +8,7 @@ info:
     Scenario: IntelliGrid AMI Services (AMISP) publishes meter data,
     BESCOM (discom) discovers and acquires it with in-message delivery.
 
-    Run via the workflow runner (from usecase1/workflows/):
+    Run via the workflow runner (from uc1-meter-data/workflows/):
 
       Local-bridge mode (default, BAP↔BPP via Caddy router inside docker —
       `docker compose up -d` in install/):
