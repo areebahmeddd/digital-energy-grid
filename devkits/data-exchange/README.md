@@ -72,10 +72,19 @@ Import a collection into Postman and hit Send. Default request URLs point at `lo
 
 ## Hosting the site (beyond this devkit)
 
-`PUBLIC_URL` is the beckn-facing URL your BAP/BPP expose; in production it's just your real hostname (TLS terminated at your edge, forwarded to `beckn-router:9000`). The rest of the work is **identity**, not infrastructure:
+`PUBLIC_URL` is the beckn-facing URL your BAP/BPP expose; in production it's your real HTTPS hostname, with TLS terminated somewhere in front of `beckn-router:9000`. The rest of the work is **identity**, not infrastructure:
 
-1. **Create DeDi registry records** for your subscriber — one record per role (BAP, BPP) per network. See [docs.beckn.io](https://docs.beckn.io/) for the current record schema and where in the protocol flow the registry is consulted (sign/verify during every message).
-2. **Update your onix config** (`config/local-simple-*.yaml`) so the identity fields match your DeDi record. The mapping:
+1. **Terminate TLS in front of the router.** beckn-router (the in-stack Caddy) listens plain HTTP on `:9000` — fine for local and for ngrok (ngrok terminates TLS for you), but a real deployment needs a proper cert. Three common patterns:
+
+   - **Host-level reverse proxy** — nginx / host Caddy / Traefik on the VM, with a Let's Encrypt cert for your hostname, `proxy_pass` → `127.0.0.1:9000`. Leaves the devkit stack unchanged.
+   - **Let the devkit Caddy do TLS itself** — edit `install/Caddyfile`: drop `auto_https off`, replace `:9000` with `your.hostname.com`, publish `80:80` and `443:443` on the `beckn-router` service, and mount a persistent volume on `/data` so issued certs survive restarts. Then no extra proxy is needed.
+   - **Managed edge** — Cloudflare / AWS ALB / GCP HTTPS LB / Cloudflare Tunnel. Terminate TLS at the edge, point the origin at `<your-host>:9000`. Zero changes to the stack.
+
+   Whichever path you pick, the hostname on the cert must match the URL you publish in your DeDi subscriber record — that's the URL signature verifiers will dial.
+
+2. **Create DeDi registry records** for your subscriber — one record per role (BAP, BPP) per network. See [docs.beckn.io](https://docs.beckn.io/) for the current record schema and where in the protocol flow the registry is consulted (sign/verify during every message).
+
+3. **Update your onix config** (`config/local-simple-*.yaml`) so the identity fields match your DeDi record. The mapping:
 
    | DeDi registry field | Onix config field |
    |---------------------|-------------------|
@@ -83,7 +92,7 @@ Import a collection into Postman and hit Send. Default request URLs point at `lo
    | `subscriberId`      | `networkParticipant` |
    | `domain`            | `allowedNetworkIDs` entry (network ID in beckn context) |
 
-3. **Ask the network namespace owner** (e.g. for `nfh.global/testnet-deg`, that's `nfh.global`) to add your subscriber record to the network's beckn reference registry. This is required whenever a network's `allowedNetworkIDs` on the adapter is non-empty — adapters reject messages from subscribers not listed there.
+4. **Ask the network namespace owner** (e.g. for `nfh.global/testnet-deg`, that's `nfh.global`) to add your subscriber record to the network's beckn reference registry. This is required whenever a network's `allowedNetworkIDs` on the adapter is non-empty — adapters reject messages from subscribers not listed there.
 
 One beckn server can belong to multiple networks: list each one in `allowedNetworkIDs` and register a corresponding DeDi record per network.
 
