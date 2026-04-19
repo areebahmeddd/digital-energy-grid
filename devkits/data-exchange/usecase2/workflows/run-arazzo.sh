@@ -1,34 +1,31 @@
 #!/usr/bin/env bash
-# Run the usecase2 Arazzo workflows via Redocly Respect, either against the
-# local docker stack (default) or against the public URL exposed by the
-# over-internet docker compose + ngrok tunnel.
+# Run the usecase2 Arazzo workflows via Redocly Respect.
+#
+# Default mode (no PUBLIC_URL): payload bapUri/bppUri are rewritten to
+# http://beckn-router:9000 — Caddy bridges BAP↔BPP traffic locally inside
+# docker, no ngrok needed.
+#
+# Over-internet mode (forces public-internet traversal): set PUBLIC_URL
+# to the ngrok tunnel URL fronting beckn-router:9000.
 #
 # Usage (from usecase2/workflows/):
-#   ./run-arazzo.sh                                    # run all workflows
-#   ./run-arazzo.sh -w select-through-status -v        # single workflow, verbose
-#
-# Over-the-internet mode:
-#   PUBLIC_URL=https://your-domain.ngrok-free.dev ./run-arazzo.sh
-#
-# When PUBLIC_URL is set, the wrapper materialises a tmpdir with a copy of the
-# arazzo file and patched example payloads (docker-DNS bapUri/bppUri rewritten
-# to the public URL) and runs respect against that, so the source examples on
-# disk stay untouched. Server URLs (-S) are also flipped to the public URL.
+#   ./run-arazzo.sh                                                    # local-bridge mode
+#   ./run-arazzo.sh -w select-through-status -v
+#   PUBLIC_URL=https://your-domain.ngrok-free.dev ./run-arazzo.sh      # over-internet mode
 
 set -euo pipefail
 
 USECASE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RESPECT_ARGS=(--severity 'SCHEMA_CHECK=off' "$@")
 
-if [ -z "${PUBLIC_URL:-}" ]; then
-  echo "Mode: local docker (default x-serverUrl)"
-  exec npx --yes @redocly/cli respect \
-    "$USECASE_ROOT/workflows/data-exchange.arazzo.yaml" \
-    "${RESPECT_ARGS[@]}"
-fi
-
+PUBLIC_URL="${PUBLIC_URL:-http://beckn-router:9000}"
 PUBLIC_URL="${PUBLIC_URL%/}"
-echo "Mode: over-internet via $PUBLIC_URL (payloads patched in tmpdir)"
+
+if [ "$PUBLIC_URL" = "http://beckn-router:9000" ]; then
+  echo "Mode: local-bridge via beckn-router (payloads patched in tmpdir)"
+else
+  echo "Mode: over-internet via $PUBLIC_URL (payloads patched in tmpdir)"
+fi
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/data-exchange-arazzo-XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -50,8 +47,17 @@ for f in sorted(src.glob('*.json')):
     json.dump(d, open(dst / f.name, 'w'), indent=2)
 PY
 
-exec npx --yes @redocly/cli respect \
-  "$WORK/workflows/data-exchange.arazzo.yaml" \
-  -S "beckn-bap-caller=$PUBLIC_URL/bap/caller" \
-  -S "beckn-bpp-caller=$PUBLIC_URL/bpp/caller" \
-  "${RESPECT_ARGS[@]}"
+# Server URLs (host-side caller endpoints) always go via the published host
+# ports — direct in local-bridge mode, via the tunnel only when PUBLIC_URL
+# is a remote URL.
+if [ "$PUBLIC_URL" = "http://beckn-router:9000" ]; then
+  exec npx --yes @redocly/cli respect \
+    "$WORK/workflows/data-exchange.arazzo.yaml" \
+    "${RESPECT_ARGS[@]}"
+else
+  exec npx --yes @redocly/cli respect \
+    "$WORK/workflows/data-exchange.arazzo.yaml" \
+    -S "beckn-bap-caller=$PUBLIC_URL/bap/caller" \
+    -S "beckn-bpp-caller=$PUBLIC_URL/bpp/caller" \
+    "${RESPECT_ARGS[@]}"
+fi

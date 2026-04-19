@@ -75,7 +75,7 @@ BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
 ```bash
 # 1. Start infrastructure (shared across both use cases)
 cd install
-docker compose up -d   # local topology (docker-compose.override.yml auto-applied)
+docker compose up -d
 
 # 2. Verify services
 curl http://localhost:8081/health   # BAP adapter
@@ -100,11 +100,9 @@ data-exchange/
 │   ├── local-simple-bpp.yaml            #   BPP adapter (port 8082)
 │   └── local-simple-routing-*.yaml      #   Routing rules
 ├── install/
-│   ├── docker-compose.yml               # Base: BAP + BPP adapters and sandboxes
-│   ├── docker-compose.override.yml      # LOCAL topology (auto-applied: shared bridge)
-│   ├── docker-compose.over-internet.yml # OVER_INTERNET topology (split nets + router)
-│   ├── Caddyfile                        #   path router config (:9000)
-│   └── ngrok.yml.example                #   template for ngrok agent
+│   ├── docker-compose.yml               # Stack: split networks + Caddy router on :9000
+│   ├── Caddyfile                        #   path router config
+│   └── ngrok.yml.example                #   template for ngrok agent (over-internet mode)
 ├── scripts/
 │   ├── generate_postman_collection.py   # Postman collection generator
 │   └── subscribe-catalog.sh             # one-time catalog-service subscribe (network setup)
@@ -113,7 +111,7 @@ data-exchange/
 │   ├── postman/                         #   data-exchange-usecase1.{BAP,BPP}-DEG
 │   └── workflows/
 │       ├── data-exchange.arazzo.yaml    #   Arazzo 1.0.1 workflow spec
-│       └── run-arazzo.sh                #   Arazzo runner (local or PUBLIC_URL)
+│       └── run-arazzo.sh                #   Arazzo runner (local-bridge default, PUBLIC_URL override)
 └── usecase2/                            # Discom → Regulator (ARR filing)
     ├── examples/
     ├── postman/
@@ -134,17 +132,21 @@ data-exchange/
 
 ## Run end-to-end over the public internet
 
-By default (`docker-compose.override.yml`, auto-applied) BAP and BPP share a
-docker bridge and reach each other by container DNS names (`onix-bap`,
-`onix-bpp`). To exercise the protocol with both sides talking strictly over
-the public internet, the devkit ships `docker-compose.over-internet.yml`
-which, when layered on the base, puts the two sides on **separate, mutually
-unreachable** docker networks and exposes them through a single ngrok tunnel.
+The stack always runs BAP-side and BPP-side services on **separate, mutually
+unreachable** docker networks (`bap_side`, `bpp_side`). The Caddy
+beckn-router is the only container with a foot in both networks; all
+BAP↔BPP traffic flows through it on `:9000`.
+
+By default the Arazzo runner uses `http://beckn-router:9000` for `bapUri`
+and `bppUri` in payloads, so traffic stays inside docker (Caddy bridges
+the two sides — no ngrok needed). To prove end-to-end **public-internet**
+traversal, expose the router via an ngrok tunnel and set `PUBLIC_URL` to
+the tunnel URL when invoking the runner.
 
 ```
                        internet
                           │
-              https://<public-host>/  (ngrok)
+              https://<public-host>/  (ngrok, optional)
                           │
                      :9000 (host)
                           │
@@ -186,27 +188,22 @@ Body-digest signing is unaffected by the URL change, so registry entries for
 ### Per-session steps
 
 ```bash
-# 1. Stop the default stack if it's running (the airtight stack uses the
-#    same host ports 8081/8082/3001/3002; only one stack at a time).
+# 1. Bring up the stack (or leave it running from Quick Start).
 cd install
-docker compose down 2>/dev/null
-
-# 2. Bring up the airtight stack (separate networks per side + router on :9000).
-#    Passing -f disables auto-pickup of docker-compose.override.yml.
-docker compose -f docker-compose.yml -f docker-compose.over-internet.yml up -d
+docker compose up -d
 curl -s http://localhost:9000   # → "beckn-router ok"
 
-# 3. (Optional) Verify isolation: from inside bap_side, onix-bpp must be NXDOMAIN
+# 2. (Optional) Verify isolation: from inside bap_side, onix-bpp must be NXDOMAIN
 docker run --rm --network install_bap_side busybox \
   sh -c 'nslookup onix-bpp; nc -zv -w 3 onix-bpp 8082'
 # Expected: "can't find onix-bpp: NXDOMAIN" and "nc: bad address 'onix-bpp'"
 
-# 4. Open the tunnel (foreground in its own terminal, or backgrounded)
+# 3. Open the tunnel (foreground in its own terminal, or backgrounded)
 ngrok start --all
 # Note the public URL printed by ngrok; export it:
 export PUBLIC_URL=https://<your-subdomain>.ngrok-free.dev
 
-# 5. Run the Arazzo workflows over the public URL. Each usecase's runner sits
+# 4. Run the Arazzo workflows over the public URL. Each usecase's runner sits
 #    next to its arazzo file under workflows/. When PUBLIC_URL is set the
 #    runner materialises a tmpdir with a copy of the arazzo file and patched
 #    example payloads (docker-DNS bapUri/bppUri rewritten to the public URL)
@@ -221,9 +218,11 @@ PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh
 PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
 ```
 
-A passing run proves end-to-end internet traversal: there is no docker-bridge
-fallback between the two halves, so every BAP↔BPP hop must have travelled
-through the public URL fronting the router.
+A passing run with `PUBLIC_URL` set to the ngrok URL proves end-to-end
+internet traversal — `bapUri`/`bppUri` in payloads point at the public
+URL, so every BAP↔BPP hop must have travelled through the tunnel
+fronting the router (the local Caddy-bridge fallback is only used when
+`PUBLIC_URL` is unset).
 
 ### Verify the traffic really left the box
 
@@ -254,7 +253,7 @@ step you should see three rows recorded by the public tunnel:
 
 ```bash
 cd install
-docker compose -f docker-compose.yml -f docker-compose.over-internet.yml down
+docker compose down
 # kill the ngrok agent in its terminal (Ctrl-C) or:  pkill -f 'ngrok start'
 ```
 
