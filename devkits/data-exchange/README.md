@@ -83,6 +83,7 @@ BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
     |    catalog)         |                    |                      |
     |                     |                    |                      |
     |                     |                    |<---- discover -------|
+    |                     |                    |     (search datasets)|
     |                     |                    |---- on_discover ---->|
     |                     |                    |     (catalog results)|
     |                     |                    |                      |
@@ -102,14 +103,14 @@ BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
     |---- on_status (PROCESSING) ----------------------------------->|
     |                                                                 |
     |  +- Delivery mode A: URL download -------------------------+  |
-    |  | on_status (DELIVERY_COMPLETE)                           |  |
-    |  |   dataset:downloadUrl + dataset:checksum                | >|
-    |  +---------------------------------------------------------+  |
+    |  | on_status (DELIVERY_COMPLETE)                            |  |
+    |  |   dataset:downloadUrl + dataset:checksum                 | >|
+    |  +----------------------------------------------------------+  |
     |                                                                 |
     |  +- Delivery mode B: Inline dataPayload --------------------+  |
-    |  | on_status (DELIVERY_COMPLETE)                           |  |
-    |  |   dataPayload: IES_Report / IES_ARR_Filing              | >|
-    |  +---------------------------------------------------------+  |
+    |  | on_status (DELIVERY_COMPLETE)                            |  |
+    |  |   dataPayload: IES_Report / IES_ARR_Filing               | >|
+    |  +----------------------------------------------------------+  |
     |                                                                 |
     |<---- cancel ---------------------------------------------------|
     |---- on_cancel ------------------------------------------------>|
