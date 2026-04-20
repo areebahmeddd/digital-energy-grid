@@ -140,9 +140,9 @@ DEVKIT_CONFIGS = {
     "data-exchange-uc1-meter-data": {
         "domain": "nfh.global/testnet-deg",
         "bap_id": "bap.example.com",
-        "bap_uri": "http://onix-bap:8081/bap/receiver",
+        "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
-        "bpp_uri": "http://onix-bpp:8082/bpp/receiver",
+        "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/data-exchange/uc1-meter-data/examples",
@@ -151,9 +151,9 @@ DEVKIT_CONFIGS = {
     "data-exchange-uc2-regulatory-data": {
         "domain": "nfh.global/testnet-deg",
         "bap_id": "bap.example.com",
-        "bap_uri": "http://onix-bap:8081/bap/receiver",
+        "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
-        "bpp_uri": "http://onix-bpp:8082/bpp/receiver",
+        "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/data-exchange/uc2-regulatory-data/examples",
@@ -377,17 +377,22 @@ def load_example_json(filepath: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def replace_context_macros(data: Dict[str, Any]) -> Dict[str, Any]:
+def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) -> Dict[str, Any]:
     """
     Replace hardcoded context values with Postman macros.
-    
+
     Preserves message payload as-is, only modifies context.
+
+    When host_root_style is True, bapUri/bppUri are templated as
+    "{{bap_host_root}}/bap/receiver" / "{{bpp_host_root}}/bpp/receiver" so a
+    single host variable (e.g., http://beckn-router:9000 or an ngrok URL)
+    drives both request targeting and callback routing.
     """
     if not isinstance(data, dict):
         return data
-    
+
     result = {}
-    
+
     for key, value in data.items():
         if key == "context" and isinstance(value, dict):
             # Replace context fields with macros
@@ -400,11 +405,11 @@ def replace_context_macros(data: Dict[str, Any]) -> Dict[str, Any]:
                 elif ctx_key in ("bap_id", "bapId"):
                     new_context[ctx_key] = "{{bap_id}}"
                 elif ctx_key in ("bap_uri", "bapUri"):
-                    new_context[ctx_key] = "{{bap_uri}}"
+                    new_context[ctx_key] = "{{bap_host_root}}/bap/receiver" if host_root_style else "{{bap_uri}}"
                 elif ctx_key in ("bpp_id", "bppId"):
                     new_context[ctx_key] = "{{bpp_id}}"
                 elif ctx_key in ("bpp_uri", "bppUri"):
-                    new_context[ctx_key] = "{{bpp_uri}}"
+                    new_context[ctx_key] = "{{bpp_host_root}}/bpp/receiver" if host_root_style else "{{bpp_uri}}"
                 elif ctx_key in ("transaction_id", "transactionId"):
                     new_context[ctx_key] = "{{transaction_id}}"
                 elif ctx_key in ("message_id", "messageId"):
@@ -419,16 +424,16 @@ def replace_context_macros(data: Dict[str, Any]) -> Dict[str, Any]:
                     new_context[ctx_key] = ctx_value
                 else:
                     # Preserve other context fields (e.g., location)
-                    new_context[ctx_key] = replace_context_macros(ctx_value) if isinstance(ctx_value, (dict, list)) else ctx_value
-            
+                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style) if isinstance(ctx_value, (dict, list)) else ctx_value
+
             result[key] = new_context
         elif isinstance(value, (dict, list)):
             # Recursively process nested structures in message
-            result[key] = replace_context_macros(value)
+            result[key] = replace_context_macros(value, host_root_style)
         else:
             # Preserve other fields as-is
             result[key] = value
-    
+
     return result
 
 
@@ -438,11 +443,12 @@ def create_postman_request(
     endpoint: str,
     request_name: str,
     role: str,
-    adapter_url_var: str
+    adapter_url_var: str,
+    host_root_style: bool = False
 ) -> Dict[str, Any]:
     """
     Create a Postman request object from JSON data.
-    
+
     Args:
         json_data: The JSON payload
         action: Action name (e.g., "discover", "on_discover")
@@ -450,16 +456,19 @@ def create_postman_request(
         request_name: Name for the request
         role: Role (BAP, BPP, UtilityBPP)
         adapter_url_var: Variable name for adapter URL (e.g., "bap_adapter_url")
+        host_root_style: Template bapUri/bppUri as {{bap_host_root}}/bap/receiver
     """
     # Replace macros in the JSON
-    request_body = replace_context_macros(json_data)
+    request_body = replace_context_macros(json_data, host_root_style)
 
     # Format JSON with proper indentation
     body_raw = json.dumps(request_body, indent=2)
 
-    method = "POST"
+    # BAP discover is a GET so Postman prunes the body unless explicitly disabled
+    is_bap_discover = role == "BAP" and action == "discover"
+    method = "GET" if is_bap_discover else "POST"
 
-    return {
+    item = {
         "name": request_name,
         "request": {
             "method": method,
@@ -482,6 +491,11 @@ def create_postman_request(
         },
         "response": []
     }
+
+    if is_bap_discover:
+        item["protocolProfileBehavior"] = {"disableBodyPruning": True}
+
+    return item
 
 
 def scan_examples_directory(examples_dir: Path, structure: str, role: str) -> Dict[str, List[Tuple[Path, str]]]:
@@ -550,17 +564,23 @@ def scan_examples_directory(examples_dir: Path, structure: str, role: str) -> Di
 def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     """Get collection variables based on devkit and role."""
     config = DEVKIT_CONFIGS[devkit]
-    
+
     variables = [
         {"key": "domain", "value": config["domain"]},
         {"key": "version", "value": "2.0.0"},
         {"key": "bap_id", "value": config["bap_id"]},
-        {"key": "bap_uri", "value": config["bap_uri"]},
         {"key": "bpp_id", "value": config["bpp_id"]},
-        {"key": "bpp_uri", "value": config["bpp_uri"]},
         {"key": "transaction_id", "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"},
         {"key": "iso_date", "value": ""}
     ]
+
+    # Presence of bap_host_root switches templating to {{bap_host_root}}/bap/receiver
+    if "bap_host_root" in config:
+        variables.append({"key": "bap_host_root", "value": config["bap_host_root"]})
+        variables.append({"key": "bpp_host_root", "value": config["bpp_host_root"]})
+    else:
+        variables.append({"key": "bap_uri", "value": config["bap_uri"]})
+        variables.append({"key": "bpp_uri", "value": config["bpp_uri"]})
     
     # Add adapter URLs based on role
     if role == "BAP":
@@ -595,7 +615,8 @@ def generate_collection(
     """
     config = DEVKIT_CONFIGS[devkit]
     structure = config["structure"]
-    
+    host_root_style = "bap_host_root" in config
+
     # Determine action mapping and adapter URL based on role
     if role == "BAP":
         action_mapping = BAP_ACTIONS
@@ -658,7 +679,7 @@ def generate_collection(
             
             # Create Postman request
             request = create_postman_request(
-                json_data, action, endpoint, request_name, role, adapter_url_var
+                json_data, action, endpoint, request_name, role, adapter_url_var, host_root_style
             )
             action_items.append(request)
         

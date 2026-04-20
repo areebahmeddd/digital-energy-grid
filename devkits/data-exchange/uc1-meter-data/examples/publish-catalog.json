@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "action": "catalog/publish",
     "bppId": "bpp.example.com",
-    "bppUri": "http://onix-bpp:8082/bpp/receiver",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
     "transactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "messageId": "1a2b3c4d-5e6f-7890-abcd-ef0987654321",
     "timestamp": "2026-04-01T06:00:00Z",

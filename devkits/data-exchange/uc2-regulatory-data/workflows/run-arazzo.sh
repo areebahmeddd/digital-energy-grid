@@ -40,9 +40,9 @@ pub = os.environ['PUBLIC_URL']
 for f in sorted(src.glob('*.json')):
     d = json.load(open(f))
     ctx = d.get('context', {})
-    if ctx.get('bapUri') == 'http://onix-bap:8081/bap/receiver':
+    if 'bapUri' in ctx:
         ctx['bapUri'] = pub + '/bap/receiver'
-    if ctx.get('bppUri') == 'http://onix-bpp:8082/bpp/receiver':
+    if 'bppUri' in ctx:
         ctx['bppUri'] = pub + '/bpp/receiver'
     json.dump(d, open(dst / f.name, 'w'), indent=2)
 PY
