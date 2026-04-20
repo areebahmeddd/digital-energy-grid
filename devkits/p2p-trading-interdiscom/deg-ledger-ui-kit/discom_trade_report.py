@@ -134,21 +134,32 @@ def generate_report():
     api_url = f"{LEDGER_URL.rstrip('/')}/ledger/get"
     private_key = _load_private_key()
 
-    # Date range: last 30 days to last 2 days, at midnight IST
+    # Date range: fetch covers both the historical report window (T-30 to T-2)
+    # and the near-term trend window (T-1 to T+1), all at midnight IST.
     now_ist = datetime.now(IST)
     today_midnight = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_date = today_midnight - timedelta(days=2)
-    start_date = today_midnight - timedelta(days=30)
+    window_start = today_midnight - timedelta(days=30)
+    window_end = today_midnight - timedelta(days=2)  # exclusive
+    trend_end = today_midnight + timedelta(days=2)   # exclusive; includes all of tomorrow
 
-    start_utc = start_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    end_utc = end_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    start_utc = window_start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    end_utc = trend_end.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    print(f"Fetching trades {start_date.strftime('%d %b')} – {end_date.strftime('%d %b %Y')} IST ...", file=sys.stderr)
+    print(f"Fetching trades {window_start.strftime('%d %b')} – {trend_end.strftime('%d %b %Y')} IST ...", file=sys.stderr)
     all_trades = _fetch_all_trades(api_url, private_key, start_utc, end_utc)
 
     # Per-discom stats: total, allocated, unallocated, unallocated by delivery day
     stats = {d: {"total": 0, "allocated": 0, "unallocated": 0,
                  "unalloc_days": defaultdict(int)} for d in VALID_DISCOMS}
+
+    # Near-term delivery trend (unique trades involving a valid DISCOM)
+    yesterday_key = (today_midnight - timedelta(days=1)).strftime("%Y-%m-%d")
+    today_key = today_midnight.strftime("%Y-%m-%d")
+    tomorrow_key = (today_midnight + timedelta(days=1)).strftime("%Y-%m-%d")
+    trend = {yesterday_key: 0, today_key: 0, tomorrow_key: 0}
+
+    window_start_key = window_start.strftime("%Y-%m-%d")
+    window_end_key = window_end.strftime("%Y-%m-%d")
 
     for trade in all_trades:
         buyer_discom = trade.get("discomIdBuyer", "")
@@ -156,6 +167,14 @@ def generate_report():
         if buyer_discom.startswith("TEST") or seller_discom.startswith("TEST"):
             continue
         sort_key, display_day = _delivery_date_key(trade)
+
+        # Trend: count each trade once if it touches a tracked DISCOM
+        if sort_key in trend and (buyer_discom in stats or seller_discom in stats):
+            trend[sort_key] += 1
+
+        # Existing per-DISCOM stats are limited to the historical window
+        if not (window_start_key <= sort_key < window_end_key):
+            continue
 
         # Buyer side
         if buyer_discom in stats:
@@ -179,11 +198,12 @@ def generate_report():
 
     # ── Build WhatsApp-friendly report ──
     today_str = now_ist.strftime("%d %b %Y")
-    window_str = f"{start_date.strftime('%d %b')} – {end_date.strftime('%d %b %Y')}"
+    window_str = f"{window_start.strftime('%d %b')} – {window_end.strftime('%d %b %Y')}"
 
     lines = [
         f"*DEG P2P Trade Report*",
         f"Date: {today_str}",
+        f"*Delivery trend:* Yesterday {trend[yesterday_key]} · Today {trend[today_key]} · Tomorrow {trend[tomorrow_key]}",
         f"Delivery window: {window_str}",
         f"Trades delivered in this window:",
         "",
