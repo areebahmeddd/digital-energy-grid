@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "2d909785-1651-41f3-9ebf-68615b2ead0c",
+    "_postman_id": "3cd69693-ca02-4aef-8b3a-a5a6d4c9f418",
     "name": "data-exchange-uc2-regulatory-data.BAP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc2-regulatory-data APIs based on Beckn Protocol v2"
@@ -80,7 +80,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"location\": {\n      \"country\": {\n        \"code\": \"IND\"\n      },\n      \"city\": {\n        \"code\": \"std:080\"\n      }\n    },\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$.catalogs[*].resources[*]\"\n      }\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"location\": {\n      \"country\": {\n        \"code\": \"IND\"\n      },\n      \"city\": {\n        \"code\": \"std:080\"\n      }\n    },\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$.catalogs[*].resources[*]\",\n        \"_expressionExamples\": [\n          \"// all catalogs where bppId exists\",\n          \"$.catalogs[*] ? (exists(@.bppId))\",\n          \"// all catalogs where bppId matches a given name and resources exists\",\n          \"$.catalogs[*] ? (@.bppId == 'hes.cuculus.in' && exists(@.resources))\",\n          \"// all catalogs from a specific bppId with active offers\",\n          \"$.catalogs[*] ? (@.bppId == 'hes.cuculus.in' && @.offers[*].validity.endDate < '2026-09-01T00:00:00Z')\"\n        ]\n      }\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"

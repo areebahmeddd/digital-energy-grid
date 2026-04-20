@@ -24,7 +24,15 @@
     "intent": {
       "filters": {
         "type": "jsonpath",
-        "expression": "$.catalogs[*].resources[*]"
+        "expression": "$.catalogs[*].resources[*]",
+        "_expressionExamples": [
+          "// all catalogs where bppId exists",
+          "$.catalogs[*] ? (exists(@.bppId))",
+          "// all catalogs where bppId matches a given name and resources exists",
+          "$.catalogs[*] ? (@.bppId == 'hes.cuculus.in' && exists(@.resources))",
+          "// all catalogs from a specific bppId with active offers",
+          "$.catalogs[*] ? (@.bppId == 'hes.cuculus.in' && @.offers[*].validity.endDate < '2026-09-01T00:00:00Z')"
+        ]
       }
     }
   }
