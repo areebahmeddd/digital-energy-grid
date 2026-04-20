@@ -128,8 +128,6 @@ BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
    - **Let the devkit Caddy do TLS itself** — edit `install/Caddyfile`: drop `auto_https off`, replace `:9000` with `your.hostname.com`, publish `80:80` and `443:443` on the `beckn-router` service, and mount a persistent volume on `/data` so issued certs survive restarts. Then no extra proxy is needed.
    - **Managed edge** — Cloudflare / AWS ALB / GCP HTTPS LB / Cloudflare Tunnel. Terminate TLS at the edge, point the origin at `<your-host>:9000`. Zero changes to the stack.
 
-   Whichever path you pick, the hostname on the cert must match the URL you publish in your DeDi subscriber record — that's the URL signature verifiers will dial.
-
 2. **Create DeDi registry records** for your subscriber — one record per role (BAP, BPP) per network. See [docs.beckn.io](https://docs.beckn.io/) for the current record schema and where in the protocol flow the registry is consulted (sign/verify during every message).
 
 3. **Update your onix config** (`config/local-simple-*.yaml`) so the identity fields match your DeDi record. The mapping:
