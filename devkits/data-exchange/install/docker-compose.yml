@@ -1,33 +1,31 @@
-# Over-internet variant of docker-compose-adapter.yml.
+# Data Exchange devkit stack.
 #
 # BAP-side and BPP-side services live on separate, mutually unreachable
-# docker networks (bap_side, bpp_side). Each side has its own redis. The
-# beckn-router is the ONLY container with a foot in both networks; it accepts
-# inbound public traffic on :9000 and routes /bap/* and /bpp/* to the
-# respective onix adapter on its own side.
+# docker networks (bap_side, bpp_side). Each side has its own redis
+# (aliased as `redis` inside its network). The beckn-router (Caddy) is the
+# ONLY container with a foot in both networks; it accepts traffic on :9000
+# and routes /bap/* and /bpp/* to the respective onix adapter on its own side.
 #
 # Effect: onix-bap cannot resolve or reach onix-bpp on the docker bridge.
-# The only path between BAP and BPP is the public URL fronting the router,
-# so any successful workflow run proves end-to-end internet traversal.
+# All BAP↔BPP traffic flows through the router on :9000. By default the
+# Arazzo runner uses http://beckn-router:9000 in payload URIs (router
+# bridges locally, no internet needed). To prove end-to-end public-internet
+# traversal, expose the router via ngrok and run with PUBLIC_URL set to
+# the tunnel URL.
 #
-# If you only want to both BAP & BPP stacks locally or in hosted environment, 
-# run following (do not run alongside docker-compose-adapter.yml; pick one):
-#   cd install
-#   docker compose -f docker-compose-over-internet.yml up -d
-# If you only want to run say BPP stack locally or in hosted environment, run
-#   docker compose -f docker-compose-over-internet.yml up -d onix-bpp sandbox-bpp redis-bpp beckn-router
-# If you only want to run say BAP stack locally or in hosted environment, run
-#   docker compose -f docker-compose-over-internet.yml up -d onix-bap sandbox-bap redis-bap beckn-router
+# Run full stack:
+#   docker compose up -d
+# Run only BPP side:
+#   docker compose up -d onix-bpp sandbox-bpp redis-bpp beckn-router
+# Run only BAP side:
+#   docker compose up -d onix-bap sandbox-bap redis-bap beckn-router
 #
-# To expose local stacks to the public internet, copy ngrok.yml.example to ngrok.yml 
-# and enter your authtoken from ngrok website and start ngrok. This exposes port 9000.
+# Expose the router to the public internet: copy ngrok.yml.example to
+# ngrok.yml, paste your authtoken, then:
 #   ngrok start --all --config ngrok.yml
-
-# With local env, you can run end--to-end automated workflows using arazzo scripts from workflow folder.
-# Set PUBLIC_URL to the external URL shown in ngrok dashboard, and run all workflows
-#   PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh
-# for runnig specific workflows e.g. select-through-status, you can run 
-#   PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
+# Point workflows at the tunnel URL (forces real internet traversal):
+#   PUBLIC_URL=https://<host>.ngrok-free.dev ./run-arazzo.sh
+#   PUBLIC_URL=https://<host>.ngrok-free.dev ./run-arazzo.sh -w select-through-status -v
 
 services:
   # ---------- BAP side ----------
@@ -45,8 +43,6 @@ services:
   onix-bap:
     image: fidedocker/onix-adapter:1.5.1
     platform: linux/amd64
-    networks:
-      - bap_side
     ports:
       - "8081:8081"
     environment:
@@ -61,6 +57,8 @@ services:
       - ../config:/app/config
       - ../schemas:/app/schemas
     command: ["./server", "--config=/app/config/local-simple-bap.yaml"]
+    networks:
+      - bap_side
 
   sandbox-bap:
     image: fidedocker/sandbox-2.0:latest
@@ -93,8 +91,6 @@ services:
   onix-bpp:
     image: fidedocker/onix-adapter:1.5.1
     platform: linux/amd64
-    networks:
-      - bpp_side
     ports:
       - "8082:8082"
     environment:
@@ -109,6 +105,8 @@ services:
       - ../config:/app/config
       - ../schemas:/app/schemas
     command: ["./server", "--config=/app/config/local-simple-bpp.yaml"]
+    networks:
+      - bpp_side
 
   sandbox-bpp:
     image: fidedocker/sandbox-2.0:latest
@@ -126,7 +124,7 @@ services:
     networks:
       - bpp_side
 
-  # ---------- Public-facing path router (only container on both sides) ----------
+  # ---------- Path router (only container on both sides) ----------
   beckn-router:
     image: caddy:alpine
     ports:

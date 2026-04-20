@@ -8,14 +8,14 @@ info:
     Scenario: BESCOM (discom) submits ARR filing data to
     APERC (state regulator) with in-message delivery.
 
-    Run via the workflow runner (from usecase2/workflows/):
+    Run via the workflow runner (from uc2-regulatory-data/workflows/):
 
-      Local mode (default, against docker-compose-adapter.yml on localhost):
+      Local-bridge mode (default, BAP↔BPP via Caddy router inside docker —
+      `docker compose up -d` in install/):
         ./run-arazzo.sh
         ./run-arazzo.sh -w select-through-status -v
 
-      Over-internet mode (against the public ngrok URL fronting
-      docker-compose-over-internet.yml):
+      Over-internet mode (against the public ngrok URL fronting the router):
         PUBLIC_URL=https://<host>.ngrok-free.dev ./run-arazzo.sh
 
       Direct respect invocation (advanced; no on-the-fly URI rewrites):

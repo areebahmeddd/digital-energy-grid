@@ -5,7 +5,7 @@ Thin wrapper around DEG/scripts/generate_postman_collection.py.
 Usage:
   python3 scripts/generate_postman_collection.py --role BAP
   python3 scripts/generate_postman_collection.py --role BPP
-  python3 scripts/generate_postman_collection.py --role BAP --usecase usecase2
+  python3 scripts/generate_postman_collection.py --role BAP --usecase uc2-regulatory-data
 """
 
 import subprocess
@@ -25,10 +25,10 @@ for i, arg in enumerate(sys.argv):
         USECASE = sys.argv[i + 1]
 
 if ROLE is None:
-    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase usecase1|usecase2]")
+    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data]")
     sys.exit(1)
 
-usecases = [USECASE] if USECASE else ["usecase1", "usecase2"]
+usecases = [USECASE] if USECASE else ["uc1-meter-data", "uc2-regulatory-data"]
 
 for uc in usecases:
     devkit = f"data-exchange-{uc}"

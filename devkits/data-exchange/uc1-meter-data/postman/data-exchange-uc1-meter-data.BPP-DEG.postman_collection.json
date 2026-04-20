@@ -1,9 +1,9 @@
 {
   "info": {
     "_postman_id": "a6b84332-f16d-421b-9aa4-b79945951d53",
-    "name": "data-exchange-usecase1.BPP-DEG",
+    "name": "data-exchange-uc1-meter-data.BPP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Postman collection for Buyer Provider Platform implementing data-exchange-usecase1 APIs based on Beckn Protocol v2"
+    "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc1-meter-data APIs based on Beckn Protocol v2"
   },
   "item": [
     {
