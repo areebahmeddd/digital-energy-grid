@@ -70,6 +70,53 @@ Each use case ships BAP and BPP Postman collections under `postman/`:
 
 Import a collection into Postman and hit Send. Default request URLs point at `localhost:8081`/`8082` (BAP/BPP caller endpoints); change them to your ngrok URL to send over the tunnel. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data]`.
 
+Full transaction flow for reference:
+
+```
+BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
+    |                     |                    |                      |
+    |                     |<-- subscribe ------|                      |
+    |                     |   (catalog updates)|                      |
+    |                     |                    |                      |
+    |-- publish --------->|                    |                      |
+    |   (DatasetItem      |                    |                      |
+    |    catalog)         |                    |                      |
+    |                     |                    |                      |
+    |                     |                    |<---- discover -------|
+    |                     |                    |---- on_discover ---->|
+    |                     |                    |     (catalog results)|
+    |                     |                    |                      |
+    |---------------------+--------------------+----------------------|
+    |                  Direct BAP <-> BPP negotiation                 |
+    |                                                                 |
+    |<---- select (choose dataset + offer) --------------------------|
+    |---- on_select (terms) ---------------------------------------->|
+    |                                                                 |
+    |<---- init (details) -------------------------------------------|
+    |---- on_init (ready) ------------------------------------------>|
+    |                                                                 |
+    |<---- confirm --------------------------------------------------|
+    |---- on_confirm (active) -------------------------------------->|
+    |                                                                 |
+    |<---- status (check delivery) ----------------------------------|
+    |---- on_status (PROCESSING) ----------------------------------->|
+    |                                                                 |
+    |  +- Delivery mode A: URL download -------------------------+  |
+    |  | on_status (DELIVERY_COMPLETE)                           |  |
+    |  |   dataset:downloadUrl + dataset:checksum                | >|
+    |  +---------------------------------------------------------+  |
+    |                                                                 |
+    |  +- Delivery mode B: Inline dataPayload --------------------+  |
+    |  | on_status (DELIVERY_COMPLETE)                           |  |
+    |  |   dataPayload: IES_Report / IES_ARR_Filing              | >|
+    |  +---------------------------------------------------------+  |
+    |                                                                 |
+    |<---- cancel ---------------------------------------------------|
+    |---- on_cancel ------------------------------------------------>|
+```
+
+**Minimal Postman flow to sanity-check the stack**: fire `confirm` from the BAP collection and look for `on_confirm` arriving back. That single round-trip exercises sign → route → verify on both sides and is enough to prove the wiring end-to-end; the other steps are only needed when you want to walk through the full protocol.
+
 ## Hosting the site (beyond this devkit)
 
 `PUBLIC_URL` is the beckn-facing URL your BAP/BPP expose; in production it's your real HTTPS hostname, with TLS terminated somewhere in front of `beckn-router:9000`. The rest of the work is **identity**, not infrastructure:
