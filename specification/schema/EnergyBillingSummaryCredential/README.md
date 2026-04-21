@@ -4,7 +4,7 @@ Verifiable Credential containing aggregated billing period data using ESPI/Green
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyBillingSummaryCredential/v1.0`
 
-**Namespace prefix:** `energy:` → `https://schema.beckn.io/energy/`
+**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `billing` · `green-button` · `espi`
 
@@ -42,9 +42,9 @@ beckn:Credential
 
 | Term | IRI |
 |------|-----|
-| `EnergyBillingSummaryCredential` | `energy:EnergyBillingSummaryCredential` |
-| `customerProfile` | `energy:customerProfile` |
-| `billingSummary` | `energy:billingSummary` |
+| `EnergyBillingSummaryCredential` | `deg:EnergyBillingSummaryCredential` |
+| `customerProfile` | `deg:customerProfile` |
+| `billingSummary` | `deg:billingSummary` |
 
 ---
 

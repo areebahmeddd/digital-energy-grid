@@ -2,7 +2,7 @@
 
 > **Canonical IRI:** [`https://schema.beckn.io/EnergyCustomerProfile`](https://schema.beckn.io/EnergyCustomerProfile)
 > **Tags:** `energy`, `identity`, `deg`
-> **Namespace:** `https://schema.beckn.io/energy/`
+> **Namespace:** `https://schema.beckn.io/deg/`
 > Part of the [DEG Specification](../../../README.md)
 
 ---

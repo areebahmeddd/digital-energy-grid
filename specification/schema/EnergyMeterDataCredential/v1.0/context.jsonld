@@ -9,23 +9,23 @@
             "type": "@type",
             "schema": "https://schema.org/",
             "xsd": "http://www.w3.org/2001/XMLSchema#",
-            "energy": "https://schema.beckn.io/energy/",
+            "deg": "https://schema.beckn.io/deg/",
 
             "EnergyMeterDataCredential": {
-                "@id": "energy:EnergyMeterDataCredential",
+                "@id": "deg:EnergyMeterDataCredential",
                 "@context": {
                     "@version": 1.1,
                     "@protected": true,
                     "id": "@id",
                     "type": "@type",
                     "meterDataGB": {
-                        "@id": "energy:meterDataGB",
+                        "@id": "deg:meterDataGB",
                         "@type": "@id",
                         "@context": {
                             "@version": 1.1,
                             "@protected": true,
                             "timeZone": {
-                                "@id": "energy:timeZone",
+                                "@id": "deg:timeZone",
                                 "@type": "xsd:string"
                             }
                         }

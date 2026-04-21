@@ -4,7 +4,7 @@ Verifiable Credential containing historical time-series interval meter readings 
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyMeterDataCredential/v1.0`
 
-**Namespace prefix:** `energy:` → `https://schema.beckn.io/energy/`
+**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `metering` · `green-button` · `espi`
 
@@ -42,9 +42,9 @@ beckn:Credential
 
 | Term | IRI |
 |------|-----|
-| `EnergyMeterDataCredential` | `energy:EnergyMeterDataCredential` |
-| `customerProfile` | `energy:customerProfile` |
-| `meterDataGB` | `energy:meterDataGB` |
+| `EnergyMeterDataCredential` | `deg:EnergyMeterDataCredential` |
+| `customerProfile` | `deg:customerProfile` |
+| `meterDataGB` | `deg:meterDataGB` |
 
 ---
 

@@ -2,7 +2,7 @@
 # Generated from XSD schema and WADL definition
 # This spec includes JSON-LD context for semantic understanding of API terms
 # OpenAPI Specification Version
-openapi: 3.0.0
+openapi: 3.1.1
 # API Information
 info:
   title: Green Button / ESPI Types
@@ -11,6 +11,7 @@ info:
   contact:
     name: IEEE 2030.5
     url: https://standards.ieee.org/ieee/2030.5/
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 # API Server URLs
 servers:
 - url: https://api.example.com

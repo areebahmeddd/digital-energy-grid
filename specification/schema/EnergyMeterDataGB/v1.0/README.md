@@ -9,7 +9,7 @@ Part of the [DEG Specification](../../../../README.md) · [MeterDataGB](../READM
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1 / JSON Schema definition for `MeterDataGB` |
-| [context.jsonld](./context.jsonld) | JSON-LD context — imports ESPI context, adds `energy:meterDataGB` and `energy:timeZone` |
+| [context.jsonld](./context.jsonld) | JSON-LD context — imports ESPI context, adds `deg:meterDataGB` and `deg:timeZone` |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for VC-specific terms (MeterDataCredential, meterDataGB, timeZone) |
 
 ## Dependencies

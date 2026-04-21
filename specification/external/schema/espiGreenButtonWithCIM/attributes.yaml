@@ -12,7 +12,7 @@
 #   - IEC 61968    (Assets — instrument transformers, multipliers)
 #   - Balijepalli & Khaparde, IEEE Systems Journal 2013 (CIM ↔ Green Button integration)
 
-openapi: 3.0.0
+openapi: 3.1.1
 info:
   title: ESPI + CIM Meter Telemetry Extension
   version: 0.1.0
@@ -21,6 +21,10 @@ info:
     telemetry at consumer (AMI), distribution-transformer, and transmission
     levels.  All schemas here are additive — the base ESPI types in
     attributes.yaml are unchanged.
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io/external/schema/espiGreenButtonWithCIM
+    description: Canonical schema registry
 
 components:
   schemas:

@@ -2,7 +2,7 @@
 
 > **Canonical IRI:** [`https://schema.beckn.io/EnergyMeterDataGB`](https://schema.beckn.io/EnergyMeterDataGB)
 > **Tags:** `energy`, `metering`, `green-button`, `espi`, `deg`
-> **Namespace:** `https://schema.beckn.io/energy/`
+> **Namespace:** `https://schema.beckn.io/deg/`
 > Part of the [DEG Specification](../../../README.md)
 
 ---

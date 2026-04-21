@@ -9,7 +9,7 @@ Part of the [DEG Specification](../../../../README.md) · [CustomerProfile](../R
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1 / JSON Schema definition for `CustomerProfile` |
-| [context.jsonld](./context.jsonld) | JSON-LD context mapping properties to `energy:` namespace |
+| [context.jsonld](./context.jsonld) | JSON-LD context mapping properties to `deg:` namespace |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary (RDFS classes and properties) |
 
 ## Properties

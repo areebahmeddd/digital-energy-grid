@@ -9,7 +9,7 @@ Part of the [DEG Specification](../../../../README.md) · [BillingSummary](../RE
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1 / JSON Schema definition for `BillingSummary` |
-| [context.jsonld](./context.jsonld) | JSON-LD context — imports ESPI context, adds `energy:billingSummary` and `energy:timeZone` |
+| [context.jsonld](./context.jsonld) | JSON-LD context — imports ESPI context, adds `deg:billingSummary` and `deg:timeZone` |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for VC-specific terms (BillingSummaryCredential, billingSummary, timeZone) |
 
 ## Dependencies

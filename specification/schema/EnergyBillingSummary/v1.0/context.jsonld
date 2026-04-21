@@ -5,15 +5,15 @@
             "@version": 1.1,
             "@protected": true,
             "xsd": "http://www.w3.org/2001/XMLSchema#",
-            "energy": "https://schema.beckn.io/energy/",
+            "deg": "https://schema.beckn.io/deg/",
 
-            "BillingSummary": "energy:BillingSummary",
+            "BillingSummary": "deg:BillingSummary",
             "billingSummary": {
-                "@id": "energy:billingSummary",
+                "@id": "deg:billingSummary",
                 "@type": "@id"
             },
             "timeZone": {
-                "@id": "energy:timeZone",
+                "@id": "deg:timeZone",
                 "@type": "xsd:string"
             }
         }
