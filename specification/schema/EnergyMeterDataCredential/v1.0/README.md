@@ -151,6 +151,14 @@ This is **v1.0** of the Meter Data Credential schema.
 - `ndjson-transport.md` - NDJSON bulk delivery transport specification
 - `readme.md` - This documentation
 
+Validate examples against the schema:
+
+```bash
+python3 scripts/validate_vc_examples.py specification/schema/EnergyMeterDataCredential/v1.0/attributes.yaml
+```
+
+The script bundles `attributes.yaml` with `@redocly/cli` (dereferencing cross-schema `$ref`s) and validates each example with `jsonschema` (Draft 2020-12).
+
 ## Usage
 
 ```json

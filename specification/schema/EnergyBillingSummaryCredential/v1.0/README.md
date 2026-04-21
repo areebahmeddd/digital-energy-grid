@@ -144,6 +144,14 @@ This is **v1.0** of the Billing Summary Credential schema.
 - `examples/example.json` - Sample credential with 6 monthly billing periods from real PG&E data structure
 - `readme.md` - This documentation
 
+Validate examples against the schema:
+
+```bash
+python3 scripts/validate_vc_examples.py specification/schema/EnergyBillingSummaryCredential/v1.0/attributes.yaml
+```
+
+The script bundles `attributes.yaml` with `@redocly/cli` (dereferencing cross-schema `$ref`s) and validates each example with `jsonschema` (Draft 2020-12).
+
 ## Usage
 
 ```json
