@@ -138,11 +138,10 @@ This is **v1.0** of the Billing Summary Credential schema.
 
 ## Files
 
-- `schema.json` - JSON Schema (draft 2020-12) for validation
+- `attributes.yaml` - OpenAPI 3.1.1 document (JSON Schema 2020-12 dialect) — canonical schema for validation and Swagger rendering
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
 - `examples/example.json` - Sample credential with 6 monthly billing periods from real PG&E data structure
-- `test/test_billing_summary_schema.py` - Pytest validation of examples against schema
 - `readme.md` - This documentation
 
 ## Usage

@@ -142,15 +142,13 @@ This is **v1.0** of the Meter Data Credential schema.
 
 ## Files
 
-- `schema.json` - JSON Schema (draft 2020-12) for validation
+- `attributes.yaml` - OpenAPI 3.1.1 document (JSON Schema 2020-12 dialect) — canonical schema for validation and Swagger rendering
 - `context.jsonld` - JSON-LD context for semantic interoperability
 - `vocab.jsonld` - RDF vocabulary definitions
 - `examples/example.json` - Sample credential with 15-minute residential data using integer values and cost (single VC, pretty-printed)
 - `examples/example-decimal.json` - Sample credential using decimal values with per-reading quality override
 - `examples/example.ndjson` - Sample NDJSON stream with 3 consecutive daily VCs for bulk transport
 - `ndjson-transport.md` - NDJSON bulk delivery transport specification
-- `test/test_meter_data_schema.py` - Pytest validation of examples against schema
-- `test/validate_examples.py` - Standalone validation script
 - `readme.md` - This documentation
 
 ## Usage
