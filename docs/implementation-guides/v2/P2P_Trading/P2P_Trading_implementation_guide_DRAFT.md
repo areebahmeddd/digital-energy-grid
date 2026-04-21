@@ -338,7 +338,7 @@ Specifically, please use the following configuration:
 
 ### 8.2.3. 10.2.3 Performing a test transaction
 
-Step 1 : Download the postman collection, from [here](/testnet/p2p-trading-devkit/postman).
+Step 1 : Download the postman collection, from [here](/devkits/p2p-trading/postman).
 
 Step 2 : Run API calls
 
@@ -3053,6 +3053,6 @@ TODO
 
 ## 12.2. References
 
-* [Postman collection for EV Charging](/testnet/ev-charging-devkit/postman/)  
+* [Postman collection for EV Charging](/devkits/ev-charging/postman/)  
 * [Beckn 1.0 (legacy) Layer2 config for peer to peer trading](https://github.com/beckn/missions/blob/main/DEG2.0/layer2/P2P/trade_1.1.0.yaml)
 

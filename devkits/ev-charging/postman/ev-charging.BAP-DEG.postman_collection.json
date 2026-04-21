@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "bap-ubc-ev-charging-collection",
+    "name": "BAP:UBC:EV-Charging",
+    "description": "BAP (Buyer App Provider) API collection for UBC EV Charging domain - Beckn Protocol v2.0.0 LTS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "discover",
+      "item": [
+        {
+          "name": "discovery-by-QR",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld\"\n    ],\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$[?(@.resourceAttributes.qrIdentifier == 'https://charge.ecopower.in/cs01-ccs2')]\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["discover"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "discovery-services-by-a-cpo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld\"\n    ],\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$[?(@.provider.id == 'ecopower-charging')]\"\n      },\n      \"spatial\": [\n        {\n          \"op\": \"s_dwithin\",\n          \"targets\": \"$['resourceAttributes']['chargingStation']['serviceLocation']['geo']\",\n          \"geometry\": {\n            \"type\": \"Point\",\n            \"coordinates\": [77.59, 12.94]\n          },\n          \"distanceMeters\": 10000\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["discover"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "discovery-within-a-circular-boundary",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld\"\n    ],\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"spatial\": [\n        {\n          \"op\": \"s_dwithin\",\n          \"targets\": \"$['resourceAttributes']['chargingStation']['serviceLocation']['geo']\",\n          \"geometry\": {\n            \"type\": \"Point\",\n            \"coordinates\": [77.59, 12.94]\n          },\n          \"distanceMeters\": 10000\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["discover"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "discovery-within-a-timerange",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld\"\n    ],\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$[?(@.resourceAttributes.vehicleType == '4-WHEELER' && @.resourceAttributes.connectorType == 'CCS2')]\"\n      },\n      \"temporal\": [\n        {\n          \"op\": \"t_during\",\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      ],\n      \"spatial\": [\n        {\n          \"op\": \"s_dwithin\",\n          \"targets\": \"$['resourceAttributes']['chargingStation']['serviceLocation']['geo']\",\n          \"geometry\": {\n            \"type\": \"Point\",\n            \"coordinates\": [77.59, 12.94]\n          },\n          \"distanceMeters\": 10000\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["discover"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "item": [
+        {
+          "name": "ev-charging-select",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"select\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"ecopower-charging\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"ecopower-charging\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\",\n              \"id\": \"user-123\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/select",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["select"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "init",
+      "item": [
+        {
+          "name": "ev-charging-init",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"init\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\",\n              \"id\": \"user-123\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"consideration\": [\n        {\n          \"id\": \"consideration-001\",\n          \"status\": {\n            \"code\": \"QUOTED\"\n          },\n          \"considerationAttributes\": {\n            \"@context\": \"https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld\",\n            \"@type\": \"PriceSpecification\",\n            \"currency\": \"INR\",\n            \"totalAmount\": 143.95,\n            \"breakup\": [\n              {\"title\": \"Base charging session cost\", \"amount\": 112.5, \"type\": \"BASE_PRICE\"},\n              {\"title\": \"Surge price\", \"amount\": 20.0, \"type\": \"SURCHARGE\"},\n              {\"title\": \"Offer discount\", \"amount\": -15.0, \"type\": \"DISCOUNT\"},\n              {\"title\": \"Service fee\", \"amount\": 10.0, \"type\": \"FEE\"},\n              {\"title\": \"Overcharge estimation\", \"amount\": 13.64, \"type\": \"FEE\"},\n              {\"title\": \"Buyer finder fee\", \"amount\": 2.81, \"type\": \"FEE\"}\n            ],\n            \"paymentMethods\": [\"UPI\", \"WALLET\", \"BANK_TRANSFER\"]\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/init",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["init"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "confirm",
+      "item": [
+        {
+          "name": "ev-charging-confirm",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"confirm\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\",\n              \"id\": \"user-123\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"consideration\": [\n        {\n          \"id\": \"consideration-001\",\n          \"status\": {\n            \"code\": \"QUOTED\"\n          },\n          \"considerationAttributes\": {\n            \"@context\": \"https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld\",\n            \"@type\": \"PriceSpecification\",\n            \"currency\": \"INR\",\n            \"totalAmount\": 143.95,\n            \"breakup\": [\n              {\"title\": \"Base charging session cost\", \"amount\": 112.5, \"type\": \"BASE_PRICE\"},\n              {\"title\": \"Surge price\", \"amount\": 20.0, \"type\": \"SURCHARGE\"},\n              {\"title\": \"Offer discount\", \"amount\": -15.0, \"type\": \"DISCOUNT\"},\n              {\"title\": \"Service fee\", \"amount\": 10.0, \"type\": \"FEE\"},\n              {\"title\": \"Overcharge estimation\", \"amount\": 13.64, \"type\": \"FEE\"},\n              {\"title\": \"Buyer finder fee\", \"amount\": 2.81, \"type\": \"FEE\"}\n            ],\n            \"paymentMethods\": [\"UPI\", \"WALLET\", \"BANK_TRANSFER\"]\n          }\n        }\n      ],\n      \"settlements\": [\n        {\n          \"id\": \"payment-123e4567-e89b-12d3-a456-426614174000\",\n          \"amount\": {\n            \"currency\": \"INR\",\n            \"value\": 143.95\n          },\n          \"paymentURL\": \"https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount\",\n          \"txnRef\": \"TXN-123456789\",\n          \"paidAt\": \"{{$isoTimestamp}}\",\n          \"beneficiary\": \"BPP\",\n          \"status\": \"COMPLETE\",\n          \"settlementAttributes\": {\n            \"@context\": \"https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld\",\n            \"@type\": \"UBCPaymentAttributes\",\n            \"upiTransactionId\": \"UPI123456789012\"\n          }\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/confirm",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["confirm"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "item": [
+        {
+          "name": "ev-charging-connector-status",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"id\": \"user-123\",\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/status",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "update",
+      "item": [
+        {
+          "name": "ev-charging-start-update",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"update\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"id\": \"user-123\",\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"performance\": [\n        {\n          \"id\": \"fulfillment-001\",\n          \"commitmentIds\": [\"commitment-001\"],\n          \"performanceAttributes\": {\n            \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n            \"@type\": \"ChargingSession\",\n            \"connectorType\": \"CCS2\",\n            \"maxPowerKW\": 50,\n            \"sessionStatus\": \"PENDING\"\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      }\n    }\n  },\n  \"error\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/update",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["update"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ev-charging-stop-update",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"update\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"id\": \"user-123\",\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ],\n      \"performance\": [\n        {\n          \"id\": \"fulfillment-001\",\n          \"commitmentIds\": [\"commitment-001\"],\n          \"performanceAttributes\": {\n            \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n            \"@type\": \"ChargingSession\",\n            \"connectorType\": \"CCS2\",\n            \"maxPowerKW\": 50,\n            \"sessionStatus\": \"STOP\"\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/EvChargingSession/1.0\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2026-01-04T08:00:00Z\",\n          \"endTime\": \"2026-01-04T20:00:00Z\"\n        }\n      }\n    }\n  },\n  \"error\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/update",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["update"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "track",
+      "item": [
+        {
+          "name": "ev-charging-track",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"track\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"tracking\": {\n      \"contract\": {\n        \"id\": \"contract-ev-charging-001\",\n        \"commitments\": [\n          {\n            \"id\": \"commitment-001\",\n            \"status\": {\n              \"descriptor\": {\n                \"code\": \"ACTIVE\"\n              }\n            },\n            \"resources\": [\n              {\n                \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n                \"quantity\": {\n                  \"unitCode\": \"KWH\",\n                  \"unitQuantity\": 2.5\n                }\n              }\n            ],\n            \"offer\": {\n              \"id\": \"offer-ccs2-60kw-kwh\",\n              \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n            }\n          }\n        ]\n      },\n      \"status\": \"ACTIVE\",\n      \"url\": \"https://track.bluechargenet-aggregator.io/session/SESSION-9876543210\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/track",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["track"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "rate",
+      "item": [
+        {
+          "name": "ev-charging-rate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"rate\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"ratingInputs\": [\n      {\n        \"target\": {\n          \"id\": \"fulfillment-001\",\n          \"descriptor\": {\n            \"name\": \"Charging Session Fulfillment\",\n            \"code\": \"FULFILLMENT\"\n          }\n        },\n        \"range\": {\n          \"min\": 1,\n          \"max\": 5,\n          \"value\": 4\n        }\n      },\n      {\n        \"target\": {\n          \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n          \"descriptor\": {\n            \"name\": \"CCS2 Charging Connector\",\n            \"code\": \"ITEM\"\n          }\n        },\n        \"range\": {\n          \"min\": 1,\n          \"max\": 5,\n          \"value\": 3\n        }\n      }\n    ]\n  },\n  \"error\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/rate",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["rate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "support",
+      "item": [
+        {
+          "name": "ev-charging-support",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"support\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"support\": {\n      \"orderId\": \"contract-ev-charging-001\",\n      \"descriptor\": {\n        \"name\": \"Billing dispute — charging session interrupted\",\n        \"shortDesc\": \"Charging session stopped unexpectedly at 40% battery but billed the full estimated amount. Charger displayed error code E-204.\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/support",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["support"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cancel",
+      "item": [
+        {
+          "name": "cancel-a-reserved-slot",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"cancel\",\n    \"networkId\": \"{{domain}}\",\n    \"bapId\": \"{{bapId}}\",\n    \"bapUri\": \"{{bapUri}}\",\n    \"bppId\": \"{{bppId}}\",\n    \"bppUri\": \"{{bppUri}}\",\n    \"transactionId\": \"{{transactionId}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$isoTimestamp}}\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-ev-charging-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"participants\": [\n        {\n          \"id\": \"cpo1.com\",\n          \"descriptor\": {\n            \"name\": \"EcoPower Charging Pvt Ltd\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Provider/v2.1/context.jsonld\",\n            \"@type\": \"Provider\",\n            \"id\": \"cpo1.com\",\n            \"descriptor\": {\n              \"name\": \"EcoPower Charging Pvt Ltd\"\n            }\n          }\n        },\n        {\n          \"id\": \"user-123\",\n          \"descriptor\": {\n            \"name\": \"Ravi Kumar\"\n          },\n          \"participantAttributes\": {\n            \"@context\": \"https://schema.beckn.io/Consumer/v2.0/context.jsonld\",\n            \"@type\": \"Consumer\",\n            \"role\": \"buyer\",\n            \"person\": {\n              \"id\": \"user-123\",\n              \"name\": \"Ravi Kumar\",\n              \"telephone\": \"+91-9876543210\",\n              \"email\": \"ravi.kumar@example.com\"\n            }\n          }\n        }\n      ],\n      \"commitments\": [\n        {\n          \"id\": \"commitment-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n              \"quantity\": {\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 2.5\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ccs2-60kw-kwh\",\n            \"@context\": \"https://schema.beckn.io/Offer/v2.0/context.jsonld\"\n          }\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/cancel",
+              "host": ["{{bap_adapter_url}}"],
+              "path": ["cancel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "domain",
+      "value": "nfh.global/testnet-evcharging"
+    },
+    {
+      "key": "version",
+      "value": "2.0.0"
+    },
+    {
+      "key": "bapId",
+      "value": "bap.example.com"
+    },
+    {
+      "key": "bapUri",
+      "value": "http://onix-bap:8081/bap/receiver"
+    },
+    {
+      "key": "bppId",
+      "value": "bpp.example.com"
+    },
+    {
+      "key": "bppUri",
+      "value": "http://onix-bpp:8082/bpp/receiver"
+    },
+    {
+      "key": "transactionId",
+      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+    },
+    {
+      "key": "bap_adapter_url",
+      "value": "http://localhost:8081/bap/caller"
+    }
+  ]
+}

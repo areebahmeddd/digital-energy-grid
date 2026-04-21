@@ -46,7 +46,7 @@ import rego.v1
 #     provider utilityId must be TEST_DISCOM_SELLER.
 # P3. Validity-to-delivery gap: on each catalog offer, validity window end must
 #     be at least minDeliveryLeadHours before delivery window start (mirrors O2).
-# P3b. [DISABLED] Delivery slot duration: delivery window must be exactly 1 hour
+# P3b. Delivery slot duration: delivery window must be exactly 1 hour
 #      (mirrors O3).
 # P4. Currency: each catalog offer's schema:priceCurrency must be "INR" (mirrors O6).
 # P5. Quantity unit: each catalog offer's applicableQuantity.unitText must be
