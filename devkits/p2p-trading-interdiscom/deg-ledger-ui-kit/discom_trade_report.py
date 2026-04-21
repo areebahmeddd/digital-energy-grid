@@ -201,7 +201,7 @@ def generate_report():
     window_str = f"{window_start.strftime('%d %b')} – {window_end.strftime('%d %b %Y')}"
 
     lines = [
-        f"*DEG P2P Trade Report*",
+        f"*IES P2P Trade Report*",
         f"Date: {today_str}",
         f"*Delivery trend:* Yesterday {trend[yesterday_key]} · Today {trend[today_key]} · Tomorrow {trend[tomorrow_key]}",
         f"Delivery window: {window_str}",
