@@ -20,6 +20,9 @@ ngrok.yaml
 !ngrok.yml.example
 !ngrok.yaml.example
 
-# Python
+# Python / Cython build artefacts
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.so
