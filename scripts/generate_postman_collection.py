@@ -115,13 +115,12 @@ DEVKIT_CONFIGS = {
     "p2p-trading-interdiscom": {
         "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0",
         "bap_id": "p2p-trading-sandbox1.com",
-        "bap_uri": "http://onix-bap:8081/bap/receiver",
+        "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "p2p-trading-sandbox2.com",
-        "bpp_uri": "http://onix-bpp:8082/bpp/receiver",
+        "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
-        "examples_path": "examples/p2p-trading-interdiscom/v2",
-        # "output_path": "devkits/p2p-trading-interdiscom/postman",
+        "examples_path": "devkits/p2p-trading-interdiscom/uc1-p2p-trading-interdiscom/examples",
         "structure": "flat"  # Flat file structure (like p2p-trading)
     },
     "demand-flex": {
