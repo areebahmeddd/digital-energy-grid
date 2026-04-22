@@ -53,7 +53,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/publish-catalog.json"
+            $ref: "../examples/publish-catalog.json"
 
   - workflowId: discover
     summary: Aggregator discovers available flex opportunities via discover service
@@ -64,7 +64,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/discover-request.json"
+            $ref: "../examples/discover-request.json"
 
   - workflowId: discover-service-catalog-subscription
     summary: Discover service subscribes to catalog service for flex catalog updates
@@ -75,7 +75,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/subscribe-catalog.json"
+            $ref: "../examples/subscribe-catalog.json"
 
   # ── Contract Lifecycle: select → confirm → baselines → actuals → settlement ──
 
@@ -88,7 +88,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/select-request.json"
+            $ref: "../examples/select-request.json"
 
       - stepId: on-select
         description: Utility returns DRAFT contract with incentive terms
@@ -96,7 +96,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-select-response.json"
+            $ref: "../examples/on-select-response.json"
 
       - stepId: init
         description: Aggregator provides identity and 2 participating meters
@@ -104,7 +104,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/init-request.json"
+            $ref: "../examples/init-request.json"
 
       - stepId: on-init
         description: Utility acknowledges identity (DRAFT)
@@ -112,7 +112,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-init-response.json"
+            $ref: "../examples/on-init-response.json"
 
       - stepId: confirm
         description: Aggregator confirms the demand flex contract (ACTIVE)
@@ -120,7 +120,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/confirm-request.json"
+            $ref: "../examples/confirm-request.json"
 
       - stepId: on-confirm
         description: Utility confirms contract is ACTIVE
@@ -128,7 +128,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-confirm-response.json"
+            $ref: "../examples/on-confirm-response.json"
 
       - stepId: on-status-baselines
         description: >
@@ -138,7 +138,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-status-response-baselines.json"
+            $ref: "../examples/on-status-response-baselines.json"
 
       - stepId: on-status-actuals
         description: >
@@ -148,7 +148,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-status-response-actuals.json"
+            $ref: "../examples/on-status-response-actuals.json"
 
       - stepId: on-status-settled
         description: >
@@ -158,7 +158,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/on-status-response-settled.json"
+            $ref: "../examples/on-status-response-settled.json"
 
   # ── Update: opt-in additional meters ──
 
@@ -171,4 +171,4 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../examples/demand-flex/v2/update-request-opt-in.json"
+            $ref: "../examples/update-request-opt-in.json"
