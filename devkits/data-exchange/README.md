@@ -40,23 +40,28 @@ Git, Docker, Docker Compose, (optional) Postman, (optional) ngrok.
 ## Quick Start
 
 ```bash
+git clone https://github.com/beckn/DEG
+cd DEG/devkits
+# cd specific-devkit-you-want
 cd install
 docker compose up -d
 
 # Pick a mode for the Arazzo runner:
 #   (a) Strictly local — default if PUBLIC_URL is unset or empty.
 #       Caddy bridges BAP↔BPP inside docker, no internet.
-export PUBLIC_URL=
+export PUBLIC_URL=http://beckn-router:9000
 #   (b) Over the public internet via ngrok — set PUBLIC_URL to the tunnel URL.
 #       cp ngrok.yml.example ngrok.yml  # paste your authtoken
 #       ngrok start --all --config ngrok.yml
 # export PUBLIC_URL=https://<your-subdomain>.ngrok-free.dev
 
-cd ../uc1-meter-data/workflows
+# Run automated tests (for quick devkit testing)
+cd ../uc*-specific-usecase-within-devkit/workflows
 PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
 
-cd ../../uc2-regulatory-data/workflows
-PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
+# Manual API tests
+# Run postman collections for local test. There variable {{bap_host_root}} and {{bpp_host_root}} default to http://beckn-router:9000
+# For testing over ngrok, change above variables to ngrok provided static url.
 ```
 
 `./run-arazzo.sh` with no args runs all workflows for the use case. Available workflows: `publish-catalog`, `discover`, `select-through-status`, `data-exchange-cancellation`.
