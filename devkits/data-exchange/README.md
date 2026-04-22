@@ -2,6 +2,8 @@
 
 Beckn Protocol v2.0 devkit demonstrating **inline data delivery** via DDM's `DatasetItem` schema. Datasets are embedded directly in beckn messages through the `dataPayload` attribute rather than fetched from external URLs.
 
+For the shared stack topology, prerequisites, Quick Start, transaction flow, hosting, ngrok notes, and cleanup, see [../README.md](../README.md).
+
 ## Use Cases
 
 | Use Case | BPP (Provider) | BAP (Consumer) | dataPayload | Description |
@@ -10,61 +12,6 @@ Beckn Protocol v2.0 devkit demonstrating **inline data delivery** via DDM's `Dat
 | [uc2-regulatory-data](./uc2-regulatory-data/) | BESCOM (discom) | APERC (state regulator) | `IES_ARR_Filing` — cost line items, fiscal years | ARR filing submission under regulatory mandate |
 
 Both use cases share the same docker stack, adapter configs, and runner.
-
-## Stack Topology
-
-```
-               internet (optional, via ngrok)
-                          │
-                  https://<public-host>/
-                          │
-                     :9000 (host)
-                          │
-                    ┌──beckn-router──┐   (Caddy; the only container on both networks)
-                    │                │
-              /bap/* │                │ /bpp/*
-                    │                │
-   ┌── bap_side ────┘                └──── bpp_side ──┐
-   │  onix-bap:8081                   onix-bpp:8082   │
-   │  sandbox-bap:3001                sandbox-bpp:3002│
-   │  redis                           redis           │
-   └──────────────────────────────────────────────────┘
-```
-
-BAP-side and BPP-side services sit on independent docker networks; the Caddy router on `:9000` is the sole bridge. All BAP↔BPP traffic passes through it, so the same container image/config runs unchanged whether you're hitting the router locally or through a public tunnel.
-
-## Prerequisites
-
-Git, Docker, Docker Compose, (optional) Postman, (optional) ngrok.
-
-## Quick Start
-
-```bash
-git clone https://github.com/beckn/DEG
-cd DEG/devkits
-# cd specific-devkit-you-want
-cd install
-docker compose up -d
-
-# Pick a mode for the Arazzo runner:
-#   (a) Strictly local — default if PUBLIC_URL is unset or empty.
-#       Caddy bridges BAP↔BPP inside docker, no internet.
-export PUBLIC_URL=http://beckn-router:9000
-#   (b) Over the public internet via ngrok — set PUBLIC_URL to the tunnel URL.
-#       cp ngrok.yml.example ngrok.yml  # paste your authtoken
-#       ngrok start --all --config ngrok.yml
-# export PUBLIC_URL=https://<your-subdomain>.ngrok-free.dev
-
-# Run automated tests (for quick devkit testing)
-cd ../uc*-specific-usecase-within-devkit/workflows
-PUBLIC_URL=$PUBLIC_URL ./run-arazzo.sh -w select-through-status -v
-
-# Manual API tests
-# Run postman collections for local test. There variable {{bap_host_root}} and {{bpp_host_root}} default to http://beckn-router:9000
-# For testing over ngrok, change above variables to ngrok provided static url.
-```
-
-`./run-arazzo.sh` with no args runs all workflows for the use case. Available workflows: `publish-catalog`, `discover`, `select-through-status`, `data-exchange-cancellation`.
 
 ## Postman
 
@@ -75,96 +22,9 @@ Each use case ships BAP and BPP Postman collections under `postman/`:
 
 Import a collection into Postman and hit Send. Default request URLs point at `localhost:8081`/`8082` (BAP/BPP caller endpoints); change them to your ngrok URL to send over the tunnel. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data]`.
 
-Full transaction flow for reference:
-
-```
-BPP (Provider)      Catalog Service     Discovery Service       BAP (Consumer)
-    |                     |                    |                      |
-    |                     |<-- subscribe ------|                      |
-    |                     |   (catalog updates)|                      |
-    |                     |                    |                      |
-    |-- publish --------->|                    |                      |
-    |   (DatasetItem      |                    |                      |
-    |    catalog)         |                    |                      |
-    |                     |                    |                      |
-    |                     |                    |<---- discover -------|
-    |                     |                    |     (search datasets)|
-    |                     |                    |---- on_discover ---->|
-    |                     |                    |     (catalog results)|
-    |                     |                    |                      |
-    |---------------------+--------------------+----------------------|
-    |                  Direct BAP <-> BPP negotiation                 |
-    |                                                                 |
-    |<---- select (choose dataset + offer) --------------------------|
-    |---- on_select (terms) ---------------------------------------->|
-    |                                                                 |
-    |<---- init (details) -------------------------------------------|
-    |---- on_init (ready) ------------------------------------------>|
-    |                                                                 |
-    |<---- confirm --------------------------------------------------|
-    |---- on_confirm (active) -------------------------------------->|
-    |                                                                 |
-    |<---- status (check delivery) ----------------------------------|
-    |---- on_status (PROCESSING) ----------------------------------->|
-    |                                                                 |
-    |  +- Delivery mode A: URL download -------------------------+  |
-    |  | on_status (DELIVERY_COMPLETE)                            |  |
-    |  |   dataset:downloadUrl + dataset:checksum                 | >|
-    |  +----------------------------------------------------------+  |
-    |                                                                 |
-    |  +- Delivery mode B: Inline dataPayload --------------------+  |
-    |  | on_status (DELIVERY_COMPLETE)                            |  |
-    |  |   dataPayload: IES_Report / IES_ARR_Filing               | >|
-    |  +----------------------------------------------------------+  |
-    |                                                                 |
-    |<---- cancel ---------------------------------------------------|
-    |---- on_cancel ------------------------------------------------>|
-```
-
-**Minimal Postman flow to sanity-check the stack**: fire `confirm` from the BAP collection and look for `on_confirm` arriving back. That single round-trip exercises sign → route → verify on both sides and is enough to prove the wiring end-to-end; the other steps are only needed when you want to walk through the full protocol.
-
-## Hosting the site (beyond this devkit)
-
-`PUBLIC_URL` is the beckn-facing URL your BAP/BPP expose; in production it's your real HTTPS hostname, with TLS terminated somewhere in front of `beckn-router:9000`. The rest of the work is **identity**, not infrastructure:
-
-1. **Terminate TLS in front of the router.** beckn-router (the in-stack Caddy) listens plain HTTP on `:9000` — fine for local and for ngrok (ngrok terminates TLS for you), but a real deployment needs a proper cert. Three common patterns:
-
-   - **Host-level reverse proxy** — nginx / host Caddy / Traefik on the VM, with a Let's Encrypt cert for your hostname, `proxy_pass` → `127.0.0.1:9000`. Leaves the devkit stack unchanged.
-   - **Let the devkit Caddy do TLS itself** — edit `install/Caddyfile`: drop `auto_https off`, replace `:9000` with `your.hostname.com`, publish `80:80` and `443:443` on the `beckn-router` service, and mount a persistent volume on `/data` so issued certs survive restarts. Then no extra proxy is needed.
-   - **Managed edge** — Cloudflare / AWS ALB / GCP HTTPS LB / Cloudflare Tunnel. Terminate TLS at the edge, point the origin at `<your-host>:9000`. Zero changes to the stack.
-
-2. **Create DeDi registry records** for your subscriber — one record per role (BAP, BPP) per network. See [docs.beckn.io](https://docs.beckn.io/) for the current record schema and where in the protocol flow the registry is consulted (sign/verify during every message).
-
-3. **Update your onix config** (`config/local-simple-*.yaml`) so the identity fields match your DeDi record. The mapping:
-
-   | DeDi registry field | Onix config field |
-   |---------------------|-------------------|
-   | `recordId`          | `keyId`           |
-   | `subscriberId`      | `networkParticipant` |
-   | `domain`            | `allowedNetworkIDs` entry (network ID in beckn context) |
-
-4. **Ask the network namespace owner** (e.g. for `nfh.global/testnet-deg`, that's `nfh.global`) to add your subscriber record to the network's beckn reference registry. This is required whenever a network's `allowedNetworkIDs` on the adapter is non-empty — adapters reject messages from subscribers not listed there.
-
-One beckn server can belong to multiple networks: list each one in `allowedNetworkIDs` and register a corresponding DeDi record per network.
-
-## Over-the-internet notes
-
-Run the stack, start ngrok, set `PUBLIC_URL=https://<tunnel>.ngrok-free.dev`, run the arazzo scripts. The runner materialises a tmpdir with a copy of the arazzo file and patched example payloads (`bapUri`/`bppUri` rewritten to the public URL) and invokes Respect against it, so sources on disk stay untouched. Watch the tunnel at `http://localhost:4040` — each transactional step shows three hops: `your curl → BAP`, `BAP → BPP`, `BPP → BAP callback`.
-
-The `discover` step calls an external discovery service (`34.14.221.66.sslip.io`); its outcome is independent of this devkit's topology. The catalog-service subscription is a one-time network setup call (not part of the transactional flow); see `scripts/subscribe-catalog.sh`.
-
-## Cleanup
-
-```bash
-cd install
-docker compose down
-pkill -f 'ngrok start'   # if ngrok was running
-```
-
 ## Related
 
 - [DDM DatasetItem Schema](https://github.com/beckn/DDM/tree/main/specification/schema/DatasetItem/v1) — `dataPayload` and `accessMethod`
 - [IES Core Schemas](https://github.com/beckn/DEG/tree/ies-specs/specification/external/schema/ies/core) — IES_Report, IES_Program, IES_Policy (OpenADR 3.1.0)
 - [IES ARR Schemas](https://github.com/beckn/DEG/tree/ies-specs/specification/external/schema/ies/arr) — IES_ARR_Filing, IES_ARR_FiscalYear, IES_ARR_LineItem
-- [docs.beckn.io](https://docs.beckn.io/) — DeDi registry, subscriber identity, message signing
 - beckn/beckn-onix#655 — ONIX regex engine issue with OpenADR duration patterns
