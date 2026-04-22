@@ -12,6 +12,8 @@ This collection provides schemas for credentials issued by energy providers to c
 |------------|-------------|---------|
 | [Customer Credential](./electricity-credential/) | Unified credential combining customer identity, consumption, generation, and storage profiles | Single credential per meter for consumer/prosumer identity |
 | [Program Enrollment Credential](./program-enrollment-vc/) | Energy program participation | P2P trading, demand response, virtual power plants, ToU programs |
+| [Meter Data Credential](./meterDataVC/v1.0/) | Historical interval meter readings | Demand forecasting, P2P trading |
+| [Billing Summary Credential](./billingSummaryVC/v1.0/) | Aggregated billing period costs and consumption | Credit checks, program eligibility, cost analytics |
 
 ## Shared Data Objects
 
@@ -39,6 +41,33 @@ Structure:
   "subjectId": "kerc.karnataka.gov.in:AABPC12345"
 }
 ```
+┌─────────────────────────────┐
+│  Utility Customer Credential │  (Base identity - required)
+│  - Masked consumer number    │
+│  - Name, address, meter      │
+└──────────────┬──────────────┘
+               │
+               │ Links via customer DID
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Optional Profile Credentials               │
+├────────────────────┬─────────────────────┬───────────────────┤
+│ Consumption Profile│ Generation Profile  │ Storage Profile   │
+│ - Load/tariff info │ - Solar/Wind/etc.   │ - Battery capacity│
+│ - Connection type  │ - Capacity (kW)     │ - Power rating    │
+└────────────────────┴─────────────────────┴───────────────────┘
+               │
+               │ Links via customer DID + meterNumber
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Data Credentials                            │
+├─────────────────────────────┬────────────────────────────────┤
+│ Meter Data Credential       │ Billing Summary Credential     │
+│ - 15-min interval readings  │ - Monthly billing totals       │
+│ - Green Button / ESPI       │ - Cost + consumption per period│
+│ - Demand forecasting        │ - Credit checks, eligibility   │
+└─────────────────────────────┴────────────────────────────────┘
+```
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -58,6 +87,21 @@ All credentials use the DeDi registry for revocation. The `credentialStatus` obj
 }
 ```
 
+### Pure Consumer
+- **Has**: Utility Customer Credential, Consumption Profile Credential
+- **May have**: Meter Data Credential (for sharing history with trading apps)
+- **Does not have**: Generation Profile, Storage Profile
+
+### Solar Prosumer
+- **Has**: Utility Customer Credential, Consumption Profile, Generation Profile (Solar)
+- **May have**: Storage Profile (if battery installed)
+- **May have**: Meter Data Credential (for demand forecasting)
+
+### Full Prosumer
+- **Has**: All credential types
+- **May have**: Multiple Generation Profiles (e.g., solar + wind)
+- **May have**: Multiple Storage Profiles (e.g., home battery + EV)
+- **May have**: Meter Data Credentials covering different time periods
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | URI | Lookup URL for this specific credential's revocation status |
@@ -76,15 +120,40 @@ Example: `"2025-01-15T10:30:00+05:30"` (IST) or `"2025-01-13T10:30:00-05:00"` (E
 ```
 energy-credentials/
 ├── electricity-credential/       # Customer Credential (all profiles in one)
-│   ├── schema.json
 │   ├── context.jsonld
 │   ├── example.json
 │   └── readme.md
 ├── program-enrollment-vc/        # Program participation
-│   ├── schema.json
 │   ├── context.jsonld
 │   ├── example.json
 │   └── readme.md
+├── program-enrollment-vc/     # Program participation
+│   ├── context.jsonld
+│   ├── example.json
+│   └── readme.md
+├── meterDataVC/               # Historical meter readings (Green Button aligned)
+│   └── v1.0/
+│       ├── context.jsonld
+│       ├── vocab.jsonld
+│       ├── examples/
+│       │   ├── example.json
+│       │   ├── example-decimal.json
+│       │   └── example.ndjson
+│       ├── test/
+│       │   ├── test_meter_data_schema.py
+│       │   └── validate_examples.py
+│       ├── ndjson-transport.md
+│       └── readme.md
+├── billingSummaryVC/          # Aggregated billing period data
+│   └── v1.0/
+│       ├── context.jsonld
+│       ├── vocab.jsonld
+│       ├── examples/
+│       │   └── example.json
+│       ├── test/
+│       │   └── test_billing_summary_schema.py
+│       └── readme.md
+└── readme.md                  # This file
 ├── eos-schemas/                  # Archived: original per-profile schemas (pre-unification)
 │   ├── consumption-profile-vc/
 │   ├── generation-profile-vc/
