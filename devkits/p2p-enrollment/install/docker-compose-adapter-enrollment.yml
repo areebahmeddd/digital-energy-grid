@@ -1,39 +1,46 @@
+# P2P Enrollment devkit stack.
+#
+# BAP-side and BPP-side services live on separate, mutually unreachable
+# docker networks (bap_side, bpp_side). Each side has its own redis
+# (aliased as `redis` inside its network). The beckn-router (Caddy) is the
+# ONLY container with a foot in both networks; it accepts traffic on :9000
+# and routes /bap/* and /bpp/* to the respective onix adapter on its own side.
+#
+# Effect: onix-bap cannot resolve or reach onix-bpp on the docker bridge.
+# All BAP↔BPP traffic flows through the router on :9000. By default the
+# Arazzo runner uses http://beckn-router:9000 in payload URIs (router
+# bridges locally, no internet needed). To prove end-to-end public-internet
+# traversal, expose the router via ngrok and run with PUBLIC_URL set to
+# the tunnel URL.
+#
+# Run full stack:
+#   docker compose -f docker-compose-adapter-enrollment.yml up -d
+
 services:
-  # ============================================
-  # Core Infrastructure Services
-  # ============================================
-  
-  # Redis - Caching Service
-  redis:
+  # ---------- BAP side ----------
+  redis-bap:
     image: redis:alpine
-    container_name: redis-enrollment
-    ports:
-      - "6379:6379"
+    hostname: redis
+    container_name: redis-enrollment-bap
     networks:
-      - beckn_enrollment_network
+      - bap_side
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
-  
-  # ============================================
-  # Beckn Onix Adapters
-  # ============================================
-  
+
   onix-bap:
     image: fidedocker/onix-adapter
     container_name: onix-enrollment-bap
     platform: linux/amd64
-    networks:
-      - beckn_enrollment_network
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-simple.yaml"
+      CONFIG_FILE: "/app/config/local-enrollment-bap.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
-      REDIS_ADDR: redis-enrollment:6379
+      REDIS_ADDR: redis:6379
       RABBITMQ_ADDR: rabbitmq:5672
       RABBITMQ_USER: admin
       RABBITMQ_PASS: admin123
@@ -42,36 +49,10 @@ services:
       - ../schemas:/app/schemas
     command: ["./server", "--config=/app/config/local-enrollment-bap.yaml"]
     depends_on:
-      redis:
+      redis-bap:
         condition: service_healthy
-
-  onix-bpp:
-    image: fidedocker/onix-adapter
-    container_name: onix-enrollment-bpp
-    platform: linux/amd64
     networks:
-      - beckn_enrollment_network
-    ports:
-      - "8082:8082"
-    environment:
-      CONFIG_FILE: "/app/config/local-simple.yaml"
-      VAULT_ADDR: http://vault:8200
-      VAULT_TOKEN: root
-      REDIS_ADDR: redis-enrollment:6379
-      RABBITMQ_ADDR: rabbitmq:5672
-      RABBITMQ_USER: admin
-      RABBITMQ_PASS: admin123
-    volumes:
-      - ../config:/app/config
-      - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-enrollment-bpp.yaml"]
-    depends_on:
-      redis:
-        condition: service_healthy
-
-  # ============================================
-  # Sandbox Services (Mock BAP/BPP implementations)
-  # ============================================
+      - bap_side
 
   sandbox-bap:
     container_name: sandbox-enrollment-bap
@@ -89,8 +70,45 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - beckn_enrollment_network
-    
+      - bap_side
+
+  # ---------- BPP side ----------
+  redis-bpp:
+    image: redis:alpine
+    hostname: redis
+    container_name: redis-enrollment-bpp
+    networks:
+      - bpp_side
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-bpp:
+    image: fidedocker/onix-adapter
+    container_name: onix-enrollment-bpp
+    platform: linux/amd64
+    ports:
+      - "8082:8082"
+    environment:
+      CONFIG_FILE: "/app/config/local-enrollment-bpp.yaml"
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      REDIS_ADDR: redis:6379
+      RABBITMQ_ADDR: rabbitmq:5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASS: admin123
+    volumes:
+      - ../config:/app/config
+      - ../schemas:/app/schemas
+    command: ["./server", "--config=/app/config/local-enrollment-bpp.yaml"]
+    depends_on:
+      redis-bpp:
+        condition: service_healthy
+    networks:
+      - bpp_side
+
   sandbox-bpp:
     container_name: sandbox-enrollment-bpp
     image: fidedocker/sandbox-2.0:latest
@@ -108,10 +126,22 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - beckn_enrollment_network
+      - bpp_side
+
+  # ---------- Path router (only container on both sides) ----------
+  beckn-router:
+    image: caddy:alpine
+    container_name: beckn-router-enrollment
+    ports:
+      - "9000:9000"
+    networks:
+      - bap_side
+      - bpp_side
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
 
 networks:
-  beckn_enrollment_network:
-    name: beckn_enrollment_network
+  bap_side:
     driver: bridge
-
+  bpp_side:
+    driver: bridge
