@@ -81,13 +81,12 @@ DEVKIT_CONFIGS = {
     "ev-charging": {
         "domain": "beckn.one:deg:ev-charging:2.0.0",
         "bap_id": "ev-charging.sandbox1.com",
-        "bap_uri": "http://onix-bap:8081/bap/receiver",
+        "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "ev-charging.sandbox2.com",
-        "bpp_uri": "http://onix-bpp:8082/bpp/receiver",
+        "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
-        "examples_path": "examples/ev-charging/v2",
-        # "output_path": "devkits/ev-charging/postman",
+        "examples_path": "devkits/ev-charging/uc1-ev-charging/examples",
         "structure": "folders"  # Folder-based structure
     },
     "p2p-trading": {
