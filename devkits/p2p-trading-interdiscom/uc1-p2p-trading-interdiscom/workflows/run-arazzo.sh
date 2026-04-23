@@ -40,21 +40,61 @@ pub = os.environ['PUBLIC_URL']
 for f in sorted(src.glob('*.json')):
     d = json.load(open(f))
     ctx = d.get('context', {})
-    if 'bapUri' in ctx:
-        ctx['bapUri'] = pub + '/bap/receiver'
-    if 'bppUri' in ctx:
-        ctx['bppUri'] = pub + '/bpp/receiver'
+    if 'bap_uri' in ctx:
+        ctx['bap_uri'] = pub + '/bap/receiver'
+    if 'bpp_uri' in ctx:
+        ctx['bpp_uri'] = pub + '/bpp/receiver'
     json.dump(d, open(dst / f.name, 'w'), indent=2)
 PY
 
+JSON_OUT="$WORK/respect-output.json"
+
+set +e
 if [ "$PUBLIC_URL" = "http://beckn-router:9000" ]; then
-  exec npx --yes @redocly/cli respect \
+  npx --yes @redocly/cli respect \
     "$WORK/workflows/p2p-trading-interdiscom.arazzo.yaml" \
+    -J "$JSON_OUT" \
     "${RESPECT_ARGS[@]}"
 else
-  exec npx --yes @redocly/cli respect \
+  npx --yes @redocly/cli respect \
     "$WORK/workflows/p2p-trading-interdiscom.arazzo.yaml" \
+    -J "$JSON_OUT" \
     -S "beckn-bap-caller=$PUBLIC_URL/bap/caller" \
     -S "beckn-bpp-caller=$PUBLIC_URL/bpp/caller" \
     "${RESPECT_ARGS[@]}"
 fi
+RESPECT_EXIT=$?
+set -e
+
+# Fail the run if any step got a NACK response (statusCode != 200 or NACK in body).
+# respect's native successCriteria don't work reliably against $statusCode in the
+# installed version, so we post-process the JSON log instead.
+python3 - "$JSON_OUT" "$RESPECT_EXIT" <<'PY'
+import json, sys
+log_path, respect_exit = sys.argv[1], int(sys.argv[2])
+try:
+    data = json.load(open(log_path))
+except Exception as e:
+    print(f"NACK check: unable to read respect JSON log ({e})")
+    sys.exit(respect_exit)
+nacks = []
+for _, file_data in data.get('files', {}).items():
+    for wf in file_data.get('executedWorkflows', []):
+        for step in wf.get('executedSteps', []):
+            resp = step.get('response') or {}
+            body = resp.get('body')
+            status = resp.get('statusCode')
+            body_str = json.dumps(body) if not isinstance(body, str) else body
+            is_nack = (
+                isinstance(status, int) and status >= 400
+            ) or (body_str and '"NACK"' in body_str)
+            if is_nack:
+                nacks.append((wf.get('workflowId'), step.get('stepId'), status))
+if nacks:
+    print("\nNACK check: FAILED — the following steps returned a NACK/error response:")
+    for wf_id, step_id, status in nacks:
+        print(f"  - {wf_id} / {step_id}  (HTTP {status})")
+    sys.exit(1)
+print("\nNACK check: PASSED — all steps returned ACK.")
+sys.exit(respect_exit)
+PY

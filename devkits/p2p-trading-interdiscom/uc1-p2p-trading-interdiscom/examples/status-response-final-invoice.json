@@ -5,10 +5,10 @@
     "timestamp": "2024-10-04T18:15:00Z",
     "message_id": "msg-on-status-final-invoice-001",
     "transaction_id": "txn-energy-001",
-    "bap_id": "bap.energy-consumer.com",
-    "bap_uri": "https://bap.energy-consumer.com",
-    "bpp_id": "bpp.energy-provider.com",
-    "bpp_uri": "https://bpp.energy-provider.com",
+    "bap_id": "p2p-trading-sandbox1.com",
+    "bap_uri": "https://p2p-trading-sandbox1.com",
+    "bpp_id": "p2p-trading-sandbox2.com",
+    "bpp_uri": "https://p2p-trading-sandbox2.com",
     "ttl": "PT30S",
     "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0"
   },
@@ -190,7 +190,7 @@
       "beckn:orderValue": {
         "currency": "INR",
         "value": 405,
-        "description": "Inter-platform settlement at catalog prices (15 kWh × ₹15 + 10 kWh × ₹18). Catalog prices are inclusive of seller platform charges."
+        "description": "Inter-platform settlement at catalog prices (15 kWh \u00d7 \u20b915 + 10 kWh \u00d7 \u20b918). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
