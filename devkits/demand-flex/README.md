@@ -29,7 +29,9 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 ## Policy Enforcement
 
-Uses OPA (Open Policy Agent) via the `opapolicychecker` plugin. Current policy is loaded from the `becknv2-demand-flex` branch of this repo — replace the `location` URL in the config with a stable policy reference as network rules mature.
+Uses OPA (Open Policy Agent) via the `opapolicychecker` plugin. Policies are declared in [`config/opa-network-policies.yaml`](./config/opa-network-policies.yaml) and loaded from [`policies/demand_flex_network.rego`](./policies/demand_flex_network.rego) (a no-op placeholder that mirrors [`specification/policies/demand_flex_network.rego`](../../specification/policies/demand_flex_network.rego)). Both BAP and BPP use a single `default:` entry — every message evaluates against the same rules regardless of `context.networkId`. Add per-networkId entries to `opa-network-policies.yaml` as the demand-flex network matures.
+
+Signature/registry lookups currently target `nfh.global/testnet-deg` via the `allowedNetworkIDs` key on the `dediregistry` plugin. Subscriber IDs are placeholders (`bap.example.com` / `bpp.example.com`) with signing keys borrowed from the p2p-trading devkit, so arazzo flows will NACK on lookup until real subscribers are registered on testnet-deg.
 
 ## Related
 

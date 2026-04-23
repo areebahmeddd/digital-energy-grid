@@ -33,13 +33,18 @@ modules:
           config:
             url: https://api.dev.beckn.io/registry/dedi
             registryName: subscribers.beckn.one
-            allowedParentNamespaces: "IES,IES-DISCOMS"
+            # Placeholder until the demand-flex network is stood up on
+            # testnet-deg and arazzo flows stop NACKing on lookup.
+            allowedNetworkIDs: "nfh.global/testnet-deg"
             timeout: 10
         keyManager:
           id: simplekeymanager
           config:
-            # Reusing signing keys from p2p-trading devkit (BPP keys)
-            networkParticipant: p2p-trading-sandbox2.com
+            # Placeholder subscriber for the demand-flex devkit. Signing
+            # keys are reused from p2p-trading-sandbox2.com, so DeDi
+            # lookup for bpp.example.com will NACK until this BPP is
+            # registered on testnet-deg with its own key material.
+            networkParticipant: bpp.example.com
             keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
             signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
             signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
@@ -59,10 +64,8 @@ modules:
         checkPolicy:
           id: opapolicychecker
           config:
-            type: url
-            location: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/policies/demand_flex_network.rego"
-            query: "data.deg.policy.demand_flex_network.violations"
-            refreshIntervalSeconds: "300"
+            networkPolicyConfig: ./config/opa-network-policies.yaml
+            refreshInterval: "5m"
         cache:
           id: cache
           config:
@@ -100,12 +103,14 @@ modules:
           config:
             url: https://api.dev.beckn.io/registry/dedi
             registryName: subscribers.beckn.one
-            allowedParentNamespaces: "IES,IES-DISCOMS"
+            # Placeholder until the demand-flex network is stood up on
+            # testnet-deg and arazzo flows stop NACKing on lookup.
+            allowedNetworkIDs: "nfh.global/testnet-deg"
             timeout: 10
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: p2p-trading-sandbox2.com
+            networkParticipant: bpp.example.com
             keyId: 76EU7Mvhh7jaEf7Lcac5R1PPeFL4ddr1ALs2QYzpyTRE8g15Yr1p7C
             signingPrivateKey: AC72WfPu5ly3T7rXfRHrLA/l++BxbsNwe0qitgT9u6U=
             signingPublicKey: E9w4QejjJ6d+VODJlDKJcpI93RY3Bg4RQp4Rs1F9oQ8=
@@ -125,10 +130,8 @@ modules:
         checkPolicy:
           id: opapolicychecker
           config:
-            type: url
-            location: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/policies/demand_flex_network.rego"
-            query: "data.deg.policy.demand_flex_network.violations"
-            refreshIntervalSeconds: "300"
+            networkPolicyConfig: ./config/opa-network-policies.yaml
+            refreshInterval: "5m"
         cache:
           id: cache
           config:
