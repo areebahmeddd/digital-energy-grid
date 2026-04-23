@@ -3,14 +3,14 @@
     "version": "2.0.0",
     "action": "init",
     "domain": "beckn.one:deg:ev-charging:*",
-    "bpp_id": "example-bpp.com",
-    "bpp_uri": "https://example-bpp.com/pilot/bap/energy/v2",
+    "bpp_id": "bpp.example.com",
+    "bpp_uri": "https://bpp.example.com",
     "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002",
     "message_id": "6743e9e2-4fb5-487c-92b7-13ba8018f176",
     "timestamp": "2025-01-27T10:00:00Z",
     "ttl": "PT30S",
-    "bap_id": "example-bap.com",
-    "bap_uri": "https://api.example-bap.com/pilot/bap/energy/v2"
+    "bap_id": "bap.example.com",
+    "bap_uri": "https://bap.example.com"
   },
   "message": {
     "order": {
@@ -56,7 +56,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",

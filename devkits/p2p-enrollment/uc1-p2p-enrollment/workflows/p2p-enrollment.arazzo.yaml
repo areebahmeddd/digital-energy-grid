@@ -10,7 +10,7 @@ info:
     Run via the workflow runner (from uc1-p2p-enrollment/workflows/):
 
       Local-bridge mode (default, BAP↔BPP via Caddy router inside docker —
-      `docker compose -f docker-compose-adapter-enrollment.yml up -d` in install/):
+      `docker compose up -d` in install/):
         ./run-arazzo.sh
         ./run-arazzo.sh -w enroll-otp -v
 
