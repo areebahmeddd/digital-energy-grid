@@ -26,7 +26,7 @@ Ancillary assets (bootcamp collection, verifiable-credential samples, ledger UI 
 
 | Parameter | Value |
 |-----------|-------|
-| Domain | `beckn.one:deg:p2p-trading-ies-wave1:2.0.0` |
+| Domain | `beckn.one:deg:p2p-trading-interdiscom:2.0.0` |
 | BAP ID | `p2p-trading-sandbox1.com` |
 | BPP ID | `p2p-trading-sandbox2.com` |
 | BAP host (router) | `http://beckn-router:9000` |

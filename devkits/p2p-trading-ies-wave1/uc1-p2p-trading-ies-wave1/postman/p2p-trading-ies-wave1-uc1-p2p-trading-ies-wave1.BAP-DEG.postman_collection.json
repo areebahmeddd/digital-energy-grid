@@ -242,7 +242,7 @@
   "variable": [
     {
       "key": "domain",
-      "value": "beckn.one:deg:p2p-trading-ies-wave1:2.0.0"
+      "value": "beckn.one:deg:p2p-trading-interdiscom:2.0.0"
     },
     {
       "key": "version",

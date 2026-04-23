@@ -10,7 +10,7 @@
     "bpp_id": "p2p-trading-sandbox2.com",
     "bpp_uri": "https://p2p-trading-sandbox2.com",
     "ttl": "PT30S",
-    "domain": "beckn.one:deg:p2p-trading-ies-wave1:2.0.0",
+    "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0",
     "location": {
       "city": {
         "code": "BLR",
