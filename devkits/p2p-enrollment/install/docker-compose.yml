@@ -1,4 +1,4 @@
-# EV-Charging devkit stack.
+# P2P Enrollment devkit stack.
 #
 # BAP-side and BPP-side services live on separate, mutually unreachable
 # docker networks (bap_side, bpp_side). Each side has its own redis
@@ -14,13 +14,14 @@
 # the tunnel URL.
 #
 # Run full stack:
-#   docker compose -f docker-compose-adapter-ev.yml up -d
+#   docker compose up -d
 
 services:
   # ---------- BAP side ----------
   redis-bap:
     image: redis:alpine
     hostname: redis
+    container_name: redis-enrollment-bap
     networks:
       - bap_side
     healthcheck:
@@ -30,13 +31,13 @@ services:
       retries: 5
 
   onix-bap:
-    image: fidedocker/onix-adapter:latest
-    container_name: onix-bap
+    image: fidedocker/onix-adapter
+    container_name: onix-enrollment-bap
     platform: linux/amd64
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-ev-bap.yaml"
+      CONFIG_FILE: "/app/config/local-enrollment-bap.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -46,12 +47,15 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-ev-bap.yaml"]
+    command: ["./server", "--config=/app/config/local-enrollment-bap.yaml"]
+    depends_on:
+      redis-bap:
+        condition: service_healthy
     networks:
       - bap_side
 
   sandbox-bap:
-    container_name: sandbox-bap
+    container_name: sandbox-enrollment-bap
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -72,6 +76,7 @@ services:
   redis-bpp:
     image: redis:alpine
     hostname: redis
+    container_name: redis-enrollment-bpp
     networks:
       - bpp_side
     healthcheck:
@@ -81,13 +86,13 @@ services:
       retries: 5
 
   onix-bpp:
-    image: fidedocker/onix-adapter:latest
-    container_name: onix-bpp
+    image: fidedocker/onix-adapter
+    container_name: onix-enrollment-bpp
     platform: linux/amd64
     ports:
       - "8082:8082"
     environment:
-      CONFIG_FILE: "/app/config/local-ev-bpp.yaml"
+      CONFIG_FILE: "/app/config/local-enrollment-bpp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -97,17 +102,21 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-ev-bpp.yaml"]
+    command: ["./server", "--config=/app/config/local-enrollment-bpp.yaml"]
+    depends_on:
+      redis-bpp:
+        condition: service_healthy
     networks:
       - bpp_side
 
   sandbox-bpp:
-    container_name: sandbox-bpp
+    container_name: sandbox-enrollment-bpp
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
       - NODE_ENV=production
       - PORT=3002
+      - PERSONA=bpp
     ports:
       - "3002:3002"
     healthcheck:
@@ -122,6 +131,7 @@ services:
   # ---------- Path router (only container on both sides) ----------
   beckn-router:
     image: caddy:alpine
+    container_name: beckn-router-enrollment
     ports:
       - "9000:9000"
     networks:

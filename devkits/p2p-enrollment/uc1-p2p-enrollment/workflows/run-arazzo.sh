@@ -14,47 +14,8 @@
 #   PUBLIC_URL=https://your-domain.ngrok-free.dev ./run-arazzo.sh      # over-internet mode
 
 set -euo pipefail
-
-USECASE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RESPECT_ARGS=(--severity 'SCHEMA_CHECK=off' "$@")
-
-PUBLIC_URL="${PUBLIC_URL:-http://beckn-router:9000}"
-PUBLIC_URL="${PUBLIC_URL%/}"
-
-if [ "$PUBLIC_URL" = "http://beckn-router:9000" ]; then
-  echo "Mode: local-bridge via beckn-router (payloads patched in tmpdir)"
-else
-  echo "Mode: over-internet via $PUBLIC_URL (payloads patched in tmpdir)"
-fi
-
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/p2p-enrollment-arazzo-XXXXXX")"
-trap 'rm -rf "$WORK"' EXIT
-mkdir -p "$WORK/workflows" "$WORK/examples"
-
-cp "$USECASE_ROOT/workflows/p2p-enrollment.arazzo.yaml" "$WORK/workflows/"
-
-PUBLIC_URL="$PUBLIC_URL" python3 - "$USECASE_ROOT/examples" "$WORK/examples" <<'PY'
-import json, os, sys, pathlib
-src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-pub = os.environ['PUBLIC_URL']
-for f in sorted(src.glob('*.json')):
-    d = json.load(open(f))
-    ctx = d.get('context', {})
-    if 'bapUri' in ctx:
-        ctx['bapUri'] = pub + '/bap/receiver'
-    if 'bppUri' in ctx:
-        ctx['bppUri'] = pub + '/bpp/receiver'
-    json.dump(d, open(dst / f.name, 'w'), indent=2)
-PY
-
-if [ "$PUBLIC_URL" = "http://beckn-router:9000" ]; then
-  exec npx --yes @redocly/cli respect \
-    "$WORK/workflows/p2p-enrollment.arazzo.yaml" \
-    "${RESPECT_ARGS[@]}"
-else
-  exec npx --yes @redocly/cli respect \
-    "$WORK/workflows/p2p-enrollment.arazzo.yaml" \
-    -S "beckn-bap-caller=$PUBLIC_URL/bap/caller" \
-    -S "beckn-bpp-caller=$PUBLIC_URL/bpp/caller" \
-    "${RESPECT_ARGS[@]}"
-fi
+HERE="$(cd "$(dirname "$0")" && pwd)"
+RUN_ARAZZO_ARGS=("$@")
+# shellcheck disable=SC1091
+source "$(cd "$HERE/../../.." && pwd)/scripts/run-arazzo-lib.sh"
+run_arazzo "$HERE" "p2p-enrollment" "p2p-enrollment.arazzo.yaml"

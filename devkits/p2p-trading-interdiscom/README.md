@@ -55,7 +55,7 @@ See [`./beckn-signing-kit/`](./beckn-signing-kit/) for language-specific signing
 
 ## Troubleshooting
 
-- If an onix container fails to start with `failed to load SchemaValidator plugin`, you may have a stale `fidedocker/onix-adapter-deg` image. Pull the tag referenced in `install/docker-compose-adapter-p2p.yml`.
+- If an onix container fails to start with `failed to load SchemaValidator plugin`, you may have a stale `fidedocker/onix-adapter-deg` image. Pull the tag referenced in `install/docker-compose.yml`.
 - The devkit reuses DeDi records in `subscribers.beckn.one`; network-level rejects typically trace back to stale records there.
 
 ## Related

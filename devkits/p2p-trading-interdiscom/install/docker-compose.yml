@@ -1,4 +1,4 @@
-# P2P Enrollment devkit stack.
+# P2P Trading Inter-Discom devkit stack.
 #
 # BAP-side and BPP-side services live on separate, mutually unreachable
 # docker networks (bap_side, bpp_side). Each side has its own redis
@@ -13,15 +13,18 @@
 # traversal, expose the router via ngrok and run with PUBLIC_URL set to
 # the tunnel URL.
 #
+# NOTE for this devkit: the catalog service and discover service share the
+# same endpoint, so no separate subscribe-catalog call is required.
+#
 # Run full stack:
-#   docker compose -f docker-compose-adapter-enrollment.yml up -d
+#   docker compose up -d
 
 services:
   # ---------- BAP side ----------
   redis-bap:
     image: redis:alpine
     hostname: redis
-    container_name: redis-enrollment-bap
+    container_name: redis-p2p-interdiscom-bap
     networks:
       - bap_side
     healthcheck:
@@ -31,13 +34,12 @@ services:
       retries: 5
 
   onix-bap:
-    image: fidedocker/onix-adapter
-    container_name: onix-enrollment-bap
-    platform: linux/amd64
+    image: fidedocker/onix-adapter-deg:p2p-multiarch-v6
+    container_name: onix-bap
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-enrollment-bap.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-bap.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -47,15 +49,13 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-enrollment-bap.yaml"]
-    depends_on:
-      redis-bap:
-        condition: service_healthy
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-bap.yaml"]
     networks:
       - bap_side
 
   sandbox-bap:
-    container_name: sandbox-enrollment-bap
+    container_name: sandbox-bap
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -76,7 +76,7 @@ services:
   redis-bpp:
     image: redis:alpine
     hostname: redis
-    container_name: redis-enrollment-bpp
+    container_name: redis-p2p-interdiscom-bpp
     networks:
       - bpp_side
     healthcheck:
@@ -86,13 +86,12 @@ services:
       retries: 5
 
   onix-bpp:
-    image: fidedocker/onix-adapter
-    container_name: onix-enrollment-bpp
-    platform: linux/amd64
+    image: fidedocker/onix-adapter-deg:p2p-multiarch-v6
+    container_name: onix-bpp
     ports:
       - "8082:8082"
     environment:
-      CONFIG_FILE: "/app/config/local-enrollment-bpp.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-bpp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -102,15 +101,13 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-enrollment-bpp.yaml"]
-    depends_on:
-      redis-bpp:
-        condition: service_healthy
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-bpp.yaml"]
     networks:
       - bpp_side
 
   sandbox-bpp:
-    container_name: sandbox-enrollment-bpp
+    container_name: sandbox-bpp
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -131,7 +128,7 @@ services:
   # ---------- Path router (only container on both sides) ----------
   beckn-router:
     image: caddy:alpine
-    container_name: beckn-router-enrollment
+    container_name: beckn-router-p2p-interdiscom
     ports:
       - "9000:9000"
     networks:

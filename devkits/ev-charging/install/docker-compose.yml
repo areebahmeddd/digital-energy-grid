@@ -1,4 +1,4 @@
-# Demand-Flex devkit stack.
+# EV-Charging devkit stack.
 #
 # BAP-side and BPP-side services live on separate, mutually unreachable
 # docker networks (bap_side, bpp_side). Each side has its own redis
@@ -14,13 +14,7 @@
 # the tunnel URL.
 #
 # Run full stack:
-#   docker compose -f docker-compose-demand-flex.yml up -d
-#
-# Expose the router to the public internet: copy ngrok.yml.example to
-# ngrok.yml, paste your authtoken, then:
-#   ngrok start --all --config ngrok.yml
-# Point workflows at the tunnel URL (forces real internet traversal):
-#   PUBLIC_URL=https://<host>.ngrok-free.dev ./run-arazzo.sh
+#   docker compose up -d
 
 services:
   # ---------- BAP side ----------
@@ -36,12 +30,13 @@ services:
       retries: 5
 
   onix-bap:
-    image: onix-adapter-deg:p2p-multiarch-v7
+    image: fidedocker/onix-adapter:latest
     container_name: onix-bap
+    platform: linux/amd64
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-demand-flex-bap.yaml"
+      CONFIG_FILE: "/app/config/local-ev-bap.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -51,8 +46,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-demand-flex-bap.yaml"]
+    command: ["./server", "--config=/app/config/local-ev-bap.yaml"]
     networks:
       - bap_side
 
@@ -87,12 +81,13 @@ services:
       retries: 5
 
   onix-bpp:
-    image: onix-adapter-deg:p2p-multiarch-v7
+    image: fidedocker/onix-adapter:latest
     container_name: onix-bpp
+    platform: linux/amd64
     ports:
       - "8082:8082"
     environment:
-      CONFIG_FILE: "/app/config/local-demand-flex-bpp.yaml"
+      CONFIG_FILE: "/app/config/local-ev-bpp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -102,8 +97,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-demand-flex-bpp.yaml"]
+    command: ["./server", "--config=/app/config/local-ev-bpp.yaml"]
     networks:
       - bpp_side
 
@@ -114,7 +108,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
-      - PERSONA=bpp
     ports:
       - "3002:3002"
     healthcheck:
