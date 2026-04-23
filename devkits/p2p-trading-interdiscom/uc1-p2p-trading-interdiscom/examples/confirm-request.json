@@ -5,10 +5,10 @@
     "timestamp": "2024-10-04T10:25:00Z",
     "message_id": "msg-confirm-001",
     "transaction_id": "txn-energy-001",
-    "bap_id": "bap.energy-consumer.com",
-    "bap_uri": "https://bap.energy-consumer.com",
-    "bpp_id": "bpp.energy-provider.com",
-    "bpp_uri": "https://bpp.energy-provider.com",
+    "bap_id": "p2p-trading-sandbox1.com",
+    "bap_uri": "https://p2p-trading-sandbox1.com",
+    "bpp_id": "p2p-trading-sandbox2.com",
+    "bpp_uri": "https://p2p-trading-sandbox2.com",
     "ttl": "PT30S",
     "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0"
   },
@@ -33,8 +33,8 @@
       "beckn:orderAttributes": {
         "@context": "https://raw.githubusercontent.com/beckn/DEG/tags/deg-1.0.1/specification/schema/EnergyTrade/v0.3/context.jsonld",
         "@type": "EnergyTradeOrder",
-        "bap_id": "bap.energy-consumer.com",
-        "bpp_id": "bpp.energy-provider.com",
+        "bap_id": "p2p-trading-sandbox1.com",
+        "bpp_id": "p2p-trading-sandbox2.com",
         "total_quantity": {
           "unitQuantity": 25.0,
           "unitText": "kWh"
