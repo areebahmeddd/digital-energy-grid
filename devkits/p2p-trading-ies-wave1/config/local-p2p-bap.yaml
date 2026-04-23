@@ -75,7 +75,7 @@ modules:
         steps:
           - id: policyenforcer
             config:
-              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p-trading-ies-wave1.rego"
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p-trading-interdiscom.rego"
           - id: degledgerrecorder
             config:
               # ledgerHost: "https://34.93.166.38.sslip.io" OLD URL
@@ -153,7 +153,7 @@ modules:
         steps:
           - id: policyenforcer
             config:
-              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p-trading-ies-wave1.rego"
+              policyUrls: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p-trading-interdiscom.rego"
       steps:
         - addRoute
         - sign
