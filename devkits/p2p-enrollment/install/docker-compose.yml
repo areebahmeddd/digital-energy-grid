@@ -21,7 +21,7 @@ services:
   redis-bap:
     image: redis:alpine
     hostname: redis
-    container_name: redis-enrollment-bap
+    container_name: redis-bap
     networks:
       - bap_side
     healthcheck:
@@ -32,7 +32,7 @@ services:
 
   onix-bap:
     image: fidedocker/onix-adapter
-    container_name: onix-enrollment-bap
+    container_name: onix-bap
     platform: linux/amd64
     ports:
       - "8081:8081"
@@ -55,7 +55,7 @@ services:
       - bap_side
 
   sandbox-bap:
-    container_name: sandbox-enrollment-bap
+    container_name: sandbox-bap
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -76,7 +76,7 @@ services:
   redis-bpp:
     image: redis:alpine
     hostname: redis
-    container_name: redis-enrollment-bpp
+    container_name: redis-bpp
     networks:
       - bpp_side
     healthcheck:
@@ -87,7 +87,7 @@ services:
 
   onix-bpp:
     image: fidedocker/onix-adapter
-    container_name: onix-enrollment-bpp
+    container_name: onix-bpp
     platform: linux/amd64
     ports:
       - "8082:8082"
@@ -110,7 +110,7 @@ services:
       - bpp_side
 
   sandbox-bpp:
-    container_name: sandbox-enrollment-bpp
+    container_name: sandbox-bpp
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -131,7 +131,7 @@ services:
   # ---------- Path router (only container on both sides) ----------
   beckn-router:
     image: caddy:alpine
-    container_name: beckn-router-enrollment
+    container_name: beckn-router
     ports:
       - "9000:9000"
     networks:

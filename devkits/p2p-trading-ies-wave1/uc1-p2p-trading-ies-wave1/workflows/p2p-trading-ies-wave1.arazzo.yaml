@@ -11,7 +11,7 @@ info:
     This devkit's catalog service and discover service share the same
     endpoint, so there is no separate subscribe-catalog step.
 
-    Run via the workflow runner (from uc1-p2p-trading-interdiscom/workflows/):
+    Run via the workflow runner (from uc1-p2p-trading-ies-wave1/workflows/):
 
       Local-bridge mode (default, BAP↔BPP via Caddy router inside docker —
       `docker compose up -d` in install/):

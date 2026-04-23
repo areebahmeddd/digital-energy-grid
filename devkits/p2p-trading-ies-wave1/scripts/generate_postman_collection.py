@@ -25,14 +25,14 @@ if ROLE is None:
     print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP|UtilityBPP")
     sys.exit(1)
 
-usecase = "uc1-p2p-trading-interdiscom"
+usecase = "uc1-p2p-trading-ies-wave1"
 output_dir = str(DEVKIT_ROOT / usecase / "postman")
 cmd = [
     sys.executable, str(TOP_LEVEL_SCRIPT),
-    "--devkit", "p2p-trading-interdiscom",
+    "--devkit", "p2p-trading-ies-wave1",
     "--role", ROLE,
     "--output-dir", output_dir,
-    "--name", f"p2p-trading-interdiscom-{usecase}.{ROLE}-DEG",
+    "--name", f"p2p-trading-ies-wave1-{usecase}.{ROLE}-DEG",
     "--no-validate",
 ]
 ret = subprocess.call(cmd)

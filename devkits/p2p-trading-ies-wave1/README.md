@@ -10,7 +10,7 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 | Use Case | BAP (Buyer) | BPP (Seller) | UtilityBPP | Description |
 |----------|-------------|--------------|------------|-------------|
-| [uc1-p2p-trading-interdiscom](./uc1-p2p-trading-interdiscom/) | p2p-trading-sandbox1.com | p2p-trading-sandbox2.com | (cascaded) | Catalog → discover → select → confirm → status → settle, plus cascaded init/confirm to the seller's utility BPP |
+| [uc1-p2p-trading-ies-wave1](./uc1-p2p-trading-ies-wave1/) | p2p-trading-sandbox1.com | p2p-trading-sandbox2.com | (cascaded) | Catalog → discover → select → confirm → status → settle, plus cascaded init/confirm to the seller's utility BPP |
 
 ## Catalog vs discover
 
@@ -18,7 +18,7 @@ This devkit's catalog service and discover service share the same hosted endpoin
 
 ## Postman
 
-`uc1-p2p-trading-interdiscom/postman/p2p-trading-interdiscom-uc1-p2p-trading-interdiscom.{BAP,BPP,UtilityBPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP|UtilityBPP`.
+`uc1-p2p-trading-ies-wave1/postman/p2p-trading-ies-wave1-uc1-p2p-trading-ies-wave1.{BAP,BPP,UtilityBPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP|UtilityBPP`.
 
 Ancillary assets (bootcamp collection, verifiable-credential samples, ledger UI helpers) remain under `postman/` at the devkit root — they are not regenerated from examples.
 

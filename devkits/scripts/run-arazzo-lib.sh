@@ -48,7 +48,7 @@ import json, os, sys, pathlib
 src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 pub = os.environ['PUBLIC_URL']
 # rglob to support both flat (data-exchange) and nested (ev-charging) layouts.
-# Both snake_case (p2p-trading-interdiscom) and camelCase URI keys are handled.
+# Both snake_case (p2p-trading-ies-wave1) and camelCase URI keys are handled.
 for f in sorted(src.rglob('*.json')):
     rel = f.relative_to(src)
     out = dst / rel
