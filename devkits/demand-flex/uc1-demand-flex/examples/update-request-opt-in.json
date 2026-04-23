@@ -1,12 +1,12 @@
 {
   "context": {
-    "networkId": "beckn.one/testnet",
+    "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "update",
-    "bapId": "greenflex-agg.example.com",
-    "bapUri": "https://greenflex-agg.example.com/beckn",
-    "bppId": "tpddl-utility.example.com",
-    "bppUri": "https://tpddl-utility.example.com/beckn",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
+    "bppId": "bpp.example.com",
+    "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
     "messageId": "msg-update-optin-001",
     "timestamp": "2026-04-01T06:00:00Z",
@@ -107,11 +107,11 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "tpddl-utility.example.com"
+            "participantId": "bpp.example.com"
           },
           {
             "role": "seller",
-            "participantId": "greenflex-agg.example.com"
+            "participantId": "bap.example.com"
           }
         ],
         "policy": {

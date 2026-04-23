@@ -1,10 +1,10 @@
 {
   "context": {
-    "networkId": "beckn.one/testnet",
+    "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "discover",
-    "bapId": "greenflex-agg.example.com",
-    "bapUri": "https://greenflex-agg.example.com/beckn",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
     "transactionId": "txn-flex-001",
     "messageId": "msg-discover-001",
     "timestamp": "2026-03-30T09:00:00Z"

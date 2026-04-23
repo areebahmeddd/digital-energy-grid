@@ -31,25 +31,19 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://api.dev.beckn.io/registry/dedi
+            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
-            # Placeholder until the demand-flex network is stood up on
-            # testnet-deg and arazzo flows stop NACKing on lookup.
             allowedNetworkIDs: "nfh.global/testnet-deg"
             timeout: 10
         keyManager:
           id: simplekeymanager
           config:
-            # Placeholder subscriber for the demand-flex devkit. Signing
-            # keys are reused from p2p-trading-sandbox1.com, so DeDi
-            # lookup for bap.example.com will NACK until this BAP is
-            # registered on testnet-deg with its own key material.
             networkParticipant: bap.example.com
-            keyId: 76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ
-            signingPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            signingPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
-            encrPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            encrPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
+            keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
+            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
         schemaValidator:
           id: schemav2validator
           config:
@@ -101,21 +95,19 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://api.dev.beckn.io/registry/dedi
+            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
-            # Placeholder until the demand-flex network is stood up on
-            # testnet-deg and arazzo flows stop NACKing on lookup.
             allowedNetworkIDs: "nfh.global/testnet-deg"
             timeout: 10
         keyManager:
           id: simplekeymanager
           config:
             networkParticipant: bap.example.com
-            keyId: 76EU8aUqHouww7gawT6EibH4bseMCumyDv3sgyXSKENGk8NDcdVwmQ
-            signingPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            signingPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
-            encrPrivateKey: Pc6dkYo5LeP0LkwvZXVRV9pcbeh8jDdtdHWymID5cjw=
-            encrPublicKey: KVYEWkQB2WwnttVMWfy7KrnqiD51ZDvi8vfCac2IwRE=
+            keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
+            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
         schemaValidator:
           id: schemav2validator
           config:

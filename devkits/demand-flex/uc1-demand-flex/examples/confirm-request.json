@@ -1,12 +1,12 @@
 {
   "context": {
-    "networkId": "beckn.one/testnet",
+    "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "confirm",
-    "bapId": "greenflex-agg.example.com",
-    "bapUri": "https://greenflex-agg.example.com/beckn",
-    "bppId": "tpddl-utility.example.com",
-    "bppUri": "https://tpddl-utility.example.com/beckn",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
+    "bppId": "bpp.example.com",
+    "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
     "messageId": "msg-confirm-001",
     "timestamp": "2026-03-30T10:10:00Z",
