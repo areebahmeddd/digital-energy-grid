@@ -36,11 +36,6 @@ sourceDescriptions:
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bpp/caller
 
-  - name: beckn-discover-service
-    type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
-    x-serverUrl: http://localhost:8083/discover
-
 workflows:
   # ── Catalog & Discovery ──
 
@@ -65,17 +60,6 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/discover-request.json"
-
-  - workflowId: discover-service-catalog-subscription
-    summary: Discover service subscribes to catalog service for flex catalog updates
-    steps:
-      - stepId: subscribe-catalog
-        description: Discover service subscribes to DemandFlexNeed catalog updates
-        operationId: beckn-discover-service.catalogSubscribe
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/subscribe-catalog.json"
 
   # ── Contract Lifecycle: select → confirm → baselines → actuals → settlement ──
 
