@@ -1,4 +1,4 @@
-# EV-Charging devkit stack.
+# P2P Trading (IES Wave 1) devkit stack.
 #
 # BAP-side and BPP-side services live on separate, mutually unreachable
 # docker networks (bap_side, bpp_side). Each side has its own redis
@@ -12,6 +12,9 @@
 # bridges locally, no internet needed). To prove end-to-end public-internet
 # traversal, expose the router via ngrok and run with PUBLIC_URL set to
 # the tunnel URL.
+#
+# NOTE for this devkit: the catalog service and discover service share the
+# same endpoint, so no separate subscribe-catalog call is required.
 #
 # Run full stack:
 #   docker compose up -d
@@ -31,13 +34,12 @@ services:
       retries: 5
 
   onix-bap:
-    image: fidedocker/onix-adapter:latest
+    image: fidedocker/onix-adapter-deg:p2p-multiarch-v6
     container_name: onix-bap
-    platform: linux/amd64
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-ev-bap.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-bap.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -47,7 +49,8 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-ev-bap.yaml"]
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-bap.yaml"]
     networks:
       - bap_side
 
@@ -83,13 +86,12 @@ services:
       retries: 5
 
   onix-bpp:
-    image: fidedocker/onix-adapter:latest
+    image: fidedocker/onix-adapter-deg:p2p-multiarch-v6
     container_name: onix-bpp
-    platform: linux/amd64
     ports:
       - "8082:8082"
     environment:
-      CONFIG_FILE: "/app/config/local-ev-bpp.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-bpp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -99,7 +101,8 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-    command: ["./server", "--config=/app/config/local-ev-bpp.yaml"]
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-bpp.yaml"]
     networks:
       - bpp_side
 
@@ -110,6 +113,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
+      - PERSONA=bpp
     ports:
       - "3002:3002"
     healthcheck:

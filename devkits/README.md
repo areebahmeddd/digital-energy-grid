@@ -8,8 +8,7 @@ Each devkit spins up a self-contained BAP↔BPP stack for one use-case family ov
 | [demand-flex](./demand-flex/) | Behavioural demand response — need, buy offer, performance |
 | [ev-charging](./ev-charging/) | EV charging discovery, reservation, session, billing |
 | [p2p-enrollment](./p2p-enrollment/) | Consumer enrollment to DER programmes (OTP, OAuth2) |
-| [p2p-trading](./p2p-trading/) | Peer-to-peer energy trading with a utility BPP (pre-router layout, kept as-is) |
-| [p2p-trading-interdiscom](./p2p-trading-interdiscom/) | Peer-to-peer trading across discoms |
+| [p2p-trading-ies-wave1](./p2p-trading-ies-wave1/) | Peer-to-peer trading across discoms |
 
 Jump into a devkit's own README for the use-case table, schemas, and example payload notes; the rest of this page is the shared stack-and-runtime guide.
 
