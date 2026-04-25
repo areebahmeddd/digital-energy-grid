@@ -285,7 +285,11 @@ The block diagram below summarises the LP-mediated topology — sourced from *Fi
 
 ```mermaid
 flowchart TB
-    TAc["Trading App<br/>(consumer side)"] <-->|"Transaction protocol<br/>(order confirmation)"| TAp["Trading App<br/>(prosumer side)"]
+    subgraph TPs["Trading Apps — Transaction protocol (order confirmation)"]
+        direction LR
+        TAc["Trading App<br/>(consumer side)"]
+        TAp["Trading App<br/>(prosumer side)"]
+    end
     LP["Trade Ledger Provider (LP)<br/><i>allocation logic lives here</i>"]
     Dc["Discom<br/>(consumer)"]
     Dp["Discom<br/>(prosumer)"]
