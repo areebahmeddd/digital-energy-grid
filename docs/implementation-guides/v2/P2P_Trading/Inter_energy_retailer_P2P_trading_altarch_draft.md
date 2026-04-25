@@ -289,14 +289,12 @@ The block diagram below summarises the LTSP-mediated topology — sourced from *
 flowchart TB
     subgraph TPs[" "]
         direction LR
-        TAc["Trading App<br/>(consumer side)"]
-        TAp["Trading App<br/>(prosumer side)"]
+        TAc["Trading App<br/>(consumer side)"] <-->|"Transaction protocol<br/>(order confirmation)"| TAp["Trading App<br/>(prosumer side)"]
     end
     LTSP["Trade Ledger Provider (LTSP)<br/><i>allocation logic lives here</i>"]
     Dc["Discom<br/>(consumer)"]
     Dp["Discom<br/>(prosumer)"]
 
-    TAc <-->|"Transaction protocol<br/>(order confirmation)"| TAp
     TAc <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
     TAp <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
     LTSP <-->|"Data Exchange protocol"| Dc
