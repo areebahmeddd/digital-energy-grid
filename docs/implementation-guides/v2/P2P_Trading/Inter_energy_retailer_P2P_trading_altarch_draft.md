@@ -34,12 +34,14 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 |---|-------|------|------------|
 | 1 | **BuyerTP** | Consumer's trading platform | BAP when requesting, BPP when responding |
 | 2 | **SellerTP** | Producer's trading platform | BAP when requesting, BPP when responding |
-| 3 | **BuyerUtility** | Buyer's energy retailer/distribution company | BAP when requesting, BPP when responding |
-| 4 | **SellerUtility** | Seller's energy retailer/distribution company | BAP when requesting, BPP when responding |
+| 3 | **BuyerUtility / BuyerUtilityLTSP** | Buyer's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LTSP)** | BAP when requesting, BPP when responding |
+| 4 | **SellerUtility / SellerUtilityLTSP** | Seller's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LTSP)** | BAP when requesting, BPP when responding |
 | 5 | **Buyer** | Energy consumer in P2P trade | End user |
 | 6 | **Seller** | Energy producer in P2P trade | End user |
 
 > **Note:** When buyer and seller are with the **same utility**, the flow simplifies naturally - BuyerUtility and SellerUtility collapse into a single entity, reducing the number of hops while maintaining the same protocol structure.
+
+> **Note on LTSP (Ledger TSP):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LTSP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LTSP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LTSP` because the same flow applies whether the utility runs the ledger itself or delegates to its LTSP. See [§ Operating Through a Ledger TSP (LTSP)](#operating-through-a-ledger-tsp-ltsp) for the LTSP-mediated topology.
 
 ---
 
@@ -103,10 +105,10 @@ flowchart LR
 sequenceDiagram
     autonumber
     participant B as Buyer
-    participant BuyerUtility as BuyerUtility
+    participant BuyerUtility as BuyerUtility / BuyerUtilityLTSP
     participant BuyerTP as BuyerTP
     participant SellerTP as SellerTP
-    participant SellerUtility as SellerUtility
+    participant SellerUtility as SellerUtility / SellerUtilityLTSP
     participant S as Seller
 
     rect rgb(230, 245, 255)
@@ -241,3 +243,67 @@ A prosumer or consumer may have multiple trades in the same delivery window but 
 SellerUtility sends `/on_status` to SellerTP with these allocated quantities.
 
 Once both discoms' allocations reach both trading platforms and are relayed to the respective utilities, SellerUtility performs a final adjustment informed by the buyer's allocation and sends it to SellerTP. SellerTP computes the settled quantity (minimum of seller's final adjusted allocation and buyer's allocation) and sends both the final adjusted allocation and settled quantity to SellerUtility and BuyerTP in parallel. BuyerTP relays both to BuyerUtility. Trading platforms use this final settled volume to exchange peer-to-peer payment, and discoms use it to avoid double billing.
+
+---
+
+## Operating Through a Ledger TSP (LTSP)
+
+A **Ledger TSP (LTSP)** is a regulated technical service provider that may act on behalf of a utility for the trade-ledger and fair-allocation functions described above. The LTSP is bound by the network policy to enforce fair allocation, hold the utility's distributed trade ledger, and answer protocol requests on the utility's behalf. **Each utility contracts exactly one LTSP** (for start); two different utilities may contract the **same** LTSP or **different** LTSPs — the protocol does not assume a single shared ledger.
+
+### When the same sequence diagram still holds
+
+For utilities that choose to operate via their LTSP — or where network policy mandates this — the [Overall Process Flow](#overall-process-flow) sequence diagram above applies **unchanged**. The only substitution is at the participant level:
+
+- Wherever `BuyerUtility` appears, the calls are made by `BuyerUtilityLTSP` on behalf of the buyer's utility.
+- Wherever `SellerUtility` appears, the calls are made by `SellerUtilityLTSP` on behalf of the seller's utility.
+
+Trade ledger writes, limit checks, pro-rata allocation, final adjustment, and settled-qty propagation all execute inside the LTSP — keyed to the utility whose customers are involved. This is why the sequence diagram labels its utility participants as `<Utility> / <Utility>LTSP`: the protocol is identical and only the operator changes.
+
+### LTSP as a full Beckn node
+
+When an LTSP is in the path it acts as a **full-fledged Beckn node** for the utility it represents. Specifically the LTSP:
+
+- **Receives `/confirm` calls** from the utility's TP (and from BAP/BPP in cascaded flows) and writes the trade into that utility's ledger, deducting from the customer's trading limits per network policy.
+- **Raises cascaded `/status` requests** downstream to the discom's meter/billing systems (e.g., to fetch the actual injection/consumption for a meter-block), and folds the responses back into the protocol flow.
+- **Issues `/on_status` updates** upstream to the TP carrying seller/buyer allocations, the final-adjusted allocation, and the settled qty — exactly as the utility itself would.
+- **Receives `/update` calls** (e.g., scheduled outage / curtailment) from the utility-side and propagates them through the protocol per the diagram above.
+- **Performs the fair pro-rata allocation and final adjustment** per the regulator-approved network policy, so allocation logic is consistent across utilities that share an LTSP and auditable across those that don't.
+
+Because the LTSP carries the protocol surface area, the discom behind it can keep its existing operational systems and integrate over a simpler internal data-exchange interface (meter-block injection/consumption, cancellations, outage notifications) rather than implementing the full Beckn node itself.
+
+### Multi-ledger topology
+
+Because each utility independently picks an LTSP, real deployments will be a **multi-ledger network**:
+
+- **Same LTSP across utilities.** Utility A and Utility B may contract the same LTSP. The LTSP runs **two logically separated ledgers** (one per utility) and behaves as **two distinct Beckn nodes** in the sequence diagram. No data crosses the per-utility partition.
+- **Different LTSPs.** Utility A and Utility B may contract different LTSPs. Each LTSP runs its own utility's ledger, and the cross-utility hops in the sequence diagram cross an **LTSP-to-LTSP boundary** (one LTSP acts as `BuyerUtilityLTSP`, the other as `SellerUtilityLTSP`).
+- **Mixed.** Some utilities may run their own ledger and others may delegate to an LTSP — the sequence diagram still holds because each utility's participant slot is filled by whichever entity is operating that utility's ledger.
+
+The decentralized base-protocol design guarantees this works: trades and limits are partitioned per utility, so adding, removing, or swapping an LTSP is local to a single utility and never requires global reconciliation.
+
+### Reference architecture
+
+The block diagram below summarises the LTSP-mediated topology — sourced from *Final P2P Ledger and Allocation Architecture* (Pramod Varma, 15 April 2025).
+
+```mermaid
+flowchart TB
+    TAc["Trading App<br/>(consumer side)"]
+    TAp["Trading App<br/>(prosumer side)"]
+    LTSP["Trade Ledger Provider (LTSP)<br/><i>allocation logic lives here</i>"]
+    Dc["Discom<br/>(consumer)"]
+    Dp["Discom<br/>(prosumer)"]
+
+    TAc <-->|"Transaction protocol<br/>(order confirmation)"| TAp
+    TAc <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
+    TAp <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
+    LTSP <-->|"Data Exchange protocol"| Dc
+    LTSP <-->|"Data Exchange protocol"| Dp
+```
+
+**Reading the diagram:**
+
+- **Trading apps** speak the Beckn **transaction protocol (order confirmation)** directly to each other — price, contract, settled-qty exchange. This is the row labelled "TP-to-TP" in the sequence diagram above.
+- **Each trading app** speaks the Beckn **transaction protocol (order fulfillment)** to its utility's LTSP — limit checks, trade logging, allocation reporting, settled-qty relay. This is the row labelled "TP-to-utility" in the sequence diagram above.
+- **Each LTSP** speaks a simpler **data-exchange protocol** to its utility's discom backend — meter-block injection/consumption pulls, cancellations, outage notifications. This corresponds to the cascaded `/status` and `/update` flows that the LTSP performs on the utility's behalf.
+
+**Why this matters:** allocation logic moves to the LTSP layer — consistent across utilities that share an LTSP, regulator-auditable across those that don't, and simple to integrate for discoms that keep their existing internal stack. The architecture begins with one LTSP per utility, but the partitioned design preserves the option to scale to **multiple LTSPs per network** without changes to the underlying protocol.
