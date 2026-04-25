@@ -1,8 +1,8 @@
-# Inter-Energy Retailer P2P Energy Trading (Decentralized Approach)
+# Inter-Energy Retailer P2P Energy Trading
 
 ## Overview
 
-This document describes an alternative approach to inter-energy retailer P2P trading that **eliminates the need for a central trade exchange/ledger**. Instead, each utility maintains its own ledger for its customers, and trust is established through cascading Beckn protocol calls with multi-party digital signatures.
+This document describes inter-utility peer to peer energy trading architecture, that allows for distributed databases and multi-ledgers to facilitate the transactions, allocations & settlements.
 
 For the original approach using a central ledger, see [Inter_energy_retailer_P2P_trading_draft.md](./Inter_energy_retailer_P2P_trading_draft.md).
 
@@ -20,10 +20,10 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 | Aspect | Central Ledger Approach | Decentralized Approach |
 |--------|------------------------|------------------------|
-| Trade records | Single central ledger (Trade Exchange) | Each utility maintains its own ledger |
+| Trade records | Single central ledger (Trade Exchange) | Each utility or their ledger provider (LP) maintains its own ledger |
 | Trust model | All parties trust the central ledger | Multi-party signatures create distributed proof |
 | Trading limits | Central ledger tracks all limits | Each utility tracks only its own customers' limits |
-| Reconciliation | Central ledger allocates actual energy | Each utility allocates for its own customers |
+| Reconciliation | Central ledger allocates actual energy | Each utility or its LP allocates for its own customers |
 | Privacy | Central entity sees all trade details | Each utility only sees trades involving its customers |
 
 ---
@@ -34,22 +34,22 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 |---|-------|------|------------|
 | 1 | **BuyerTP** | Consumer's trading platform | BAP when requesting, BPP when responding |
 | 2 | **SellerTP** | Producer's trading platform | BAP when requesting, BPP when responding |
-| 3 | **BuyerUtility / BuyerUtilityLTSP** | Buyer's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LTSP)** | BAP when requesting, BPP when responding |
-| 4 | **SellerUtility / SellerUtilityLTSP** | Seller's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LTSP)** | BAP when requesting, BPP when responding |
+| 3 | **BuyerUtility / BuyerUtilityLP** | Buyer's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LP)** | BAP when requesting, BPP when responding |
+| 4 | **SellerUtility / SellerUtilityLP** | Seller's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LP)** | BAP when requesting, BPP when responding |
 | 5 | **Buyer** | Energy consumer in P2P trade | End user |
 | 6 | **Seller** | Energy producer in P2P trade | End user |
 
 > **Note:** When buyer and seller are with the **same utility**, the flow simplifies naturally - BuyerUtility and SellerUtility collapse into a single entity, reducing the number of hops while maintaining the same protocol structure.
 
-> **Note on LTSP (Ledger TSP):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LTSP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LTSP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LTSP` because the same flow applies whether the utility runs the ledger itself or delegates to its LTSP. See [§ Operating Through a Ledger TSP (LTSP)](#operating-through-a-ledger-tsp-ltsp) for the LTSP-mediated topology.
+> **Note on LP (Ledger TSP):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LP` because the same flow applies whether the utility runs the ledger itself or delegates to its LP. See [§ Operating Through a Ledger TSP (LP)](#operating-through-a-ledger-tsp-LP) for the LP-mediated topology.
 
 ---
 
 ## Core Design Principles
 
-1. **Symmetric TP-liaison model**: Each trading platform acts as the sole liaison to its own utility. No utility communicates directly with the counterparty's TP. Cross-utility information flows TP-to-TP only.
+1. **Symmetric TP-liaison model**: Each trading platform acts as the liaison to its own utility, and relays allocations from one ledger to another.
 2. **Privacy-preserving information flow**: Only allocations are exchanged between TPs and utilities — not customer IDs, PII, or meter data. Price information stays between trading platforms only. Intra-discom trade data stays in the discom's own ledger.
-3. **Utility involvement patterns**: Utility participation during init is optional, and only needed when trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, each TP sends a non-blocking intimation to its own utility, informing them of the trade so they can avoid double-billing and compute wheeling and under-fulfillment charges post delivery. Utilities can independently track and publish trade reliability scores (e.g., CIBIL for energy).
+3. **Utility involvement patterns**: Utility participation during init is optional, and only needed when trading platforms don't have the trading limits imposed by the utility. After the trade is confirmed, each TP sends a non-blocking intimation to its own utility, informing them of the trade so they can avoid double-billing and compute wheeling and under-fulfillment charges post delivery. Utilities can independently track and publish trade reliability scores (e.g., Credit score for energy delivery).
 4. **Distributed ledgers**: Each utility maintains its own ledger for its customers only
 5. **Natural collapse**: Same-utility trades collapse to single-discom flow automatically
 
@@ -105,10 +105,10 @@ flowchart LR
 sequenceDiagram
     autonumber
     participant B as Buyer
-    participant BuyerUtility as BuyerUtility / BuyerUtilityLTSP
+    participant BuyerUtility as BuyerUtility / BuyerUtilityLP
     participant BuyerTP as BuyerTP
     participant SellerTP as SellerTP
-    participant SellerUtility as SellerUtility / SellerUtilityLTSP
+    participant SellerUtility as SellerUtility / SellerUtilityLP
     participant S as Seller
 
     rect rgb(230, 245, 255)
@@ -246,67 +246,59 @@ Once both discoms' allocations reach both trading platforms and are relayed to t
 
 ---
 
-## Operating Through a Ledger TSP (LTSP)
+## Operating Through a Ledger TSP (LP)
 
-A **Ledger TSP (LTSP)** is a regulated technical service provider that may act on behalf of a utility for the trade-ledger and fair-allocation functions described above. The LTSP is bound by the network policy to enforce fair allocation, hold the utility's distributed trade ledger, and answer protocol requests on the utility's behalf. **Each utility contracts exactly one LTSP** (for start); two different utilities may contract the **same** LTSP or **different** LTSPs — the protocol does not assume a single shared ledger.
+A **Ledger TSP (LP)** is a regulated technical service provider that may act on behalf of a utility for the trade-ledger and fair-allocation functions described above. The LP is bound by the network policy to enforce fair allocation, hold the utility's distributed trade ledger, and answer protocol requests on the utility's behalf. **Each utility contracts exactly one LP** (for start); two different utilities may contract the **same** LP or **different** LPs — the protocol does not assume a single shared ledger.
 
 ### When the same sequence diagram still holds
 
-For utilities that choose to operate via their LTSP — or where network policy mandates this — the [Overall Process Flow](#overall-process-flow) sequence diagram above applies **unchanged**. The only substitution is at the participant level:
+For utilities that choose to operate via their LP — or where network policy mandates this — the [Overall Process Flow](#overall-process-flow) sequence diagram above applies **unchanged**. The only substitution is at the participant level:
 
-- Wherever `BuyerUtility` appears, the calls are made by `BuyerUtilityLTSP` on behalf of the buyer's utility.
-- Wherever `SellerUtility` appears, the calls are made by `SellerUtilityLTSP` on behalf of the seller's utility.
+- Wherever `BuyerUtility` appears, the calls are made by `BuyerUtilityLP` on behalf of the buyer's utility.
+- Wherever `SellerUtility` appears, the calls are made by `SellerUtilityLP` on behalf of the seller's utility.
 
-Trade ledger writes, limit checks, pro-rata allocation, final adjustment, and settled-qty propagation all execute inside the LTSP — keyed to the utility whose customers are involved. This is why the sequence diagram labels its utility participants as `<Utility> / <Utility>LTSP`: the protocol is identical and only the operator changes.
+Trade ledger writes, limit checks, pro-rata allocation, final adjustment, and settled-qty propagation all execute inside the LP — keyed to the utility whose customers are involved. This is why the sequence diagram labels its utility participants as `<Utility> / <Utility>LP`: the protocol is identical and only the operator changes.
 
-### LTSP as a full Beckn node
+### LP as a full Beckn node
 
-When an LTSP is in the path it acts as a **full-fledged Beckn node** for the utility it represents. Specifically the LTSP:
+When an LP is in the path it acts as a **full-fledged Beckn node** for the utility it represents. Specifically the LP:
 
-- **Receives `/confirm` calls** from the utility's TP (and from BAP/BPP in cascaded flows) and writes the trade into that utility's ledger, deducting from the customer's trading limits per network policy.
+- **Receives `/confirm` calls** from the trading platform (and from BAP/BPP in cascaded flows) and writes the trade into that utility's ledger, deducting from the customer's trading limits per network policy.
 - **Raises cascaded `/status` requests** downstream to the discom's meter/billing systems (e.g., to fetch the actual injection/consumption for a meter-block), and folds the responses back into the protocol flow.
 - **Issues `/on_status` updates** upstream to the TP carrying seller/buyer allocations, the final-adjusted allocation, and the settled qty — exactly as the utility itself would.
 - **Receives `/update` calls** (e.g., scheduled outage / curtailment) from the utility-side and propagates them through the protocol per the diagram above.
-- **Performs the fair pro-rata allocation and final adjustment** per the regulator-approved network policy, so allocation logic is consistent across utilities that share an LTSP and auditable across those that don't.
-
-Because the LTSP carries the protocol surface area, the discom behind it can keep its existing operational systems and integrate over a simpler internal data-exchange interface (meter-block injection/consumption, cancellations, outage notifications) rather than implementing the full Beckn node itself.
+- **Performs the fair pro-rata allocation and final adjustment** per the regulator-approved network policy, so allocation logic is consistent across utilities that share an LP and auditable across those that don't.
 
 ### Multi-ledger topology
 
-Because each utility independently picks an LTSP, real deployments will be a **multi-ledger network**:
+Because each utility independently picks an LP, real deployments will be a **multi-ledger network**:
 
-- **Same LTSP across utilities.** Utility A and Utility B may contract the same LTSP. The LTSP runs **two logically separated ledgers** (one per utility) and behaves as **two distinct Beckn nodes** in the sequence diagram. No data crosses the per-utility partition.
-- **Different LTSPs.** Utility A and Utility B may contract different LTSPs. Each LTSP runs its own utility's ledger, and the cross-utility hops in the sequence diagram cross an **LTSP-to-LTSP boundary** (one LTSP acts as `BuyerUtilityLTSP`, the other as `SellerUtilityLTSP`).
-- **Mixed.** Some utilities may run their own ledger and others may delegate to an LTSP — the sequence diagram still holds because each utility's participant slot is filled by whichever entity is operating that utility's ledger.
+- **Same LP across utilities.** Utility A and Utility B may contract the same LP. The LP runs **two logically separated ledgers** (one per utility) and behaves as **two distinct Beckn nodes** in the sequence diagram. No data crosses the per-utility partition.
+- **Different LPs.** Utility A and Utility B may contract different LPs. Each LP runs its own utility's ledger, and the cross-utility hops in the sequence diagram cross an **LP-to-LP boundary** (one LP acts as `BuyerUtilityLP`, the other as `SellerUtilityLP`).
+- **Mixed.** Some utilities may run their own ledger and others may delegate to an LP — the sequence diagram still holds because each utility's participant slot is filled by whichever entity is operating that utility's ledger.
 
-The decentralized base-protocol design guarantees this works: trades and limits are partitioned per utility, so adding, removing, or swapping an LTSP is local to a single utility and never requires global reconciliation.
+The decentralized base-protocol design guarantees this works: trades and limits are partitioned per utility, so adding, removing, or swapping an LP is local to a single utility and never requires global reconciliation.
 
 ### Reference architecture
 
-The block diagram below summarises the LTSP-mediated topology — sourced from *Final P2P Ledger and Allocation Architecture* (Pramod Varma, 15 April 2025).
+The block diagram below summarises the LP-mediated topology — sourced from *Final P2P Ledger and Allocation Architecture* (Pramod Varma, 15 April 2025).
 
 ```mermaid
 flowchart TB
-    subgraph TPs[" "]
-        direction LR
-        TAc["Trading App<br/>(consumer side)"] <-->|"Transaction protocol<br/>(order confirmation)"| TAp["Trading App<br/>(prosumer side)"]
-    end
-    LTSP["Trade Ledger Provider (LTSP)<br/><i>allocation logic lives here</i>"]
+    TAc["Trading App<br/>(consumer side)"] <-->|"Transaction protocol<br/>(order confirmation)"| TAp["Trading App<br/>(prosumer side)"]
+    LP["Trade Ledger Provider (LP)<br/><i>allocation logic lives here</i>"]
     Dc["Discom<br/>(consumer)"]
     Dp["Discom<br/>(prosumer)"]
-
-    TAc <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
-    TAp <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
-    LTSP <-->|"Data Exchange protocol"| Dc
-    LTSP <-->|"Data Exchange protocol"| Dp
-
-    style TPs fill:none,stroke:none
+    TAc <-->|"Transaction protocol<br/>(order fulfillment)"| LP
+    TAp <-->|"Transaction protocol<br/>(order fulfillment)"| LP
+    LP <-->|"Data Exchange protocol"| Dc
+    LP <-->|"Data Exchange protocol"| Dp
 ```
 
 **Reading the diagram:**
 
 - **Trading apps** speak the Beckn **transaction protocol (order confirmation)** directly to each other — price, contract, settled-qty exchange. This is the row labelled "TP-to-TP" in the sequence diagram above.
-- **Each trading app** speaks the Beckn **transaction protocol (order fulfillment)** to its utility's LTSP — limit checks, trade logging, allocation reporting, settled-qty relay. This is the row labelled "TP-to-utility" in the sequence diagram above.
-- **Each LTSP** speaks a simpler **data-exchange protocol** to its utility's discom backend — meter-block injection/consumption pulls, cancellations, outage notifications. This corresponds to the cascaded `/status` and `/update` flows that the LTSP performs on the utility's behalf.
+- **Each trading app** speaks the Beckn **transaction protocol (order fulfillment)** to its utility's LP — limit checks, trade logging, allocation reporting, settled-qty relay. This is the row labelled "TP-to-utility" in the sequence diagram above.
+- **Each LP** speaks a simpler **data-exchange protocol** to its utility's discom backend — meter-block injection/consumption pulls, cancellations, outage notifications. This corresponds to the cascaded `/status` and `/update` flows that the LP performs on the utility's behalf.
 
-**Why this matters:** allocation logic moves to the LTSP layer — consistent across utilities that share an LTSP, regulator-auditable across those that don't, and simple to integrate for discoms that keep their existing internal stack. The architecture begins with one LTSP per utility, but the partitioned design preserves the option to scale to **multiple LTSPs per network** without changes to the underlying protocol.
+**Why this matters:** allocation logic moves to the LP layer — consistent across utilities that share an LP, regulator-auditable across those that don't, and simple to integrate for discoms that keep their existing internal stack. The architecture begins with one LP per utility, but the partitioned design preserves the option to scale to **multiple LPs per network** without changes to the underlying protocol.
