@@ -287,8 +287,11 @@ The block diagram below summarises the LTSP-mediated topology — sourced from *
 
 ```mermaid
 flowchart TB
-    TAc["Trading App<br/>(consumer side)"]
-    TAp["Trading App<br/>(prosumer side)"]
+    subgraph TPs[" "]
+        direction LR
+        TAc["Trading App<br/>(consumer side)"]
+        TAp["Trading App<br/>(prosumer side)"]
+    end
     LTSP["Trade Ledger Provider (LTSP)<br/><i>allocation logic lives here</i>"]
     Dc["Discom<br/>(consumer)"]
     Dp["Discom<br/>(prosumer)"]
@@ -298,6 +301,8 @@ flowchart TB
     TAp <-->|"Transaction protocol<br/>(order fulfillment)"| LTSP
     LTSP <-->|"Data Exchange protocol"| Dc
     LTSP <-->|"Data Exchange protocol"| Dp
+
+    style TPs fill:none,stroke:none
 ```
 
 **Reading the diagram:**
