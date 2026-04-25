@@ -34,14 +34,14 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 |---|-------|------|------------|
 | 1 | **BuyerTP** | Consumer's trading platform | BAP when requesting, BPP when responding |
 | 2 | **SellerTP** | Producer's trading platform | BAP when requesting, BPP when responding |
-| 3 | **BuyerUtility / BuyerUtilityLP** | Buyer's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LP)** | BAP when requesting, BPP when responding |
-| 4 | **SellerUtility / SellerUtilityLP** | Seller's energy retailer/distribution company, optionally acting through its contracted **Ledger TSP (LP)** | BAP when requesting, BPP when responding |
+| 3 | **BuyerUtility / BuyerUtilityLP** | Buyer's energy retailer/distribution company, optionally acting through its contracted **Ledger Provider (LP)** | BAP when requesting, BPP when responding |
+| 4 | **SellerUtility / SellerUtilityLP** | Seller's energy retailer/distribution company, optionally acting through its contracted **Ledger Provider (LP)** | BAP when requesting, BPP when responding |
 | 5 | **Buyer** | Energy consumer in P2P trade | End user |
 | 6 | **Seller** | Energy producer in P2P trade | End user |
 
 > **Note:** When buyer and seller are with the **same utility**, the flow simplifies naturally - BuyerUtility and SellerUtility collapse into a single entity, reducing the number of hops while maintaining the same protocol structure.
 
-> **Note on LP (Ledger TSP):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LP` because the same flow applies whether the utility runs the ledger itself or delegates to its LP. See [§ Operating Through a Ledger TSP (LP)](#operating-through-a-ledger-tsp-LP) for the LP-mediated topology.
+> **Note on LP (Ledger Service Provider):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LP` because the same flow applies whether the utility runs the ledger itself or delegates to its LP. See [§ Operating Through a Ledger TSP (LP)](#operating-through-a-ledger-tsp-LP) for the LP-mediated topology.
 
 ---
 
@@ -246,7 +246,7 @@ Once both discoms' allocations reach both trading platforms and are relayed to t
 
 ---
 
-## Operating Through a Ledger TSP (LP)
+## Operating Through a Ledger Service Provider (LP)
 
 A **Ledger TSP (LP)** is a regulated technical service provider that may act on behalf of a utility for the trade-ledger and fair-allocation functions described above. The LP is bound by the network policy to enforce fair allocation, hold the utility's distributed trade ledger, and answer protocol requests on the utility's behalf. **Each utility contracts exactly one LP** (for start); two different utilities may contract the **same** LP or **different** LPs — the protocol does not assume a single shared ledger.
 
@@ -303,6 +303,6 @@ flowchart TB
 
 - **Trading apps** speak the Beckn **transaction protocol (order confirmation)** directly to each other — price, contract, settled-qty exchange. This is the row labelled "TP-to-TP" in the sequence diagram above.
 - **Each trading app** speaks the Beckn **transaction protocol (order fulfillment)** to its utility's LP — limit checks, trade logging, allocation reporting, settled-qty relay. This is the row labelled "TP-to-utility" in the sequence diagram above.
-- **Each LP** speaks a simpler **data-exchange protocol** to its utility's discom backend — meter-block injection/consumption pulls, cancellations, outage notifications. This corresponds to the cascaded `/status` and `/update` flows that the LP performs on the utility's behalf.
+- **Each discom** sends meter data to Ledger provider  over beckn protocol, as a data-exchange use case, and receives allocation data back.
 
 **Why this matters:** allocation logic moves to the LP layer — consistent across utilities that share an LP, regulator-auditable across those that don't, and simple to integrate for discoms that keep their existing internal stack. The architecture begins with one LP per utility, but the partitioned design preserves the option to scale to **multiple LPs per network** without changes to the underlying protocol.
