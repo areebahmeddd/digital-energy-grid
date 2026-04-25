@@ -1,0 +1,57 @@
+$id: "https://schema.beckn.io/EnergyOrderItem/v0.3"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyOrderItem
+description: >
+  Order item attributes for P2P energy trading. Wraps customer information
+  and optional fulfillment tracking data. Use this schema for
+  beckn:orderItemAttributes in P2P energy trading flows.
+
+  This is the v0.3 schema, originally defined as a component in EnergyTrade/v0.3/attributes.yaml.
+x-tags:
+  - energy-trade
+  - p2p-trading
+  - order-item
+type: object
+additionalProperties: false
+required:
+  - providerAttributes
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyOrderItem
+properties:
+
+  providerAttributes:
+    type: object
+    description: >
+      Provider/customer information for this order item, including meter ID and utility account.
+    additionalProperties: true
+    properties:
+      "@context":
+        type: string
+        format: uri
+        description: URI to the EnergyCustomer context.jsonld
+      "@type":
+        type: string
+        enum: ["EnergyCustomer"]
+        description: Type identifier for provider attributes
+    x-jsonld:
+      "@id": providerAttributes
+
+  fulfillmentAttributes:
+    type: object
+    description: >
+      Optional fulfillment tracking for this order item.
+      Only populated in on_status and on_update responses (not in init/confirm flows).
+      Contains delivery status, meter readings, and energy allocation data.
+    additionalProperties: true
+    properties:
+      "@context":
+        type: string
+        format: uri
+        description: URI to the EnergyTradeDelivery context.jsonld
+      "@type":
+        type: string
+        enum: ["EnergyTradeDelivery"]
+        description: Type identifier for fulfillment attributes
+    x-jsonld:
+      "@id": fulfillmentAttributes

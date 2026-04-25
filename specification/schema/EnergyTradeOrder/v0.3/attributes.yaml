@@ -1,0 +1,54 @@
+$id: "https://schema.beckn.io/EnergyTradeOrder/v0.3"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyTradeOrder
+description: >
+  Order attributes for P2P energy trading. Attached to Order.orderAttributes
+  to identify BAP and BPP participants involved in a trade.
+  NOTE: Utility IDs for inter-discom trading are captured in EnergyCustomer
+  (buyerAttributes.utilityId and providerAttributes.utilityId).
+
+  This is the v0.3 schema, originally defined as a component in EnergyTrade/v0.3/attributes.yaml.
+x-tags:
+  - energy-trade
+  - p2p-trading
+  - order
+type: object
+additionalProperties: false
+required: [bap_id, bpp_id]
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyTradeOrder
+properties:
+
+  bap_id:
+    type: string
+    description: Beckn Application Platform (BAP) identifier. The subscriber ID of the buyer/consumer platform initiating the trade order.
+    example: "bap.energymarket.io"
+    x-jsonld:
+      "@id": bap_id
+
+  bpp_id:
+    type: string
+    description: Beckn Provider Platform (BPP) identifier. The subscriber ID of the seller/provider platform fulfilling the trade order.
+    example: "bpp.solarprovider.io"
+    x-jsonld:
+      "@id": bpp_id
+
+  total_quantity:
+    description: >
+      Total quantity of energy for this trade order. Units should be in kWh.
+    example:
+      unitQuantity: 50.0
+      unitText: "kWh"
+      unitCode: "KWH"
+    x-jsonld:
+      "@id": total_quantity
+    allOf:
+      - $ref: "https://schema.beckn.io/Quantity/v2.0"
+      - type: object
+        description: Total energy quantity in kWh.
+        properties:
+          unitText:
+            default: "kWh"
+          unitCode:
+            default: "KWH"

@@ -1,0 +1,105 @@
+$id: "https://schema.beckn.io/GenerationProfileCredential/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: GenerationProfileCredential
+description: >
+  Verifiable Credential for DER (Distributed Energy Resource) generation
+  capability. Issued by distribution utilities to prosumers with solar, wind,
+  micro-hydro, or other generation assets. GenerationProfileCredential is a
+  subclass of EnergyCredential.
+
+  The credential subject captures generation-specific attributes including
+  generation type, installed capacity in kW, and commissioning date.
+x-tags:
+  - energy
+  - credential
+  - verifiable-credential
+  - generation
+  - der
+type: object
+additionalProperties: true
+allOf:
+  - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": GenerationProfileCredential
+properties:
+
+  credentialSubject:
+    description: >
+      The credential subject containing DER generation capability
+      characteristics.
+    x-jsonld:
+      "@id": deg:credentialSubject
+    type: object
+    required:
+      - id
+      - consumerNumber
+      - generationType
+      - capacityKW
+      - commissioningDate
+    properties:
+      id:
+        type: string
+        format: uri
+        description: DID of the customer/credential subject (links to customer).
+        x-jsonld:
+          "@id": "@id"
+      consumerNumber:
+        type: string
+        minLength: 1
+        description: Consumer account number assigned by the utility.
+        x-jsonld:
+          "@id": deg:consumerNumber
+      fullName:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Consumer name (optional).
+        x-jsonld:
+          "@id": "schema:name"
+      meterNumber:
+        type: string
+        minLength: 1
+        maxLength: 50
+        description: Meter serial number associated with this generation asset (optional).
+        x-jsonld:
+          "@id": deg:meterNumber
+      assetId:
+        type: string
+        minLength: 1
+        description: Unique identifier for the generation asset (optional, useful when customer has multiple DERs).
+        x-jsonld:
+          "@id": deg:assetId
+      generationType:
+        type: string
+        enum: [Solar, Wind, MicroHydro, Other]
+        description: Type of distributed energy generation.
+        x-jsonld:
+          "@id": deg:generationType
+      capacityKW:
+        type: number
+        minimum: 0.1
+        maximum: 10000
+        description: Installed generation capacity in kilowatts (kW).
+        x-jsonld:
+          "@id": deg:capacityKW
+      commissioningDate:
+        type: string
+        format: date
+        description: Date when the generation system was activated.
+        x-jsonld:
+          "@id": deg:commissioningDate
+      manufacturer:
+        type: string
+        minLength: 1
+        maxLength: 200
+        description: Equipment manufacturer (optional).
+        x-jsonld:
+          "@id": "schema:manufacturer"
+      modelNumber:
+        type: string
+        minLength: 1
+        maxLength: 100
+        description: Equipment model number (optional).
+        x-jsonld:
+          "@id": "schema:model"

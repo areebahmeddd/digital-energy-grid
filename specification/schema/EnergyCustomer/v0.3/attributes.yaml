@@ -1,0 +1,62 @@
+$id: "https://schema.beckn.io/EnergyCustomer/v0.3"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyCustomer
+description: >
+  Customer attributes for energy flows. Used for consumers, producers, or prosumers in:
+  - orderItemAttributes (init request): Contains meterId for delivery destination
+  - orderItemAttributes (responses): Contains meterId for delivery destination
+  - buyerAttributes (enrollment): Contains meterId and sanctionedLoad for customer identification
+
+  This is the v0.3 schema, originally defined as a component in EnergyTrade/v0.3/attributes.yaml.
+x-tags:
+  - energy-trade
+  - p2p-trading
+  - energy-enrollment
+  - customer
+type: object
+additionalProperties: false
+required: ["meterId"]
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyCustomer
+properties:
+
+  meterId:
+    type: string
+    description: >
+      Meter identifier in DER address format (der://meter/{id}). Used for customer identification
+      and energy delivery tracking in P2P trading flows.
+    example: "der://meter/98765456"
+    x-jsonld:
+      "@id": meterId
+
+  sanctionedLoad:
+    type: number
+    minimum: 0
+    description: >
+      Sanctioned load capacity in kilowatts (kW). Optional field representing the approved
+      electrical load capacity for the customer's connection. Used for load management and
+      regulatory compliance.
+    example: 15.0
+    x-jsonld:
+      "@id": sanctionedLoad
+
+  utilityCustomerId:
+    type: string
+    description: >
+      Customer's account identifier with the utility company (e.g., PG&E customer number).
+      Used for billing, service identification, and utility system integration.
+    example: "UTIL-CUST-123456"
+    x-jsonld:
+      "@id": utilityCustomerId
+
+  utilityId:
+    type: string
+    description: >
+      Utility/DISCOM identifier for the customer's service territory (e.g., "TPDDL-DL", "BESCOM-KA").
+      Used in inter-utility/inter-DISCOM P2P trading to identify which utility serves this customer.
+      Should match the corresponding utilityIdSeller or utilityIdBuyer in orderAttributes for
+      cross-utility transactions.
+    example: "TPDDL-DL"
+    x-jsonld:
+      "@id": utilityId

@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyCustomer/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyCustomer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Customer",
+      "rdfs:comment": "Customer attributes for energy flows, attached to Buyer.buyerAttributes or Provider.providerAttributes."
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID",
+      "rdfs:comment": "Meter identifier in DER address format (der://meter/{id}).",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:sanctionedLoad",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load",
+      "rdfs:comment": "Sanctioned load capacity in kilowatts (kW).",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:utilityCustomerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility customer ID",
+      "rdfs:comment": "Customer's account identifier with the utility company.",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:utilityId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID",
+      "rdfs:comment": "Utility/DISCOM identifier for the customer's service territory.",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "rdfs:range": "xsd:string"
+    }
+  ]
+}

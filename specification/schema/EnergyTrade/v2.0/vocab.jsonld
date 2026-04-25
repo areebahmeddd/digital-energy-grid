@@ -1,0 +1,398 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyTrade/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyTrade",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade",
+      "rdfs:comment": "Deprecated. A subclass of beckn:Contract for P2P energy trading. Superseded by deg:P2PTrade.",
+      "rdfs:subClassOf": { "@id": "beckn:Contract" },
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTrade" }
+    },
+    {
+      "@id": "deg:EnergyTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Offer",
+      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes."
+    },
+    {
+      "@id": "deg:EnergyTradeDelivery",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Delivery",
+      "rdfs:comment": "Fulfillment attributes for energy trade deliveries, attached to orderItemAttributes.fulfillmentAttributes."
+    },
+    {
+      "@id": "deg:EnergyResource",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource",
+      "rdfs:comment": "Item attributes for energy resources, attached to Item.itemAttributes."
+    },
+    {
+      "@id": "deg:EnergyCustomer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Customer",
+      "rdfs:comment": "Customer attributes for energy flows, attached to Buyer.buyerAttributes or Provider.providerAttributes."
+    },
+    {
+      "@id": "deg:EnergyOrderItem",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Order Item",
+      "rdfs:comment": "Order item attributes wrapper for P2P energy trading, attached to beckn:orderItemAttributes."
+    },
+    {
+      "@id": "deg:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift",
+      "rdfs:comment": "Gift parameters for P2P energy gifting, enabling prosumers to gift energy to specific recipients via privacy-preserving discovery and secret-based claim verification."
+    },
+    {
+      "@id": "deg:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model",
+      "rdfs:comment": "Pricing model classification (PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED).",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "deg:PricingModel"
+    },
+    {
+      "@id": "deg:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window",
+      "rdfs:comment": "Time window when the offer can be selected/accepted.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "deg:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window",
+      "rdfs:comment": "Specific time period when energy delivery occurs.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "schema:TimePeriod"
+    },
+    {
+      "@id": "deg:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift",
+      "rdfs:comment": "Optional gift parameters for energy gifting on this offer.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": "deg:EnergyGift"
+    },
+    {
+      "@id": "deg:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash",
+      "rdfs:comment": "SHA-256 hash of the recipient's phone number (E.164 format) for privacy-preserving gift discovery.",
+      "rdfs:domain": "deg:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier",
+      "rdfs:comment": "SHA-256 hash of a claim secret shared out-of-band from gifter to recipient for gift claim validation.",
+      "rdfs:domain": "deg:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at",
+      "rdfs:comment": "Gift expiration timestamp in UTC (ISO 8601 with Z suffix).",
+      "rdfs:domain": "deg:EnergyGift",
+      "rdfs:range": "xsd:dateTime"
+    },
+    {
+      "@id": "deg:deliveryStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery status",
+      "rdfs:comment": "Delivery status for the energy transfer (PENDING, IN_PROGRESS, COMPLETED, FAILED).",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": "deg:DeliveryStatus"
+    },
+    {
+      "@id": "deg:deliveryMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery mode",
+      "rdfs:comment": "Mode of energy delivery (EV_CHARGING, BATTERY_SWAP, V2G, GRID_INJECTION).",
+      "schema:rangeIncludes": "deg:DeliveryMode"
+    },
+    {
+      "@id": "deg:deliveredQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivered quantity",
+      "rdfs:comment": "Total quantity delivered so far in kilowatt-hours (kWh).",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:meterReadings",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter readings",
+      "rdfs:comment": "Array of meter readings for this orderItem.",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:ItemList"
+    },
+    {
+      "@id": "deg:consumedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumed energy",
+      "rdfs:comment": "Energy consumed by the customer (imported from grid) in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:producedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Produced energy",
+      "rdfs:comment": "Energy produced by the customer (exported to grid) in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:allocatedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Allocated energy",
+      "rdfs:comment": "Net energy allocated for this trade in kWh.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:curtailedQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailed quantity",
+      "rdfs:comment": "Quantity curtailed from original contracted amount (kWh).",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:curtailmentReason",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailment reason",
+      "rdfs:comment": "Reason for curtailment (GRID_OUTAGE, EMERGENCY, CONGESTION, MAINTENANCE, OTHER).",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": "deg:CurtailmentReason"
+    },
+    {
+      "@id": "deg:sourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Source type",
+      "rdfs:comment": "Type of energy source (SOLAR, BATTERY, GRID, HYBRID, RENEWABLE).",
+      "rdfs:domain": "deg:EnergyResource",
+      "schema:rangeIncludes": "deg:SourceType"
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID",
+      "rdfs:comment": "Meter identifier in DER address format (der://meter/{id}).",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:sanctionedLoad",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load",
+      "rdfs:comment": "Sanctioned load capacity in kilowatts (kW).",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:utilityCustomerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility customer ID",
+      "rdfs:comment": "Customer's account identifier with the utility company.",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:utilityId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID",
+      "rdfs:comment": "Utility/DISCOM identifier for the customer's service territory.",
+      "rdfs:domain": "deg:EnergyCustomer",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:providerAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Provider attributes",
+      "rdfs:comment": "Provider/customer information for this order item.",
+      "rdfs:domain": "deg:EnergyOrderItem"
+    },
+    {
+      "@id": "deg:fulfillmentAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Fulfillment attributes",
+      "rdfs:comment": "Optional fulfillment tracking for this order item.",
+      "rdfs:domain": "deg:EnergyOrderItem"
+    },
+    {
+      "@id": "deg:PricingModel",
+      "@type": "schema:Enumeration",
+      "schema:name": "Pricing Model",
+      "rdfs:comment": "Enumeration of supported pricing models for energy trade offers."
+    },
+    {
+      "@id": "deg:PricingModelPerKwh",
+      "@type": "deg:PricingModel",
+      "schema:name": "PER_KWH",
+      "schema:identifier": "PER_KWH"
+    },
+    {
+      "@id": "deg:PricingModelTimeOfDay",
+      "@type": "deg:PricingModel",
+      "schema:name": "TIME_OF_DAY",
+      "schema:identifier": "TIME_OF_DAY"
+    },
+    {
+      "@id": "deg:PricingModelSubscription",
+      "@type": "deg:PricingModel",
+      "schema:name": "SUBSCRIPTION",
+      "schema:identifier": "SUBSCRIPTION"
+    },
+    {
+      "@id": "deg:PricingModelFixed",
+      "@type": "deg:PricingModel",
+      "schema:name": "FIXED",
+      "schema:identifier": "FIXED"
+    },
+    {
+      "@id": "deg:DeliveryStatus",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Status",
+      "rdfs:comment": "Enumeration of delivery statuses."
+    },
+    {
+      "@id": "deg:DeliveryStatusPending",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "PENDING",
+      "schema:identifier": "PENDING"
+    },
+    {
+      "@id": "deg:DeliveryStatusInProgress",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "IN_PROGRESS",
+      "schema:identifier": "IN_PROGRESS"
+    },
+    {
+      "@id": "deg:DeliveryStatusCompleted",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "COMPLETED",
+      "schema:identifier": "COMPLETED"
+    },
+    {
+      "@id": "deg:DeliveryStatusFailed",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "FAILED",
+      "schema:identifier": "FAILED"
+    },
+    {
+      "@id": "deg:DeliveryMode",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Mode",
+      "rdfs:comment": "Enumeration of energy delivery modes."
+    },
+    {
+      "@id": "deg:DeliveryModeEvCharging",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "EV_CHARGING",
+      "schema:identifier": "EV_CHARGING"
+    },
+    {
+      "@id": "deg:DeliveryModeBatterySwap",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "BATTERY_SWAP",
+      "schema:identifier": "BATTERY_SWAP"
+    },
+    {
+      "@id": "deg:DeliveryModeV2G",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "V2G",
+      "schema:identifier": "V2G"
+    },
+    {
+      "@id": "deg:DeliveryModeGridInjection",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "GRID_INJECTION",
+      "schema:identifier": "GRID_INJECTION"
+    },
+    {
+      "@id": "deg:SourceType",
+      "@type": "schema:Enumeration",
+      "schema:name": "Source Type",
+      "rdfs:comment": "Enumeration of energy source types."
+    },
+    {
+      "@id": "deg:SourceTypeSolar",
+      "@type": "deg:SourceType",
+      "schema:name": "SOLAR",
+      "schema:identifier": "SOLAR"
+    },
+    {
+      "@id": "deg:SourceTypeBattery",
+      "@type": "deg:SourceType",
+      "schema:name": "BATTERY",
+      "schema:identifier": "BATTERY"
+    },
+    {
+      "@id": "deg:SourceTypeGrid",
+      "@type": "deg:SourceType",
+      "schema:name": "GRID",
+      "schema:identifier": "GRID"
+    },
+    {
+      "@id": "deg:SourceTypeHybrid",
+      "@type": "deg:SourceType",
+      "schema:name": "HYBRID",
+      "schema:identifier": "HYBRID"
+    },
+    {
+      "@id": "deg:SourceTypeRenewable",
+      "@type": "deg:SourceType",
+      "schema:name": "RENEWABLE",
+      "schema:identifier": "RENEWABLE"
+    },
+    {
+      "@id": "deg:CurtailmentReason",
+      "@type": "schema:Enumeration",
+      "schema:name": "Curtailment Reason",
+      "rdfs:comment": "Enumeration of reasons for energy curtailment."
+    },
+    {
+      "@id": "deg:CurtailmentReasonGridOutage",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "GRID_OUTAGE",
+      "schema:identifier": "GRID_OUTAGE"
+    },
+    {
+      "@id": "deg:CurtailmentReasonEmergency",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "EMERGENCY",
+      "schema:identifier": "EMERGENCY"
+    },
+    {
+      "@id": "deg:CurtailmentReasonCongestion",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "CONGESTION",
+      "schema:identifier": "CONGESTION"
+    },
+    {
+      "@id": "deg:CurtailmentReasonMaintenance",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "MAINTENANCE",
+      "schema:identifier": "MAINTENANCE"
+    },
+    {
+      "@id": "deg:CurtailmentReasonOther",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "OTHER",
+      "schema:identifier": "OTHER"
+    }
+  ]
+}

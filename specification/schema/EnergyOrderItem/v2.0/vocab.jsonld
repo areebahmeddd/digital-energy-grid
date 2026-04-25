@@ -1,0 +1,33 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyOrderItem/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyOrderItem",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Order Item",
+      "rdfs:comment": "Order item attributes wrapper for P2P energy trading, attached to beckn:orderItemAttributes."
+    },
+    {
+      "@id": "deg:providerAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Provider attributes",
+      "rdfs:comment": "Provider/customer information for this order item.",
+      "rdfs:domain": "deg:EnergyOrderItem"
+    },
+    {
+      "@id": "deg:fulfillmentAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Fulfillment attributes",
+      "rdfs:comment": "Optional fulfillment tracking for this order item.",
+      "rdfs:domain": "deg:EnergyOrderItem"
+    }
+  ]
+}

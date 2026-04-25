@@ -1,0 +1,45 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/ProgramEnrollmentCredential/v2.0/",
+    "energyCred": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:ProgramEnrollmentCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Program Enrollment Credential",
+      "rdfs:comment": "Verifiable Credential for energy program enrollment. Subclass of EnergyCredential.",
+      "rdfs:subClassOf": { "@id": "energyCred:EnergyCredential" }
+    },
+    {
+      "@id": "deg:programName",
+      "@type": "rdf:Property",
+      "rdfs:label": "Program name",
+      "rdfs:comment": "Human-readable name of the energy program (e.g., Peer-to-Peer Energy Trading).",
+      "rdfs:domain": "deg:ProgramEnrollmentCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:programCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Program code",
+      "rdfs:comment": "Unique program identifier code assigned by the utility.",
+      "rdfs:domain": "deg:ProgramEnrollmentCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:enrollmentDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Enrollment date",
+      "rdfs:comment": "Date when the consumer enrolled in the energy program.",
+      "rdfs:domain": "deg:ProgramEnrollmentCredential",
+      "schema:rangeIncludes": { "@id": "xsd:date" }
+    }
+  ]
+}

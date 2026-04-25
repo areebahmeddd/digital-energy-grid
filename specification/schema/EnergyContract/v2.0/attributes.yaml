@@ -1,0 +1,22 @@
+$id: "https://schema.beckn.io/EnergyContract/v2.0"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: EnergyContract
+description: >
+  EnergyContract is a subclass of beckn:Contract representing energy-specific
+  contracts on the DEG (Digital Energy Grid) network. It serves as a semantic
+  subclass marker for energy contracts and is the parent of P2PTrade and other
+  DEG energy contract types.
+
+  This schema introduces no additional properties beyond those inherited from
+  beckn:Contract. Domain-specific properties are defined in concrete subclass
+  schemas (e.g., P2PTrade).
+x-tags:
+  - energy
+  - contract
+type: object
+additionalProperties: false
+allOf:
+  - $ref: "https://schema.beckn.io/Contract/v2.0"
+x-jsonld:
+  "@context": ./context.jsonld
+  "@type": EnergyContract

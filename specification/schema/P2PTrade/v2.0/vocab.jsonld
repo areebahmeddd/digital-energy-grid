@@ -1,0 +1,1041 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/P2PTrade/v2.0/",
+    "degLegacy": "https://schema.beckn.io/deg/EnergyTrade/v2.0/",
+    "becknLegacy": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/schema/EnergyTrade/v0.3/#",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "@graph": [
+
+    {
+      "@id": "deg:P2PTrade",
+      "@type": "rdfs:Class",
+      "rdfs:label": "P2P Trade",
+      "rdfs:comment": "A Peer-to-Peer energy trading contract on the DEG network. Subclass of deg:EnergyContract (which is a subclass of beckn:Contract). Successor to the deprecated deg:EnergyTrade.",
+      "rdfs:subClassOf": { "@id": "deg:EnergyContract" }
+    },
+    {
+      "@id": "deg:P2PTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "P2P Trade Offer",
+      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes. Successor to the deprecated deg:EnergyTradeOffer."
+    },
+    {
+      "@id": "deg:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift",
+      "rdfs:comment": "Gift parameters for P2P energy gifting, enabling prosumers to gift energy to specific recipients via privacy-preserving discovery and secret-based claim verification."
+    },
+    {
+      "@id": "deg:P2PTradeOrder",
+      "@type": "rdfs:Class",
+      "rdfs:label": "P2P Trade Order",
+      "rdfs:comment": "Contract attributes for P2P energy trading, attached to Contract.orderAttributes. Successor to the deprecated deg:EnergyTradeOrder."
+    },
+    {
+      "@id": "deg:P2PTradeOrderInterUtility",
+      "@type": "rdfs:Class",
+      "rdfs:subClassOf": { "@id": "deg:P2PTradeOrder" },
+      "rdfs:label": "P2P Trade Order Inter-Utility",
+      "rdfs:comment": "Extended contract attributes for inter-utility (inter-discom) P2P trading. Successor to the deprecated deg:EnergyTradeOrderInterUtility."
+    },
+    {
+      "@id": "deg:P2PTradeDelivery",
+      "@type": "rdfs:Class",
+      "rdfs:label": "P2P Trade Delivery",
+      "rdfs:comment": "Fulfillment attributes for P2P energy trade deliveries, attached to orderItemAttributes.fulfillmentAttributes. Successor to the deprecated deg:EnergyTradeDelivery."
+    },
+    {
+      "@id": "deg:EnergyResource",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource",
+      "rdfs:comment": "Item attributes for energy resources, attached to Item.itemAttributes."
+    },
+    {
+      "@id": "deg:EnergyCustomer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Customer",
+      "rdfs:comment": "Customer attributes for energy flows, attached to Buyer.buyerAttributes or Provider.providerAttributes."
+    },
+    {
+      "@id": "deg:P2POrderItem",
+      "@type": "rdfs:Class",
+      "rdfs:label": "P2P Order Item",
+      "rdfs:comment": "Order item attributes wrapper for P2P energy trading, attached to beckn:orderItemAttributes. Successor to the deprecated deg:EnergyOrderItem."
+    },
+
+    {
+      "@id": "deg:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model",
+      "rdfs:comment": "Pricing model classification (PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED).",
+      "rdfs:domain": { "@id": "deg:P2PTradeOffer" },
+      "schema:rangeIncludes": { "@id": "deg:PricingModel" }
+    },
+    {
+      "@id": "deg:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window",
+      "rdfs:comment": "Time window when the offer can be selected/accepted.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOffer" },
+      "schema:rangeIncludes": { "@id": "schema:TimePeriod" }
+    },
+    {
+      "@id": "deg:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window",
+      "rdfs:comment": "Specific time period when energy delivery occurs.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOffer" },
+      "schema:rangeIncludes": { "@id": "schema:TimePeriod" }
+    },
+    {
+      "@id": "deg:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift",
+      "rdfs:comment": "Optional gift parameters for energy gifting on this offer.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOffer" },
+      "schema:rangeIncludes": { "@id": "deg:EnergyGift" }
+    },
+    {
+      "@id": "deg:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash",
+      "rdfs:comment": "SHA-256 hash of the recipient's phone number (E.164 format) for privacy-preserving gift discovery.",
+      "rdfs:domain": { "@id": "deg:EnergyGift" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier",
+      "rdfs:comment": "SHA-256 hash of a claim secret shared out-of-band from gifter to recipient for gift claim validation.",
+      "rdfs:domain": { "@id": "deg:EnergyGift" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at",
+      "rdfs:comment": "Gift expiration timestamp in UTC (ISO 8601 with Z suffix).",
+      "rdfs:domain": { "@id": "deg:EnergyGift" },
+      "rdfs:range": { "@id": "xsd:dateTime" }
+    },
+    {
+      "@id": "deg:bap_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BAP ID",
+      "rdfs:comment": "Beckn Application Platform (BAP) identifier.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOrder" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:bpp_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BPP ID",
+      "rdfs:comment": "Beckn Provider Platform (BPP) identifier.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOrder" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:total_quantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Total quantity",
+      "rdfs:comment": "Total quantity of energy in kilowatt-hours (kWh) for this trade contract.",
+      "rdfs:domain": { "@id": "deg:P2PTradeOrder" },
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:utilityIdBuyer",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Buyer",
+      "rdfs:comment": "Identifier of the buyer-side utility/distribution company (discom).",
+      "rdfs:domain": { "@id": "deg:P2PTradeOrderInterUtility" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:utilityIdSeller",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Seller",
+      "rdfs:comment": "Identifier of the seller-side utility/distribution company (discom).",
+      "rdfs:domain": { "@id": "deg:P2PTradeOrderInterUtility" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:deliveryStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery status",
+      "rdfs:comment": "Delivery status for the energy transfer (PENDING, IN_PROGRESS, COMPLETED, FAILED).",
+      "rdfs:domain": { "@id": "deg:P2PTradeDelivery" },
+      "schema:rangeIncludes": { "@id": "deg:DeliveryStatus" }
+    },
+    {
+      "@id": "deg:deliveryMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery mode",
+      "rdfs:comment": "Mode of energy delivery (EV_CHARGING, BATTERY_SWAP, V2G, GRID_INJECTION).",
+      "schema:rangeIncludes": { "@id": "deg:DeliveryMode" }
+    },
+    {
+      "@id": "deg:deliveredQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivered quantity",
+      "rdfs:comment": "Total quantity delivered so far in kilowatt-hours (kWh).",
+      "rdfs:domain": { "@id": "deg:P2PTradeDelivery" },
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:meterReadings",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter readings",
+      "rdfs:comment": "Array of meter readings for this orderItem.",
+      "rdfs:domain": { "@id": "deg:P2PTradeDelivery" },
+      "schema:rangeIncludes": { "@id": "schema:ItemList" }
+    },
+    {
+      "@id": "deg:consumedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumed energy",
+      "rdfs:comment": "Energy consumed by the customer (imported from grid) in kWh.",
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:producedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Produced energy",
+      "rdfs:comment": "Energy produced by the customer (exported to grid) in kWh.",
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:allocatedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Allocated energy",
+      "rdfs:comment": "Net energy allocated for this trade in kWh.",
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:curtailedQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailed quantity",
+      "rdfs:comment": "Quantity curtailed from original contracted amount (kWh).",
+      "rdfs:domain": { "@id": "deg:P2PTradeDelivery" },
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:curtailmentReason",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailment reason",
+      "rdfs:comment": "Reason for curtailment (GRID_OUTAGE, EMERGENCY, CONGESTION, MAINTENANCE, OTHER).",
+      "rdfs:domain": { "@id": "deg:P2PTradeDelivery" },
+      "schema:rangeIncludes": { "@id": "deg:CurtailmentReason" }
+    },
+    {
+      "@id": "deg:sourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Source type",
+      "rdfs:comment": "Type of energy source (SOLAR, BATTERY, GRID, HYBRID, RENEWABLE).",
+      "rdfs:domain": { "@id": "deg:EnergyResource" },
+      "schema:rangeIncludes": { "@id": "deg:SourceType" }
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID",
+      "rdfs:comment": "Meter identifier in DER address format (der://meter/{id}).",
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:sanctionedLoad",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load",
+      "rdfs:comment": "Sanctioned load capacity in kilowatts (kW).",
+      "rdfs:domain": { "@id": "deg:EnergyCustomer" },
+      "schema:rangeIncludes": { "@id": "schema:Number" }
+    },
+    {
+      "@id": "deg:utilityCustomerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility customer ID",
+      "rdfs:comment": "Customer's account identifier with the utility company.",
+      "rdfs:domain": { "@id": "deg:EnergyCustomer" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:utilityId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID",
+      "rdfs:comment": "Utility/DISCOM identifier for the customer's service territory.",
+      "rdfs:domain": { "@id": "deg:EnergyCustomer" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:providerAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Provider attributes",
+      "rdfs:comment": "Provider/customer information for this order item.",
+      "rdfs:domain": { "@id": "deg:P2POrderItem" }
+    },
+    {
+      "@id": "deg:fulfillmentAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Fulfillment attributes",
+      "rdfs:comment": "Optional fulfillment tracking for this order item.",
+      "rdfs:domain": { "@id": "deg:P2POrderItem" }
+    },
+
+    {
+      "@id": "deg:PricingModel",
+      "@type": "schema:Enumeration",
+      "schema:name": "Pricing Model",
+      "rdfs:comment": "Enumeration of supported pricing models for energy trade offers."
+    },
+    {
+      "@id": "deg:PricingModelPerKwh",
+      "@type": "deg:PricingModel",
+      "schema:name": "PER_KWH",
+      "schema:identifier": "PER_KWH"
+    },
+    {
+      "@id": "deg:PricingModelTimeOfDay",
+      "@type": "deg:PricingModel",
+      "schema:name": "TIME_OF_DAY",
+      "schema:identifier": "TIME_OF_DAY"
+    },
+    {
+      "@id": "deg:PricingModelSubscription",
+      "@type": "deg:PricingModel",
+      "schema:name": "SUBSCRIPTION",
+      "schema:identifier": "SUBSCRIPTION"
+    },
+    {
+      "@id": "deg:PricingModelFixed",
+      "@type": "deg:PricingModel",
+      "schema:name": "FIXED",
+      "schema:identifier": "FIXED"
+    },
+    {
+      "@id": "deg:DeliveryStatus",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Status",
+      "rdfs:comment": "Enumeration of delivery statuses."
+    },
+    {
+      "@id": "deg:DeliveryStatusPending",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "PENDING",
+      "schema:identifier": "PENDING"
+    },
+    {
+      "@id": "deg:DeliveryStatusInProgress",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "IN_PROGRESS",
+      "schema:identifier": "IN_PROGRESS"
+    },
+    {
+      "@id": "deg:DeliveryStatusCompleted",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "COMPLETED",
+      "schema:identifier": "COMPLETED"
+    },
+    {
+      "@id": "deg:DeliveryStatusFailed",
+      "@type": "deg:DeliveryStatus",
+      "schema:name": "FAILED",
+      "schema:identifier": "FAILED"
+    },
+    {
+      "@id": "deg:DeliveryMode",
+      "@type": "schema:Enumeration",
+      "schema:name": "Delivery Mode",
+      "rdfs:comment": "Enumeration of energy delivery modes."
+    },
+    {
+      "@id": "deg:DeliveryModeEvCharging",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "EV_CHARGING",
+      "schema:identifier": "EV_CHARGING"
+    },
+    {
+      "@id": "deg:DeliveryModeBatterySwap",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "BATTERY_SWAP",
+      "schema:identifier": "BATTERY_SWAP"
+    },
+    {
+      "@id": "deg:DeliveryModeV2G",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "V2G",
+      "schema:identifier": "V2G"
+    },
+    {
+      "@id": "deg:DeliveryModeGridInjection",
+      "@type": "deg:DeliveryMode",
+      "schema:name": "GRID_INJECTION",
+      "schema:identifier": "GRID_INJECTION"
+    },
+    {
+      "@id": "deg:SourceType",
+      "@type": "schema:Enumeration",
+      "schema:name": "Source Type",
+      "rdfs:comment": "Enumeration of energy source types."
+    },
+    {
+      "@id": "deg:SourceTypeSolar",
+      "@type": "deg:SourceType",
+      "schema:name": "SOLAR",
+      "schema:identifier": "SOLAR"
+    },
+    {
+      "@id": "deg:SourceTypeBattery",
+      "@type": "deg:SourceType",
+      "schema:name": "BATTERY",
+      "schema:identifier": "BATTERY"
+    },
+    {
+      "@id": "deg:SourceTypeGrid",
+      "@type": "deg:SourceType",
+      "schema:name": "GRID",
+      "schema:identifier": "GRID"
+    },
+    {
+      "@id": "deg:SourceTypeHybrid",
+      "@type": "deg:SourceType",
+      "schema:name": "HYBRID",
+      "schema:identifier": "HYBRID"
+    },
+    {
+      "@id": "deg:SourceTypeRenewable",
+      "@type": "deg:SourceType",
+      "schema:name": "RENEWABLE",
+      "schema:identifier": "RENEWABLE"
+    },
+    {
+      "@id": "deg:CurtailmentReason",
+      "@type": "schema:Enumeration",
+      "schema:name": "Curtailment Reason",
+      "rdfs:comment": "Enumeration of reasons for energy curtailment."
+    },
+    {
+      "@id": "deg:CurtailmentReasonGridOutage",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "GRID_OUTAGE",
+      "schema:identifier": "GRID_OUTAGE"
+    },
+    {
+      "@id": "deg:CurtailmentReasonEmergency",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "EMERGENCY",
+      "schema:identifier": "EMERGENCY"
+    },
+    {
+      "@id": "deg:CurtailmentReasonCongestion",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "CONGESTION",
+      "schema:identifier": "CONGESTION"
+    },
+    {
+      "@id": "deg:CurtailmentReasonMaintenance",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "MAINTENANCE",
+      "schema:identifier": "MAINTENANCE"
+    },
+    {
+      "@id": "deg:CurtailmentReasonOther",
+      "@type": "deg:CurtailmentReason",
+      "schema:name": "OTHER",
+      "schema:identifier": "OTHER"
+    },
+
+    {
+      "@id": "degLegacy:EnergyTrade",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2PTrade. A subclass of beckn:Contract for P2P energy trading.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTrade" }
+    },
+    {
+      "@id": "degLegacy:EnergyTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Offer (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2PTradeOffer.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOffer" }
+    },
+    {
+      "@id": "degLegacy:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:EnergyGift (P2PTrade/v2.0).",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyGift" }
+    },
+    {
+      "@id": "degLegacy:EnergyTradeOrder",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Order (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2PTradeOrder. Contract attributes for P2P energy trading.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOrder" }
+    },
+    {
+      "@id": "degLegacy:EnergyTradeOrderInterUtility",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Order Inter-Utility (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2PTradeOrderInterUtility.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOrderInterUtility" }
+    },
+    {
+      "@id": "degLegacy:EnergyTradeDelivery",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Delivery (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2PTradeDelivery.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeDelivery" }
+    },
+    {
+      "@id": "degLegacy:EnergyResource",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:EnergyResource (P2PTrade/v2.0).",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyResource" }
+    },
+    {
+      "@id": "degLegacy:EnergyCustomer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Customer (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:EnergyCustomer (P2PTrade/v2.0).",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyCustomer" }
+    },
+    {
+      "@id": "degLegacy:EnergyOrderItem",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Order Item (deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:P2POrderItem.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2POrderItem" }
+    },
+    {
+      "@id": "degLegacy:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:pricingModel.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:pricingModel" }
+    },
+    {
+      "@id": "degLegacy:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:validityWindow.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:validityWindow" }
+    },
+    {
+      "@id": "degLegacy:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:deliveryWindow.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryWindow" }
+    },
+    {
+      "@id": "degLegacy:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:gift.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:gift" }
+    },
+    {
+      "@id": "degLegacy:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:lookupHash.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:lookupHash" }
+    },
+    {
+      "@id": "degLegacy:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:claimVerifier.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:claimVerifier" }
+    },
+    {
+      "@id": "degLegacy:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:expiresAt.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:expiresAt" }
+    },
+    {
+      "@id": "degLegacy:bap_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BAP ID (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:bap_id.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:bap_id" }
+    },
+    {
+      "@id": "degLegacy:bpp_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BPP ID (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:bpp_id.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:bpp_id" }
+    },
+    {
+      "@id": "degLegacy:total_quantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Total quantity (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:total_quantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:total_quantity" }
+    },
+    {
+      "@id": "degLegacy:utilityIdBuyer",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Buyer (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:utilityIdBuyer.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityIdBuyer" }
+    },
+    {
+      "@id": "degLegacy:utilityIdSeller",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Seller (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:utilityIdSeller.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityIdSeller" }
+    },
+    {
+      "@id": "degLegacy:deliveryStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery status (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:deliveryStatus.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryStatus" }
+    },
+    {
+      "@id": "degLegacy:deliveryMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery mode (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:deliveryMode.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryMode" }
+    },
+    {
+      "@id": "degLegacy:deliveredQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivered quantity (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:deliveredQuantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveredQuantity" }
+    },
+    {
+      "@id": "degLegacy:meterReadings",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter readings (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:meterReadings.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:meterReadings" }
+    },
+    {
+      "@id": "degLegacy:consumedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumed energy (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:consumedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:consumedEnergy" }
+    },
+    {
+      "@id": "degLegacy:producedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Produced energy (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:producedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:producedEnergy" }
+    },
+    {
+      "@id": "degLegacy:allocatedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Allocated energy (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:allocatedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:allocatedEnergy" }
+    },
+    {
+      "@id": "degLegacy:curtailedQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailed quantity (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:curtailedQuantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:curtailedQuantity" }
+    },
+    {
+      "@id": "degLegacy:curtailmentReason",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailment reason (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:curtailmentReason.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:curtailmentReason" }
+    },
+    {
+      "@id": "degLegacy:sourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Source type (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:sourceType.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:sourceType" }
+    },
+    {
+      "@id": "degLegacy:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:meterId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:meterId" }
+    },
+    {
+      "@id": "degLegacy:sanctionedLoad",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:sanctionedLoad.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:sanctionedLoad" }
+    },
+    {
+      "@id": "degLegacy:utilityCustomerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility customer ID (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:utilityCustomerId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityCustomerId" }
+    },
+    {
+      "@id": "degLegacy:utilityId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:utilityId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityId" }
+    },
+    {
+      "@id": "degLegacy:providerAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Provider attributes (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:providerAttributes.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:providerAttributes" }
+    },
+    {
+      "@id": "degLegacy:fulfillmentAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Fulfillment attributes (EnergyTrade/v2.0 deprecated)",
+      "rdfs:comment": "Deprecated. Use deg:fulfillmentAttributes.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:fulfillmentAttributes" }
+    },
+
+    {
+      "@id": "becknLegacy:EnergyTradeOffer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Offer (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:P2PTradeOffer.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOffer" }
+    },
+    {
+      "@id": "becknLegacy:EnergyTradeOrder",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Order (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:P2PTradeOrder. Previously referenced Order.orderAttributes — now Contract.orderAttributes.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOrder" }
+    },
+    {
+      "@id": "becknLegacy:EnergyTradeOrderInterUtility",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Order Inter-Utility (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:P2PTradeOrderInterUtility.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeOrderInterUtility" }
+    },
+    {
+      "@id": "becknLegacy:EnergyTradeDelivery",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Trade Delivery (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:P2PTradeDelivery.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2PTradeDelivery" }
+    },
+    {
+      "@id": "becknLegacy:EnergyResource",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:EnergyResource.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyResource" }
+    },
+    {
+      "@id": "becknLegacy:EnergyCustomer",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Customer (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:EnergyCustomer.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyCustomer" }
+    },
+    {
+      "@id": "becknLegacy:EnergyOrderItem",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Order Item (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:P2POrderItem.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:P2POrderItem" }
+    },
+    {
+      "@id": "becknLegacy:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:EnergyGift.",
+      "owl:deprecated": true,
+      "owl:equivalentClass": { "@id": "deg:EnergyGift" }
+    },
+    {
+      "@id": "becknLegacy:pricingModel",
+      "@type": "rdf:Property",
+      "rdfs:label": "Pricing model (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:pricingModel.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:pricingModel" }
+    },
+    {
+      "@id": "becknLegacy:validityWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Validity window (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:validityWindow.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:validityWindow" }
+    },
+    {
+      "@id": "becknLegacy:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:deliveryWindow.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryWindow" }
+    },
+    {
+      "@id": "becknLegacy:gift",
+      "@type": "rdf:Property",
+      "rdfs:label": "Gift (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:gift.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:gift" }
+    },
+    {
+      "@id": "becknLegacy:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:lookupHash.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:lookupHash" }
+    },
+    {
+      "@id": "becknLegacy:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:claimVerifier.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:claimVerifier" }
+    },
+    {
+      "@id": "becknLegacy:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:expiresAt.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:expiresAt" }
+    },
+    {
+      "@id": "becknLegacy:bap_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BAP ID (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:bap_id.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:bap_id" }
+    },
+    {
+      "@id": "becknLegacy:bpp_id",
+      "@type": "rdf:Property",
+      "rdfs:label": "BPP ID (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:bpp_id.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:bpp_id" }
+    },
+    {
+      "@id": "becknLegacy:total_quantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Total quantity (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:total_quantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:total_quantity" }
+    },
+    {
+      "@id": "becknLegacy:utilityIdBuyer",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Buyer (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:utilityIdBuyer.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityIdBuyer" }
+    },
+    {
+      "@id": "becknLegacy:utilityIdSeller",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID Seller (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:utilityIdSeller.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityIdSeller" }
+    },
+    {
+      "@id": "becknLegacy:deliveryStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery status (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:deliveryStatus.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryStatus" }
+    },
+    {
+      "@id": "becknLegacy:deliveryMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery mode (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:deliveryMode.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveryMode" }
+    },
+    {
+      "@id": "becknLegacy:deliveredQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivered quantity (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:deliveredQuantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:deliveredQuantity" }
+    },
+    {
+      "@id": "becknLegacy:meterReadings",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter readings (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:meterReadings.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:meterReadings" }
+    },
+    {
+      "@id": "becknLegacy:consumedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Consumed energy (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:consumedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:consumedEnergy" }
+    },
+    {
+      "@id": "becknLegacy:producedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Produced energy (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:producedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:producedEnergy" }
+    },
+    {
+      "@id": "becknLegacy:allocatedEnergy",
+      "@type": "rdf:Property",
+      "rdfs:label": "Allocated energy (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:allocatedEnergy.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:allocatedEnergy" }
+    },
+    {
+      "@id": "becknLegacy:curtailedQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailed quantity (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:curtailedQuantity.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:curtailedQuantity" }
+    },
+    {
+      "@id": "becknLegacy:curtailmentReason",
+      "@type": "rdf:Property",
+      "rdfs:label": "Curtailment reason (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:curtailmentReason.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:curtailmentReason" }
+    },
+    {
+      "@id": "becknLegacy:sourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Source type (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:sourceType.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:sourceType" }
+    },
+    {
+      "@id": "becknLegacy:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:meterId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:meterId" }
+    },
+    {
+      "@id": "becknLegacy:sanctionedLoad",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:sanctionedLoad.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:sanctionedLoad" }
+    },
+    {
+      "@id": "becknLegacy:utilityCustomerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility customer ID (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:utilityCustomerId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityCustomerId" }
+    },
+    {
+      "@id": "becknLegacy:utilityId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Utility ID (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:utilityId.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:utilityId" }
+    },
+    {
+      "@id": "becknLegacy:providerAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Provider attributes (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:providerAttributes.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:providerAttributes" }
+    },
+    {
+      "@id": "becknLegacy:fulfillmentAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Fulfillment attributes (v0.3 deprecated)",
+      "rdfs:comment": "Deprecated (EnergyTrade/v0.3). Use deg:fulfillmentAttributes.",
+      "owl:deprecated": true,
+      "owl:equivalentProperty": { "@id": "deg:fulfillmentAttributes" }
+    }
+
+  ]
+}

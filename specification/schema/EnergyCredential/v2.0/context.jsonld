@@ -1,0 +1,23 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "sec": "https://w3id.org/security#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "EnergyCredential": "deg:EnergyCredential",
+    "issuer": "schema:issuer",
+    "issuanceDate": "schema:dateCreated",
+    "expirationDate": "schema:expires",
+    "credentialStatus": "deg:credentialStatus",
+    "licenseNumber": "deg:licenseNumber",
+    "proof": "sec:proof",
+    "verificationMethod": "sec:verificationMethod",
+    "proofPurpose": "sec:proofPurpose",
+    "proofValue": "sec:proofValue"
+  },
+  "@graph": []
+}

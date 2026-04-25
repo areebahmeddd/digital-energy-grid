@@ -1,0 +1,36 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "schema": "https://schema.org/",
+    "sec": "https://w3id.org/security#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyCredential",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Credential",
+      "rdfs:comment": "Base class for all DEG energy-sector Verifiable Credentials issued by electricity distribution utilities. Subclass of beckn:Credential.",
+      "rdfs:subClassOf": { "@id": "beckn:Credential" }
+    },
+    {
+      "@id": "deg:licenseNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "License number",
+      "rdfs:comment": "Regulatory license number issued by the local energy regulator to the issuing distribution utility.",
+      "rdfs:domain": "deg:EnergyCredential",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:credentialStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Credential status",
+      "rdfs:comment": "Revocation status information for the energy credential, checked via the DeDi registry.",
+      "rdfs:domain": "deg:EnergyCredential"
+    }
+  ]
+}

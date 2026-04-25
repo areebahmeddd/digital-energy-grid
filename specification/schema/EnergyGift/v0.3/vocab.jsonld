@@ -1,0 +1,42 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/schema/EnergyTrade/v0.3/#",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "beckn:EnergyGift",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Gift",
+      "rdfs:comment": "Gift parameters for P2P energy gifting, enabling prosumers to gift energy to specific recipients via privacy-preserving discovery and secret-based claim verification."
+    },
+    {
+      "@id": "beckn:lookupHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "Lookup hash",
+      "rdfs:comment": "SHA-256 hash of the recipient's phone number (E.164 format) for privacy-preserving gift discovery.",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "beckn:claimVerifier",
+      "@type": "rdf:Property",
+      "rdfs:label": "Claim verifier",
+      "rdfs:comment": "SHA-256 hash of a claim secret shared out-of-band from gifter to recipient for gift claim validation.",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "beckn:expiresAt",
+      "@type": "rdf:Property",
+      "rdfs:label": "Expires at",
+      "rdfs:comment": "Gift expiration timestamp in UTC (ISO 8601 with Z suffix).",
+      "rdfs:domain": "beckn:EnergyGift",
+      "rdfs:range": "xsd:dateTime"
+    }
+  ]
+}
