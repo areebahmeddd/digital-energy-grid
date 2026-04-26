@@ -41,7 +41,7 @@ P2P trading between prosumers belonging to different energy retailers/distributi
 
 > **Note:** When buyer and seller are with the **same utility**, the flow simplifies naturally - BuyerUtility and SellerUtility collapse into a single entity, reducing the number of hops while maintaining the same protocol structure.
 
-> **Note on LP (Ledger Service Provider):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LP` because the same flow applies whether the utility runs the ledger itself or delegates to its LP. See [§ Operating Through a Ledger TSP (LP)](#operating-through-a-ledger-tsp-LP) for the LP-mediated topology.
+> **Note on LP (Ledger Service Provider):** A Ledger TSP is a **regulated technical service provider** that may act on behalf of a utility for the trade-ledger and allocation functions in this protocol. The LP is responsible for fair allocation as per network policy and is contracted by the utility. **Each utility contracts exactly one LP**. The sequence diagram below uses the combined label `<Utility> / <Utility>LP` because the same flow applies whether the utility runs the ledger itself or delegates to its LP. See [§ Operating Through a Ledger TSP (LP)](#operating-through-a-ledger-service-provider-LP) for the LP-mediated topology.
 
 ---
 
