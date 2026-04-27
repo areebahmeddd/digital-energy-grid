@@ -1,0 +1,221 @@
+{
+  "info": {
+    "_postman_id": "fb24bcf9-4128-405e-aeb7-eace7f425ef3",
+    "name": "p2p-trading-ies-wave2-uc1-p2p-trading-ies-wave2.BAP-DEG",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Buyer Application Platform implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
+  },
+  "item": [
+    {
+      "name": "confirm",
+      "item": [
+        {
+          "name": "confirm-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"confirm\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"@type\": \"P2PTrade\",\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n                \"@type\": \"EnergyResource\",\n                \"sourceType\": \"SOLAR\",\n                \"meterId\": \"der://meter/seller-001\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-p2p-001\",\n            \"resourceIds\": [\n              \"energy-resource-solar-001\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n              \"@type\": \"EnergyTradeOffer\",\n              \"pricingModel\": \"PER_KWH\",\n              \"deliveryWindow\": {\n                \"@type\": \"beckn:TimePeriod\",\n                \"schema:startTime\": \"2026-04-26T04:30:00Z\",\n                \"schema:endTime\": \"2026-04-26T05:30:00Z\"\n              },\n              \"inputs\": [\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": \"example.bpp.com\",\n                  \"inputs\": {\n                    \"pricePerKwh\": 12,\n                    \"currency\": \"INR\",\n                    \"availableQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 30.0\n                    },\n                    \"sourceType\": \"SOLAR\",\n                    \"meterId\": \"der://meter/seller-001\",\n                    \"utilityId\": \"TPDDL-DL\",\n                    \"utilityCustomerId\": \"TPDDL-CUST-S-001\"\n                  }\n                },\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"example.bap.com\",\n                  \"inputs\": {\n                    \"requestedQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 20.0\n                    },\n                    \"sourceType\": \"GRID\",\n                    \"meterId\": \"der://meter/buyer-001\",\n                    \"utilityId\": \"BRPL-DL\",\n                    \"utilityCustomerId\": \"BRPL-CUST-B-001\"\n                  }\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"example.bap.com\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": \"example.bpp.com\"\n          },\n          {\n            \"role\": \"buyerDiscom\",\n            \"participantId\": \"buyer-discom-ledger\"\n          },\n          {\n            \"role\": \"sellerDiscom\",\n            \"participantId\": \"seller-discom-ledger\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/confirm",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "confirm"
+              ]
+            },
+            "description": "Confirm request: confirm-request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "discover",
+      "item": [
+        {
+          "name": "discover-request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$.catalogs[*].offers[*] ? (@.offerAttributes.pricingModel == 'PER_KWH' && @.offerAttributes['@type'] == 'EnergyTradeOffer')\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "discover"
+              ]
+            },
+            "description": "Discover request: discover-request"
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "init",
+      "item": [
+        {
+          "name": "init-request-discom",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"init\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"@type\": \"P2PTrade\",\n      \"status\": {\n        \"code\": \"PENDING_LIMIT_CHECK\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"PENDING_LIMIT_CHECK\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              }\n            }\n          ]\n        }\n      ],\n      \"performance\": [\n        {\n          \"id\": \"perf-discom-limit-check\",\n          \"status\": {\n            \"code\": \"DISCOM_LIMIT_CHECK_REQUESTED\",\n            \"name\": \"Optional discom-ledger limit check (Phase 2)\"\n          },\n          \"commitmentIds\": [\n            \"commitment-p2p-001\"\n          ],\n          \"performanceAttributes\": {\n            \"@type\": \"DiscomLimitCheck\",\n            \"subject\": \"buyer\",\n            \"subjectMeterId\": \"der://meter/buyer-001\",\n            \"discomParticipantId\": \"buyer-discom-ledger\",\n            \"deliveryWindow\": {\n              \"@type\": \"beckn:TimePeriod\",\n              \"schema:startTime\": \"2026-04-26T04:30:00Z\",\n              \"schema:endTime\": \"2026-04-26T05:30:00Z\"\n            },\n            \"tradeQuantity\": {\n              \"@type\": \"Quantity\",\n              \"unitCode\": \"KWH\",\n              \"unitQuantity\": 20.0\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"example.bap.com\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": \"example.bpp.com\"\n          },\n          {\n            \"role\": \"buyerDiscom\",\n            \"participantId\": \"buyer-discom-ledger\"\n          },\n          {\n            \"role\": \"sellerDiscom\",\n            \"participantId\": \"seller-discom-ledger\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/init",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "init"
+              ]
+            },
+            "description": "Init request: init-request-discom"
+          },
+          "response": []
+        },
+        {
+          "name": "init-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"init\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"@type\": \"P2PTrade\",\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"descriptor\": {\n                \"name\": \"Solar energy slot \\u2014 2026-04-26 10:00\\u201311:00 IST\"\n              },\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n                \"@type\": \"EnergyResource\",\n                \"sourceType\": \"SOLAR\",\n                \"meterId\": \"der://meter/seller-001\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-p2p-001\",\n            \"resourceIds\": [\n              \"energy-resource-solar-001\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n              \"@type\": \"EnergyTradeOffer\",\n              \"pricingModel\": \"PER_KWH\",\n              \"deliveryWindow\": {\n                \"@type\": \"beckn:TimePeriod\",\n                \"schema:startTime\": \"2026-04-26T04:30:00Z\",\n                \"schema:endTime\": \"2026-04-26T05:30:00Z\"\n              },\n              \"inputs\": [\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": \"example.bpp.com\",\n                  \"inputs\": {\n                    \"pricePerKwh\": 12,\n                    \"currency\": \"INR\",\n                    \"availableQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 30.0\n                    },\n                    \"sourceType\": \"SOLAR\",\n                    \"meterId\": \"der://meter/seller-001\",\n                    \"utilityId\": \"TPDDL-DL\",\n                    \"utilityCustomerId\": \"TPDDL-CUST-S-001\"\n                  }\n                },\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"example.bap.com\",\n                  \"inputs\": {\n                    \"requestedQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 20.0\n                    },\n                    \"sourceType\": \"GRID\",\n                    \"meterId\": \"der://meter/buyer-001\",\n                    \"utilityId\": \"BRPL-DL\",\n                    \"utilityCustomerId\": \"BRPL-CUST-B-001\"\n                  }\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"example.bap.com\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": \"example.bpp.com\"\n          },\n          {\n            \"role\": \"buyerDiscom\",\n            \"participantId\": \"buyer-discom-ledger\"\n          },\n          {\n            \"role\": \"sellerDiscom\",\n            \"participantId\": \"seller-discom-ledger\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/init",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "init"
+              ]
+            },
+            "description": "Init request: init-request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "item": [
+        {
+          "name": "select-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"select\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld\",\n      \"@type\": \"P2PTrade\",\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"descriptor\": {\n                \"name\": \"Solar energy slot \\u2014 2026-04-26 10:00\\u201311:00 IST\"\n              },\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld\",\n                \"@type\": \"EnergyResource\",\n                \"sourceType\": \"SOLAR\",\n                \"meterId\": \"der://meter/seller-001\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-p2p-001\",\n            \"resourceIds\": [\n              \"energy-resource-solar-001\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld\",\n              \"@type\": \"EnergyTradeOffer\",\n              \"pricingModel\": \"PER_KWH\",\n              \"deliveryWindow\": {\n                \"@type\": \"beckn:TimePeriod\",\n                \"schema:startTime\": \"2026-04-26T04:30:00Z\",\n                \"schema:endTime\": \"2026-04-26T05:30:00Z\"\n              },\n              \"inputs\": [\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": \"example.bpp.com\",\n                  \"inputs\": {\n                    \"pricePerKwh\": 12,\n                    \"currency\": \"INR\",\n                    \"availableQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 30.0\n                    },\n                    \"sourceType\": \"SOLAR\",\n                    \"meterId\": \"der://meter/seller-001\",\n                    \"utilityId\": \"TPDDL-DL\",\n                    \"utilityCustomerId\": \"TPDDL-CUST-S-001\"\n                  }\n                },\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"example.bap.com\",\n                  \"inputs\": {\n                    \"requestedQuantity\": {\n                      \"@type\": \"Quantity\",\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 20.0\n                    }\n                  }\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"example.bap.com\"\n          },\n          {\n            \"role\": \"seller\"\n          },\n          {\n            \"role\": \"buyerDiscom\"\n          },\n          {\n            \"role\": \"sellerDiscom\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/select",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "select"
+              ]
+            },
+            "description": "Select request: select-request"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pure JS pre-request script to replace moment()",
+          "// 1) ISO 8601 timestamp without needing moment",
+          "const isoTimestamp = new Date().toISOString();",
+          "pm.collectionVariables.set('iso_date', isoTimestamp);",
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "domain",
+      "value": "nfh.global/testnet-deg"
+    },
+    {
+      "key": "version",
+      "value": "2.0.0"
+    },
+    {
+      "key": "bap_id",
+      "value": "bap.example.com"
+    },
+    {
+      "key": "bpp_id",
+      "value": "bpp.example.com"
+    },
+    {
+      "key": "transaction_id",
+      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+    },
+    {
+      "key": "iso_date",
+      "value": ""
+    },
+    {
+      "key": "bap_host_root",
+      "value": "http://beckn-router:9000"
+    },
+    {
+      "key": "bpp_host_root",
+      "value": "http://beckn-router:9000"
+    },
+    {
+      "key": "bap_adapter_url",
+      "value": "http://localhost:8081/bap/caller"
+    }
+  ]
+}
