@@ -20,8 +20,6 @@
   },
   "message": {
     "contract": {
-      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld",
-      "@type": "P2PTrade",
       "id": "contract-p2p-001",
       "status": {
         "code": "ACTIVE"

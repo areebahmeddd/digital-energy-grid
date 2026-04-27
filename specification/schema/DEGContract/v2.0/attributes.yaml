@@ -30,7 +30,7 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller]
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               participantId:
                 type: string
                 description: Bound at init/confirm. Null in catalog.
