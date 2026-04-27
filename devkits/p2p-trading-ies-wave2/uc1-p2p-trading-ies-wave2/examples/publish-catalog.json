@@ -106,10 +106,6 @@
                     "utilityId": "TPDDL-DL",
                     "utilityCustomerId": "TPDDL-CUST-S-001"
                   }
-                },
-                {
-                  "role": "buyer",
-                  "participantId": null
                 }
               ]
             }
