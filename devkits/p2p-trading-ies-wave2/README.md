@@ -12,7 +12,7 @@ A rooftop solar prosumer on **TPDDL** (the seller, BPP-side) lists a 1-hour deli
 
 | Use Case | BPP (Seller TP) | BAP (Buyer TP) | Description |
 |----------|-----------------|----------------|-------------|
-| [uc1-p2p-trading-ies-wave2](./uc1-p2p-trading-ies-wave2/) | Prosumer on TPDDL | Prosumer on BRPL | Publish offer → discover → select → optional discom-limit check → confirm → settle |
+| [uc1](./uc1/) | Prosumer on TPDDL | Prosumer on BRPL | Publish offer → discover → select → optional discom-limit check → confirm → settle |
 
 ## Roles
 
@@ -37,7 +37,7 @@ The contract names four conceptual actors. Only buyer and seller speak Beckn dir
 
 ## Postman
 
-`uc1-p2p-trading-ies-wave2/postman/p2p-trading-ies-wave2-uc1-p2p-trading-ies-wave2.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
+`uc1/postman/p2p-trading-ies-wave2-uc1.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
 
 ## Policy Enforcement
 

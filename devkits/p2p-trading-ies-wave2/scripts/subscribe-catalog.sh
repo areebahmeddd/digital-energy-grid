@@ -3,7 +3,7 @@
 # network. This is a one-time, network-level setup call against the hosted
 # catalog at fabric.nfh.global; it does not flow through the local BAP/BPP
 # adapters and is not part of the transactional workflow exercised by
-# uc1-p2p-trading-ies-wave2/workflows/run-arazzo.sh. Re-running is idempotent.
+# uc1/workflows/run-arazzo.sh. Re-running is idempotent.
 
 set -euo pipefail
 
