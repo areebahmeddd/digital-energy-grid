@@ -9,8 +9,8 @@
     "messageId": "c1d2e3f4-a5b6-7890-abcd-ef2233445566",
     "timestamp": "2026-03-28T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
       "https://schema.beckn.io/Quantity/context.jsonld"
     ]
   },
@@ -38,7 +38,7 @@
               "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
             },
             "resourceAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
               "@type": "DemandFlexNeed",
               "direction": "REDUCE",
               "eventWindow": {
@@ -73,10 +73,10 @@
             },
             "availableTo": [],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "contractTerms": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/schema/DEGContract/v2.0/context.jsonld",
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
                   {
@@ -87,7 +87,7 @@
                   }
                 ],
                 "policy": {
-                  "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/becknv2-demand-flex/specification/policies/demand_flex_revenue.rego",
+                  "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
                   "queryPath": "data.deg.contracts.demand_flex"
                 }
               },
