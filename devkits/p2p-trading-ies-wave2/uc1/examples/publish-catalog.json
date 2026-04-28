@@ -9,10 +9,8 @@
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
     "timestamp": "2026-04-25T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld"
     ]
   },
@@ -115,6 +113,19 @@
                           "@type": "beckn:TimePeriod",
                           "schema:startTime": "2026-04-26T04:30:00Z",
                           "schema:endTime": "2026-04-26T05:30:00Z"
+                        }
+                      },
+                      {
+                        "pricePerKwh": 14,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 25.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T05:30:00Z",
+                          "schema:endTime": "2026-04-26T06:30:00Z"
                         }
                       }
                     ]

@@ -11,12 +11,10 @@
     "messageId": "msg-on-status-settled-001",
     "timestamp": "2026-04-26T06:30:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeDelivery/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld"
     ]
@@ -41,7 +39,7 @@
               "quantity": {
                 "@type": "Quantity",
                 "unitCode": "KWH",
-                "unitQuantity": 20
+                "unitQuantity": 35.0
               },
               "resourceAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
@@ -79,6 +77,19 @@
                           "schema:startTime": "2026-04-26T04:30:00Z",
                           "schema:endTime": "2026-04-26T05:30:00Z"
                         }
+                      },
+                      {
+                        "pricePerKwh": 14,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 25.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T05:30:00Z",
+                          "schema:endTime": "2026-04-26T06:30:00Z"
+                        }
                       }
                     ]
                   }
@@ -106,6 +117,24 @@
                           "unitCode": "KWH",
                           "unitQuantity": 30.0
                         }
+                      },
+                      {
+                        "pricePerKwh": 14,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 25.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T05:30:00Z",
+                          "schema:endTime": "2026-04-26T06:30:00Z"
+                        },
+                        "requestedQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 15.0
+                        }
                       }
                     ]
                   }
@@ -117,10 +146,10 @@
       ],
       "performance": [
         {
-          "id": "perf-p2p-001-settled",
+          "id": "perf-p2p-001-window-a",
           "status": {
             "code": "SETTLED",
-            "name": "Allocation reconciled across discom ledgers; settlement computed from policy evaluation"
+            "name": "Window A settled — 18.5 kWh of 20 requested allocated"
           },
           "commitmentIds": [
             "commitment-p2p-001"
@@ -148,6 +177,43 @@
                 "consumedEnergy": 18.5,
                 "producedEnergy": 19.2,
                 "allocatedEnergy": 18.5,
+                "unit": "kWh"
+              }
+            ]
+          }
+        },
+        {
+          "id": "perf-p2p-001-window-b",
+          "status": {
+            "code": "SETTLED",
+            "name": "Window B settled — 14.2 kWh of 15 requested allocated"
+          },
+          "commitmentIds": [
+            "commitment-p2p-001"
+          ],
+          "performanceAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeDelivery/v2.0/context.jsonld",
+            "@type": "EnergyTradeDelivery",
+            "deliveryStatus": "COMPLETED",
+            "deliveryMode": "GRID_INJECTION",
+            "deliveryWindow": {
+              "@type": "beckn:TimePeriod",
+              "schema:startTime": "2026-04-26T05:30:00Z",
+              "schema:endTime": "2026-04-26T06:30:00Z"
+            },
+            "buyerSideAllocationKwh": 14.2,
+            "sellerSideAllocationKwh": 14.7,
+            "settledQuantityKwh": 14.2,
+            "meterReadings": [
+              {
+                "beckn:timeWindow": {
+                  "@type": "beckn:TimePeriod",
+                  "schema:startTime": "2026-04-26T05:30:00Z",
+                  "schema:endTime": "2026-04-26T06:30:00Z"
+                },
+                "consumedEnergy": 14.2,
+                "producedEnergy": 14.7,
+                "allocatedEnergy": 14.2,
                 "unit": "kWh"
               }
             ]
@@ -224,27 +290,27 @@
             "revenueFlows": [
               {
                 "role": "buyer",
-                "value": -222,
+                "value": -420.80,
                 "currency": "INR",
-                "description": "Pays 222 INR for 18.5 kWh delivered (incl. buyer-side wheeling 0)"
+                "description": "Pays 420.80 INR total: 222.00 for 18.5 kWh @ 12 (window A) + 198.80 for 14.2 kWh @ 14 (window B); buyer-side wheeling 0"
               },
               {
                 "role": "seller",
-                "value": 222,
+                "value": 420.80,
                 "currency": "INR",
-                "description": "Receives 222 INR for 18.5 kWh delivered (net of seller-side wheeling 0 and penalty 0)"
+                "description": "Receives 420.80 INR total: 222.00 (window A) + 198.80 (window B); seller-side wheeling 0, penalty 0"
               },
               {
                 "role": "buyerDiscom",
                 "value": 0,
                 "currency": "INR",
-                "description": "Buyer-side wheeling charge (placeholder \u2014 currently 0)"
+                "description": "Buyer-side wheeling charge across both windows (placeholder \u2014 currently 0)"
               },
               {
                 "role": "sellerDiscom",
                 "value": 0,
                 "currency": "INR",
-                "description": "Seller-side wheeling charge + any penalty (placeholders \u2014 currently 0)"
+                "description": "Seller-side wheeling charge + any penalty across both windows (placeholders \u2014 currently 0)"
               }
             ]
           }
