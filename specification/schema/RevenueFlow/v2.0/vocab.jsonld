@@ -1,0 +1,86 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/RevenueFlow/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:RevenueFlow",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Revenue Flow",
+      "rdfs:comment": "Settlement-time revenue-flow attributes for energy contracts. Attached to Contract.consideration[*].considerationAttributes after the linked rego policy evaluates. Each entry in revenueFlows is signed (positive = receives, negative = pays); the sum across all entries MUST be zero (net-zero invariant)."
+    },
+    {
+      "@id": "deg:revenueFlows",
+      "@type": "rdf:Property",
+      "rdfs:label": "Revenue flows",
+      "rdfs:comment": "Per-role signed revenue-flow entries computed by the contract policy after settlement. Sum MUST be zero across the array.",
+      "rdfs:domain": "deg:RevenueFlow",
+      "schema:rangeIncludes": "schema:ItemList"
+    },
+    {
+      "@id": "deg:role",
+      "@type": "rdf:Property",
+      "rdfs:label": "Role",
+      "rdfs:comment": "Contract role this flow applies to (buyer, seller, buyerDiscom, sellerDiscom).",
+      "schema:rangeIncludes": "deg:RevenueFlowRole"
+    },
+    {
+      "@id": "deg:value",
+      "@type": "rdf:Property",
+      "rdfs:label": "Value",
+      "rdfs:comment": "Signed amount of the flow. Positive = role receives; negative = role pays.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:currency",
+      "@type": "rdf:Property",
+      "rdfs:label": "Currency",
+      "rdfs:comment": "ISO-4217 currency code (e.g. INR, USD).",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:description",
+      "@type": "rdf:Property",
+      "rdfs:label": "Description",
+      "rdfs:comment": "Human-readable rationale for the flow.",
+      "rdfs:subPropertyOf": "schema:description",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:RevenueFlowRole",
+      "@type": "schema:Enumeration",
+      "schema:name": "Revenue-Flow Role",
+      "rdfs:comment": "Roles for which a revenue flow can be emitted in the four-role inter-discom P2P contract."
+    },
+    {
+      "@id": "deg:RevenueFlowRoleBuyer",
+      "@type": "deg:RevenueFlowRole",
+      "schema:name": "buyer",
+      "schema:identifier": "buyer"
+    },
+    {
+      "@id": "deg:RevenueFlowRoleSeller",
+      "@type": "deg:RevenueFlowRole",
+      "schema:name": "seller",
+      "schema:identifier": "seller"
+    },
+    {
+      "@id": "deg:RevenueFlowRoleBuyerDiscom",
+      "@type": "deg:RevenueFlowRole",
+      "schema:name": "buyerDiscom",
+      "schema:identifier": "buyerDiscom"
+    },
+    {
+      "@id": "deg:RevenueFlowRoleSellerDiscom",
+      "@type": "deg:RevenueFlowRole",
+      "schema:name": "sellerDiscom",
+      "schema:identifier": "sellerDiscom"
+    }
+  ]
+}
