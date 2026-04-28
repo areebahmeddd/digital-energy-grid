@@ -139,11 +139,12 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
-          - id: revenueflows
-            config:
-              actions: "on_status"
-              debugLogging: "true"
-              allowedDomains: "raw.githubusercontent.com"
+          # revenueflows middleware disabled for wave2 — its current
+          # implementation auto-injects results at contractAttributes.revenueFlows,
+          # but the canonical home (per devkit design) is now
+          # message.contract.consideration[*].considerationAttributes
+          # (RevenueFlow JSON-LD), populated directly in the on_status payload.
+          # Re-enable once the middleware can target the consideration block.
       steps:
         - validateSchema
         - checkPolicy

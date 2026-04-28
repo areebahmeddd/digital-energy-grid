@@ -26,6 +26,12 @@
         },
         "bppId": "bpp.example.com",
         "bppUri": "http://bpp.example.com/bpp/receiver",
+        "provider": {
+          "id": "TPDDL-DL-seller-001",
+          "descriptor": {
+            "name": "Prosumer Solar Farm — North Delhi"
+          }
+        },
         "resources": [
           {
             "id": "energy-resource-solar-001",
