@@ -10,7 +10,7 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 | Use Case | BAP (Buyer) | BPP (Seller) | UtilityBPP | Description |
 |----------|-------------|--------------|------------|-------------|
-| [uc1-p2p-trading-ies-wave1](./uc1-p2p-trading-ies-wave1/) | p2p-trading-sandbox1.com | p2p-trading-sandbox2.com | (cascaded) | Catalog → discover → select → confirm → status → settle, plus cascaded init/confirm to the seller's utility BPP |
+| [uc1](./uc1/) | p2p-trading-sandbox1.com | p2p-trading-sandbox2.com | (cascaded) | Catalog → discover → select → confirm → status → settle, plus cascaded init/confirm to the seller's utility BPP |
 
 ## Catalog vs discover
 
