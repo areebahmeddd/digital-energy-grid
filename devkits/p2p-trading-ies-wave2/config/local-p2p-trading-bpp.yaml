@@ -139,12 +139,22 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
-          # revenueflows middleware disabled for wave2 — its current
-          # implementation auto-injects results at contractAttributes.revenueFlows,
-          # but the canonical home (per devkit design) is now
-          # message.contract.consideration[*].considerationAttributes
-          # (RevenueFlow JSON-LD), populated directly in the on_status payload.
-          # Re-enable once the middleware can target the consideration block.
+          - id: revenueflows
+            config:
+              actions: "on_status"
+              debugLogging: "true"
+              allowedDomains: "raw.githubusercontent.com"
+              # Wave2 writes rego output to a Beckn-native Consideration entry
+              # (idempotent on retry via the [id=auto-revenue-flows] selector).
+              # The considerationAttributes block carries a JSON-LD-wrapped
+              # RevenueFlow object the extended-schema validator picks up via
+              # @context.
+              outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
         - validateSchema
         - checkPolicy

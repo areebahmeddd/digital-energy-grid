@@ -149,7 +149,7 @@
           "id": "perf-p2p-001-window-a",
           "status": {
             "code": "SETTLED",
-            "name": "Window A settled — 18.5 kWh of 20 requested allocated"
+            "name": "Window A settled \u2014 18.5 kWh of 20 requested allocated"
           },
           "commitmentIds": [
             "commitment-p2p-001"
@@ -186,7 +186,7 @@
           "id": "perf-p2p-001-window-b",
           "status": {
             "code": "SETTLED",
-            "name": "Window B settled — 14.2 kWh of 15 requested allocated"
+            "name": "Window B settled \u2014 14.2 kWh of 15 requested allocated"
           },
           "commitmentIds": [
             "commitment-p2p-001"
@@ -276,44 +276,6 @@
         {
           "role": "sellerDiscom",
           "participantId": "seller-discom-ledger"
-        }
-      ],
-      "consideration": [
-        {
-          "id": "settled-revenue-flows",
-          "status": {
-            "code": "SETTLED"
-          },
-          "considerationAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld",
-            "@type": "RevenueFlow",
-            "revenueFlows": [
-              {
-                "role": "buyer",
-                "value": -420.80,
-                "currency": "INR",
-                "description": "Pays 420.80 INR total: 222.00 for 18.5 kWh @ 12 (window A) + 198.80 for 14.2 kWh @ 14 (window B); buyer-side wheeling 0"
-              },
-              {
-                "role": "seller",
-                "value": 420.80,
-                "currency": "INR",
-                "description": "Receives 420.80 INR total: 222.00 (window A) + 198.80 (window B); seller-side wheeling 0, penalty 0"
-              },
-              {
-                "role": "buyerDiscom",
-                "value": 0,
-                "currency": "INR",
-                "description": "Buyer-side wheeling charge across both windows (placeholder \u2014 currently 0)"
-              },
-              {
-                "role": "sellerDiscom",
-                "value": 0,
-                "currency": "INR",
-                "description": "Seller-side wheeling charge + any penalty across both windows (placeholders \u2014 currently 0)"
-              }
-            ]
-          }
         }
       ]
     }

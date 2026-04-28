@@ -144,6 +144,12 @@ modules:
               actions: "on_status"
               debugLogging: "true"
               allowedDomains: "raw.githubusercontent.com"
+              # outputPath / outputMode are now required by the plugin —
+              # state them explicitly here. demand-flex keeps the historical
+              # destination: rego flows written directly under
+              # message.contract.contractAttributes.revenueFlows.
+              outputPath: "message.contract.contractAttributes.revenueFlows"
+              outputMode: "raw"
       steps:
         - validateSchema
         - checkPolicy

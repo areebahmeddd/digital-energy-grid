@@ -65,11 +65,23 @@ func ExtractAction(urlPath string, body []byte) string {
 	return ""
 }
 
-// InjectRevenueFlows sets message.contract.contractAttributes.revenueFlows
-// in the JSON body and returns the modified bytes.
-// Uses json.Number to preserve numeric precision.
-func InjectRevenueFlows(body []byte, flows interface{}) ([]byte, error) {
-	// Use Decoder with UseNumber to preserve numeric precision
+// InjectRevenueFlows writes the rego output into the message body at the
+// configured destination. Behavior is fully driven by `cfg`:
+//
+//   - cfg.OutputPath defines WHERE the value lands (see path.go).
+//   - cfg.OutputMode controls the SHAPE of the value:
+//       "raw"    — write the rego array directly at the leaf.
+//       "jsonld" — wrap as {@context?, @type, <OutputArrayKey>: flows}.
+//   - cfg.OutputType / OutputContextURL / OutputArrayKey shape the wrapper
+//     when mode == "jsonld".
+//   - cfg.EntryDefaults seeds keys on newly-created [k=v] entries (e.g.
+//     '{"status":{"code":"SETTLED"}}' for Beckn-required Consideration.status).
+//
+// Numbers in the existing body are preserved via json.Number.
+func InjectRevenueFlows(body []byte, flows interface{}, cfg *Config) ([]byte, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("nil config")
+	}
 	dec := json.NewDecoder(strings.NewReader(string(body)))
 	dec.UseNumber()
 
@@ -78,22 +90,53 @@ func InjectRevenueFlows(body []byte, flows interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("failed to decode body: %w", err)
 	}
 
-	// Navigate: message → contract → contractAttributes
-	message, ok := payload["message"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("message not found or not an object")
-	}
-	contract, ok := message["contract"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("message.contract not found or not an object")
-	}
-	attrs, ok := contract["contractAttributes"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("contractAttributes not found or not an object")
+	segs, err := ParsePath(cfg.OutputPath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid outputPath %q: %w", cfg.OutputPath, err)
 	}
 
-	// Inject
-	attrs["revenueFlows"] = flows
+	var entryDefaults map[string]interface{}
+	if strings.TrimSpace(cfg.EntryDefaults) != "" {
+		if err := json.Unmarshal([]byte(cfg.EntryDefaults), &entryDefaults); err != nil {
+			return nil, fmt.Errorf("invalid entryDefaults JSON: %w", err)
+		}
+	}
+
+	value, err := buildOutputValue(flows, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := SetAtPath(payload, segs, value, entryDefaults); err != nil {
+		return nil, fmt.Errorf("failed to write at outputPath %q: %w", cfg.OutputPath, err)
+	}
 
 	return json.Marshal(payload)
+}
+
+// buildOutputValue shapes the rego output according to OutputMode.
+func buildOutputValue(flows interface{}, cfg *Config) (interface{}, error) {
+	switch cfg.OutputMode {
+	case OutputModeRaw, "":
+		return flows, nil
+	case OutputModeJSONLD:
+		key := cfg.OutputArrayKey
+		if key == "" {
+			key = "revenueFlows"
+		}
+		typ := cfg.OutputType
+		if typ == "" {
+			typ = "RevenueFlow"
+		}
+		out := map[string]interface{}{
+			"@type": typ,
+			key:     flows,
+		}
+		if cfg.OutputContextURL != "" {
+			out["@context"] = cfg.OutputContextURL
+		}
+		return out, nil
+	default:
+		return nil, fmt.Errorf("unknown outputMode %q", cfg.OutputMode)
+	}
 }
