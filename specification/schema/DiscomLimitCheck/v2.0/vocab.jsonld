@@ -1,0 +1,129 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/DiscomLimitCheck/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:DiscomLimitCheck",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Discom Limit Check",
+      "rdfs:comment": "Optional Phase-2 limit-check performance attributes for inter-discom P2P energy trades. Attached to Performance.performanceAttributes during the init/on_init exchange that asks each discom ledger whether the contract quantity fits within the prosumer's allocation envelope for the delivery window."
+    },
+    {
+      "@id": "deg:subject",
+      "@type": "rdf:Property",
+      "rdfs:label": "Subject",
+      "rdfs:comment": "Which side of the trade this limit check is being requested against (buyer or seller). Omitted in on_init responses that report both sides.",
+      "rdfs:domain": "deg:DiscomLimitCheck",
+      "schema:rangeIncludes": "deg:LimitCheckSubject"
+    },
+    {
+      "@id": "deg:subjectMeterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Subject meter ID",
+      "rdfs:comment": "Source meter identifier in DER address format (der://meter/{id}) for the subject prosumer.",
+      "rdfs:domain": "deg:DiscomLimitCheck",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:discomParticipantId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Discom participant ID",
+      "rdfs:comment": "Participant id of the discom ledger.",
+      "rdfs:domain": "deg:DiscomLimitCheck",
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:deliveryWindow",
+      "@type": "rdf:Property",
+      "rdfs:label": "Delivery window",
+      "rdfs:comment": "Delivery window for the limit check (UTC, ISO 8601 with Z suffix).",
+      "rdfs:domain": "deg:DiscomLimitCheck",
+      "schema:rangeIncludes": "beckn:TimePeriod"
+    },
+    {
+      "@id": "deg:tradeQuantity",
+      "@type": "rdf:Property",
+      "rdfs:label": "Trade quantity",
+      "rdfs:comment": "Trade quantity being limit-checked (Quantity object with unitCode and unitQuantity).",
+      "rdfs:domain": "deg:DiscomLimitCheck",
+      "schema:rangeIncludes": "beckn:Quantity"
+    },
+    {
+      "@id": "deg:buyerSide",
+      "@type": "rdf:Property",
+      "rdfs:label": "Buyer-side limit-check result",
+      "rdfs:comment": "Buyer-side limit-check result; populated in on_init responses that report both sides. Carries discomParticipantId, limitCheckResult and remainingHeadroomKwh.",
+      "rdfs:domain": "deg:DiscomLimitCheck"
+    },
+    {
+      "@id": "deg:sellerSide",
+      "@type": "rdf:Property",
+      "rdfs:label": "Seller-side limit-check result",
+      "rdfs:comment": "Seller-side limit-check result; populated in on_init responses that report both sides. Carries discomParticipantId, limitCheckResult and remainingHeadroomKwh.",
+      "rdfs:domain": "deg:DiscomLimitCheck"
+    },
+    {
+      "@id": "deg:limitCheckResult",
+      "@type": "rdf:Property",
+      "rdfs:label": "Limit-check result",
+      "rdfs:comment": "Outcome of a per-side limit check (OK, REJECTED, or ADJUSTED).",
+      "schema:rangeIncludes": "deg:LimitCheckOutcome"
+    },
+    {
+      "@id": "deg:remainingHeadroomKwh",
+      "@type": "rdf:Property",
+      "rdfs:label": "Remaining headroom (kWh)",
+      "rdfs:comment": "Remaining allocation headroom on the discom ledger for the delivery window, in kilowatt-hours.",
+      "schema:rangeIncludes": "schema:Number"
+    },
+    {
+      "@id": "deg:LimitCheckSubject",
+      "@type": "schema:Enumeration",
+      "schema:name": "Limit-Check Subject",
+      "rdfs:comment": "Side of the trade against which the limit check is performed."
+    },
+    {
+      "@id": "deg:LimitCheckSubjectBuyer",
+      "@type": "deg:LimitCheckSubject",
+      "schema:name": "buyer",
+      "schema:identifier": "buyer"
+    },
+    {
+      "@id": "deg:LimitCheckSubjectSeller",
+      "@type": "deg:LimitCheckSubject",
+      "schema:name": "seller",
+      "schema:identifier": "seller"
+    },
+    {
+      "@id": "deg:LimitCheckOutcome",
+      "@type": "schema:Enumeration",
+      "schema:name": "Limit-Check Outcome",
+      "rdfs:comment": "Possible outcomes of a discom-ledger limit check."
+    },
+    {
+      "@id": "deg:LimitCheckOutcomeOk",
+      "@type": "deg:LimitCheckOutcome",
+      "schema:name": "OK",
+      "schema:identifier": "OK"
+    },
+    {
+      "@id": "deg:LimitCheckOutcomeRejected",
+      "@type": "deg:LimitCheckOutcome",
+      "schema:name": "REJECTED",
+      "schema:identifier": "REJECTED"
+    },
+    {
+      "@id": "deg:LimitCheckOutcomeAdjusted",
+      "@type": "deg:LimitCheckOutcome",
+      "schema:name": "ADJUSTED",
+      "schema:identifier": "ADJUSTED"
+    }
+  ]
+}
