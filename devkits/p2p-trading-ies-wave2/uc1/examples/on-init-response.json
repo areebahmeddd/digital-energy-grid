@@ -11,10 +11,10 @@
     "messageId": "msg-on-init-001",
     "timestamp": "2026-04-25T10:05:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -39,7 +39,7 @@
                 "unitQuantity": 35.0
               },
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
                 "sourceType": "SOLAR",
                 "meterId": "der://meter/seller-001"
@@ -52,7 +52,7 @@
               "energy-resource-solar-001"
             ],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "inputs": [
                 {
@@ -142,7 +142,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
@@ -163,7 +163,7 @@
           }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
           "queryPath": "data.deg.contracts.p2p_trading"
         }
       },
@@ -172,7 +172,7 @@
           "role": "seller",
           "participantId": "TPDDL-DL-seller-001",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "der://meter/seller-001",
             "utilityId": "TPDDL-DL",
@@ -183,7 +183,7 @@
           "role": "buyer",
           "participantId": "BRPL-DL-buyer-001",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "der://meter/buyer-001",
             "utilityId": "BRPL-DL",

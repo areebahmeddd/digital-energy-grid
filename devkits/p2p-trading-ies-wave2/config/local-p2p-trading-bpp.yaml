@@ -152,7 +152,7 @@ modules:
               outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
-              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:

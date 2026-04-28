@@ -11,7 +11,7 @@
     "messageId": "msg-discom-init-001",
     "timestamp": "2026-04-25T10:06:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -56,7 +56,7 @@
             "commitment-p2p-001"
           ],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DiscomLimitCheck/v2.0/context.jsonld",
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DiscomLimitCheck/v2.0/context.jsonld",
             "@type": "DiscomLimitCheck",
             "subject": "buyer",
             "subjectMeterId": "der://meter/buyer-001",
@@ -75,7 +75,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
@@ -96,7 +96,7 @@
           }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
           "queryPath": "data.deg.contracts.p2p_trading"
         }
       }
