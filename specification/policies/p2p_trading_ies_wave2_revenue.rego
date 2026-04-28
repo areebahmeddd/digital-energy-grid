@@ -9,7 +9,13 @@
 #   sellerDiscom (regulated LP for seller's discom)   → receives → positive (wheeling + penalty)
 #
 # Inputs read from the contract payload:
-#   commitments[0].offer.offerAttributes.inputs   — role-tagged price/qty terms
+#   commitments[0].offer.offerAttributes.inputs[seller].inputs.offers[0]
+#                                                  — pricePerKwh for the selected
+#                                                    delivery window (single
+#                                                    window today; multi-window
+#                                                    aggregation can be wired later)
+#   commitments[0].offer.offerAttributes.inputs[seller].inputs.currency
+#                                                  — currency, applies to all slots
 #   contract.performance[0].performanceAttributes — settled qty (Phase 5 reconciliation)
 #   contractAttributes.roles                       — must include all four roles
 #
@@ -42,7 +48,7 @@ _inputs := _offer_attrs.inputs
 
 _seller_inputs := [i.inputs | some i in _inputs; i.role == "seller"][0]
 
-_price_per_kwh := _seller_inputs.pricePerKwh
+_price_per_kwh := _seller_inputs.offers[0].pricePerKwh
 
 _currency := _seller_inputs.currency
 

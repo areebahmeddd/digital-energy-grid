@@ -59,37 +59,55 @@
             "offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
-              "pricingModel": "PER_KWH",
-              "deliveryWindow": {
-                "@type": "beckn:TimePeriod",
-                "schema:startTime": "2026-04-26T04:30:00Z",
-                "schema:endTime": "2026-04-26T05:30:00Z"
-              },
               "inputs": [
                 {
                   "role": "seller",
                   "participantId": "TPDDL-DL-seller-001",
                   "inputs": {
-                    "pricePerKwh": 12,
                     "currency": "INR",
-                    "availableQuantity": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 30.0
-                    },
-                    "sourceType": "SOLAR"
+                    "sourceType": "SOLAR",
+                    "offers": [
+                      {
+                        "pricePerKwh": 12,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 30.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T04:30:00Z",
+                          "schema:endTime": "2026-04-26T05:30:00Z"
+                        }
+                      }
+                    ]
                   }
                 },
                 {
                   "role": "buyer",
                   "participantId": "BRPL-DL-buyer-001",
                   "inputs": {
-                    "requestedQuantity": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 20.0
-                    },
-                    "sourceType": "GRID"
+                    "sourceType": "GRID",
+                    "offers": [
+                      {
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T04:30:00Z",
+                          "schema:endTime": "2026-04-26T05:30:00Z"
+                        },
+                        "requestedQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 20.0
+                        },
+                        "pricePerKwh": 12,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 30.0
+                        }
+                      }
+                    ]
                   }
                 }
               ]
@@ -119,7 +137,7 @@
           }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego",
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_ies_wave2_revenue.rego",
           "queryPath": "data.deg.contracts.p2p_trading"
         }
       },
