@@ -34,7 +34,7 @@
             {
               "id": "energy-resource-solar-001",
               "descriptor": {
-                "name": "Solar energy slot — 2026-04-26 10:00–11:00 IST"
+                "name": "Solar energy slot \u2014 2026-04-26 10:00\u201311:00 IST"
               },
               "quantity": {
                 "@type": "Quantity",
@@ -76,9 +76,13 @@
                       "unitQuantity": 30.0
                     },
                     "sourceType": "SOLAR",
-                    "meterId": "der://meter/seller-001",
-                    "utilityId": "TPDDL-DL",
-                    "utilityCustomerId": "TPDDL-CUST-S-001"
+                    "customerAttributes": {
+                      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+                      "@type": "EnergyCustomer",
+                      "meterId": "der://meter/seller-001",
+                      "utilityId": "TPDDL-DL",
+                      "utilityCustomerId": "TPDDL-CUST-S-001"
+                    }
                   }
                 },
                 {
@@ -101,10 +105,19 @@
         "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          { "role": "buyer", "participantId": "example.bap.com" },
-          { "role": "seller" },
-          { "role": "buyerDiscom" },
-          { "role": "sellerDiscom" }
+          {
+            "role": "buyer",
+            "participantId": "example.bap.com"
+          },
+          {
+            "role": "seller"
+          },
+          {
+            "role": "buyerDiscom"
+          },
+          {
+            "role": "sellerDiscom"
+          }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego",

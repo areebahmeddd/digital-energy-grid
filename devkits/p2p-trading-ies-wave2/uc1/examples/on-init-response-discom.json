@@ -41,7 +41,9 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": ["energy-resource-solar-001"]
+            "resourceIds": [
+              "energy-resource-solar-001"
+            ]
           }
         }
       ],
@@ -85,10 +87,22 @@
         "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          { "role": "buyer", "participantId": "example.bap.com" },
-          { "role": "seller", "participantId": "example.bpp.com" },
-          { "role": "buyerDiscom", "participantId": "buyer-discom-ledger" },
-          { "role": "sellerDiscom", "participantId": "seller-discom-ledger" }
+          {
+            "role": "buyer",
+            "participantId": "example.bap.com"
+          },
+          {
+            "role": "seller",
+            "participantId": "example.bpp.com"
+          },
+          {
+            "role": "buyerDiscom",
+            "participantId": "buyer-discom-ledger"
+          },
+          {
+            "role": "sellerDiscom",
+            "participantId": "seller-discom-ledger"
+          }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego",

@@ -28,14 +28,14 @@
         "provider": {
           "id": "seller-prosumer-001",
           "descriptor": {
-            "name": "Prosumer Solar Farm — North Delhi"
+            "name": "Prosumer Solar Farm \u2014 North Delhi"
           }
         },
         "resources": [
           {
             "id": "energy-resource-solar-001",
             "descriptor": {
-              "name": "Solar energy slot — 2026-04-26 10:00–11:00 IST",
+              "name": "Solar energy slot \u2014 2026-04-26 10:00\u201311:00 IST",
               "shortDesc": "Up to 30 kWh of rooftop solar, 1-hour delivery slot"
             },
             "resourceAttributes": {
@@ -51,7 +51,7 @@
             "id": "offer-p2p-001",
             "descriptor": {
               "name": "Morning Solar @ 12 INR/kWh",
-              "shortDesc": "Up to 30 kWh of rooftop solar for 2026-04-26 10:00–11:00 IST"
+              "shortDesc": "Up to 30 kWh of rooftop solar for 2026-04-26 10:00\u201311:00 IST"
             },
             "resourceIds": [
               "energy-resource-solar-001"
@@ -79,10 +79,18 @@
                 "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  { "role": "buyer" },
-                  { "role": "seller" },
-                  { "role": "buyerDiscom" },
-                  { "role": "sellerDiscom" }
+                  {
+                    "role": "buyer"
+                  },
+                  {
+                    "role": "seller"
+                  },
+                  {
+                    "role": "buyerDiscom"
+                  },
+                  {
+                    "role": "sellerDiscom"
+                  }
                 ],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego",
@@ -102,9 +110,13 @@
                       "unitQuantity": 30.0
                     },
                     "sourceType": "SOLAR",
-                    "meterId": "der://meter/seller-001",
-                    "utilityId": "TPDDL-DL",
-                    "utilityCustomerId": "TPDDL-CUST-S-001"
+                    "customerAttributes": {
+                      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+                      "@type": "EnergyCustomer",
+                      "meterId": "der://meter/seller-001",
+                      "utilityId": "TPDDL-DL",
+                      "utilityCustomerId": "TPDDL-CUST-S-001"
+                    }
                   }
                 }
               ]

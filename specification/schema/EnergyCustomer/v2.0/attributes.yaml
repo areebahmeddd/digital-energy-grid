@@ -1,60 +1,69 @@
-$id: "https://schema.beckn.io/EnergyCustomer/v2.0"
-$schema: "https://json-schema.org/draft/2020-12/schema"
-title: EnergyCustomer
-description: >
-  Customer attributes for energy flows. Used for consumers, producers, or prosumers in:
-  - orderItemAttributes (init request): Contains meterId for delivery destination
-  - orderItemAttributes (responses): Contains meterId for delivery destination
-  - buyerAttributes (enrollment): Contains meterId and sanctionedLoad for customer identification
-x-tags:
-  - energy-trade
-  - p2p-trading
-  - energy-enrollment
-  - customer
-type: object
-additionalProperties: false
-required: ["meterId"]
-x-jsonld:
-  "@context": ./context.jsonld
-  "@type": EnergyCustomer
-properties:
+openapi: 3.1.1
+info:
+  title: EnergyCustomer — Customer Attributes (v2.0)
+  version: 2.0.0
+  description: >
+    Customer attributes for energy flows. Used for consumers, producers, or
+    prosumers as the customer-identity block in:
+      - offerAttributes.inputs[*].inputs.customerAttributes (P2P trading)
+      - orderItemAttributes (init/response): meterId for delivery destination
+      - buyerAttributes (enrollment): meterId + sanctionedLoad
 
-  meterId:
-    type: string
-    description: >
-      Meter identifier in DER address format (der://meter/{id}). Used for customer identification
-      and energy delivery tracking in P2P trading flows.
-    example: "der://meter/98765456"
-    x-jsonld:
-      "@id": meterId
+components:
+  schemas:
+    EnergyCustomer:
+      type: object
+      additionalProperties: false
+      required: [meterId]
+      x-tags:
+        - energy-trade
+        - p2p-trading
+        - energy-enrollment
+        - customer
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyCustomer
+      properties:
 
-  sanctionedLoad:
-    type: number
-    minimum: 0
-    description: >
-      Sanctioned load capacity in kilowatts (kW). Optional field representing the approved
-      electrical load capacity for the customer's connection. Used for load management and
-      regulatory compliance.
-    example: 15.0
-    x-jsonld:
-      "@id": sanctionedLoad
+        meterId:
+          type: string
+          description: >
+            Meter identifier in DER address format (der://meter/{id}). Used
+            for customer identification and energy delivery tracking in P2P
+            trading flows.
+          example: "der://meter/98765456"
+          x-jsonld:
+            "@id": meterId
 
-  utilityCustomerId:
-    type: string
-    description: >
-      Customer's account identifier with the utility company (e.g., PG&E customer number).
-      Used for billing, service identification, and utility system integration.
-    example: "UTIL-CUST-123456"
-    x-jsonld:
-      "@id": utilityCustomerId
+        sanctionedLoad:
+          type: number
+          minimum: 0
+          description: >
+            Sanctioned load capacity in kilowatts (kW). Optional field
+            representing the approved electrical load capacity for the
+            customer's connection. Used for load management and regulatory
+            compliance.
+          example: 15.0
+          x-jsonld:
+            "@id": sanctionedLoad
 
-  utilityId:
-    type: string
-    description: >
-      Utility/DISCOM identifier for the customer's service territory (e.g., "TPDDL-DL", "BESCOM-KA").
-      Used in inter-utility/inter-DISCOM P2P trading to identify which utility serves this customer.
-      Should match the corresponding utilityIdSeller or utilityIdBuyer in orderAttributes for
-      cross-utility transactions.
-    example: "TPDDL-DL"
-    x-jsonld:
-      "@id": utilityId
+        utilityCustomerId:
+          type: string
+          description: >
+            Customer's account identifier with the utility company (e.g.,
+            PG&E customer number). Used for billing, service identification,
+            and utility system integration.
+          example: "UTIL-CUST-123456"
+          x-jsonld:
+            "@id": utilityCustomerId
+
+        utilityId:
+          type: string
+          description: >
+            Utility/DISCOM identifier for the customer's service territory
+            (e.g., "TPDDL-DL", "BESCOM-KA"). Used in inter-utility /
+            inter-DISCOM P2P trading to identify which utility serves this
+            customer.
+          example: "TPDDL-DL"
+          x-jsonld:
+            "@id": utilityId

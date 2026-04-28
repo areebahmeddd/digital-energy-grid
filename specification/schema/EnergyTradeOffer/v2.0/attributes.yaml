@@ -162,9 +162,11 @@ components:
       description: >
         Role-specific inputs bag. Seller fields and buyer fields are both
         listed as optional here; in practice seller entries populate
-        availability/price/source/meter/utility, while buyer entries
-        populate requestedQuantity (and optional meter/utility) at
-        select/init.
+        availability/price/source + customerAttributes, while buyer entries
+        populate requestedQuantity (and customerAttributes at select/init).
+        Customer identity (meter, utility, utility-customer id) is carried
+        in the customerAttributes JSON-LD block and validated separately
+        against the EnergyCustomer schema.
       properties:
 
         # ── seller-side fields ─────────────────────────────────────────────
@@ -189,7 +191,7 @@ components:
             - $ref: "#/components/schemas/Quantity"
           description: Energy quantity the buyer is requesting.
 
-        # ── shared (seller, buyer) identity fields ─────────────────────────
+        # ── shared (seller, buyer) trade-side fields ───────────────────────
         sourceType:
           type: string
           enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
@@ -197,18 +199,24 @@ components:
             Energy source type for this side. Seller side typically declares
             generation source (e.g., SOLAR); buyer side may declare
             consumption-side context (e.g., GRID).
-        meterId:
-          type: string
+
+        # ── shared (seller, buyer) customer identity ───────────────────────
+        customerAttributes:
+          type: object
+          additionalProperties: true
+          required: ["@context", "@type"]
           description: >
-            DER-format meter identifier (der://meter/{id}).
-          example: "der://meter/seller-001"
-        utilityId:
-          type: string
-          description: >
-            Discom / utility identifier the participant is registered with.
-          example: "TPDDL-DL"
-        utilityCustomerId:
-          type: string
-          description: >
-            Customer id at the utility (consumer-side or prosumer-side).
-          example: "TPDDL-CUST-S-001"
+            JSON-LD-aware container for customer identity (meter, utility,
+            utility-customer id). MUST carry @context and @type pointing at
+            EnergyCustomer/v2.0; the EnergyCustomer schema is loaded by the
+            extended-schema validator via @context and validates the inner
+            fields strictly.
+          properties:
+            "@context":
+              type: string
+              format: uri
+            "@type":
+              type: string
+              enum: [EnergyCustomer]
+          x-jsonld:
+            "@id": customerAttributes
