@@ -16,7 +16,9 @@
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeDelivery/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -66,7 +68,7 @@
               "inputs": [
                 {
                   "role": "seller",
-                  "participantId": "example.bpp.com",
+                  "participantId": "TPDDL-DL-seller-001",
                   "inputs": {
                     "pricePerKwh": 12,
                     "currency": "INR",
@@ -75,33 +77,19 @@
                       "unitCode": "KWH",
                       "unitQuantity": 30.0
                     },
-                    "sourceType": "SOLAR",
-                    "customerAttributes": {
-                      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-                      "@type": "EnergyCustomer",
-                      "meterId": "der://meter/seller-001",
-                      "utilityId": "TPDDL-DL",
-                      "utilityCustomerId": "TPDDL-CUST-S-001"
-                    }
+                    "sourceType": "SOLAR"
                   }
                 },
                 {
                   "role": "buyer",
-                  "participantId": "example.bap.com",
+                  "participantId": "BRPL-DL-buyer-001",
                   "inputs": {
                     "requestedQuantity": {
                       "@type": "Quantity",
                       "unitCode": "KWH",
                       "unitQuantity": 20.0
                     },
-                    "sourceType": "GRID",
-                    "customerAttributes": {
-                      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-                      "@type": "EnergyCustomer",
-                      "meterId": "der://meter/buyer-001",
-                      "utilityId": "BRPL-DL",
-                      "utilityCustomerId": "BRPL-CUST-B-001"
-                    }
+                    "sourceType": "GRID"
                   }
                 }
               ]
@@ -154,11 +142,11 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "example.bap.com"
+            "participantId": "BRPL-DL-buyer-001"
           },
           {
             "role": "seller",
-            "participantId": "example.bpp.com"
+            "participantId": "TPDDL-DL-seller-001"
           },
           {
             "role": "buyerDiscom",
@@ -172,34 +160,78 @@
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/policies/p2p_trading_revenue.rego",
           "queryPath": "data.deg.contracts.p2p_trading"
-        },
-        "revenueFlows": [
-          {
-            "role": "buyer",
-            "value": -222,
-            "currency": "INR",
-            "description": "Pays 222 INR for 18.5 kWh delivered (incl. buyer-side wheeling 0)"
-          },
-          {
-            "role": "seller",
-            "value": 222,
-            "currency": "INR",
-            "description": "Receives 222 INR for 18.5 kWh delivered (net of seller-side wheeling 0 and penalty 0)"
-          },
-          {
-            "role": "buyerDiscom",
-            "value": 0,
-            "currency": "INR",
-            "description": "Buyer-side wheeling charge (placeholder \u2014 currently 0)"
-          },
-          {
-            "role": "sellerDiscom",
-            "value": 0,
-            "currency": "INR",
-            "description": "Seller-side wheeling charge + any penalty (placeholders \u2014 currently 0)"
+        }
+      },
+      "participants": [
+        {
+          "role": "seller",
+          "participantId": "TPDDL-DL-seller-001",
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+            "@type": "EnergyCustomer",
+            "meterId": "der://meter/seller-001",
+            "utilityId": "TPDDL-DL",
+            "utilityCustomerId": "TPDDL-CUST-S-001"
           }
-        ]
-      }
+        },
+        {
+          "role": "buyer",
+          "participantId": "BRPL-DL-buyer-001",
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+            "@type": "EnergyCustomer",
+            "meterId": "der://meter/buyer-001",
+            "utilityId": "BRPL-DL",
+            "utilityCustomerId": "BRPL-CUST-B-001"
+          }
+        },
+        {
+          "role": "buyerDiscom",
+          "participantId": "buyer-discom-ledger"
+        },
+        {
+          "role": "sellerDiscom",
+          "participantId": "seller-discom-ledger"
+        }
+      ],
+      "consideration": [
+        {
+          "id": "settled-revenue-flows",
+          "status": {
+            "code": "SETTLED"
+          },
+          "considerationAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/RevenueFlow/v2.0/context.jsonld",
+            "@type": "RevenueFlow",
+            "revenueFlows": [
+              {
+                "role": "buyer",
+                "value": -222,
+                "currency": "INR",
+                "description": "Pays 222 INR for 18.5 kWh delivered (incl. buyer-side wheeling 0)"
+              },
+              {
+                "role": "seller",
+                "value": 222,
+                "currency": "INR",
+                "description": "Receives 222 INR for 18.5 kWh delivered (net of seller-side wheeling 0 and penalty 0)"
+              },
+              {
+                "role": "buyerDiscom",
+                "value": 0,
+                "currency": "INR",
+                "description": "Buyer-side wheeling charge (placeholder \u2014 currently 0)"
+              },
+              {
+                "role": "sellerDiscom",
+                "value": 0,
+                "currency": "INR",
+                "description": "Seller-side wheeling charge + any penalty (placeholders \u2014 currently 0)"
+              }
+            ]
+          }
+        }
+      ]
     }
   }
 }

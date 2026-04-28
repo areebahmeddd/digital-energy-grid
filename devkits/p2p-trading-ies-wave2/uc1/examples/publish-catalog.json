@@ -12,7 +12,8 @@
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/P2PTrade/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -25,12 +26,6 @@
         },
         "bppId": "bpp.example.com",
         "bppUri": "http://bpp.example.com/bpp/receiver",
-        "provider": {
-          "id": "seller-prosumer-001",
-          "descriptor": {
-            "name": "Prosumer Solar Farm \u2014 North Delhi"
-          }
-        },
         "resources": [
           {
             "id": "energy-resource-solar-001",
@@ -80,16 +75,20 @@
                 "@type": "DEGContract",
                 "roles": [
                   {
-                    "role": "buyer"
+                    "role": "buyer",
+                    "participantId": null
                   },
                   {
-                    "role": "seller"
+                    "role": "seller",
+                    "participantId": "TPDDL-DL-seller-001"
                   },
                   {
-                    "role": "buyerDiscom"
+                    "role": "buyerDiscom",
+                    "participantId": null
                   },
                   {
-                    "role": "sellerDiscom"
+                    "role": "sellerDiscom",
+                    "participantId": "seller-discom-ledger"
                   }
                 ],
                 "policy": {
@@ -100,7 +99,7 @@
               "inputs": [
                 {
                   "role": "seller",
-                  "participantId": "example.bpp.com",
+                  "participantId": "TPDDL-DL-seller-001",
                   "inputs": {
                     "pricePerKwh": 12,
                     "currency": "INR",
@@ -109,17 +108,23 @@
                       "unitCode": "KWH",
                       "unitQuantity": 30.0
                     },
-                    "sourceType": "SOLAR",
-                    "customerAttributes": {
-                      "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-                      "@type": "EnergyCustomer",
-                      "meterId": "der://meter/seller-001",
-                      "utilityId": "TPDDL-DL",
-                      "utilityCustomerId": "TPDDL-CUST-S-001"
-                    }
+                    "sourceType": "SOLAR"
                   }
                 }
               ]
+            },
+            "provider": {
+              "id": "TPDDL-DL-seller-001",
+              "descriptor": {
+                "name": "Prosumer Solar Farm \u2014 North Delhi"
+              },
+              "providerAttributes": {
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/deg-214-p2p-trading-devkit-based-on-becknv2LTS/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+                "@type": "EnergyCustomer",
+                "meterId": "der://meter/seller-001",
+                "utilityId": "TPDDL-DL",
+                "utilityCustomerId": "TPDDL-CUST-S-001"
+              }
             }
           }
         ]

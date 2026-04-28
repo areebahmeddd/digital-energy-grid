@@ -160,13 +160,12 @@ components:
       type: object
       additionalProperties: false
       description: >
-        Role-specific inputs bag. Seller fields and buyer fields are both
-        listed as optional here; in practice seller entries populate
-        availability/price/source + customerAttributes, while buyer entries
-        populate requestedQuantity (and customerAttributes at select/init).
-        Customer identity (meter, utility, utility-customer id) is carried
-        in the customerAttributes JSON-LD block and validated separately
-        against the EnergyCustomer schema.
+        Role-specific inputs bag — trade-side terms only. Customer identity
+        (meter, utility, utility-customer id) is NOT carried here; it lives
+        on Provider.providerAttributes at catalog publish and on
+        Contract.participants[*].participantAttributes from select onwards.
+        Seller-side entries populate availability + price; buyer-side
+        entries populate requestedQuantity. sourceType is shared.
       properties:
 
         # ── seller-side fields ─────────────────────────────────────────────
@@ -199,24 +198,3 @@ components:
             Energy source type for this side. Seller side typically declares
             generation source (e.g., SOLAR); buyer side may declare
             consumption-side context (e.g., GRID).
-
-        # ── shared (seller, buyer) customer identity ───────────────────────
-        customerAttributes:
-          type: object
-          additionalProperties: true
-          required: ["@context", "@type"]
-          description: >
-            JSON-LD-aware container for customer identity (meter, utility,
-            utility-customer id). MUST carry @context and @type pointing at
-            EnergyCustomer/v2.0; the EnergyCustomer schema is loaded by the
-            extended-schema validator via @context and validates the inner
-            fields strictly.
-          properties:
-            "@context":
-              type: string
-              format: uri
-            "@type":
-              type: string
-              enum: [EnergyCustomer]
-          x-jsonld:
-            "@id": customerAttributes
