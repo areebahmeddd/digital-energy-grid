@@ -1,0 +1,19 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/DiscomLimitCheck/v2.0/",
+    "DiscomLimitCheck": "deg:DiscomLimitCheck",
+    "subject": "deg:subject",
+    "subjectMeterId": "deg:subjectMeterId",
+    "discomParticipantId": "deg:discomParticipantId",
+    "deliveryWindow": "deg:deliveryWindow",
+    "tradeQuantity": "deg:tradeQuantity",
+    "buyerSide": "deg:buyerSide",
+    "sellerSide": "deg:sellerSide",
+    "limitCheckResult": "deg:limitCheckResult",
+    "remainingHeadroomKwh": "deg:remainingHeadroomKwh"
+  },
+  "@graph": []
+}

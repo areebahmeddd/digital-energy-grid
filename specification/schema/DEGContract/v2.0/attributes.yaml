@@ -4,15 +4,25 @@ info:
   version: 2.0.0
   description: >
     Standard contract schema for all DEG energy contracts. Carried as a
-    sub-attribute of domain-specific offer schemas (e.g. DemandFlexBuyOffer.contractTerms)
-    and promoted to Contract.contractAttributes at select/init.
-    Defines roles, policy reference, and computed revenue flows.
+    sub-attribute of domain-specific offer schemas (e.g. EnergyTradeOffer.contractTerms,
+    DemandFlexBuyOffer.contractTerms) and promoted to Contract.contractAttributes
+    at select/init. Defines the role list and the policy reference.
+
+    Note: customer/discom identity that backs each role lives at
+    Contract.participants[*].participantAttributes (Beckn-native).
+
+    Computed revenue flows can land in either of two destinations,
+    selected by the BPP-side `revenueflows` plugin's `outputPath` config:
+      - "raw" / contractAttributes.revenueFlows  — legacy shape, used by
+        demand-flex; the array is declared below as an optional property.
+      - "jsonld" / Contract.consideration[*].considerationAttributes —
+        Beckn-native, used by wave2 P2P trading.
 
 components:
   schemas:
     DEGContract:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required: [roles, policy]
       x-jsonld:
         "@context": ./context.jsonld
@@ -22,21 +32,33 @@ components:
         roles:
           type: array
           description: >
-            Contract roles. participantId is null in the catalog/offer and
-            bound to actual participant IDs at init/confirm.
+            Contract roles. The participantId key is required on every role
+            entry, but its value MAY be null in the catalog/offer (buyer
+            and buyerDiscom unknown until select/init) and is bound to a
+            concrete participant id at select/init. Identity attributes
+            (meter, utility, utilityCustomerId) for each bound role live
+            at Contract.participants[*].participantAttributes.
           items:
             type: object
-            required: [role]
+            additionalProperties: false
+            required: [role, participantId]
             properties:
               role:
                 type: string
-                enum: [buyer, seller]
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               participantId:
-                type: string
-                description: Bound at init/confirm. Null in catalog.
+                type:
+                  - string
+                  - "null"
+                description: >
+                  Concrete participant id once bound (buyer/seller use the
+                  utilityId-meter compound id, e.g. "TPDDL-DL-seller-001";
+                  discom roles use the discom-ledger participant id).
+                  Null at catalog publish for sides not yet bound.
 
         policy:
           type: object
+          additionalProperties: false
           required: [url, queryPath]
           description: OPA/Rego policy governing this contract.
           properties:
@@ -49,15 +71,25 @@ components:
         revenueFlows:
           type: array
           description: >
-            Computed after settlement. Positive = receives, negative = pays.
-            Sum of all values MUST equal zero (net-zero).
+            Optional. Settlement-time per-role flows written by the
+            `revenueflows` plugin when it is configured with
+            outputMode: raw and outputPath ending at this property
+            (the legacy demand-flex shape). Wave2 P2P trading instead
+            uses Contract.consideration[*].considerationAttributes
+            (RevenueFlow JSON-LD) and leaves this array unset.
           items:
             type: object
+            additionalProperties: false
             required: [role, value, currency]
             properties:
               role:
                 type: string
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               value:
                 type: number
               currency:
+                type: string
+                minLength: 3
+                maxLength: 3
+              description:
                 type: string

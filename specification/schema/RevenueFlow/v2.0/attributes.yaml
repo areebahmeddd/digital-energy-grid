@@ -1,0 +1,58 @@
+openapi: 3.1.1
+info:
+  title: RevenueFlow — Consideration Attributes (v2.0)
+  version: 2.0.0
+  description: >
+    Settlement-time revenue-flow attributes for energy contracts. Attached
+    to Contract.consideration[*].considerationAttributes after the linked
+    rego policy evaluates (typically once per contract, post-settlement).
+
+    Each entry in revenueFlows is signed:
+      positive value = role receives,
+      negative value = role pays.
+    The sum across all entries MUST be zero (net-zero invariant).
+
+components:
+  schemas:
+    RevenueFlow:
+      type: object
+      additionalProperties: false
+      required: [revenueFlows]
+      x-tags:
+        - energy-trade
+        - p2p-trading
+        - settlement
+        - revenue
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": RevenueFlow
+      properties:
+
+        revenueFlows:
+          type: array
+          minItems: 1
+          description: >
+            Per-role signed revenue-flow entries computed by the contract
+            policy after settlement. Sum MUST be zero across the array.
+          items:
+            type: object
+            additionalProperties: false
+            required: [role, value, currency]
+            properties:
+              role:
+                type: string
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
+              value:
+                type: number
+                description: >
+                  Signed amount. Positive = role receives;
+                  negative = role pays.
+              currency:
+                type: string
+                minLength: 3
+                maxLength: 3
+                description: ISO-4217 currency code.
+                example: "INR"
+              description:
+                type: string
+                description: Human-readable rationale for the flow.

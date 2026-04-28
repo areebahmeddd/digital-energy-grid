@@ -110,8 +110,8 @@ func (rf *RevenueFlows) Run(ctx *model.StepContext) error {
 		return nil
 	}
 
-	// Inject into message body
-	modified, err := InjectRevenueFlows(ctx.Body, flows)
+	// Inject into message body at the configured outputPath / outputMode.
+	modified, err := InjectRevenueFlows(ctx.Body, flows, rf.config)
 	if err != nil {
 		log.Warnf(ctx, "RevenueFlows: failed to inject revenue_flows: %v", err)
 		return nil // soft failure

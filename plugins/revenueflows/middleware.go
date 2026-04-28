@@ -115,8 +115,8 @@ func NewMiddleware(cfg map[string]string) (func(http.Handler) http.Handler, erro
 				return
 			}
 
-			// Inject into body
-			modified, err := InjectRevenueFlows(body, flows)
+			// Inject into body at the configured outputPath / outputMode.
+			modified, err := InjectRevenueFlows(body, flows, config)
 			if err != nil {
 				fmt.Printf("[RevenueFlows] WARN: inject failed: %v\n", err)
 				r.Body = io.NopCloser(bytes.NewReader(body))

@@ -1,77 +1,218 @@
-$id: "https://schema.beckn.io/EnergyTradeOffer/v2.0"
-$schema: "https://json-schema.org/draft/2020-12/schema"
-title: EnergyTradeOffer
-description: >
-  Offer attributes for P2P energy trading. Attached to Offer.offerAttributes
-  to provide pricing models, availability windows, and delivery details.
-  NOTE: Price (beckn:price) is specified on the parent Offer object, not here.
-  The price.applicableQuantity specifies the max energy quantity for this delivery window.
-x-tags:
-  - energy-trade
-  - p2p-trading
-  - offer
-type: object
-additionalProperties: false
-required: [pricingModel]
-x-jsonld:
-  "@context": ./context.jsonld
-  "@type": EnergyTradeOffer
-properties:
+openapi: 3.1.1
+info:
+  title: EnergyTradeOffer — Offer Attributes (v2.0)
+  version: 2.0.0
+  description: >
+    Offer attributes for P2P energy trading. Attached to Offer.offerAttributes
+    to provide validity windows, role-tagged inputs, and an embedded list of
+    delivery slots ("offers"). Each slot in inputs[*].inputs.offers is a
+    {pricePerKwh, availableQuantity, deliveryWindow[, requestedQuantity]}
+    tuple, allowing a single contract to span multiple time windows.
 
-  pricingModel:
-    type: string
-    enum: [PER_KWH, TIME_OF_DAY, SUBSCRIPTION, FIXED]
-    description: Pricing model classification used for the energy trade offer.
-    example: "PER_KWH"
-    x-jsonld:
-      "@id": pricingModel
+components:
+  schemas:
 
-  validityWindow:
-    description: >
-      Time window during which this offer can be selected/accepted. Typically set
-      to expire before delivery starts (e.g., 4 hours before delivery start time)
-      to allow for scheduling and grid coordination. After this window closes,
-      the offer is no longer available for selection.
-    x-jsonld:
-      "@id": validityWindow
-    allOf:
-      - $ref: "https://schema.beckn.io/TimePeriod/v2.0"
-      - type: object
-        required: ["schema:startTime", "schema:endTime"]
+    EnergyTradeOffer:
+      type: object
+      additionalProperties: false
+      x-tags:
+        - energy-trade
+        - p2p-trading
+        - offer
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyTradeOffer
+      properties:
 
-  deliveryWindow:
-    description: >
-      Specific time period (start and end time) when energy delivery occurs.
-      Different from validityWindow which indicates when the offer can be selected.
-      This represents the actual delivery time window. All times MUST be in UTC
-      (ISO 8601 with Z suffix).
-    x-jsonld:
-      "@id": deliveryWindow
-    allOf:
-      - $ref: "https://schema.beckn.io/TimePeriod/v2.0"
-      - type: object
-        required: ["schema:startTime", "schema:endTime"]
+        validityWindow:
+          allOf:
+            - $ref: "#/components/schemas/TimePeriod"
+          description: >
+            Time window during which this offer can be selected/accepted.
+            Typically set to expire before the earliest delivery starts.
+            After this window closes, the offer is no longer available.
+          x-jsonld:
+            "@id": validityWindow
+
+        inputs:
+          type: array
+          description: >
+            Per-role inputs to the offer. Each entry binds a role
+            (seller / buyer) to a participantId and to a list of delivery
+            slots (offers[]). Seller slots specify pricePerKwh,
+            availableQuantity and deliveryWindow; buyer slots additionally
+            specify requestedQuantity for that window.
+          items:
+            $ref: "#/components/schemas/RoleInputs"
+
+        contractTerms:
+          type: object
+          additionalProperties: true
+          description: >
+            JSON-LD-aware container for the contract terms attached to this
+            offer at catalog/publish time. MUST carry @context and @type
+            (typically pointing at DEGContract). Validated separately by the
+            extended-schema chain via @context.
+          required: ["@context", "@type"]
+          properties:
+            "@context":
+              type: string
+              format: uri
+            "@type":
+              type: string
+          x-jsonld:
+            "@id": contractTerms
+
+        gift:
+          type: object
+          additionalProperties: true
+          description: >
+            Optional gift parameters for energy gifting.
+          x-jsonld:
+            "@id": gift
+
+    # ── shared sub-schemas ─────────────────────────────────────────────────
+
+    TimePeriod:
+      type: object
+      additionalProperties: false
+      required: ["@type", "schema:startTime", "schema:endTime"]
+      properties:
+        "@type":
+          type: string
+          enum: ["beckn:TimePeriod"]
+        "schema:startTime":
+          type: string
+          format: date-time
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+          description: Start time in UTC (ISO 8601 with Z suffix).
+          example: "2026-04-26T04:30:00Z"
+        "schema:endTime":
+          type: string
+          format: date-time
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+          description: End time in UTC (ISO 8601 with Z suffix).
+          example: "2026-04-26T05:30:00Z"
+
+    Quantity:
+      type: object
+      additionalProperties: false
+      required: ["@type", unitCode, unitQuantity]
+      properties:
+        "@type":
+          type: string
+          enum: [Quantity]
+        unitCode:
+          type: string
+          enum: [KWH, MWH, WH]
+          description: Quantity unit code.
+        unitQuantity:
+          type: number
+          minimum: 0
+          description: Numeric quantity in the given unit.
+
+    RoleInputs:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [buyer, seller]
+          description: Role this inputs entry applies to within the offer.
+        participantId:
+          type: string
+          description: >
+            Beckn participant id of the role-holder. Bound at select/init;
+            omitted at catalog publish for the buyer side.
+        inputs:
+          $ref: "#/components/schemas/InputBag"
+      # Buyer slots additionally require requestedQuantity. Seller slots
+      # leave it absent.
+      if:
         properties:
-          "schema:startTime":
-            type: string
-            format: date-time
-            pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-            description: Start time in UTC (ISO 8601 format with Z suffix).
-            example: "2025-06-15T09:00:00Z"
-          "schema:endTime":
-            type: string
-            format: date-time
-            pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-            description: End time in UTC (ISO 8601 format with Z suffix).
-            example: "2025-06-15T10:00:00Z"
+          role:
+            const: buyer
+      then:
+        properties:
+          inputs:
+            properties:
+              offers:
+                items:
+                  required:
+                    - pricePerKwh
+                    - availableQuantity
+                    - deliveryWindow
+                    - requestedQuantity
 
-  gift:
-    description: >
-      Optional gift parameters for energy gifting. When present, indicates this offer
-      is a gift from a prosumer (gifter) to a specific recipient, discoverable by
-      lookupHash of the recipient's phone and claimable using a shared secret.
-      Gift offers are typically listed at price 0 on the catalog.
-    x-jsonld:
-      "@id": gift
-    allOf:
-      - $ref: "https://schema.beckn.io/EnergyGift/v2.0"
+    InputBag:
+      type: object
+      additionalProperties: false
+      required: [offers]
+      description: >
+        Role-specific inputs bag. Single-valued, role-stable attributes
+        (currency, sourceType) live flat at the top of this bag; the
+        time-varying tuples (price, available qty, delivery window, and —
+        for buyers — requestedQuantity) live in the offers[] array, one
+        entry per delivery slot.
+      properties:
+
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO-4217 currency code (e.g., INR, USD). Applies to all entries in offers[].
+          example: "INR"
+
+        sourceType:
+          type: string
+          enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
+          description: >
+            Energy source type for this side. Seller side typically declares
+            generation source (e.g., SOLAR); buyer side may declare
+            consumption-side context (e.g., GRID). Applies to all entries
+            in offers[].
+
+        offers:
+          type: array
+          minItems: 1
+          description: >
+            One entry per delivery time window. For seller role:
+            {pricePerKwh, availableQuantity, deliveryWindow}. For buyer
+            role: same three plus requestedQuantity. Multiple entries let
+            a single contract span multiple time windows (e.g. several
+            consecutive hours), avoiding duplication of currency /
+            sourceType / role identity.
+          items:
+            $ref: "#/components/schemas/OfferSlot"
+
+    OfferSlot:
+      type: object
+      additionalProperties: false
+      required: [pricePerKwh, availableQuantity, deliveryWindow]
+      description: >
+        A single trade slot — one delivery window with its price and
+        available quantity. requestedQuantity is added when this slot is
+        carried under a buyer-role inputs entry (enforced via the if/then
+        on RoleInputs above).
+      properties:
+        pricePerKwh:
+          type: number
+          minimum: 0
+          description: Per-kWh price for this delivery window.
+        availableQuantity:
+          allOf:
+            - $ref: "#/components/schemas/Quantity"
+          description: Energy quantity the seller has on offer for this window.
+        deliveryWindow:
+          allOf:
+            - $ref: "#/components/schemas/TimePeriod"
+          description: >
+            Specific time period (UTC, ISO 8601 with Z suffix) when energy
+            delivery occurs for this slot.
+        requestedQuantity:
+          allOf:
+            - $ref: "#/components/schemas/Quantity"
+          description: >
+            Energy quantity the buyer is requesting for this window.
+            Required only when the parent RoleInputs.role is "buyer".

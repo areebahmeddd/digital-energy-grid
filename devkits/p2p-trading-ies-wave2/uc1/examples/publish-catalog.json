@@ -1,0 +1,154 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "catalog/publish",
+    "bppId": "bpp.example.com",
+    "bppUri": "https://bpp.example.com/beckn",
+    "transactionId": "a1b2c3d4-e5f6-7890-abcd-ef1122334455",
+    "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
+    "timestamp": "2026-04-25T06:00:00Z",
+    "schemaContext": [
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld"
+    ]
+  },
+  "message": {
+    "catalogs": [
+      {
+        "id": "catalog-p2p-energy-2026-04",
+        "descriptor": {
+          "name": "Inter-Discom P2P Solar Energy",
+          "shortDesc": "Rooftop solar energy from prosumers, traded across discoms"
+        },
+        "bppId": "bpp.example.com",
+        "bppUri": "http://bpp.example.com/bpp/receiver",
+        "provider": {
+          "id": "TPDDL-DL-seller-001",
+          "descriptor": {
+            "name": "Prosumer Solar Farm \u2014 North Delhi"
+          }
+        },
+        "resources": [
+          {
+            "id": "energy-resource-solar-001",
+            "descriptor": {
+              "name": "Solar energy slot \u2014 2026-04-26 10:00\u201311:00 IST",
+              "shortDesc": "Up to 30 kWh of rooftop solar, 1-hour delivery slot"
+            },
+            "resourceAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
+              "@type": "EnergyResource",
+              "sourceType": "SOLAR",
+              "meterId": "der://meter/seller-001"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "id": "offer-p2p-001",
+            "descriptor": {
+              "name": "Morning Solar @ 12 INR/kWh",
+              "shortDesc": "Up to 30 kWh of rooftop solar for 2026-04-26 10:00\u201311:00 IST"
+            },
+            "resourceIds": [
+              "energy-resource-solar-001"
+            ],
+            "validity": {
+              "startDate": "2026-04-25T06:00:00Z",
+              "endDate": "2026-04-26T00:30:00Z"
+            },
+            "availableTo": [],
+            "offerAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
+              "@type": "EnergyTradeOffer",
+              "validityWindow": {
+                "@type": "beckn:TimePeriod",
+                "schema:startTime": "2026-04-25T06:00:00Z",
+                "schema:endTime": "2026-04-26T00:30:00Z"
+              },
+              "contractTerms": {
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+                "@type": "DEGContract",
+                "roles": [
+                  {
+                    "role": "buyer",
+                    "participantId": null
+                  },
+                  {
+                    "role": "seller",
+                    "participantId": "TPDDL-DL-seller-001"
+                  },
+                  {
+                    "role": "buyerDiscom",
+                    "participantId": null
+                  },
+                  {
+                    "role": "sellerDiscom",
+                    "participantId": "seller-discom-ledger"
+                  }
+                ],
+                "policy": {
+                  "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+                  "queryPath": "data.deg.contracts.p2p_trading"
+                }
+              },
+              "inputs": [
+                {
+                  "role": "seller",
+                  "participantId": "TPDDL-DL-seller-001",
+                  "inputs": {
+                    "currency": "INR",
+                    "sourceType": "SOLAR",
+                    "offers": [
+                      {
+                        "pricePerKwh": 12,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 30.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T04:30:00Z",
+                          "schema:endTime": "2026-04-26T05:30:00Z"
+                        }
+                      },
+                      {
+                        "pricePerKwh": 14,
+                        "availableQuantity": {
+                          "@type": "Quantity",
+                          "unitCode": "KWH",
+                          "unitQuantity": 25.0
+                        },
+                        "deliveryWindow": {
+                          "@type": "beckn:TimePeriod",
+                          "schema:startTime": "2026-04-26T05:30:00Z",
+                          "schema:endTime": "2026-04-26T06:30:00Z"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "provider": {
+              "id": "TPDDL-DL-seller-001",
+              "descriptor": {
+                "name": "Prosumer Solar Farm \u2014 North Delhi"
+              },
+              "providerAttributes": {
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+                "@type": "EnergyCustomer",
+                "meterId": "der://meter/seller-001",
+                "utilityId": "TPDDL-DL",
+                "utilityCustomerId": "TPDDL-CUST-S-001"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

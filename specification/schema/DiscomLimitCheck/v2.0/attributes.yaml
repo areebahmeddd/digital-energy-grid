@@ -1,0 +1,85 @@
+openapi: 3.1.1
+info:
+  title: DiscomLimitCheck — Performance Attributes (v2.0)
+  version: 2.0.0
+  description: >
+    Optional Phase-2 limit-check performance attributes for inter-discom P2P
+    energy trades. Attached to Performance.performanceAttributes during the
+    init/on_init exchange that asks each discom ledger whether the contract
+    quantity fits within the prosumer's allocation envelope for the
+    delivery window.
+
+components:
+  schemas:
+    DiscomLimitCheck:
+      type: object
+      additionalProperties: true
+      x-tags:
+        - p2p-trading
+        - discom-ledger
+        - limit-check
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": DiscomLimitCheck
+      properties:
+
+        subject:
+          type: string
+          enum: [buyer, seller]
+          description: >
+            Which side of the trade this limit check is being requested
+            against. Omitted in on_init responses that report both sides.
+
+        subjectMeterId:
+          type: string
+          description: >
+            Source meter identifier in DER address format
+            (der://meter/{id}) for the subject prosumer.
+
+        discomParticipantId:
+          type: string
+          description: Participant id of the discom ledger.
+
+        deliveryWindow:
+          type: object
+          additionalProperties: true
+          description: Delivery window for the limit check (UTC).
+
+        tradeQuantity:
+          type: object
+          additionalProperties: true
+          description: >
+            Trade quantity being limit-checked (Quantity object with
+            unitCode and unitQuantity).
+
+        buyerSide:
+          type: object
+          additionalProperties: true
+          description: >
+            Buyer-side limit-check result; populated in on_init responses
+            that report both sides.
+          properties:
+            discomParticipantId:
+              type: string
+            limitCheckResult:
+              type: string
+              enum: [OK, REJECTED, ADJUSTED]
+            remainingHeadroomKwh:
+              type: number
+              minimum: 0
+
+        sellerSide:
+          type: object
+          additionalProperties: true
+          description: >
+            Seller-side limit-check result; populated in on_init responses
+            that report both sides.
+          properties:
+            discomParticipantId:
+              type: string
+            limitCheckResult:
+              type: string
+              enum: [OK, REJECTED, ADJUSTED]
+            remainingHeadroomKwh:
+              type: number
+              minimum: 0
