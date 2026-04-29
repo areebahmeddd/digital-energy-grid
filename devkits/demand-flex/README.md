@@ -12,7 +12,7 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 | Use Case | BPP (Provider) | BAP (Consumer) | Description |
 |----------|---------------|----------------|-------------|
-| [uc1-demand-flex](./uc1-demand-flex/) | TPDDL (utility) | GreenFlex (aggregator) | Publish flex need → discover → commit → deliver → settle |
+| [uc1-bdr-w-baselining](./uc1-bdr-w-baselining/) | TPDDL (utility) | GreenFlex (aggregator) | Publish flex need → discover → commit → deliver → settle |
 
 ## Key Schemas
 
@@ -25,7 +25,7 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 ## Postman
 
-`uc1-demand-flex/postman/demand-flex-uc1-demand-flex.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
+`uc1-bdr-w-baselining/postman/demand-flex-uc1-bdr-w-baselining.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
 
 ## Policy Enforcement
 

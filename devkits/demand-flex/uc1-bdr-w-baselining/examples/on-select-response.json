@@ -2,39 +2,40 @@
   "context": {
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
-    "action": "on_status",
+    "action": "on_select",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
-    "messageId": "msg-on-status-baselines-001",
-    "timestamp": "2026-04-01T08:00:00Z",
+    "messageId": "msg-on-select-001",
+    "timestamp": "2026-03-30T10:00:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "id": "contract-flex-001",
       "status": {
-        "code": "ACTIVE"
+        "code": "DRAFT"
       },
       "commitments": [
         {
           "id": "commitment-flex-001",
           "status": {
             "descriptor": {
-              "code": "ACTIVE"
+              "code": "DRAFT"
             }
           },
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
+              "descriptor": {
+                "name": "Peak Demand Flex - North Delhi"
+              },
               "quantity": {
                 "unitCode": "kW",
                 "unitQuantity": 150,
@@ -49,7 +50,14 @@
                   "endDate": "2026-04-01T10:30:00Z"
                 },
                 "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "maxCapacityKw": 500,
+                "location": {
+                  "type": "Point",
+                  "coordinates": [
+                    77.209,
+                    28.6139
+                  ]
+                }
               }
             }
           ],
@@ -79,54 +87,10 @@
                 },
                 {
                   "role": "seller",
-                  "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ]
-                  }
+                  "participantId": null
                 }
               ]
             }
-          }
-        }
-      ],
-      "performance": [
-        {
-          "id": "perf-evt-001-baselines",
-          "status": {
-            "code": "BASELINE_PUBLISHED",
-            "name": "Baselines published for upcoming event"
-          },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
-          "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-            "@type": "DemandFlexPerformance",
-            "eventId": "evt-2026-04-01-001",
-            "methodology": "5of10",
-            "meters": [
-              {
-                "meterId": "der://meter/001",
-                "baselineKw": 45.0
-              },
-              {
-                "meterId": "der://meter/002",
-                "baselineKw": 38.0
-              },
-              {
-                "meterId": "der://meter/003",
-                "baselineKw": 52.0
-              }
-            ]
           }
         }
       ],
@@ -140,14 +104,20 @@
           },
           {
             "role": "seller",
-            "participantId": "greenflex-agg"
+            "participantId": null
           }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
           "queryPath": "data.deg.contracts.demand_flex"
         }
-      }
+      },
+      "participants": [
+        {
+          "role": "buyer",
+          "participantId": "tpddl-north-delhi"
+        }
+      ]
     }
   }
 }
