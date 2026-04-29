@@ -2,14 +2,14 @@
   "context": {
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
-    "action": "update",
+    "action": "init",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
-    "messageId": "msg-update-optin-001",
-    "timestamp": "2026-04-01T06:00:00Z",
+    "messageId": "msg-init-001",
+    "timestamp": "2026-03-30T10:05:00Z",
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
@@ -19,21 +19,27 @@
   },
   "message": {
     "contract": {
-      "id": "contract-flex-001",
+      "status": {
+        "code": "DRAFT"
+      },
       "commitments": [
         {
           "id": "commitment-flex-001",
           "status": {
             "descriptor": {
-              "code": "ACTIVE"
+              "code": "DRAFT"
             }
           },
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
+              "descriptor": {
+                "name": "Peak Demand Flex - North Delhi",
+                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
+              },
               "quantity": {
                 "unitCode": "kW",
-                "unitQuantity": 120,
+                "unitQuantity": 150,
                 "@type": "Quantity"
               },
               "resourceAttributes": {
@@ -86,13 +92,12 @@
                   "inputs": {
                     "plannedDemandChange": {
                       "unitCode": "KWH",
-                      "unitQuantity": 120.0,
+                      "unitQuantity": 150.0,
                       "@type": "Quantity"
                     },
                     "participatingMeters": [
                       "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
+                      "der://meter/002"
                     ]
                   }
                 }
@@ -107,18 +112,28 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "bpp.example.com"
+            "participantId": "tpddl-north-delhi"
           },
           {
             "role": "seller",
-            "participantId": "bap.example.com"
+            "participantId": "greenflex-agg"
           }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
           "queryPath": "data.deg.contracts.demand_flex"
         }
-      }
+      },
+      "participants": [
+        {
+          "role": "buyer",
+          "participantId": "tpddl-north-delhi"
+        },
+        {
+          "role": "seller",
+          "participantId": "greenflex-agg"
+        }
+      ]
     }
   }
 }

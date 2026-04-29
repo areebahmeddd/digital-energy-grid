@@ -131,7 +131,7 @@ DEVKIT_CONFIGS = {
         "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
-        "examples_path": "devkits/demand-flex/uc1-demand-flex/examples",
+        "examples_path": "devkits/demand-flex/uc1-bdr-w-baselining/examples",
         "structure": "flat"
     },
     "p2p-trading-ies-wave1": {

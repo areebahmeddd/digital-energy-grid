@@ -2,14 +2,14 @@
   "context": {
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
-    "action": "on_init",
+    "action": "select",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
-    "messageId": "msg-on-init-001",
-    "timestamp": "2026-03-30T10:05:05Z",
+    "messageId": "msg-select-001",
+    "timestamp": "2026-03-30T10:00:00Z",
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
@@ -24,7 +24,6 @@
       },
       "commitments": [
         {
-          "id": "commitment-flex-001",
           "status": {
             "descriptor": {
               "code": "DRAFT"
@@ -34,7 +33,8 @@
             {
               "id": "flex-need-north-delhi-apr1",
               "descriptor": {
-                "name": "Peak Demand Flex - North Delhi"
+                "name": "Peak Demand Flex - North Delhi",
+                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
               },
               "quantity": {
                 "unitCode": "kW",
@@ -87,18 +87,7 @@
                 },
                 {
                   "role": "seller",
-                  "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
-                  }
+                  "participantId": null
                 }
               ]
             }
@@ -115,14 +104,20 @@
           },
           {
             "role": "seller",
-            "participantId": "greenflex-agg"
+            "participantId": null
           }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
           "queryPath": "data.deg.contracts.demand_flex"
         }
-      }
+      },
+      "participants": [
+        {
+          "role": "buyer",
+          "participantId": "tpddl-north-delhi"
+        }
+      ]
     }
   }
 }

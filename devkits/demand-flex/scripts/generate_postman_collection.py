@@ -24,7 +24,7 @@ if ROLE is None:
     print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP")
     sys.exit(1)
 
-usecase = "uc1-demand-flex"
+usecase = "uc1-bdr-w-baselining"
 output_dir = str(DEVKIT_ROOT / usecase / "postman")
 cmd = [
     sys.executable, str(TOP_LEVEL_SCRIPT),

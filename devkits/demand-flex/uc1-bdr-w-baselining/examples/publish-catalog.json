@@ -80,10 +80,12 @@
                 "@type": "DEGContract",
                 "roles": [
                   {
-                    "role": "buyer"
+                    "role": "buyer",
+                    "participantId": "tpddl-north-delhi"
                   },
                   {
-                    "role": "seller"
+                    "role": "seller",
+                    "participantId": null
                   }
                 ],
                 "policy": {

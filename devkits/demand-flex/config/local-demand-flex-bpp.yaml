@@ -144,12 +144,17 @@ modules:
               actions: "on_status"
               debugLogging: "true"
               allowedDomains: "raw.githubusercontent.com"
-              # outputPath / outputMode are now required by the plugin —
-              # state them explicitly here. demand-flex keeps the historical
-              # destination: rego flows written directly under
-              # message.contract.contractAttributes.revenueFlows.
-              outputPath: "message.contract.contractAttributes.revenueFlows"
-              outputMode: "raw"
+              # Wave2-style: rego output is wrapped as a Beckn-native
+              # Consideration entry (idempotent on retry via the
+              # [id=auto-revenue-flows] selector). The considerationAttributes
+              # block carries a JSON-LD-wrapped RevenueFlow object the
+              # extended-schema validator picks up via @context.
+              outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
         - validateSchema
         - checkPolicy
