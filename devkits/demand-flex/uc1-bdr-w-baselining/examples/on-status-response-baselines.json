@@ -12,6 +12,7 @@
     "timestamp": "2026-04-01T08:00:00Z",
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
       "https://schema.beckn.io/Quantity/context.jsonld",
@@ -116,15 +117,36 @@
             "meters": [
               {
                 "meterId": "der://meter/001",
-                "baselineKw": 45.0
+                "telemetry": {
+                  "@type": "BecknTimeSeries",
+                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervals": [
+                    { "id": 0, "payloads": [ { "type": "BASELINE", "values": [46.0] } ] },
+                    { "id": 1, "payloads": [ { "type": "BASELINE", "values": [44.0] } ] }
+                  ]
+                }
               },
               {
                 "meterId": "der://meter/002",
-                "baselineKw": 38.0
+                "telemetry": {
+                  "@type": "BecknTimeSeries",
+                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervals": [
+                    { "id": 0, "payloads": [ { "type": "BASELINE", "values": [39.0] } ] },
+                    { "id": 1, "payloads": [ { "type": "BASELINE", "values": [37.0] } ] }
+                  ]
+                }
               },
               {
                 "meterId": "der://meter/003",
-                "baselineKw": 52.0
+                "telemetry": {
+                  "@type": "BecknTimeSeries",
+                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervals": [
+                    { "id": 0, "payloads": [ { "type": "BASELINE", "values": [53.0] } ] },
+                    { "id": 1, "payloads": [ { "type": "BASELINE", "values": [51.0] } ] }
+                  ]
+                }
               }
             ]
           }

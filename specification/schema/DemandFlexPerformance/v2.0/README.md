@@ -17,5 +17,5 @@ Part of the [DEG Schema](../../) · [DemandFlexPerformance](../README.md)
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `eventId` | `string` |  | Identifier of the flex event being measured. |
-| `methodology` | `string` |  | Baseline methodology used across all meters (e.g., "5of10" means average of 5 highest-c... |
-| `meters` | `array` |  | Per-meter M&V data. Each entry contains the meter ID, its baseline, and (after the even... |
+| `methodology` | `string` |  | Baseline methodology used across all meters (e.g., "5of10"). |
+| `meters` | `array` |  | Per-meter M&V — each entry binds a `meterId` to a [`telemetry`](../../BecknTimeSeries/v1.0/) `BecknTimeSeries` carrying BASELINE (always) and — post-event — USAGE payloads. |

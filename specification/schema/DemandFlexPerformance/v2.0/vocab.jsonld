@@ -3,6 +3,7 @@
     "@version": 1.1,
     "beckn": "https://schema.beckn.io/core/v2.0/",
     "deg": "https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/",
+    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
     "schema": "https://schema.org/",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
@@ -16,18 +17,12 @@
       "rdfs:comment": "M&V (Measurement & Verification) attributes for demand-flex events."
     },
     {
-      "@id": "deg:baselines",
+      "@id": "deg:meters",
       "@type": "rdf:Property",
-      "rdfs:label": "Baselines",
-      "rdfs:comment": "Per-meter baseline loads computed before the event.",
-      "rdfs:domain": "deg:DemandFlexPerformance"
-    },
-    {
-      "@id": "deg:actuals",
-      "@type": "rdf:Property",
-      "rdfs:label": "Actuals",
-      "rdfs:comment": "Per-meter actual loads measured during the event.",
-      "rdfs:domain": "deg:DemandFlexPerformance"
+      "rdfs:label": "Meters",
+      "rdfs:comment": "Per-meter telemetry carrying BASELINE (and post-event USAGE) signals as a BecknTimeSeries.",
+      "rdfs:domain": "deg:DemandFlexPerformance",
+      "rdfs:range": "bts:BecknTimeSeries"
     }
   ]
 }

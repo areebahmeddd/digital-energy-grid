@@ -12,7 +12,7 @@ Attribute schemas for demand-flex M&V (Performance.performanceAttributes).
 
 | Version | Status | Notes |
 |---------|--------|-------|
-| [v2.0](./v2.0/) | Current | Performance / delivery attributes for behavioral demand-response — baseline and actuals. |
+| [v2.0](./v2.0/) | Current | Performance / delivery attributes for behavioral demand-response — per-meter `BecknTimeSeries` telemetry (BASELINE pre-event, BASELINE+USAGE post-event). |
 
 ---
 
@@ -21,5 +21,5 @@ Attribute schemas for demand-flex M&V (Performance.performanceAttributes).
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `eventId` | `string` |  | Identifier of the flex event being measured. |
-| `methodology` | `string` |  | Baseline methodology used across all meters (e.g., "5of10" means average of 5 highest-c... |
-| `meters` | `array` |  | Per-meter M&V data. Each entry contains the meter ID, its baseline, and (after the even... |
+| `methodology` | `string` |  | Baseline methodology used across all meters (e.g., "5of10"). |
+| `meters` | `array` |  | Per-meter M&V — each entry binds a `meterId` to a `telemetry` BecknTimeSeries. |

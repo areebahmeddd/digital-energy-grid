@@ -1,0 +1,38 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
+
+    "BecknTimeSeries": "bts:BecknTimeSeries",
+
+    "intervalPeriod": "oadr:intervalPeriod",
+    "start": { "@id": "oadr:start", "@type": "xsd:dateTime" },
+    "duration": { "@id": "oadr:duration", "@type": "xsd:duration" },
+    "randomizeStart": { "@id": "oadr:randomizeStart", "@type": "xsd:duration" },
+
+    "payloadDescriptors": { "@id": "oadr:payloadDescriptors", "@container": "@set" },
+    "objectType": "@type",
+    "payloadType": "oadr:payloadType",
+    "readingType": "oadr:readingType",
+    "units": "oadr:units",
+    "currency": "oadr:currency",
+    "accuracy": "oadr:accuracy",
+    "confidence": "oadr:confidence",
+
+    "intervals": { "@id": "oadr:intervals", "@container": "@list" },
+    "id": "oadr:id",
+    "payloads": { "@id": "oadr:payloads", "@container": "@list" },
+    "type": "oadr:type",
+    "values": { "@id": "oadr:values", "@container": "@list" },
+
+    "x": { "@id": "oadr:x", "@type": "xsd:float" },
+    "y": { "@id": "oadr:y", "@type": "xsd:float" }
+  },
+  "@graph": []
+}

@@ -4,9 +4,11 @@ info:
   version: 2.0.0
   description: >
     Attribute schemas for demand-flex M&V (Performance.performanceAttributes).
-    Before the event: utility sends baselines per meter (actualKw is null).
-    After the event: utility sends both baselines and actuals per meter.
-    The rego policy uses baselines and actuals to compute settlements.
+    Per-meter telemetry is carried as a BecknTimeSeries:
+      • before the event — intervals carry only BASELINE payloads
+      • after the event  — intervals carry BASELINE + USAGE payloads
+    The rego policy reads BASELINE / USAGE from the intervals to compute
+    settlements.
 
 components:
   schemas:
@@ -40,24 +42,25 @@ components:
         meters:
           type: array
           description: >
-            Per-meter M&V data. Each entry contains the meter ID, its baseline,
-            and (after the event) the actual load measured during the event.
+            Per-meter M&V data. Each entry binds a meter ID to its time-series
+            telemetry for the event window.
           x-jsonld:
             "@id": meters
           items:
             type: object
-            required: [meterId, baselineKw]
+            additionalProperties: false
+            required: [meterId, telemetry]
             properties:
               meterId:
                 type: string
                 description: Meter identifier.
                 example: "der://meter/001"
-              baselineKw:
-                type: number
-                description: Baseline load in kW for the event window.
-                example: 45.0
-              actualKw:
-                type: number
+              telemetry:
+                $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
                 description: >
-                  Actual load in kW during the event window. Null/absent before event completion.
-                example: 20.0
+                  BecknTimeSeries carrying BASELINE (always) and — once the
+                  event has completed — USAGE payloads, aligned to the same
+                  interval grid. Validated inline via `$ref`, so the embedded
+                  payload only needs `@type` (optional) — `@context` is
+                  declared once at the envelope level via
+                  `context.schemaContext[]`.

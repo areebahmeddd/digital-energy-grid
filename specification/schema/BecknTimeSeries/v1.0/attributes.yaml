@@ -1,0 +1,73 @@
+openapi: 3.1.1
+info:
+  title: BecknTimeSeries — Time-Series Payload (v1.0)
+  version: 1.0.0
+  description: >
+    Lightweight, OpenADR 3.1.0-aligned time-series envelope for any beckn
+    payload that needs to carry interval-aligned signals (price, baseline,
+    usage, forecast, …) without each domain schema re-inventing its own
+    shape. Built by `$ref`-reusing OpenADR's `interval`, `intervalPeriod`,
+    `valuesMap`, `reportPayloadDescriptor`, and `point`.
+
+components:
+  schemas:
+
+    BecknTimeSeries:
+      type: object
+      additionalProperties: false
+      required: [intervalPeriod, intervals]
+      description: >
+        A time-series payload. `intervalPeriod` sets the default temporal
+        bounds; each `interval` carries one or more typed `payloads`
+        (valuesMap rows). Optional `payloadDescriptors` declare units/
+        currency/reading-type for each `payloadType` referenced in the
+        rows, so per-row payloads can stay compact.
+      x-tags:
+        - time-series
+        - openadr
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": BecknTimeSeries
+      properties:
+
+        "@type":
+          type: string
+          enum: ["BecknTimeSeries"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the embedder
+            wants to surface the type in the payload; the parent schema's
+            `$ref` to BecknTimeSeries is what drives validation.
+
+        "@context":
+          type: string
+          format: uri
+          description: >
+            Optional JSON-LD context URL. Usually omitted — the envelope's
+            `context.schemaContext[]` array carries it once for the whole
+            payload. Required only when the embedder relies on
+            beckn-onix's `@context`-based schema discovery instead of
+            inline `$ref` from the parent schema.
+
+        intervalPeriod:
+          $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/intervalPeriod"
+          description: >
+            Default temporal bounds of the series — ISO 8601 `start` and
+            `duration`. An individual interval may override these.
+
+        payloadDescriptors:
+          type: array
+          description: >
+            Optional sidecar describing each `payloadType` carried by the
+            rows (units, currency, reading type, accuracy/confidence).
+          items:
+            $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/reportPayloadDescriptor"
+
+        intervals:
+          type: array
+          minItems: 1
+          description: >
+            Series rows. Each row carries an integer `id` and a list of
+            typed `payloads` (valuesMap). Per-row `intervalPeriod` is
+            optional and overrides the default.
+          items:
+            $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/interval"

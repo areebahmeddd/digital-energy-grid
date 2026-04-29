@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "e20634de-c563-4d79-89ea-a26e509efae2",
+    "_postman_id": "3e3da977-86a2-41a4-a99a-e55387dae2d2",
     "name": "demand-flex-uc1-bdr-w-baselining.BAP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing demand-flex APIs based on Beckn Protocol v2"
