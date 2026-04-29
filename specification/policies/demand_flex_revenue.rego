@@ -222,17 +222,8 @@ violations contains msg if {
 	msg := sprintf("net-zero failed: revenue sum = %g (expected 0)", [_revenue_sum])
 }
 
-# Cross-field membership: every payload type used in intervals must be
-# declared in payloadDescriptors. The schema (BecknTimeSeries v1.0)
-# encodes this in JSON Schema 2020-12, but kin-openapi < v0.136.0
-# silently ignores those keywords — so the check runs here until the
-# validator is upgraded.
-violations contains msg if {
-	some i
-	meter := _meters[i]
-	declared_types := {d.payloadType | some d in meter.telemetry.payloadDescriptors}
-	some interval in meter.telemetry.intervals
-	some payload in interval.payloads
-	not payload.type in declared_types
-	msg := sprintf("meter %s: payload type '%s' used in intervals but not declared in payloadDescriptors", [meter.meterId, payload.type])
-}
+# Cross-field type-coverage (every type used in intervals must be
+# declared in payloadDescriptors) lives in the network policy
+# (specification/policies/demand_flex_network.rego) — that's the policy
+# the BPP's checkPolicy step actually evaluates. This file's `violations`
+# set is computed only as enrichment metadata, never gates ACK/NACK.
