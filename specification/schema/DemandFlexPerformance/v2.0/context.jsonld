@@ -6,14 +6,14 @@
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.beckn.io/core/v2.0/",
-    "deg": "https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/",
-    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
+    "deg": "https://schema.beckn.io/deg/",
+    "dfp": "https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/",
     "DemandFlexPerformance": "deg:DemandFlexPerformance",
-    "eventId": "deg:eventId",
-    "methodology": "deg:methodology",
-    "meters": "deg:meters",
-    "meterId": "deg:meterId",
-    "telemetry": "bts:BecknTimeSeries"
+    "eventId": "dfp:eventId",
+    "methodology": "dfp:methodology",
+    "meters": "dfp:meters",
+    "meterId": "dfp:meterId",
+    "telemetry": "deg:BecknTimeSeries"
   },
   "@graph": []
 }

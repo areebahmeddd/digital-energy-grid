@@ -118,8 +118,11 @@
               {
                 "meterId": "der://meter/001",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "payloadDescriptors": [
+                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" }
+                  ],
                   "intervals": [
                     { "id": 0, "payloads": [ { "type": "BASELINE", "values": [46.0] } ] },
                     { "id": 1, "payloads": [ { "type": "BASELINE", "values": [44.0] } ] }
@@ -129,8 +132,11 @@
               {
                 "meterId": "der://meter/002",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "payloadDescriptors": [
+                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" }
+                  ],
                   "intervals": [
                     { "id": 0, "payloads": [ { "type": "BASELINE", "values": [39.0] } ] },
                     { "id": 1, "payloads": [ { "type": "BASELINE", "values": [37.0] } ] }
@@ -140,8 +146,11 @@
               {
                 "meterId": "der://meter/003",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "payloadDescriptors": [
+                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" }
+                  ],
                   "intervals": [
                     { "id": 0, "payloads": [ { "type": "BASELINE", "values": [53.0] } ] },
                     { "id": 1, "payloads": [ { "type": "BASELINE", "values": [51.0] } ] }

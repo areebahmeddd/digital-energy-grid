@@ -118,7 +118,7 @@
               {
                 "meterId": "der://meter/001",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
                     { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },
@@ -133,7 +133,7 @@
               {
                 "meterId": "der://meter/002",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
                     { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },
@@ -148,7 +148,7 @@
               {
                 "meterId": "der://meter/003",
                 "telemetry": {
-                  "@type": "BecknTimeSeries",
+                  "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
                     { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },

@@ -7,9 +7,9 @@
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.beckn.io/core/v2.0/",
     "oadr": "https://openadr.org/ns/oadr3#",
-    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
+    "deg": "https://schema.beckn.io/deg/",
 
-    "BecknTimeSeries": "bts:BecknTimeSeries",
+    "TimeSeries": "deg:BecknTimeSeries",
 
     "intervalPeriod": "oadr:intervalPeriod",
     "start": { "@id": "oadr:start", "@type": "xsd:dateTime" },
