@@ -17,8 +17,12 @@ import rego.v1
 _meter_with_actual(meter_id, baseline_kw, actual_kw) := {
 	"meterId": meter_id,
 	"telemetry": {
-		"@type": "BecknTimeSeries",
+		"@type": "TimeSeries",
 		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+		"payloadDescriptors": [
+			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
+			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"},
+		],
 		"intervals": [{"id": 0, "payloads": [
 			{"type": "BASELINE", "values": [baseline_kw]},
 			{"type": "USAGE", "values": [actual_kw]},
@@ -29,8 +33,11 @@ _meter_with_actual(meter_id, baseline_kw, actual_kw) := {
 _meter_baseline_only(meter_id, baseline_kw) := {
 	"meterId": meter_id,
 	"telemetry": {
-		"@type": "BecknTimeSeries",
+		"@type": "TimeSeries",
 		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+		"payloadDescriptors": [
+			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
+		],
 		"intervals": [{"id": 0, "payloads": [
 			{"type": "BASELINE", "values": [baseline_kw]},
 		]}],
@@ -188,8 +195,12 @@ test_multi_interval_mean if {
 	multi_interval_meter := {
 		"meterId": "m1",
 		"telemetry": {
-			"@type": "BecknTimeSeries",
+			"@type": "TimeSeries",
 			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+			"payloadDescriptors": [
+				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
+				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"},
+			],
 			"intervals": [
 				{"id": 0, "payloads": [
 					{"type": "BASELINE", "values": [46.0]},

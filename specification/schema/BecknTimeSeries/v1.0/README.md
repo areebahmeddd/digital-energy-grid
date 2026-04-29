@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../) · [BecknTimeSeries](../README.md)
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 components.schemas.`BecknTimeSeries` (re-uses OpenADR3 types via `$ref`) |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.beckn.io/deg/BecknTimeSeries/v1.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context — term `TimeSeries` maps to `beckn:TimeSeries` |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary |
 
 ## Properties
@@ -17,8 +17,21 @@ Part of the [DEG Schema](../../) · [BecknTimeSeries](../README.md)
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `intervalPeriod` | object | ✓ | Default `{start, duration}` (ISO 8601) for the series. |
-| `payloadDescriptors` | array | | Optional sidecar — `{payloadType, units, currency, readingType, …}` per signal. |
+| `payloadDescriptors` | array | ✓ | `{payloadType, units, currency, readingType, …}` per signal. Every type used in `intervals` MUST appear here. |
 | `intervals` | array | ✓ | Series rows; each `{id, [intervalPeriod], payloads[]}`. `payloads[]` is a list of `{type, values[]}` valuesMap rows. |
+
+## `payloadType` is open at this layer
+
+BecknTimeSeries inherits OpenADR's open-string `payloadType` (any
+`minLength:1, maxLength:128` string is accepted). Domain profiles that
+embed BecknTimeSeries SHOULD close the set to their own vocabulary and
+encode "every `intervals[*].payloads[*].type` appears in
+`payloadDescriptors`" as a profile-level cross-field check. That keeps
+BecknTimeSeries domain-neutral and pushes opinionation into the consumer
+schema. DEG sign convention follows OpenADR: encode direction in the
+type name (`USAGE` vs `INJECTION`, `UP_REGULATION_CAPACITY` vs
+`DOWN_REGULATION_CAPACITY`), keep magnitudes positive, and reserve
+signed values for explicit `DELTA_*` types.
 
 ## Two ways to embed in a parent payload
 
@@ -45,8 +58,11 @@ other contract type).
 
 ```json
 {
-  "@type": "BecknTimeSeries",
+  "@type": "TimeSeries",
   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+  "payloadDescriptors": [
+    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" }
+  ],
   "intervals": [
     { "id": 0, "payloads": [ {"type": "BASELINE", "values": [45.0]} ] },
     { "id": 1, "payloads": [ {"type": "BASELINE", "values": [44.0]} ] }
@@ -58,7 +74,7 @@ other contract type).
 
 ```json
 {
-  "@type": "BecknTimeSeries",
+  "@type": "TimeSeries",
   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT15M" },
   "payloadDescriptors": [
     { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE",         "units": "INR_PER_KWH", "currency": "INR" },
@@ -79,24 +95,27 @@ other contract type).
 ## What the schema validator catches vs. what it doesn't
 
 `BecknTimeSeries` reuses OpenADR3 shapes via `$ref`. The beckn-onix /
-kin-openapi validator (OpenAPI 3.1 / JSON Schema 2020-12 subset) will flag:
+kin-openapi validator will flag:
 
 - wrong types, missing `payloads` / `values`
-- `intervals` shorter than `minItems: 1`
+- missing `payloadDescriptors`, `intervals` shorter than `minItems: 1`
 - malformed ISO datetime / ISO duration
 - value elements that are neither number / string / boolean / `point`
 
-It will **not** catch (kin-openapi does not implement `if/then/else`,
-`prefixItems`, `dependentRequired`, `contains` from JSON Schema 2020-12):
+It does **not** catch (these belong in consumer profiles or the policy
+layer):
 
+- `payloadType` / `type` membership in a domain-specific set — close the
+  enum in the consumer profile and encode it in 2020-12 `if/then/else`
+  (silent under kin-openapi < v0.136.0; enforced once
+  [PR #1125](https://github.com/getkin/kin-openapi/pull/1125) lands)
+- cross-field membership ("every type used in `intervals` is declared in
+  `payloadDescriptors`") — same vehicle as above, or run it in Rego;
+  see [`specification/policies/demand_flex_revenue.rego`](../../../policies/demand_flex_revenue.rego)
 - value-conditioned cardinality (e.g. "PRICE rows must have exactly one
   number, FORECAST_BAND must have exactly one point")
 - cross-row alignment ("every interval carries the same set of `type`
-  keys as `payloadDescriptors`")
-
-These semantics belong in the policy layer (Rego) — see
-`specification/policies/demand_flex_revenue.rego` for an example reading
-`telemetry.intervals[].payloads`.
+  keys")
 
 ## Why this lives in DEG
 
