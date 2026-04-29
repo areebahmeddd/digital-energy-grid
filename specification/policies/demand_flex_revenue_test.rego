@@ -17,7 +17,7 @@ import rego.v1
 _meter_with_actual(meter_id, baseline_kw, actual_kw) := {
 	"meterId": meter_id,
 	"telemetry": {
-		"@context": "test", "@type": "BecknTimeSeries",
+		"@type": "BecknTimeSeries",
 		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
 		"intervals": [{"id": 0, "payloads": [
 			{"type": "BASELINE", "values": [baseline_kw]},
@@ -29,7 +29,7 @@ _meter_with_actual(meter_id, baseline_kw, actual_kw) := {
 _meter_baseline_only(meter_id, baseline_kw) := {
 	"meterId": meter_id,
 	"telemetry": {
-		"@context": "test", "@type": "BecknTimeSeries",
+		"@type": "BecknTimeSeries",
 		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
 		"intervals": [{"id": 0, "payloads": [
 			{"type": "BASELINE", "values": [baseline_kw]},
@@ -188,7 +188,7 @@ test_multi_interval_mean if {
 	multi_interval_meter := {
 		"meterId": "m1",
 		"telemetry": {
-			"@context": "test", "@type": "BecknTimeSeries",
+			"@type": "BecknTimeSeries",
 			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
 			"intervals": [
 				{"id": 0, "payloads": [

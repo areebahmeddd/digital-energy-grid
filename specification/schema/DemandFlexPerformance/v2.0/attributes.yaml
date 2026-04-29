@@ -56,20 +56,11 @@ components:
                 description: Meter identifier.
                 example: "der://meter/001"
               telemetry:
+                $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
                 description: >
                   BecknTimeSeries carrying BASELINE (always) and — once the
                   event has completed — USAGE payloads, aligned to the same
-                  interval grid. Embedded with its own `@context`/`@type` so
-                  beckn-onix's extended-schema validator picks it up.
-                type: object
-                additionalProperties: true
-                required: ["@context", "@type"]
-                properties:
-                  "@context":
-                    type: string
-                    format: uri
-                    enum:
-                      - "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld"
-                  "@type":
-                    type: string
-                    enum: ["BecknTimeSeries"]
+                  interval grid. Validated inline via `$ref`, so the embedded
+                  payload only needs `@type` (optional) — `@context` is
+                  declared once at the envelope level via
+                  `context.schemaContext[]`.

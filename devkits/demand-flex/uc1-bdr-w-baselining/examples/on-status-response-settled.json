@@ -118,7 +118,6 @@
               {
                 "meterId": "der://meter/001",
                 "telemetry": {
-                  "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "BecknTimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
@@ -134,7 +133,6 @@
               {
                 "meterId": "der://meter/002",
                 "telemetry": {
-                  "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "BecknTimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
@@ -150,7 +148,6 @@
               {
                 "meterId": "der://meter/003",
                 "telemetry": {
-                  "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "BecknTimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [

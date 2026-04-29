@@ -20,11 +20,31 @@ Part of the [DEG Schema](../../) · [BecknTimeSeries](../README.md)
 | `payloadDescriptors` | array | | Optional sidecar — `{payloadType, units, currency, readingType, …}` per signal. |
 | `intervals` | array | ✓ | Series rows; each `{id, [intervalPeriod], payloads[]}`. `payloads[]` is a list of `{type, values[]}` valuesMap rows. |
 
-## Minimal example — single-signal, two intervals
+## Two ways to embed in a parent payload
+
+**(a) Inline via `$ref` — preferred for typed properties.** Parent schema
+points at `BecknTimeSeries#/components/schemas/BecknTimeSeries`. Embedded
+payload only needs the body — `@context` is declared once in the
+envelope's `context.schemaContext[]`. `@type` is optional but useful for
+human readers.
+
+```yaml
+# In the parent attributes.yaml
+telemetry:
+  $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
+```
+
+**(b) Discovery via `@context` — for polymorphic carriers.** Parent
+schema declares only the JSON-LD envelope; the embedded payload carries
+its own `@context`+`@type`, and beckn-onix's extended-schema validator
+discovers and routes it. Use this when the carrier may hold *one of
+several* schemas (e.g. `contractTerms` could be a DEGContract or some
+other contract type).
+
+## Minimal example — single-signal, two intervals (inline-`$ref` mode)
 
 ```json
 {
-  "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
   "@type": "BecknTimeSeries",
   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
   "intervals": [
@@ -38,7 +58,6 @@ Part of the [DEG Schema](../../) · [BecknTimeSeries](../README.md)
 
 ```json
 {
-  "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
   "@type": "BecknTimeSeries",
   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT15M" },
   "payloadDescriptors": [

@@ -30,6 +30,24 @@ components:
         "@type": BecknTimeSeries
       properties:
 
+        "@type":
+          type: string
+          enum: ["BecknTimeSeries"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the embedder
+            wants to surface the type in the payload; the parent schema's
+            `$ref` to BecknTimeSeries is what drives validation.
+
+        "@context":
+          type: string
+          format: uri
+          description: >
+            Optional JSON-LD context URL. Usually omitted — the envelope's
+            `context.schemaContext[]` array carries it once for the whole
+            payload. Required only when the embedder relies on
+            beckn-onix's `@context`-based schema discovery instead of
+            inline `$ref` from the parent schema.
+
         intervalPeriod:
           $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/intervalPeriod"
           description: >
