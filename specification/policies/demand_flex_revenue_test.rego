@@ -7,8 +7,35 @@ package deg.contracts.demand_flex
 import rego.v1
 
 # ---------------------------------------------------------------------------
-# Helper: build a mock contract payload
+# Helpers: build a mock contract payload with BecknTimeSeries telemetry
+#
+# For brevity, _meter(meterId, baselineKw, actualKw) wraps the scalars in
+# a single-interval BecknTimeSeries; tests stay readable while still
+# exercising the policy's BecknTimeSeries readers end-to-end.
 # ---------------------------------------------------------------------------
+
+_meter_with_actual(meter_id, baseline_kw, actual_kw) := {
+	"meterId": meter_id,
+	"telemetry": {
+		"@context": "test", "@type": "BecknTimeSeries",
+		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+		"intervals": [{"id": 0, "payloads": [
+			{"type": "BASELINE", "values": [baseline_kw]},
+			{"type": "USAGE", "values": [actual_kw]},
+		]}],
+	},
+}
+
+_meter_baseline_only(meter_id, baseline_kw) := {
+	"meterId": meter_id,
+	"telemetry": {
+		"@context": "test", "@type": "BecknTimeSeries",
+		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+		"intervals": [{"id": 0, "payloads": [
+			{"type": "BASELINE", "values": [baseline_kw]},
+		]}],
+	},
+}
 
 _deg_contract := {
 	"@context": "test", "@type": "DEGContract",
@@ -74,9 +101,9 @@ _std_input(meters) := _mock_input(_default_inputs, meters, _default_window, _deg
 
 test_revenue_flows_net_zero if {
 	inp := _std_input([
-		{"meterId": "m1", "baselineKw": 45.0, "actualKw": 20.0},
-		{"meterId": "m2", "baselineKw": 38.0, "actualKw": 15.0},
-		{"meterId": "m3", "baselineKw": 52.0, "actualKw": 25.0},
+		_meter_with_actual("m1", 45.0, 20.0),
+		_meter_with_actual("m2", 38.0, 15.0),
+		_meter_with_actual("m3", 52.0, 25.0),
 	])
 
 	flows := revenue_flows with input as inp
@@ -94,7 +121,7 @@ test_revenue_flows_net_zero if {
 # ---------------------------------------------------------------------------
 
 test_roles_detected if {
-	inp := _std_input([{"meterId": "m1", "baselineKw": 45.0, "actualKw": 20.0}])
+	inp := _std_input([_meter_with_actual("m1", 45.0, 20.0)])
 	roles := _roles with input as inp
 	"buyer" in roles
 	"seller" in roles
@@ -106,7 +133,7 @@ test_roles_detected if {
 
 test_missing_seller_violation if {
 	no_seller := {"@context": "test", "@type": "DEGContract", "roles": [{"role": "buyer"}], "policy": {"url": "t", "queryPath": "t"}}
-	inp := _mock_input(_default_inputs, [{"meterId": "m1", "baselineKw": 45.0, "actualKw": 20.0}], _default_window, no_seller)
+	inp := _mock_input(_default_inputs, [_meter_with_actual("m1", 45.0, 20.0)], _default_window, no_seller)
 	vs := violations with input as inp
 	some v in vs
 	contains(v, "seller")
@@ -118,9 +145,9 @@ test_missing_seller_violation if {
 
 test_settlement_total if {
 	inp := _std_input([
-		{"meterId": "m1", "baselineKw": 45.0, "actualKw": 20.0},
-		{"meterId": "m2", "baselineKw": 38.0, "actualKw": 15.0},
-		{"meterId": "m3", "baselineKw": 52.0, "actualKw": 25.0},
+		_meter_with_actual("m1", 45.0, 20.0),
+		_meter_with_actual("m2", 38.0, 15.0),
+		_meter_with_actual("m3", 52.0, 25.0),
 	])
 	total_settlement == 525 with input as inp
 	count(settlement_components) == 3 with input as inp
@@ -132,8 +159,8 @@ test_settlement_total if {
 
 test_clamped_meter_excluded if {
 	inp := _std_input([
-		{"meterId": "m1", "baselineKw": 30.0, "actualKw": 40.0},
-		{"meterId": "m2", "baselineKw": 50.0, "actualKw": 20.0},
+		_meter_with_actual("m1", 30.0, 40.0),
+		_meter_with_actual("m2", 50.0, 20.0),
 	])
 	total_settlement == 210 with input as inp
 	flows := revenue_flows with input as inp
@@ -146,7 +173,52 @@ test_clamped_meter_excluded if {
 
 test_3h_event if {
 	w3h := {"startDate": "2026-04-01T08:00:00Z", "endDate": "2026-04-01T11:00:00Z"}
-	inp := _mock_input(_default_inputs, [{"meterId": "m1", "baselineKw": 40.0, "actualKw": 20.0}], w3h, _deg_contract)
+	inp := _mock_input(_default_inputs, [_meter_with_actual("m1", 40.0, 20.0)], w3h, _deg_contract)
 	flows := revenue_flows with input as inp
 	some sf in flows; sf.role == "seller"; sf.value == 210
+}
+
+# ---------------------------------------------------------------------------
+# Test: BecknTimeSeries with multiple intervals — mean is used
+# ---------------------------------------------------------------------------
+
+test_multi_interval_mean if {
+	# Two intervals; mean baseline = 45, mean usage = 20 → reduction 25 kW
+	# 25 kW × 2h × 3.50 INR/kWh = 175 INR
+	multi_interval_meter := {
+		"meterId": "m1",
+		"telemetry": {
+			"@context": "test", "@type": "BecknTimeSeries",
+			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+			"intervals": [
+				{"id": 0, "payloads": [
+					{"type": "BASELINE", "values": [46.0]},
+					{"type": "USAGE", "values": [22.0]},
+				]},
+				{"id": 1, "payloads": [
+					{"type": "BASELINE", "values": [44.0]},
+					{"type": "USAGE", "values": [18.0]},
+				]},
+			],
+		},
+	}
+	inp := _std_input([multi_interval_meter])
+	total_settlement == 175 with input as inp
+}
+
+# ---------------------------------------------------------------------------
+# Test: USAGE absent → meter excluded + violation surfaced
+# ---------------------------------------------------------------------------
+
+test_baseline_only_emits_violation if {
+	inp := _std_input([
+		_meter_baseline_only("m1", 45.0),
+		_meter_with_actual("m2", 38.0, 15.0),
+	])
+	# m1 contributes nothing
+	count(settlement_components) == 1 with input as inp
+	# A violation mentions the baseline-only meter
+	vs := violations with input as inp
+	some v in vs
+	contains(v, "m1")
 }

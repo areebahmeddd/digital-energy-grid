@@ -1,0 +1,19 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "bts:BecknTimeSeries",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Beckn Time Series",
+      "rdfs:comment": "OpenADR 3.1.0-aligned envelope for interval-aligned signals (price, baseline, usage, forecast, …) embedded in beckn payloads."
+    }
+  ]
+}

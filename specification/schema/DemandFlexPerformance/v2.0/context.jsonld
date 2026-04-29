@@ -7,13 +7,13 @@
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.beckn.io/core/v2.0/",
     "deg": "https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/",
+    "bts": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/",
     "DemandFlexPerformance": "deg:DemandFlexPerformance",
     "eventId": "deg:eventId",
     "methodology": "deg:methodology",
     "meters": "deg:meters",
     "meterId": "deg:meterId",
-    "baselineKw": "deg:baselineKw",
-    "actualKw": "deg:actualKw"
+    "telemetry": "bts:BecknTimeSeries"
   },
   "@graph": []
 }

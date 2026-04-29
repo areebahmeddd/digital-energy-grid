@@ -8,10 +8,14 @@
 # Sum of all revenue_flows values MUST equal zero (net-zero).
 #
 # Input: full beckn contract payload with:
-#   - contractAttributes.roles[].role            → buyer / seller
-#   - commitments[0].offer.offerAttributes.terms → incentive terms (role-tagged)
+#   - contractAttributes.roles[].role             → buyer / seller
+#   - commitments[0].offer.offerAttributes.inputs → incentive terms (role-tagged)
 #   - commitments[0].resources[0].resourceAttributes.eventWindow → hours
-#   - performance[0].performanceAttributes       → baselines + actuals
+#   - performance[0].performanceAttributes.meters[*].telemetry  → BecknTimeSeries
+#
+# Per-meter telemetry is a BecknTimeSeries; mean of BASELINE values across
+# intervals is used as the meter's baseline kW; mean of USAGE values is used
+# as the meter's actual kW (USAGE is absent before the event has completed).
 #
 # Exported rules:
 #   revenue_flows          — [{role, value, currency, description}]
@@ -72,6 +76,31 @@ _end_ns := time.parse_rfc3339_ns(_event_window.endDate)
 event_hours := (_end_ns - _start_ns) / ns_per_hour
 
 # ---------------------------------------------------------------------------
+# BecknTimeSeries readers
+#
+# Per-meter telemetry is a BecknTimeSeries. Each interval carries one or
+# more typed payloads ({type, values}). For demand-flex, BASELINE is
+# always present; USAGE appears once the event has completed.
+# ---------------------------------------------------------------------------
+
+_payload_values(meter, ptype) := vals if {
+	vals := [v |
+		some interval in meter.telemetry.intervals
+		some payload in interval.payloads
+		payload.type == ptype
+		some v in payload.values
+	]
+}
+
+_payload_mean(meter, ptype) := mean if {
+	vals := _payload_values(meter, ptype)
+	count(vals) > 0
+	mean := sum(vals) / count(vals)
+}
+
+_has_actual(meter) if count(_payload_values(meter, "USAGE")) > 0
+
+# ---------------------------------------------------------------------------
 # Per-meter settlement
 # ---------------------------------------------------------------------------
 
@@ -81,14 +110,16 @@ _clamp_zero(x) := 0 if x < 0
 
 _meter_settlement[i] := result if {
 	meter := _meters[i]
-	meter.actualKw != null
-	reduction_kw := _clamp_zero(meter.baselineKw - meter.actualKw)
+	_has_actual(meter)
+	baseline_kw := _payload_mean(meter, "BASELINE")
+	actual_kw := _payload_mean(meter, "USAGE")
+	reduction_kw := _clamp_zero(baseline_kw - actual_kw)
 	reduction_kwh := reduction_kw * event_hours
 	incentive := reduction_kwh * _incentive_per_kwh
 	result := {
 		"meterId": meter.meterId,
-		"baselineKw": meter.baselineKw,
-		"actualKw": meter.actualKw,
+		"baselineKw": baseline_kw,
+		"actualKw": actual_kw,
 		"reductionKw": reduction_kw,
 		"reductionKwh": reduction_kwh,
 		"incentive": incentive,
@@ -171,17 +202,19 @@ violations contains msg if {
 violations contains msg if {
 	some i
 	meter := _meters[i]
-	not meter.actualKw
-	msg := sprintf("meter %s: missing actualKw — cannot compute settlement", [meter.meterId])
+	not _has_actual(meter)
+	msg := sprintf("meter %s: missing USAGE telemetry — cannot compute settlement", [meter.meterId])
 }
 
 violations contains msg if {
 	some i
 	meter := _meters[i]
-	meter.actualKw != null
-	meter.actualKw > meter.baselineKw
+	_has_actual(meter)
+	baseline_kw := _payload_mean(meter, "BASELINE")
+	actual_kw := _payload_mean(meter, "USAGE")
+	actual_kw > baseline_kw
 	msg := sprintf("meter %s: actualKw (%g) > baselineKw (%g) — reduction clamped to zero",
-		[meter.meterId, meter.actualKw, meter.baselineKw])
+		[meter.meterId, actual_kw, baseline_kw])
 }
 
 violations contains msg if {
