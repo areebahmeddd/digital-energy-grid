@@ -196,11 +196,11 @@
     },
     {
       "key": "bap_id",
-      "value": "p2p-trading-sandbox1.com"
+      "value": "bap.example.com"
     },
     {
       "key": "bpp_id",
-      "value": "p2p-trading-sandbox2.com"
+      "value": "bpp.example.com"
     },
     {
       "key": "transaction_id",

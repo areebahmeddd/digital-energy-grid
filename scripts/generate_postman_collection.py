@@ -125,9 +125,9 @@ DEVKIT_CONFIGS = {
     },
     "demand-flex": {
         "domain": "beckn.one:deg:demand-flex:2.0.0",
-        "bap_id": "p2p-trading-sandbox1.com",
+        "bap_id": "bap.example.com",
         "bap_host_root": "http://beckn-router:9000",
-        "bpp_id": "p2p-trading-sandbox2.com",
+        "bpp_id": "bpp.example.com",
         "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
