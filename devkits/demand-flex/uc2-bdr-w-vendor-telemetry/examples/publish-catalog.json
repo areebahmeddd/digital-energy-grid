@@ -1,0 +1,148 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg-vendor",
+    "version": "2.0.0",
+    "action": "catalog/publish",
+    "bppId": "bpp.example.com",
+    "bppUri": "https://bpp.example.com/beckn",
+    "transactionId": "b2c3d4e5-f6a7-8901-bcde-f12233445566",
+    "messageId": "c2d3e4f5-a6b7-8901-bcde-f22334455667",
+    "timestamp": "2026-03-28T06:00:00Z",
+    "schemaContext": [
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/Quantity/context.jsonld"
+    ]
+  },
+  "message": {
+    "catalogs": [
+      {
+        "id": "catalog-flex-vendor-tpddl-2026-04",
+        "descriptor": {
+          "name": "TPDDL Vendor-Telemetry Demand Flex - April 2026",
+          "shortDesc": "Curtailment with EV vendor telemetry settlement (OpenADR3-style reports + carbon credits)"
+        },
+        "bppId": "bpp.example.com",
+        "bppUri": "http://bpp.example.com/bpp/receiver",
+        "provider": {
+          "id": "tpddl-north-delhi",
+          "descriptor": {
+            "name": "TPDDL North Delhi Distribution"
+          }
+        },
+        "resources": [
+          {
+            "id": "flex-need-north-delhi-evcurt-apr1",
+            "descriptor": {
+              "name": "Peak EV Charging Curtailment - North Delhi",
+              "shortDesc": "100 kW EV-charger curtailment Apr 1, 2-4pm IST"
+            },
+            "resourceAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+              "@type": "DemandFlexNeed",
+              "direction": "REDUCE",
+              "eventWindow": {
+                "startDate": "2026-04-01T08:30:00Z",
+                "endDate": "2026-04-01T10:30:00Z"
+              },
+              "capacityType": "CURTAILMENT",
+              "maxCapacityKw": 100,
+              "location": {
+                "type": "Point",
+                "coordinates": [
+                  77.209,
+                  28.6139
+                ]
+              }
+            }
+          }
+        ],
+        "offers": [
+          {
+            "id": "offer-flex-vendor-001",
+            "descriptor": {
+              "name": "Vendor-Telemetry Flex @ 3.50 INR/kWh + Carbon Credits",
+              "shortDesc": "Settlement based on EV vendor telemetry (SOC, POWER, GPS); CO2 avoided monetised at 1500 INR/tCO2e"
+            },
+            "resourceIds": [
+              "flex-need-north-delhi-evcurt-apr1"
+            ],
+            "validity": {
+              "startDate": "2026-03-28T00:00:00Z",
+              "endDate": "2026-04-01T08:30:00Z"
+            },
+            "availableTo": [],
+            "offerAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@type": "DemandFlexBuyOffer",
+              "contractTerms": {
+                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+                "@type": "DEGContract",
+                "roles": [
+                  {
+                    "role": "buyer",
+                    "participantId": "tpddl-north-delhi"
+                  },
+                  {
+                    "role": "seller",
+                    "participantId": null
+                  },
+                  {
+                    "role": "carbonBuyer",
+                    "participantId": "delhi-carbon-registry"
+                  }
+                ],
+                "policy": {
+                  "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
+                  "queryPath": "data.deg.contracts.demand_flex_uc2"
+                }
+              },
+              "inputs": [
+                {
+                  "role": "buyer",
+                  "participantId": "tpddl-north-delhi",
+                  "inputs": {
+                    "incentivePerKwh": 3.5,
+                    "currency": "INR",
+                    "baselineMethodology": "VENDOR_DEVICE_RATED",
+                    "penaltyRate": 1.5,
+                    "premiumForGuaranteed": 5.0,
+                    "optOutDefault": false,
+                    "carbonCredit": {
+                      "enabled": true,
+                      "gridEmissionFactorKgPerKwh": 0.82,
+                      "creditPricePerTonneCO2e": 1500.0,
+                      "registry": "delhi-carbon-registry",
+                      "methodology": "CDM_AMS-II.G_v1"
+                    },
+                    "reportRequirements": {
+                      "objectType": "REPORT_DESCRIPTOR",
+                      "payloadType": [
+                        "BASELINE",
+                        "USAGE",
+                        "SOC",
+                        "POWER",
+                        "GPS_LAT",
+                        "GPS_LON"
+                      ],
+                      "readingType": "DIRECT_READ",
+                      "frequency": "PT30M",
+                      "duration": "PT2H",
+                      "deviceType": "EV_CHARGER",
+                      "description": "Per-EV vendor telemetry: kW power (signed; charge=+, discharge=-), state of charge (%), and GPS while POWER != 0. OpenADR3 reportSpecifier-aligned."
+                    }
+                  }
+                },
+                {
+                  "role": "seller",
+                  "participantId": null
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

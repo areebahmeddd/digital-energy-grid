@@ -13,6 +13,7 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 | Use Case | BPP (Provider) | BAP (Consumer) | Description |
 |----------|---------------|----------------|-------------|
 | [uc1-bdr-w-baselining](./uc1-bdr-w-baselining/) | TPDDL (utility) | GreenFlex (aggregator) | Publish flex need → discover → commit → deliver → settle |
+| [uc2-bdr-w-vendor-telemetry](./uc2-bdr-w-vendor-telemetry/) | TPDDL (utility) / GreenFlex (aggregator) — **dual role** | GreenFlex (aggregator) / TPDDL (utility) — **dual role** | Vendor-telemetry settlement: DISCOM asks via Beckn `status` (BAP-caller, OpenADR3 reportSpecifier in tags); aggregator answers via `on_status` (BPP-caller) with per-EV BecknTimeSeries (USAGE/SOC/POWER/GPS); settlement includes carbon-credit revenue flow. |
 
 ## Key Schemas
 
@@ -29,7 +30,17 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 ## Policy Enforcement
 
-Uses OPA (Open Policy Agent) via the `opapolicychecker` plugin. Policies are declared in [`config/opa-network-policies.yaml`](./config/opa-network-policies.yaml) and loaded from [`policies/demand_flex_network.rego`](./policies/demand_flex_network.rego) (a no-op placeholder that mirrors [`specification/policies/demand_flex_network.rego`](../../specification/policies/demand_flex_network.rego)). Both BAP and BPP use a single `default:` entry — every message evaluates against the same rules regardless of `context.networkId`. Add per-networkId entries to `opa-network-policies.yaml` as the demand-flex network matures.
+Uses OPA (Open Policy Agent) via the `opapolicychecker` plugin. Policies are declared in [`config/opa-network-policies.yaml`](./config/opa-network-policies.yaml):
+
+| networkId | Network rego | Used by |
+|---|---|---|
+| `default:` (fallback) | [`policies/demand_flex_network.rego`](./policies/demand_flex_network.rego) — type-coverage check, mirrors [`specification/policies/demand_flex_network.rego`](../../specification/policies/demand_flex_network.rego) | UC1 |
+| `nfh.global/testnet-deg-vendor` | [`policies/demand_flex_uc2_network.rego`](./policies/demand_flex_uc2_network.rego) — type-coverage + GPS-coherence + SOC-monotonicity | UC2 |
+
+Settlement rego is referenced per-contract via `contractAttributes.policy.url`:
+
+- UC1 → [`specification/policies/demand_flex_revenue.rego`](../../specification/policies/demand_flex_revenue.rego), package `deg.contracts.demand_flex`
+- UC2 → [`specification/policies/demand_flex_uc2_revenue.rego`](../../specification/policies/demand_flex_uc2_revenue.rego), package `deg.contracts.demand_flex_uc2` (incentive + carbon-credit revenue flow)
 
 Signature/registry lookups currently target `nfh.global/testnet-deg` via the `allowedNetworkIDs` key on the `dediregistry` plugin. Subscriber IDs are placeholders (`bap.example.com` / `bpp.example.com`) with signing keys borrowed from the p2p-trading devkit, so arazzo flows will NACK on lookup until real subscribers are registered on testnet-deg.
 

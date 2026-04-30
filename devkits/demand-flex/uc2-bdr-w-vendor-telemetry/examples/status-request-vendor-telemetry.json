@@ -1,0 +1,43 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg-vendor",
+    "version": "2.0.0",
+    "action": "status",
+    "_comment_role_swap": "DISCOM uses bap/caller for this status call (asks for vendor fulfillment). Aggregator acts as BPP/receiver. Subscriber IDs are placeholders — bpp.example.com=DISCOM, bap.example.com=Aggregator across the whole devkit; only their bapId/bppId slot assignment swaps for this sub-flow.",
+    "bapId": "bpp.example.com",
+    "bapUri": "https://bpp.example.com/beckn",
+    "bppId": "bap.example.com",
+    "bppUri": "https://bap.example.com/beckn",
+    "transactionId": "txn-flex-vendor-001",
+    "messageId": "msg-status-vendor-telemetry-001",
+    "timestamp": "2026-04-01T10:32:00Z",
+    "schemaContext": [
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld"
+    ]
+  },
+  "message": {
+    "contract": {
+      "id": "contract-flex-vendor-001",
+      "tags": [
+        {
+          "descriptor": {
+            "code": "report-request",
+            "name": "OpenADR3-style reportSpecifier — DISCOM requests vendor telemetry"
+          },
+          "list": [
+            { "descriptor": { "code": "reportName" },       "value": "VENDOR_TELEMETRY_USAGE" },
+            { "descriptor": { "code": "eventId" },          "value": "evt-2026-04-01-vendor-001" },
+            { "descriptor": { "code": "objectType" },       "value": "REPORT_DESCRIPTOR" },
+            { "descriptor": { "code": "payloadType" },      "value": "USAGE,SOC,POWER,GPS_LAT,GPS_LON" },
+            { "descriptor": { "code": "readingType" },      "value": "DIRECT_READ" },
+            { "descriptor": { "code": "intervalDuration" }, "value": "PT30M" },
+            { "descriptor": { "code": "windowStart" },      "value": "2026-04-01T08:30:00Z" },
+            { "descriptor": { "code": "windowEnd" },        "value": "2026-04-01T10:30:00Z" },
+            { "descriptor": { "code": "deviceType" },       "value": "EV_CHARGER" },
+            { "descriptor": { "code": "description" },      "value": "Per-EV vendor telemetry: signed POWER (charge=+, discharge=-), SOC %, GPS only when POWER != 0. Settle against vendor-rated BASELINE published earlier." }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg-vendor",
+    "version": "2.0.0",
+    "action": "search",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
+    "transactionId": "txn-flex-vendor-001",
+    "messageId": "msg-search-vendor-001",
+    "timestamp": "2026-03-30T09:55:00Z",
+    "schemaContext": [
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld"
+    ]
+  },
+  "message": {
+    "intent": {
+      "descriptor": {
+        "name": "EV-vendor curtailment opportunities"
+      },
+      "resourceAttributes": {
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+        "@type": "DemandFlexNeed",
+        "direction": "REDUCE",
+        "capacityType": "CURTAILMENT"
+      }
+    }
+  }
+}
