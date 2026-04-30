@@ -10,7 +10,7 @@
 #   docker build -f DEG/build/Dockerfile.onix-adapter-deg -t onix-adapter-deg \
 #     --build-context beckn-onix=beckn-onix DEG
 
-FROM golang:1.24-bullseye AS builder
+FROM golang:1.26-bookworm AS builder
 
 WORKDIR /workspace
 
@@ -49,7 +49,7 @@ RUN go build -buildmode=plugin -o /workspace/beckn-onix/plugins/degledgerrecorde
 RUN go build -buildmode=plugin -o /workspace/beckn-onix/plugins/revenueflows.so ./revenueflows/cmd/plugin.go
 
 # Create minimal runtime image
-# Using debian-slim (glibc) for Go plugin (.so) compatibility with the bullseye builder.
+# Using debian-slim (glibc) for Go plugin (.so) compatibility with the bookworm builder.
 # Wolfi-base (cgr.dev) can be used if its registry is reachable in your environment.
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
