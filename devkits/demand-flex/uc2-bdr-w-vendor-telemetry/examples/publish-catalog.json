@@ -27,7 +27,9 @@
         "bppUri": "http://bpp.example.com/bpp/receiver",
         "provider": {
           "id": "tpddl-north-delhi",
-          "descriptor": { "name": "TPDDL North Delhi Distribution" }
+          "descriptor": {
+            "name": "TPDDL North Delhi Distribution"
+          }
         },
         "resources": [
           {
@@ -40,10 +42,16 @@
               "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
               "@type": "DemandFlexNeed",
               "direction": "REDUCE",
-              "eventWindow": { "startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z" },
+              "eventWindow": {
+                "startDate": "2026-04-01T08:30:00Z",
+                "endDate": "2026-04-01T10:30:00Z"
+              },
               "capacityType": "CURTAILMENT",
               "maxCapacityKw": 100,
-              "location": { "type": "Point", "coordinates": [77.209, 28.6139] }
+              "location": {
+                "type": "Point",
+                "coordinates": [77.209, 28.6139]
+              }
             }
           }
         ],
@@ -55,7 +63,10 @@
               "shortDesc": "Settlement based on EV vendor telemetry; CO2 avoided monetised at 1500 INR/tCO2e"
             },
             "resourceIds": ["flex-need-north-delhi-evcurt-apr1"],
-            "validity": { "startDate": "2026-03-28T00:00:00Z", "endDate": "2026-04-01T08:30:00Z" },
+            "validity": {
+              "startDate": "2026-03-28T00:00:00Z",
+              "endDate": "2026-04-01T08:30:00Z"
+            },
             "availableTo": [],
             "offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
@@ -64,9 +75,9 @@
                 "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  { "role": "buyer",       "participantId": "tpddl-north-delhi" },
-                  { "role": "seller",      "participantId": null },
-                  { "role": "carbonBuyer", "participantId": "delhi-carbon-registry" }
+                  {"role": "buyer", "participantId": "tpddl-north-delhi"},
+                  {"role": "seller", "participantId": null},
+                  {"role": "carbonBuyer", "participantId": "delhi-carbon-registry"}
                 ],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
