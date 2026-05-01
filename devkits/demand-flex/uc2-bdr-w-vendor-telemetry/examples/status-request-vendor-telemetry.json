@@ -3,7 +3,7 @@
     "networkId": "nfh.global/testnet-deg-vendor",
     "version": "2.0.0",
     "action": "status",
-    "_comment_role_swap": "DISCOM uses bap/caller for this status call (asks for vendor fulfillment). Aggregator acts as BPP/receiver. Subscriber IDs are placeholders — bpp.example.com=DISCOM, bap.example.com=Aggregator across the whole devkit; only their bapId/bppId slot assignment swaps for this sub-flow.",
+    "_comment_role_swap": "DISCOM uses bap/caller for this status call (asks for vendor fulfillment). Aggregator acts as BPP/receiver. Subscriber IDs are placeholders \u2014 bpp.example.com=DISCOM, bap.example.com=Aggregator across the whole devkit; only their bapId/bppId slot assignment swaps for this sub-flow.",
     "bapId": "bpp.example.com",
     "bapUri": "https://bpp.example.com/beckn",
     "bppId": "bap.example.com",
@@ -18,23 +18,80 @@
   "message": {
     "contract": {
       "id": "contract-flex-vendor-001",
-      "tags": [
+      "reportDescriptors": [
         {
-          "descriptor": {
-            "code": "report-request",
-            "name": "OpenADR3-style reportSpecifier — DISCOM requests vendor telemetry"
-          },
-          "list": [
-            { "descriptor": { "code": "reportName" },       "value": "VENDOR_TELEMETRY_USAGE" },
-            { "descriptor": { "code": "eventId" },          "value": "evt-2026-04-01-vendor-001" },
-            { "descriptor": { "code": "objectType" },       "value": "REPORT_DESCRIPTOR" },
-            { "descriptor": { "code": "payloadType" },      "value": "USAGE,SOC,POWER,GPS_LAT,GPS_LON" },
-            { "descriptor": { "code": "readingType" },      "value": "DIRECT_READ" },
-            { "descriptor": { "code": "intervalDuration" }, "value": "PT30M" },
-            { "descriptor": { "code": "windowStart" },      "value": "2026-04-01T08:30:00Z" },
-            { "descriptor": { "code": "windowEnd" },        "value": "2026-04-01T10:30:00Z" },
-            { "descriptor": { "code": "deviceType" },       "value": "EV_CHARGER" },
-            { "descriptor": { "code": "description" },      "value": "Per-EV vendor telemetry: signed POWER (charge=+, discharge=-), SOC %, GPS only when POWER != 0. Settle against vendor-rated BASELINE published earlier." }
+          "payloadType": "USAGE",
+          "readingType": "DIRECT_READ",
+          "units": "KW",
+          "aggregate": false,
+          "historical": true,
+          "numIntervals": 4,
+          "frequency": -1,
+          "reportIntervals": "INTERVALS",
+          "targets": [
+            "ev://vehicle/VIN001",
+            "ev://vehicle/VIN002",
+            "ev://vehicle/VIN003"
+          ]
+        },
+        {
+          "payloadType": "SOC",
+          "readingType": "DIRECT_READ",
+          "units": "PERCENT",
+          "aggregate": false,
+          "historical": true,
+          "numIntervals": 4,
+          "frequency": -1,
+          "reportIntervals": "INTERVALS",
+          "targets": [
+            "ev://vehicle/VIN001",
+            "ev://vehicle/VIN002",
+            "ev://vehicle/VIN003"
+          ]
+        },
+        {
+          "payloadType": "POWER",
+          "readingType": "DIRECT_READ",
+          "units": "KW",
+          "aggregate": false,
+          "historical": true,
+          "numIntervals": 4,
+          "frequency": -1,
+          "reportIntervals": "INTERVALS",
+          "targets": [
+            "ev://vehicle/VIN001",
+            "ev://vehicle/VIN002",
+            "ev://vehicle/VIN003"
+          ]
+        },
+        {
+          "payloadType": "GPS_LAT",
+          "readingType": "DIRECT_READ",
+          "units": "DEGREES",
+          "aggregate": false,
+          "historical": true,
+          "numIntervals": 4,
+          "frequency": -1,
+          "reportIntervals": "INTERVALS",
+          "targets": [
+            "ev://vehicle/VIN001",
+            "ev://vehicle/VIN002",
+            "ev://vehicle/VIN003"
+          ]
+        },
+        {
+          "payloadType": "GPS_LON",
+          "readingType": "DIRECT_READ",
+          "units": "DEGREES",
+          "aggregate": false,
+          "historical": true,
+          "numIntervals": 4,
+          "frequency": -1,
+          "reportIntervals": "INTERVALS",
+          "targets": [
+            "ev://vehicle/VIN001",
+            "ev://vehicle/VIN002",
+            "ev://vehicle/VIN003"
           ]
         }
       ]

@@ -35,14 +35,15 @@ Each subscriber is registered with **both BAP and BPP roles** in the Beckn regis
 
 This dual-role-per-subscriber pattern is allowed by Beckn 2.0; for live testnet runs, both subscribers must have BAP **and** BPP roles registered with valid signing keys against `nfh.global/testnet-deg-vendor`.
 
-## OpenADR3 alignment — `tags.report-request` / `tags.report-payload`
+## OpenADR3 alignment — `reportDescriptor[]`
 
-Beckn `status` doesn't carry rich payload — it's a query. To carry the OpenADR3 `reportSpecifier`, UC2 uses the `message.contract.tags` extension:
+DISCOM declares what telemetry it needs using the OpenADR3 [`reportDescriptor`](https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml) shape verbatim — one entry per `payloadType`, with `readingType`, `units`, `aggregate`, `historical`, `numIntervals`, `frequency`, `reportIntervals`, and (in the actual status request) `targets`.
 
-- **DISCOM's `status` request** carries `tags[code=report-request]` listing `payloadType` (`USAGE,SOC,POWER,GPS_LAT,GPS_LON`), `intervalDuration` (`PT30M`), `windowStart`/`windowEnd`, `eventId`, and `description`. This mirrors OpenADR3's `reportSpecifier` shape.
-- **Aggregator's `on_status` reply** carries `tags[code=report-payload]` with a `respondsTo` field pointing back to the `status` `messageId`, plus the actual telemetry as a `BecknTimeSeries` per device under `performance[].performanceAttributes.meters[].telemetry`.
+- **In offer terms** (`publish-catalog` through `on-confirm`): `offerAttributes.inputs[buyer].inputs.reportDescriptors[]` lists 6 descriptors (`BASELINE`, `USAGE`, `SOC`, `POWER`, `GPS_LAT`, `GPS_LON`). `targets` is omitted — the offer pre-declares telemetry shape *before* the aggregator declares its devices.
+- **DISCOM's `status` request** (`message.contract.reportDescriptors[]`): same 5 descriptors (`BASELINE` is dropped since DISCOM already published it), now with `targets: ["ev://vehicle/VIN001", …]` populated to scope the report to specific aggregator-declared VINs. This is exactly the OpenADR3 `reportSpecifier` payload — VTN→VEN report request.
+- **Aggregator's `on_status` reply** carries the requested telemetry in `performance[].performanceAttributes.meters[].telemetry` as a `BecknTimeSeries` per device, plus a structured `message.contract.reportPayload` (`respondsTo`, `eventId`, `reportName`, `intervalDuration`) for correlation back to the request.
 
-The reportRequirements are also published in the offer's `offerAttributes.inputs[buyer].inputs.reportRequirements` so that aggregators see what telemetry they'll be asked for *before* committing.
+This replaces an earlier ad-hoc `tags.report-request` / `tags.report-payload` shape with the OpenADR3 schema directly.
 
 ## Vendor telemetry payload types
 
@@ -73,6 +74,20 @@ This list is open-ended; future `CO2_AVOIDED` (`KG_CO2E`) or temperature/SoH pay
 ```
 
 The contract roles are extended with `carbonBuyer` (the registry). The settlement rego ([`demand_flex_uc2_revenue.rego`](../../../specification/policies/demand_flex_uc2_revenue.rego)) emits a 3-flow net-zero settlement when `enabled: true`, or a 2-flow + zero-stub flow when disabled — so consumers can count on a stable shape either way.
+
+## Postman
+
+Pre-built collections live at:
+- `postman/demand-flex-uc2-bdr-w-vendor-telemetry.BAP-DEG.postman_collection.json`
+- `postman/demand-flex-uc2-bdr-w-vendor-telemetry.BPP-DEG.postman_collection.json`
+
+Regenerate with:
+```bash
+python3 scripts/generate_postman_collection.py --role BAP --usecase uc2-bdr-w-vendor-telemetry
+python3 scripts/generate_postman_collection.py --role BPP --usecase uc2-bdr-w-vendor-telemetry
+```
+
+**Caveat on the role-swap requests.** The generator replaces every literal `bapId`/`bppId` with `{{bap_id}}`/`{{bpp_id}}`, so the source-level swap in `status-request-vendor-telemetry.json` and `on-status-response-vendor-telemetry.json` resolves to the default subscriber-role mapping at runtime. To exercise the swap in Postman, override `bap_id`/`bpp_id` in a Postman environment specifically for those two requests (or duplicate the collection variable as `bap_id_swapped` and edit the body accordingly).
 
 ## Files
 

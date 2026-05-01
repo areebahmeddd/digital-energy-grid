@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "a264a7bb-e69c-47cb-ad32-15f3da23d51b",
+    "name": "demand-flex-uc2-bdr-w-vendor-telemetry.BAP-DEG",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Buyer Application Platform implementing demand-flex APIs based on Beckn Protocol v2"
+  },
+  "item": [
+    {
+      "name": "confirm",
+      "item": [
+        {
+          "name": "confirm-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg-vendor\",\n    \"version\": \"{{version}}\",\n    \"action\": \"confirm\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-flex-vendor-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-flex-vendor-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"flex-need-north-delhi-evcurt-apr1\",\n              \"quantity\": {\n                \"unitCode\": \"kW\",\n                \"unitQuantity\": 21,\n                \"@type\": \"Quantity\"\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n                \"@type\": \"DemandFlexNeed\",\n                \"direction\": \"REDUCE\",\n                \"eventWindow\": {\n                  \"startDate\": \"2026-04-01T08:30:00Z\",\n                  \"endDate\": \"2026-04-01T10:30:00Z\"\n                },\n                \"capacityType\": \"CURTAILMENT\",\n                \"maxCapacityKw\": 100\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-flex-vendor-001\",\n            \"resourceIds\": [\n              \"flex-need-north-delhi-evcurt-apr1\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n              \"@type\": \"DemandFlexBuyOffer\",\n              \"inputs\": [\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"tpddl-north-delhi\",\n                  \"inputs\": {\n                    \"incentivePerKwh\": 3.5,\n                    \"currency\": \"INR\",\n                    \"baselineMethodology\": \"VENDOR_DEVICE_RATED\",\n                    \"penaltyRate\": 1.5,\n                    \"premiumForGuaranteed\": 5.0,\n                    \"optOutDefault\": false,\n                    \"carbonCredit\": {\n                      \"enabled\": true,\n                      \"gridEmissionFactorKgPerKwh\": 0.82,\n                      \"creditPricePerTonneCO2e\": 1500.0,\n                      \"registry\": \"delhi-carbon-registry\",\n                      \"methodology\": \"CDM_AMS-II.G_v1\"\n                    },\n                    \"reportDescriptors\": [\n                      {\n                        \"payloadType\": \"BASELINE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": false,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"USAGE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"SOC\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"PERCENT\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"POWER\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LAT\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LON\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": \"greenflex-agg\",\n                  \"inputs\": {\n                    \"plannedDemandChange\": {\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 40.0,\n                      \"@type\": \"Quantity\"\n                    },\n                    \"vendorDevices\": [\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN001\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"Tata\",\n                        \"model\": \"Nexon EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"tata-evp-telematics\"\n                      },\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN002\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"MG\",\n                        \"model\": \"ZS EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"mg-imotion\"\n                      },\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN003\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"Tata\",\n                        \"model\": \"Tigor EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"tata-evp-telematics\"\n                      }\n                    ]\n                  }\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"tpddl-north-delhi\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": \"greenflex-agg\"\n          },\n          {\n            \"role\": \"carbonBuyer\",\n            \"participantId\": \"delhi-carbon-registry\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.demand_flex_uc2\"\n        }\n      },\n      \"participants\": [\n        {\n          \"role\": \"buyer\",\n          \"participantId\": \"tpddl-north-delhi\"\n        },\n        {\n          \"role\": \"seller\",\n          \"participantId\": \"greenflex-agg\"\n        },\n        {\n          \"role\": \"carbonBuyer\",\n          \"participantId\": \"delhi-carbon-registry\"\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/confirm",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "confirm"
+              ]
+            },
+            "description": "Confirm request: confirm-request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "discover",
+      "item": [
+        {
+          "name": "discover-request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg-vendor\",\n    \"version\": \"{{version}}\",\n    \"action\": \"search\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"intent\": {\n      \"descriptor\": {\n        \"name\": \"EV-vendor curtailment opportunities\"\n      },\n      \"resourceAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n        \"@type\": \"DemandFlexNeed\",\n        \"direction\": \"REDUCE\",\n        \"capacityType\": \"CURTAILMENT\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/discover",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "discover"
+              ]
+            },
+            "description": "Discover request: discover-request"
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "init",
+      "item": [
+        {
+          "name": "init-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg-vendor\",\n    \"version\": \"{{version}}\",\n    \"action\": \"init\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-flex-vendor-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"flex-need-north-delhi-evcurt-apr1\",\n              \"quantity\": {\n                \"unitCode\": \"kW\",\n                \"unitQuantity\": 21,\n                \"@type\": \"Quantity\"\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n                \"@type\": \"DemandFlexNeed\",\n                \"direction\": \"REDUCE\",\n                \"eventWindow\": {\n                  \"startDate\": \"2026-04-01T08:30:00Z\",\n                  \"endDate\": \"2026-04-01T10:30:00Z\"\n                },\n                \"capacityType\": \"CURTAILMENT\",\n                \"maxCapacityKw\": 100\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-flex-vendor-001\",\n            \"resourceIds\": [\n              \"flex-need-north-delhi-evcurt-apr1\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n              \"@type\": \"DemandFlexBuyOffer\",\n              \"inputs\": [\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"tpddl-north-delhi\",\n                  \"inputs\": {\n                    \"incentivePerKwh\": 3.5,\n                    \"currency\": \"INR\",\n                    \"baselineMethodology\": \"VENDOR_DEVICE_RATED\",\n                    \"penaltyRate\": 1.5,\n                    \"premiumForGuaranteed\": 5.0,\n                    \"optOutDefault\": false,\n                    \"carbonCredit\": {\n                      \"enabled\": true,\n                      \"gridEmissionFactorKgPerKwh\": 0.82,\n                      \"creditPricePerTonneCO2e\": 1500.0,\n                      \"registry\": \"delhi-carbon-registry\",\n                      \"methodology\": \"CDM_AMS-II.G_v1\"\n                    },\n                    \"reportDescriptors\": [\n                      {\n                        \"payloadType\": \"BASELINE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": false,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"USAGE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"SOC\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"PERCENT\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"POWER\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LAT\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LON\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": \"greenflex-agg\",\n                  \"inputs\": {\n                    \"plannedDemandChange\": {\n                      \"unitCode\": \"KWH\",\n                      \"unitQuantity\": 40.0,\n                      \"@type\": \"Quantity\"\n                    },\n                    \"vendorDevices\": [\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN001\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"Tata\",\n                        \"model\": \"Nexon EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"tata-evp-telematics\"\n                      },\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN002\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"MG\",\n                        \"model\": \"ZS EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"mg-imotion\"\n                      },\n                      {\n                        \"deviceId\": \"ev://vehicle/VIN003\",\n                        \"deviceType\": \"EV_CHARGER\",\n                        \"make\": \"Tata\",\n                        \"model\": \"Tigor EV\",\n                        \"ratedPowerKw\": 7.0,\n                        \"telemetryProvider\": \"tata-evp-telematics\"\n                      }\n                    ]\n                  }\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"tpddl-north-delhi\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": \"greenflex-agg\"\n          },\n          {\n            \"role\": \"carbonBuyer\",\n            \"participantId\": \"delhi-carbon-registry\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.demand_flex_uc2\"\n        }\n      },\n      \"participants\": [\n        {\n          \"role\": \"buyer\",\n          \"participantId\": \"tpddl-north-delhi\"\n        },\n        {\n          \"role\": \"seller\",\n          \"participantId\": \"greenflex-agg\"\n        },\n        {\n          \"role\": \"carbonBuyer\",\n          \"participantId\": \"delhi-carbon-registry\"\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/init",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "init"
+              ]
+            },
+            "description": "Init request: init-request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "item": [
+        {
+          "name": "select-request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg-vendor\",\n    \"version\": \"{{version}}\",\n    \"action\": \"select\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.beckn.io/Quantity/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"flex-need-north-delhi-evcurt-apr1\",\n              \"descriptor\": {\n                \"name\": \"Peak EV Charging Curtailment - North Delhi\",\n                \"shortDesc\": \"100 kW EV-charger curtailment Apr 1, 2-4pm IST\"\n              },\n              \"quantity\": {\n                \"unitCode\": \"kW\",\n                \"unitQuantity\": 21,\n                \"@type\": \"Quantity\"\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld\",\n                \"@type\": \"DemandFlexNeed\",\n                \"direction\": \"REDUCE\",\n                \"eventWindow\": {\n                  \"startDate\": \"2026-04-01T08:30:00Z\",\n                  \"endDate\": \"2026-04-01T10:30:00Z\"\n                },\n                \"capacityType\": \"CURTAILMENT\",\n                \"maxCapacityKw\": 100,\n                \"location\": {\n                  \"type\": \"Point\",\n                  \"coordinates\": [\n                    77.209,\n                    28.6139\n                  ]\n                }\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-flex-vendor-001\",\n            \"resourceIds\": [\n              \"flex-need-north-delhi-evcurt-apr1\"\n            ],\n            \"offerAttributes\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld\",\n              \"@type\": \"DemandFlexBuyOffer\",\n              \"inputs\": [\n                {\n                  \"role\": \"buyer\",\n                  \"participantId\": \"tpddl-north-delhi\",\n                  \"inputs\": {\n                    \"incentivePerKwh\": 3.5,\n                    \"currency\": \"INR\",\n                    \"baselineMethodology\": \"VENDOR_DEVICE_RATED\",\n                    \"penaltyRate\": 1.5,\n                    \"premiumForGuaranteed\": 5.0,\n                    \"optOutDefault\": false,\n                    \"carbonCredit\": {\n                      \"enabled\": true,\n                      \"gridEmissionFactorKgPerKwh\": 0.82,\n                      \"creditPricePerTonneCO2e\": 1500.0,\n                      \"registry\": \"delhi-carbon-registry\",\n                      \"methodology\": \"CDM_AMS-II.G_v1\"\n                    },\n                    \"reportDescriptors\": [\n                      {\n                        \"payloadType\": \"BASELINE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": false,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"USAGE\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"SOC\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"PERCENT\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"POWER\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"KW\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LAT\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      },\n                      {\n                        \"payloadType\": \"GPS_LON\",\n                        \"readingType\": \"DIRECT_READ\",\n                        \"units\": \"DEGREES\",\n                        \"aggregate\": false,\n                        \"historical\": true,\n                        \"numIntervals\": 4,\n                        \"frequency\": -1,\n                        \"reportIntervals\": \"INTERVALS\"\n                      }\n                    ]\n                  }\n                },\n                {\n                  \"role\": \"seller\",\n                  \"participantId\": null\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\n            \"role\": \"buyer\",\n            \"participantId\": \"tpddl-north-delhi\"\n          },\n          {\n            \"role\": \"seller\",\n            \"participantId\": null\n          },\n          {\n            \"role\": \"carbonBuyer\",\n            \"participantId\": \"delhi-carbon-registry\"\n          }\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.demand_flex_uc2\"\n        }\n      },\n      \"participants\": [\n        {\n          \"role\": \"buyer\",\n          \"participantId\": \"tpddl-north-delhi\"\n        },\n        {\n          \"role\": \"carbonBuyer\",\n          \"participantId\": \"delhi-carbon-registry\"\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/select",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "select"
+              ]
+            },
+            "description": "Select request: select-request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "item": [
+        {
+          "name": "status-request-vendor-telemetry",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg-vendor\",\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"_comment_role_swap\": \"DISCOM uses bap/caller for this status call (asks for vendor fulfillment). Aggregator acts as BPP/receiver. Subscriber IDs are placeholders \\u2014 bpp.example.com=DISCOM, bap.example.com=Aggregator across the whole devkit; only their bapId/bppId slot assignment swaps for this sub-flow.\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-flex-vendor-001\",\n      \"reportDescriptors\": [\n        {\n          \"payloadType\": \"USAGE\",\n          \"readingType\": \"DIRECT_READ\",\n          \"units\": \"KW\",\n          \"aggregate\": false,\n          \"historical\": true,\n          \"numIntervals\": 4,\n          \"frequency\": -1,\n          \"reportIntervals\": \"INTERVALS\",\n          \"targets\": [\n            \"ev://vehicle/VIN001\",\n            \"ev://vehicle/VIN002\",\n            \"ev://vehicle/VIN003\"\n          ]\n        },\n        {\n          \"payloadType\": \"SOC\",\n          \"readingType\": \"DIRECT_READ\",\n          \"units\": \"PERCENT\",\n          \"aggregate\": false,\n          \"historical\": true,\n          \"numIntervals\": 4,\n          \"frequency\": -1,\n          \"reportIntervals\": \"INTERVALS\",\n          \"targets\": [\n            \"ev://vehicle/VIN001\",\n            \"ev://vehicle/VIN002\",\n            \"ev://vehicle/VIN003\"\n          ]\n        },\n        {\n          \"payloadType\": \"POWER\",\n          \"readingType\": \"DIRECT_READ\",\n          \"units\": \"KW\",\n          \"aggregate\": false,\n          \"historical\": true,\n          \"numIntervals\": 4,\n          \"frequency\": -1,\n          \"reportIntervals\": \"INTERVALS\",\n          \"targets\": [\n            \"ev://vehicle/VIN001\",\n            \"ev://vehicle/VIN002\",\n            \"ev://vehicle/VIN003\"\n          ]\n        },\n        {\n          \"payloadType\": \"GPS_LAT\",\n          \"readingType\": \"DIRECT_READ\",\n          \"units\": \"DEGREES\",\n          \"aggregate\": false,\n          \"historical\": true,\n          \"numIntervals\": 4,\n          \"frequency\": -1,\n          \"reportIntervals\": \"INTERVALS\",\n          \"targets\": [\n            \"ev://vehicle/VIN001\",\n            \"ev://vehicle/VIN002\",\n            \"ev://vehicle/VIN003\"\n          ]\n        },\n        {\n          \"payloadType\": \"GPS_LON\",\n          \"readingType\": \"DIRECT_READ\",\n          \"units\": \"DEGREES\",\n          \"aggregate\": false,\n          \"historical\": true,\n          \"numIntervals\": 4,\n          \"frequency\": -1,\n          \"reportIntervals\": \"INTERVALS\",\n          \"targets\": [\n            \"ev://vehicle/VIN001\",\n            \"ev://vehicle/VIN002\",\n            \"ev://vehicle/VIN003\"\n          ]\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{bap_adapter_url}}/status",
+              "host": [
+                "{{bap_adapter_url}}"
+              ],
+              "path": [
+                "status"
+              ]
+            },
+            "description": "Status request: status-request-vendor-telemetry"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pure JS pre-request script to replace moment()",
+          "// 1) ISO 8601 timestamp without needing moment",
+          "const isoTimestamp = new Date().toISOString();",
+          "pm.collectionVariables.set('iso_date', isoTimestamp);",
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "domain",
+      "value": "beckn.one:deg:demand-flex:2.0.0"
+    },
+    {
+      "key": "version",
+      "value": "2.0.0"
+    },
+    {
+      "key": "bap_id",
+      "value": "bap.example.com"
+    },
+    {
+      "key": "bpp_id",
+      "value": "bpp.example.com"
+    },
+    {
+      "key": "transaction_id",
+      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+    },
+    {
+      "key": "iso_date",
+      "value": ""
+    },
+    {
+      "key": "bap_host_root",
+      "value": "http://beckn-router:9000"
+    },
+    {
+      "key": "bpp_host_root",
+      "value": "http://beckn-router:9000"
+    },
+    {
+      "key": "bap_adapter_url",
+      "value": "http://localhost:8081/bap/caller"
+    }
+  ]
+}

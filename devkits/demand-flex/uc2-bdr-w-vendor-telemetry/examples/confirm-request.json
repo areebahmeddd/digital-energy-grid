@@ -78,22 +78,68 @@
                       "registry": "delhi-carbon-registry",
                       "methodology": "CDM_AMS-II.G_v1"
                     },
-                    "reportRequirements": {
-                      "objectType": "REPORT_DESCRIPTOR",
-                      "payloadType": [
-                        "BASELINE",
-                        "USAGE",
-                        "SOC",
-                        "POWER",
-                        "GPS_LAT",
-                        "GPS_LON"
-                      ],
-                      "readingType": "DIRECT_READ",
-                      "frequency": "PT30M",
-                      "duration": "PT2H",
-                      "deviceType": "EV_CHARGER",
-                      "description": "Per-EV vendor telemetry; OpenADR3 reportSpecifier-aligned."
-                    }
+                    "reportDescriptors": [
+                      {
+                        "payloadType": "BASELINE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": false,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "SOC",
+                        "readingType": "DIRECT_READ",
+                        "units": "PERCENT",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "POWER",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "GPS_LAT",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "GPS_LON",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      }
+                    ]
                   }
                 },
                 {
@@ -106,9 +152,30 @@
                       "@type": "Quantity"
                     },
                     "vendorDevices": [
-                      { "deviceId": "ev://vehicle/VIN001", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics" },
-                      { "deviceId": "ev://vehicle/VIN002", "deviceType": "EV_CHARGER", "make": "MG",   "model": "ZS EV",    "ratedPowerKw": 7.0, "telemetryProvider": "mg-imotion" },
-                      { "deviceId": "ev://vehicle/VIN003", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics" }
+                      {
+                        "deviceId": "ev://vehicle/VIN001",
+                        "deviceType": "EV_CHARGER",
+                        "make": "Tata",
+                        "model": "Nexon EV",
+                        "ratedPowerKw": 7.0,
+                        "telemetryProvider": "tata-evp-telematics"
+                      },
+                      {
+                        "deviceId": "ev://vehicle/VIN002",
+                        "deviceType": "EV_CHARGER",
+                        "make": "MG",
+                        "model": "ZS EV",
+                        "ratedPowerKw": 7.0,
+                        "telemetryProvider": "mg-imotion"
+                      },
+                      {
+                        "deviceId": "ev://vehicle/VIN003",
+                        "deviceType": "EV_CHARGER",
+                        "make": "Tata",
+                        "model": "Tigor EV",
+                        "ratedPowerKw": 7.0,
+                        "telemetryProvider": "tata-evp-telematics"
+                      }
                     ]
                   }
                 }
@@ -121,9 +188,18 @@
         "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          { "role": "buyer",       "participantId": "tpddl-north-delhi" },
-          { "role": "seller",      "participantId": "greenflex-agg" },
-          { "role": "carbonBuyer", "participantId": "delhi-carbon-registry" }
+          {
+            "role": "buyer",
+            "participantId": "tpddl-north-delhi"
+          },
+          {
+            "role": "seller",
+            "participantId": "greenflex-agg"
+          },
+          {
+            "role": "carbonBuyer",
+            "participantId": "delhi-carbon-registry"
+          }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
@@ -131,9 +207,18 @@
         }
       },
       "participants": [
-        { "role": "buyer",       "participantId": "tpddl-north-delhi" },
-        { "role": "seller",      "participantId": "greenflex-agg" },
-        { "role": "carbonBuyer", "participantId": "delhi-carbon-registry" }
+        {
+          "role": "buyer",
+          "participantId": "tpddl-north-delhi"
+        },
+        {
+          "role": "seller",
+          "participantId": "greenflex-agg"
+        },
+        {
+          "role": "carbonBuyer",
+          "participantId": "delhi-carbon-registry"
+        }
       ]
     }
   }

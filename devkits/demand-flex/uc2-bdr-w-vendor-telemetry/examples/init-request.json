@@ -77,22 +77,68 @@
                       "registry": "delhi-carbon-registry",
                       "methodology": "CDM_AMS-II.G_v1"
                     },
-                    "reportRequirements": {
-                      "objectType": "REPORT_DESCRIPTOR",
-                      "payloadType": [
-                        "BASELINE",
-                        "USAGE",
-                        "SOC",
-                        "POWER",
-                        "GPS_LAT",
-                        "GPS_LON"
-                      ],
-                      "readingType": "DIRECT_READ",
-                      "frequency": "PT30M",
-                      "duration": "PT2H",
-                      "deviceType": "EV_CHARGER",
-                      "description": "Per-EV vendor telemetry; OpenADR3 reportSpecifier-aligned."
-                    }
+                    "reportDescriptors": [
+                      {
+                        "payloadType": "BASELINE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": false,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "SOC",
+                        "readingType": "DIRECT_READ",
+                        "units": "PERCENT",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "POWER",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "GPS_LAT",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      },
+                      {
+                        "payloadType": "GPS_LON",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "aggregate": false,
+                        "historical": true,
+                        "numIntervals": 4,
+                        "frequency": -1,
+                        "reportIntervals": "INTERVALS"
+                      }
+                    ]
                   }
                 },
                 {
