@@ -23,14 +23,6 @@
       "rdfs:comment": "Per-meter telemetry carrying BASELINE (and post-event USAGE) signals as a deg:BecknTimeSeries.",
       "rdfs:domain": "deg:DemandFlexPerformance",
       "rdfs:range": "deg:BecknTimeSeries"
-    },
-    {
-      "@id": "dfp:respondsTo",
-      "@type": "rdf:Property",
-      "rdfs:label": "Responds to",
-      "rdfs:comment": "On a reply on_status carrying vendor telemetry, the messageId of the originating status request — lets the BAP correlate response to question.",
-      "rdfs:domain": "deg:DemandFlexPerformance",
-      "rdfs:range": "xsd:string"
     }
   ]
 }

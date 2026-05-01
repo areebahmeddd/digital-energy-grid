@@ -1,31 +1,29 @@
 # DEG Contract Policy — Demand Flex Vendor-Telemetry Revenue Flows (UC2)
 #
-# Differs from demand_flex_revenue.rego (UC1) in three ways:
+# Differs from demand_flex_revenue.rego (UC1) in two ways:
 #   1. Settlement is computed per VENDOR DEVICE (EV charger / battery /
 #      heat pump etc) rather than per grid-side meter. Baseline is
 #      vendor-rated charger power published by the DISCOM in the first
 #      on_status; USAGE arrives from the aggregator via the on_status
-#      reply to DISCOM's report-request status call.
-#   2. A third revenue role — `carbonBuyer` — receives a negative flow
-#      equal to (verified kWh reduction × gridEmissionFactor × carbon
-#      price). The aggregator (`seller`) earns both the demand-response
-#      incentive AND the carbon credit value. Net-zero across all roles.
-#   3. Carbon-credit terms are read from
-#      offerAttributes.inputs[buyer].inputs.carbonCredit and gated by an
-#      explicit `enabled: true` flag, so contracts that don't opt in to
-#      carbon monetisation continue to settle as a 2-role contract with
-#      a zero-valued carbonBuyer flow.
+#      reply to DISCOM's status call.
+#   2. Carbon credit value (verified kWh × gridEmissionFactor × carbon
+#      price) accrues to the SELLER on top of the demand-response
+#      incentive. The buyer (DISCOM) pays the bundled amount; net-zero
+#      across two roles. Carbon-credit terms are read from
+#      offerAttributes.inputs[buyer].inputs.carbonCredit and gated by
+#      `enabled: true`; when disabled the carbon component is zero and
+#      settlement is incentive-only.
 #
 # Input: full beckn contract payload, identical envelope to UC1 plus:
 #   - offerAttributes.inputs[buyer].inputs.carbonCredit:
 #       { enabled, gridEmissionFactorKgPerKwh, creditPricePerTonneCO2e,
-#         registry, methodology }
+#         methodology }
 #   - offerAttributes.inputs[seller].inputs.vendorDevices[]:
 #       per-device metadata (deviceId, ratedPowerKw, …)
 #   - performance[0].performanceAttributes.meters[*].telemetry payloads
-#     may include SOC, POWER, GPS_LAT, GPS_LON in addition to BASELINE
-#     and USAGE — only BASELINE and USAGE are consulted for settlement;
-#     the rest are inert here and fenced by the network rego.
+#     may include SOC_END, POWER, GPS_LAT, GPS_LON in addition to
+#     BASELINE and USAGE — only BASELINE and USAGE are consulted for
+#     settlement; the rest are inert here and fenced by the network rego.
 #
 # Exported rules (mirroring UC1 surface plus carbon additions):
 #   revenue_flows          — [{role, value, currency, description}]
@@ -95,10 +93,6 @@ default _carbon_price_per_tonne := 0.0
 
 _carbon_price_per_tonne := _carbon.creditPricePerTonneCO2e if _carbon_enabled
 
-default _carbon_registry := ""
-
-_carbon_registry := _carbon.registry if _carbon_enabled
-
 # ---------------------------------------------------------------------------
 # Event hours
 # ---------------------------------------------------------------------------
@@ -110,7 +104,7 @@ _end_ns := time.parse_rfc3339_ns(_event_window.endDate)
 event_hours := (_end_ns - _start_ns) / ns_per_hour
 
 # ---------------------------------------------------------------------------
-# BecknTimeSeries readers (same as UC1; vendor types like SOC/POWER/GPS
+# BecknTimeSeries readers (same as UC1; vendor types like SOC_END/POWER/GPS
 # are inert here — not consulted for settlement)
 # ---------------------------------------------------------------------------
 
@@ -183,44 +177,31 @@ total_co2_avoided_kg := sum([s.co2AvoidedKg | some i; s := _meter_settlement[i]]
 total_carbon_value := total_co2_avoided_kg * _carbon_price_per_tonne / kg_per_tonne
 
 # ---------------------------------------------------------------------------
-# Revenue flows by role — net-zero across (buyer, seller, carbonBuyer)
+# Revenue flows by role — net-zero across (buyer, seller)
 #
-#   buyer (DISCOM)        pays incentive       → −total_settlement
-#   carbonBuyer (registry) pays carbon credit  → −total_carbon_value
-#   seller (aggregator)   receives both        → +(total_settlement + total_carbon_value)
+#   buyer (DISCOM)      pays incentive + carbon  → −(total_settlement + total_carbon_value)
+#   seller (aggregator) receives both            → +(total_settlement + total_carbon_value)
 # ---------------------------------------------------------------------------
 
 _total_kwh := sum([s.reductionKwh | some i; s := _meter_settlement[i]])
 
-# Per-role value/description, built by guarded rule heads so we don't
-# rely on inline-array-of-objects literals (which trip Rego v1's parser).
+_buyer_value := -1 * (total_settlement + total_carbon_value)
 
-_buyer_value := -1 * total_settlement
+_seller_value := total_settlement + total_carbon_value
 
-_seller_value := total_settlement + total_carbon_value if _carbon_enabled
+_buyer_desc := sprintf("Incentive (%v) + carbon credit (%v) payable for %v kWh / %v kg CO2e avoided",
+	[total_settlement, total_carbon_value, _total_kwh, total_co2_avoided_kg]) if _carbon_enabled
 
-_seller_value := total_settlement if not _carbon_enabled
+_buyer_desc := sprintf("Incentive payable for %v kWh verified curtailment", [_total_kwh]) if not _carbon_enabled
 
-_carbon_value := -1 * total_carbon_value if _carbon_enabled
-
-_carbon_value := 0 if not _carbon_enabled
-
-_buyer_desc := sprintf("Incentive payable for %v kWh verified curtailment", [_total_kwh])
-
-_seller_desc := sprintf("Incentive (%v) + carbon credit revenue (%v) for %v kWh / %v kg CO2e avoided",
+_seller_desc := sprintf("Incentive (%v) + carbon credit (%v) receivable for %v kWh / %v kg CO2e avoided",
 	[total_settlement, total_carbon_value, _total_kwh, total_co2_avoided_kg]) if _carbon_enabled
 
 _seller_desc := sprintf("Incentive receivable for %v kWh verified curtailment", [_total_kwh]) if not _carbon_enabled
 
-_carbon_desc := sprintf("Carbon credit cost for %g kg CO2e (registry: %s, %g %s/tCO2e)",
-	[total_co2_avoided_kg, _carbon_registry, _carbon_price_per_tonne, _currency]) if _carbon_enabled
-
-_carbon_desc := "Carbon credit monetisation disabled for this contract" if not _carbon_enabled
-
 _flow_defs := [
 	["buyer", _buyer_value, _buyer_desc],
 	["seller", _seller_value, _seller_desc],
-	["carbonBuyer", _carbon_value, _carbon_desc],
 ]
 
 revenue_flows := [flow |
@@ -257,12 +238,6 @@ violations contains msg if {
 violations contains msg if {
 	not "seller" in _roles
 	msg := "no participant with role 'seller' found"
-}
-
-violations contains msg if {
-	_carbon_enabled
-	not "carbonBuyer" in _roles
-	msg := "carbonCredit.enabled=true but no participant with role 'carbonBuyer' declared"
 }
 
 violations contains msg if {

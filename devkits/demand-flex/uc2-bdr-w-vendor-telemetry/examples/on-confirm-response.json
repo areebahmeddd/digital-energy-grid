@@ -74,7 +74,6 @@
                       "enabled": true,
                       "gridEmissionFactorKgPerKwh": 0.82,
                       "creditPricePerTonneCO2e": 1500.0,
-                      "registry": "delhi-carbon-registry",
                       "methodology": "CDM_AMS-II.G_v1"
                     }
                   }
@@ -113,8 +112,7 @@
         "@type": "DEGContract",
         "roles": [
           {"role": "buyer", "participantId": "tpddl-north-delhi"},
-          {"role": "seller", "participantId": "greenflex-agg"},
-          {"role": "carbonBuyer", "participantId": "delhi-carbon-registry"}
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
@@ -123,8 +121,7 @@
       },
       "participants": [
         {"role": "buyer", "participantId": "tpddl-north-delhi"},
-        {"role": "seller", "participantId": "greenflex-agg"},
-        {"role": "carbonBuyer", "participantId": "delhi-carbon-registry"}
+        {"role": "seller", "participantId": "greenflex-agg"}
       ]
     }
   }

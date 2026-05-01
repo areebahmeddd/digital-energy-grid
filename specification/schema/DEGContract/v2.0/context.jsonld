@@ -16,8 +16,7 @@
     "buyer": "deg:RoleBuyer",
     "seller": "deg:RoleSeller",
     "buyerDiscom": "deg:RoleBuyerDiscom",
-    "sellerDiscom": "deg:RoleSellerDiscom",
-    "carbonBuyer": "deg:RoleCarbonBuyer"
+    "sellerDiscom": "deg:RoleSellerDiscom"
   },
   "@graph": []
 }

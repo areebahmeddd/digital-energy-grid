@@ -3,7 +3,7 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "_comment_design": "Standard direction (bapId=aggregator, bppId=DISCOM). PER_INTERVAL payloads (BASELINE/USAGE/POWER/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
+    "_comment_design": "DISCOM publishes per-EV vendor telemetry it has aggregated (out-of-band, via the aggregator's vendor-API integrations) ahead of settlement. PER_INTERVAL payloads (BASELINE/USAGE/POWER/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
@@ -77,7 +77,6 @@
                       "enabled": true,
                       "gridEmissionFactorKgPerKwh": 0.82,
                       "creditPricePerTonneCO2e": 1500.0,
-                      "registry": "delhi-carbon-registry",
                       "methodology": "CDM_AMS-II.G_v1"
                     }
                   }
@@ -124,7 +123,6 @@
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-vendor-001",
             "methodology": "VENDOR_DEVICE_RATED",
-            "respondsTo": "msg-status-vendor-telemetry-001",
             "meters": [
               {
                 "meterId": "ev://vehicle/VIN001",
@@ -207,8 +205,7 @@
         "@type": "DEGContract",
         "roles": [
           {"role": "buyer", "participantId": "tpddl-north-delhi"},
-          {"role": "seller", "participantId": "greenflex-agg"},
-          {"role": "carbonBuyer", "participantId": "delhi-carbon-registry"}
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
@@ -217,8 +214,7 @@
       },
       "participants": [
         {"role": "buyer", "participantId": "tpddl-north-delhi"},
-        {"role": "seller", "participantId": "greenflex-agg"},
-        {"role": "carbonBuyer", "participantId": "delhi-carbon-registry"}
+        {"role": "seller", "participantId": "greenflex-agg"}
       ]
     }
   }
