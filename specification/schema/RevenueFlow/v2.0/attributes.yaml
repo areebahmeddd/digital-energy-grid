@@ -41,7 +41,12 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom]
+                enum: [buyer, seller, buyerDiscom, sellerDiscom, carbonBuyer]
+                description: >
+                  Settlement role. `carbonBuyer` is used for the carbon-credit
+                  registry participant in UC2 (vendor-telemetry) settlement,
+                  which produces a 3-flow net-zero settlement when carbon
+                  credits are enabled.
               value:
                 type: number
                 description: >

@@ -27,7 +27,7 @@
       "@id": "deg:role",
       "@type": "rdf:Property",
       "rdfs:label": "Role",
-      "rdfs:comment": "Contract role this flow applies to (buyer, seller, buyerDiscom, sellerDiscom).",
+      "rdfs:comment": "Contract role this flow applies to (buyer, seller, buyerDiscom, sellerDiscom, carbonBuyer).",
       "schema:rangeIncludes": "deg:RevenueFlowRole"
     },
     {
@@ -81,6 +81,12 @@
       "@type": "deg:RevenueFlowRole",
       "schema:name": "sellerDiscom",
       "schema:identifier": "sellerDiscom"
+    },
+    {
+      "@id": "deg:RevenueFlowRoleCarbonBuyer",
+      "@type": "deg:RevenueFlowRole",
+      "schema:name": "carbonBuyer",
+      "schema:identifier": "carbonBuyer"
     }
   ]
 }
