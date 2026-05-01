@@ -145,7 +145,7 @@
                         "payloadType": "SOC_END",
                         "readingType": "DIRECT_READ",
                         "units": "PERCENT",
-                        "cardinality": "PER_EVENT"
+                        "cardinality": "PER_INTERVAL"
                       },
                       {
                         "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
@@ -197,8 +197,7 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     }
                   ],
                   "intervals": [
@@ -261,8 +260,7 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     }
                   ],
                   "intervals": [
@@ -325,8 +323,7 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     }
                   ],
                   "intervals": [

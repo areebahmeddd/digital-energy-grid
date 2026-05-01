@@ -14,7 +14,7 @@ Part of the [DEG Schema](../../) · [BecknReportDescriptors](../README.md)
 
 ## What this is
 
-A flat array of OpenADR3 [`reportPayloadDescriptor`](https://app.swaggerhub.com/apis/openadr3/OpenADR-3.0.0/3.1.0#/schemas/reportPayloadDescriptors) objects, with one DEG extension — `cardinality` — to disambiguate signals reported every interval (USAGE, POWER) from signals reported once per event (SOC_END, GPS_LAT/LON).
+A flat array of OpenADR3 [`reportPayloadDescriptor`](https://app.swaggerhub.com/apis/openadr3/OpenADR-3.0.0/3.1.0#/schemas/reportPayloadDescriptors) objects, with one DEG extension — `cardinality` — to disambiguate signals reported every interval (USAGE, POWER, SOC_END) from signals reported once per event (GPS_LAT/LON).
 
 The descriptors live in the seller's input on the offer. Pairs with [`BecknTimeSeries`](../../BecknTimeSeries/v1.0/), which carries the values themselves.
 
@@ -43,7 +43,7 @@ The descriptors live in the seller's input on the offer. Pairs with [`BecknTimeS
 | `BASELINE` | `KW` | `DIRECT_READ` | `PER_INTERVAL` | Reference (vendor-rated) charge power per interval |
 | `USAGE` | `KW` | `DIRECT_READ` | `PER_INTERVAL` | Measured charge power per interval during the event |
 | `POWER` | `KW` | `DIRECT_READ` | `PER_INTERVAL` | Signed instantaneous power (charge=+, discharge=−) |
-| `SOC_END` | `PERCENT` | `DIRECT_READ` | `PER_EVENT` | State of charge at end of event |
+| `SOC_END` | `PERCENT` | `DIRECT_READ` | `PER_INTERVAL` | State of charge at end of each interval |
 | `GPS_LAT` | `DEGREES` | `DIRECT_READ` | `PER_EVENT` | Vehicle latitude at start of event |
 | `GPS_LON` | `DEGREES` | `DIRECT_READ` | `PER_EVENT` | Vehicle longitude at start of event |
 
@@ -51,7 +51,7 @@ This list is open — extend it for other devices (heat pumps, batteries, etc.) 
 
 ## How `PER_EVENT` values appear in the time-series
 
-Per-interval values (`USAGE`, `BASELINE`, `POWER`) appear in **every** `intervals[*].payloads[*]` row. Per-event values (`SOC_END`, `GPS_LAT`, `GPS_LON`) appear **only on interval 0**. Consumers iterate intervals normally; per-event rows are simply absent on subsequent intervals. This is enforced by the network rego.
+Per-interval values (`BASELINE`, `USAGE`, `POWER`, `SOC_END`) appear in **every** `intervals[*].payloads[*]` row. Per-event values (`GPS_LAT`, `GPS_LON`) appear **only on interval 0**. Consumers iterate intervals normally; per-event rows are simply absent on subsequent intervals. This is enforced by the network rego.
 
 ## Minimal example — what a seller commits to provide for an EV curtailment
 
@@ -60,7 +60,7 @@ Per-interval values (`USAGE`, `BASELINE`, `POWER`) appear in **every** `interval
   { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW",      "cardinality": "PER_INTERVAL" },
   { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE",    "readingType": "DIRECT_READ", "units": "KW",      "cardinality": "PER_INTERVAL" },
   { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER",    "readingType": "DIRECT_READ", "units": "KW",      "cardinality": "PER_INTERVAL" },
-  { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END",  "readingType": "DIRECT_READ", "units": "PERCENT", "cardinality": "PER_EVENT" },
+  { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END",  "readingType": "DIRECT_READ", "units": "PERCENT", "cardinality": "PER_INTERVAL" },
   { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT",  "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT" },
   { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON",  "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT" }
 ]

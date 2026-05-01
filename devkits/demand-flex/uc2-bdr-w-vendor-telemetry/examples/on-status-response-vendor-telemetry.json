@@ -3,7 +3,7 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "_comment_design": "Standard direction (bapId=aggregator, bppId=DISCOM). PER_INTERVAL payloads (BASELINE/USAGE/POWER) appear in every interval; PER_EVENT payloads (SOC_END/GPS_LAT/GPS_LON) appear only on interval 0.",
+    "_comment_design": "Standard direction (bapId=aggregator, bppId=DISCOM). PER_INTERVAL payloads (BASELINE/USAGE/POWER/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
@@ -146,7 +146,7 @@
                         "payloadType": "SOC_END",
                         "readingType": "DIRECT_READ",
                         "units": "PERCENT",
-                        "cardinality": "PER_EVENT"
+                        "cardinality": "PER_INTERVAL"
                       },
                       {
                         "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
@@ -175,7 +175,7 @@
           "id": "perf-evt-vendor-001-actuals",
           "status": {
             "code": "REPORT_DELIVERED",
-            "name": "Vendor telemetry delivered (BASELINE/USAGE/POWER per interval; SOC_END/GPS only on interval 0)"
+            "name": "Vendor telemetry delivered (BASELINE/USAGE/POWER/SOC_END per interval; GPS only on interval 0)"
           },
           "commitmentIds": [
             "commitment-flex-vendor-001"
@@ -199,38 +199,32 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "POWER",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "SOC_END",
-                      "units": "PERCENT",
-                      "readingType": "DIRECT_READ"
+                      "units": "PERCENT"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LAT",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LON",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     }
                   ],
                   "intervals": [
@@ -295,6 +289,12 @@
                           "values": [
                             1.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            72.0
+                          ]
                         }
                       ]
                     },
@@ -317,6 +317,12 @@
                           "type": "POWER",
                           "values": [
                             1.0
+                          ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            73.0
                           ]
                         }
                       ]
@@ -341,6 +347,12 @@
                           "values": [
                             1.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            74.0
+                          ]
                         }
                       ]
                     }
@@ -359,38 +371,32 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "POWER",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "SOC_END",
-                      "units": "PERCENT",
-                      "readingType": "DIRECT_READ"
+                      "units": "PERCENT"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LAT",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LON",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     }
                   ],
                   "intervals": [
@@ -455,6 +461,12 @@
                           "values": [
                             0.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            70.0
+                          ]
                         }
                       ]
                     },
@@ -477,6 +489,12 @@
                           "type": "POWER",
                           "values": [
                             0.0
+                          ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            70.0
                           ]
                         }
                       ]
@@ -501,6 +519,12 @@
                           "values": [
                             0.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            70.0
+                          ]
                         }
                       ]
                     }
@@ -519,38 +543,32 @@
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "POWER",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
+                      "units": "KW"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "SOC_END",
-                      "units": "PERCENT",
-                      "readingType": "DIRECT_READ"
+                      "units": "PERCENT"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LAT",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     },
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
                       "payloadType": "GPS_LON",
-                      "units": "DEGREES",
-                      "readingType": "DIRECT_READ"
+                      "units": "DEGREES"
                     }
                   ],
                   "intervals": [
@@ -615,6 +633,12 @@
                           "values": [
                             0.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            46.0
+                          ]
                         }
                       ]
                     },
@@ -638,6 +662,12 @@
                           "values": [
                             0.0
                           ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            45.0
+                          ]
                         }
                       ]
                     },
@@ -660,6 +690,12 @@
                           "type": "POWER",
                           "values": [
                             0.0
+                          ]
+                        },
+                        {
+                          "type": "SOC_END",
+                          "values": [
+                            44.0
                           ]
                         }
                       ]
