@@ -10,7 +10,7 @@ info:
     call (contract + commitment ref only — the report shape was frozen at
     confirm via the seller's `reportDescriptors[]` sidecar); Aggregator
     answers via `on_status` with full vendor BecknTimeSeries
-    (BASELINE/USAGE/POWER per interval, SOC_END/GPS once per event); DISCOM
+    (BASELINE/USAGE/POWER/SOC_END per interval, GPS once per event); DISCOM
     settles with carbon-credit revenue flow.
 
     Role split per call (subscriber IDs are placeholders, fixed to actors):
@@ -112,7 +112,7 @@ workflows:
         description: >
           Aggregator uses BPP-caller to answer with vendor BecknTimeSeries
           per EV — PER_INTERVAL (BASELINE/USAGE/POWER) on every interval,
-          PER_EVENT (SOC_END/GPS_LAT/GPS_LON) only on interval 0.
+          PER_EVENT (GPS_LAT/GPS_LON) only on interval 0.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json

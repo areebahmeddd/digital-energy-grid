@@ -239,6 +239,64 @@ pm.collectionVariables.set('iso_date', isoTimestamp);
 """
 
 
+# Keys whose array elements should each render as a single line of JSON in
+# emitted Postman bodies. Mirrors the formatting convention used in the
+# example payloads on disk so collections stay compact and easy to scan.
+_COLLAPSE_ITEM_KEYS = {
+    "intervals",
+    "payloadDescriptors",
+    "reportDescriptors",
+    "vendorDevices",
+    "roles",
+    "participants",
+    "revenueFlows",
+}
+_SCALAR_INLINE_LIMIT = 140
+
+
+def _format_payload(doc: Any) -> str:
+    """Pretty-print JSON, but collapse small repetitive arrays to one-liners.
+
+    Each element of an array under one of `_COLLAPSE_ITEM_KEYS` renders on a
+    single line. Pure-scalar arrays whose inline form is short also collapse
+    inline. Larger nested structures (commitments, resources, inputs, meters,
+    performance, offers, catalogs) stay expanded.
+    """
+    placeholders: Dict[str, str] = {}
+
+    def add(item: Any) -> str:
+        ph = f"__PMPH_{len(placeholders)}__"
+        placeholders[ph] = json.dumps(item, separators=(", ", ": "))
+        return ph
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            for key in list(node.keys()):
+                value = node[key]
+                if key in _COLLAPSE_ITEM_KEYS and isinstance(value, list):
+                    for i, item in enumerate(value):
+                        value[i] = add(item)
+                elif isinstance(value, list) and value and all(
+                    isinstance(x, (str, int, float, bool, type(None))) for x in value
+                ):
+                    inline = json.dumps(value, separators=(", ", ": "))
+                    if len(inline) <= _SCALAR_INLINE_LIMIT:
+                        node[key] = add(value)
+                else:
+                    visit(value)
+        elif isinstance(node, list):
+            for x in node:
+                visit(x)
+
+    # We mutate `doc` in place; callers pass a freshly produced
+    # request_body so that's fine.
+    visit(doc)
+    out = json.dumps(doc, indent=2)
+    for ph, oneline in placeholders.items():
+        out = out.replace(f'"{ph}"', oneline)
+    return out
+
+
 def matches_role_filter(filename: str, role: str) -> bool:
     """
     Check if filename matches role-based filter patterns.
@@ -480,8 +538,12 @@ def create_postman_request(
     # Replace macros in the JSON
     request_body = replace_context_macros(json_data, host_root_style)
 
-    # Format JSON with proper indentation
-    body_raw = json.dumps(request_body, indent=2)
+    # Format JSON, preserving the same compact-array formatting used in the
+    # example payloads on disk: each item of a small repetitive array (intervals,
+    # payloadDescriptors, reportDescriptors, vendorDevices, roles, participants,
+    # revenueFlows) renders on a single line, plus short pure-scalar arrays
+    # render inline. Larger nested structures stay expanded.
+    body_raw = _format_payload(request_body)
 
     # BAP discover is a GET so Postman prunes the body unless explicitly disabled
     is_bap_discover = role == "BAP" and action == "discover"

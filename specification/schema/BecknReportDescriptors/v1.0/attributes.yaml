@@ -8,8 +8,8 @@ info:
     OpenADR's `reportPayloadDescriptor` 1:1 (the same descriptor type
     used inside `BecknTimeSeries.payloadDescriptors`) and adds one
     DEG extension — `cardinality` — to disambiguate signals that are
-    reported every interval (USAGE, POWER) from signals reported once
-    per event (SOC_END, GPS_LAT, GPS_LON).
+    reported every interval (USAGE, POWER, SOC_END) from signals
+    reported once per event (GPS_LAT, GPS_LON).
 
     Embedded as `inputs[seller].inputs.reportDescriptors` in DemandFlexBuyOffer
     (or any equivalent offer). The property is nullable: set to `null`
@@ -46,24 +46,24 @@ components:
 
                   PER_INTERVAL  - reported in every interval of the
                                   BecknTimeSeries (default). Use for
-                                  power-like signals: USAGE, BASELINE,
-                                  POWER (KW per interval).
+                                  power-like signals (USAGE, BASELINE,
+                                  POWER — KW per interval) and SOC_END
+                                  (% at end of each interval).
                   PER_EVENT     - reported exactly once per event, on
                                   interval 0 of the BecknTimeSeries.
                                   Use for slow-changing or summary
-                                  signals: SOC_END (% at end of event),
-                                  GPS_LAT, GPS_LON (vehicle position
-                                  at start of event).
+                                  signals: GPS_LAT, GPS_LON (vehicle
+                                  position at start of event).
               example: PER_INTERVAL
 
   # Canonical payloadType vocabulary used by demand-flex EV vendor
   # telemetry. Add to this list as new signals are introduced.
   #
-  # | payloadType | units    | readingType  | cardinality   | meaning                                          |
-  # |-------------|----------|--------------|---------------|--------------------------------------------------|
-  # | BASELINE    | KW       | DIRECT_READ  | PER_INTERVAL  | Reference (vendor-rated) charge power            |
-  # | USAGE       | KW       | DIRECT_READ  | PER_INTERVAL  | Measured charge power during the event           |
+  # | payloadType | units    | readingType  | cardinality   | meaning                                           |
+  # |-------------|----------|--------------|---------------|---------------------------------------------------|
+  # | BASELINE    | KW       | DIRECT_READ  | PER_INTERVAL  | Reference (vendor-rated) charge power             |
+  # | USAGE       | KW       | DIRECT_READ  | PER_INTERVAL  | Measured charge power during the event            |
   # | POWER       | KW       | DIRECT_READ  | PER_INTERVAL  | Signed instantaneous power (charge=+, discharge=-)|
-  # | SOC_END     | PERCENT  | DIRECT_READ  | PER_EVENT     | State of charge at end of event                  |
-  # | GPS_LAT     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle latitude at start of event               |
-  # | GPS_LON     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle longitude at start of event              |
+  # | SOC_END     | PERCENT  | DIRECT_READ  | PER_INTERVAL  | State of charge at end of each interval           |
+  # | GPS_LAT     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle latitude at start of event                |
+  # | GPS_LON     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle longitude at start of event               |

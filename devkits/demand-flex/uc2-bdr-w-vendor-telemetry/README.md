@@ -1,6 +1,6 @@
 # UC2 — Behavioral Demand Response with Vendor Telemetry
 
-Vendor-telemetry-settled curtailment: the **DISCOM (TPDDL)** asks the **Aggregator (GreenFlex)** for fulfillment status with a plain Beckn `status` call (just contract + commitment ids — the report shape was frozen at confirm). The Aggregator answers via `on_status` with per-EV `BecknTimeSeries` (BASELINE/USAGE/POWER per interval; SOC_END/GPS_LAT/GPS_LON once per event). DISCOM settles against vendor-rated baselines and pays both an incentive and a carbon-credit value.
+Vendor-telemetry-settled curtailment: the **DISCOM (TPDDL)** asks the **Aggregator (GreenFlex)** for fulfillment status with a plain Beckn `status` call (just contract + commitment ids — the report shape was frozen at confirm). The Aggregator answers via `on_status` with per-EV `BecknTimeSeries` (BASELINE/USAGE/POWER/SOC_END per interval; GPS_LAT/GPS_LON once per event). DISCOM settles against vendor-rated baselines and pays both an incentive and a carbon-credit value.
 
 For the shared stack topology, prerequisites, and Quick Start, see [../../README.md](../../README.md). For UC1 (grid-meter baselining), see [../uc1-bdr-w-baselining/](../uc1-bdr-w-baselining/).
 
@@ -66,7 +66,7 @@ Per-device `payloadDescriptors` and seller-side `reportDescriptors` use these `p
 | `BASELINE` | KW | `PER_INTERVAL` | Vendor-rated charging power, repeated each interval |
 | `USAGE` | KW | `PER_INTERVAL` | Vendor-reported actual draw during the event |
 | `POWER` | KW | `PER_INTERVAL` | Signed instantaneous power at the charger (charge=+, discharge=−) |
-| `SOC_END` | PERCENT | `PER_EVENT` | State of charge at end of event (one shot, on interval 0) |
+| `SOC_END` | PERCENT | `PER_INTERVAL` | State of charge at end of each interval |
 | `GPS_LAT` / `GPS_LON` | DEGREES | `PER_EVENT` | Vehicle position at start of event (one shot, on interval 0) |
 
 `PER_INTERVAL` payloads MUST appear in every `intervals[*].payloads[*]` row; `PER_EVENT` payloads MUST appear in exactly one interval (interval 0 by convention). The [network rego](../policies/demand_flex_uc2_network.rego) enforces both, plus type-coverage against `payloadDescriptors`. The list is open-ended; future `CO2_AVOIDED` (`KG_CO2E`) or temperature/SoH payloads can be added by extending the seller's `reportDescriptors` and the meter's `payloadDescriptors`.
