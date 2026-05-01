@@ -1,0 +1,25 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:BecknReportRequest",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Telemetry Report Request",
+      "rdfs:comment": "OpenADR 3.1.0-aligned envelope for requesting one or more interval-aligned telemetry reports embedded in beckn payloads."
+    },
+    {
+      "@id": "deg:BecknReportPayload",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Telemetry Report Payload",
+      "rdfs:comment": "Reply-side correlation block for a BecknReportRequest. Travels alongside the actual report body (a BecknTimeSeries)."
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+openapi: 3.1.1
+info:
+  title: BecknReportRequest — Telemetry Report Request (v1.0)
+  version: 1.0.0
+  description: >
+    OpenADR 3.1.0-aligned wrapper for telemetry report requests inside
+    beckn payloads. Built by `$ref`-reusing OpenADR's `reportDescriptor`
+    so the request side of the OpenADR3 report flow can travel as a
+    typed object on a beckn message — typically inside
+    `Contract.contractAttributes.reportRequest`.
+
+    Used in DEG by demand-flex UC2 to let a DISCOM ask an aggregator for
+    fulfillment status with a precise telemetry specifier (one descriptor
+    per payloadType, optional device targets, interval cadence). The
+    aggregator's reply embeds the actual payload as a `BecknTimeSeries`
+    plus a small `reportPayload` correlation block.
+
+components:
+  schemas:
+
+    BecknReportRequest:
+      type: object
+      additionalProperties: false
+      required: [reportDescriptors]
+      description: >
+        A request envelope listing one or more OpenADR3 `reportDescriptor`
+        objects plus optional correlation metadata. Carriers SHOULD attach
+        this under `Contract.contractAttributes.reportRequest`.
+      x-tags:
+        - openadr
+        - report-request
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": BecknReportRequest
+
+      properties:
+
+        "@type":
+          type: string
+          enum: ["BecknReportRequest"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the embedder
+            wants to surface the type inline; the parent schema's `$ref`
+            to BecknReportRequest is what drives validation.
+
+        "@context":
+          type: string
+          format: uri
+          description: >
+            Optional JSON-LD context URL. Usually omitted — the envelope's
+            `context.schemaContext[]` carries it once for the whole payload.
+
+        reportName:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >
+            Caller-defined name for the requested report (e.g.
+            `VENDOR_TELEMETRY_USAGE`). Mirrors OpenADR3's `reportName` in
+            the report response.
+          example: VENDOR_TELEMETRY_USAGE
+
+        eventId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >
+            Caller-defined identifier of the demand-response or settlement
+            event the report pertains to. Used to correlate the response
+            back to the request.
+          example: evt-2026-04-01-vendor-001
+
+        reportDescriptors:
+          type: array
+          minItems: 1
+          description: >
+            Array of OpenADR3 `reportDescriptor` objects — one per
+            requested signal (payloadType). Each descriptor specifies
+            units, reading type, optional device targets, and interval
+            cadence (numIntervals, frequency, reportIntervals, historical).
+          items:
+            $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/reportDescriptor"
+
+    BecknReportPayload:
+      type: object
+      additionalProperties: false
+      required: [respondsTo]
+      description: >
+        Reply-side correlation block. Carried alongside the actual report
+        body (a `BecknTimeSeries` typically embedded in
+        `performanceAttributes.meters[].telemetry`). Echoes the request's
+        `reportName` and `eventId` and points back at the request
+        `messageId` via `respondsTo`.
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": BecknReportPayload
+
+      properties:
+
+        "@type":
+          type: string
+          enum: ["BecknReportPayload"]
+
+        "@context":
+          type: string
+          format: uri
+
+        respondsTo:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: >
+            The `messageId` of the originating BecknReportRequest message.
+
+        reportName:
+          type: string
+
+        eventId:
+          type: string
+
+        intervalDuration:
+          type: string
+          description: ISO 8601 duration of intervals in the embedded BecknTimeSeries.
+          example: PT30M

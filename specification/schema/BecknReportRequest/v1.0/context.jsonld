@@ -1,0 +1,34 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "deg": "https://schema.beckn.io/deg/",
+
+    "BecknReportRequest": "deg:BecknReportRequest",
+    "BecknReportPayload": "deg:BecknReportPayload",
+
+    "reportName": "oadr:reportName",
+    "eventId": "oadr:eventId",
+    "respondsTo": "oadr:respondsTo",
+    "intervalDuration": { "@id": "oadr:duration", "@type": "xsd:duration" },
+
+    "reportDescriptors": { "@id": "oadr:reportDescriptors", "@container": "@set" },
+    "payloadType": "oadr:payloadType",
+    "readingType": "oadr:readingType",
+    "units": "oadr:units",
+    "aggregate": { "@id": "oadr:aggregate", "@type": "xsd:boolean" },
+    "startInterval": { "@id": "oadr:startInterval", "@type": "xsd:integer" },
+    "numIntervals": { "@id": "oadr:numIntervals", "@type": "xsd:integer" },
+    "historical": { "@id": "oadr:historical", "@type": "xsd:boolean" },
+    "frequency": { "@id": "oadr:frequency", "@type": "xsd:integer" },
+    "repeat": { "@id": "oadr:repeat", "@type": "xsd:integer" },
+    "reportIntervals": "oadr:reportIntervals",
+    "targets": { "@id": "oadr:targets", "@container": "@set" }
+  },
+  "@graph": []
+}

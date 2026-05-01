@@ -14,8 +14,8 @@
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -579,45 +579,11 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-        "@type": "DEGContract",
-        "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          },
-          {
-            "role": "carbonBuyer",
-            "participantId": "delhi-carbon-registry"
-          }
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
-          "queryPath": "data.deg.contracts.demand_flex_uc2"
-        }
-      },
-      "participants": [
-        {
-          "role": "buyer",
-          "participantId": "tpddl-north-delhi"
-        },
-        {
-          "role": "seller",
-          "participantId": "greenflex-agg"
-        },
-        {
-          "role": "carbonBuyer",
-          "participantId": "delhi-carbon-registry"
-        }
-      ],
-      "reportPayload": {
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld",
+        "@type": "BecknReportPayload",
         "respondsTo": "msg-status-vendor-telemetry-001",
-        "eventId": "evt-2026-04-01-vendor-001",
         "reportName": "VENDOR_TELEMETRY_USAGE",
+        "eventId": "evt-2026-04-01-vendor-001",
         "intervalDuration": "PT30M"
       }
     }

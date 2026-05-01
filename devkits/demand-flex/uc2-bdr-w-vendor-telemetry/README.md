@@ -35,15 +35,21 @@ Each subscriber is registered with **both BAP and BPP roles** in the Beckn regis
 
 This dual-role-per-subscriber pattern is allowed by Beckn 2.0; for live testnet runs, both subscribers must have BAP **and** BPP roles registered with valid signing keys against `nfh.global/testnet-deg-vendor`.
 
-## OpenADR3 alignment — `reportDescriptor[]`
+## OpenADR3 alignment — `BecknReportRequest` / `BecknReportPayload`
 
-DISCOM declares what telemetry it needs using the OpenADR3 [`reportDescriptor`](https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml) shape verbatim — one entry per `payloadType`, with `readingType`, `units`, `aggregate`, `historical`, `numIntervals`, `frequency`, `reportIntervals`, and (in the actual status request) `targets`.
+DISCOM declares its telemetry needs using the OpenADR3 [`reportDescriptor`](https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml) shape verbatim — one entry per `payloadType`, with `readingType`, `units`, `aggregate`, `historical`, `numIntervals`, `frequency`, `reportIntervals`, and (in the actual status request) `targets`. The descriptors travel inside two new DEG schemas at [`specification/schema/BecknReportRequest/v1.0/`](../../../specification/schema/BecknReportRequest/v1.0/) — `BecknReportRequest` (request side) and `BecknReportPayload` (reply correlation block) — both of which $ref the OpenADR3 reportDescriptor type.
 
-- **In offer terms** (`publish-catalog` through `on-confirm`): `offerAttributes.inputs[buyer].inputs.reportDescriptors[]` lists 6 descriptors (`BASELINE`, `USAGE`, `SOC`, `POWER`, `GPS_LAT`, `GPS_LON`). `targets` is omitted — the offer pre-declares telemetry shape *before* the aggregator declares its devices.
-- **DISCOM's `status` request** (`message.contract.reportDescriptors[]`): same 5 descriptors (`BASELINE` is dropped since DISCOM already published it), now with `targets: ["ev://vehicle/VIN001", …]` populated to scope the report to specific aggregator-declared VINs. This is exactly the OpenADR3 `reportSpecifier` payload — VTN→VEN report request.
-- **Aggregator's `on_status` reply** carries the requested telemetry in `performance[].performanceAttributes.meters[].telemetry` as a `BecknTimeSeries` per device, plus a structured `message.contract.reportPayload` (`respondsTo`, `eventId`, `reportName`, `intervalDuration`) for correlation back to the request.
+The Beckn 2.1 `Contract` schema has `additionalProperties: false`, so the descriptors can't sit at `message.contract.*` directly. They ride inside `contractAttributes`, which is a polymorphic slot typed by `@context` / `@type` (the same `@type`-driven dispatch BecknTimeSeries documents). Two messages use a non-DEGContract type for `contractAttributes`:
 
-This replaces an earlier ad-hoc `tags.report-request` / `tags.report-payload` shape with the OpenADR3 schema directly.
+| Message | `contractAttributes.@type` | Carries |
+|---|---|---|
+| `publish-catalog` … `on-confirm` | `DEGContract` | roles, policy. Telemetry needs are pre-declared at `offerAttributes.inputs[buyer].inputs.reportDescriptors[]` (no `targets` yet). |
+| `on-status-baselines` (BPP push) | `DEGContract` | per-EV BASELINE telemetry; the report-request lives on the contract terms already. |
+| **`status` (DISCOM asks)** | **`BecknReportRequest`** | `reportName`, `eventId`, `reportDescriptors[]` with `targets: [VINs]` populated. |
+| **`on_status` (vendor telemetry reply)** | **`BecknReportPayload`** | `respondsTo` (status `messageId`), `reportName`, `eventId`, `intervalDuration`. The actual report body is the `BecknTimeSeries` under `performance[].performanceAttributes.meters[].telemetry`. |
+| `on-status-settled` | `DEGContract` | full settlement contract; OPA evaluates against this. |
+
+This is exactly the OpenADR3 reportSpecifier / reportPayload split — VTN→VEN report request and VEN→VTN report response — mapped onto Beckn's `status` / `on_status` actions and the polymorphic `contractAttributes` extension slot.
 
 ## Vendor telemetry payload types
 

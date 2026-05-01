@@ -12,89 +12,100 @@
     "messageId": "msg-status-vendor-telemetry-001",
     "timestamp": "2026-04-01T10:32:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-vendor-001",
-      "reportDescriptors": [
+      "commitments": [
         {
-          "payloadType": "USAGE",
-          "readingType": "DIRECT_READ",
-          "units": "KW",
-          "aggregate": false,
-          "historical": true,
-          "numIntervals": 4,
-          "frequency": -1,
-          "reportIntervals": "INTERVALS",
-          "targets": [
-            "ev://vehicle/VIN001",
-            "ev://vehicle/VIN002",
-            "ev://vehicle/VIN003"
-          ]
-        },
-        {
-          "payloadType": "SOC",
-          "readingType": "DIRECT_READ",
-          "units": "PERCENT",
-          "aggregate": false,
-          "historical": true,
-          "numIntervals": 4,
-          "frequency": -1,
-          "reportIntervals": "INTERVALS",
-          "targets": [
-            "ev://vehicle/VIN001",
-            "ev://vehicle/VIN002",
-            "ev://vehicle/VIN003"
-          ]
-        },
-        {
-          "payloadType": "POWER",
-          "readingType": "DIRECT_READ",
-          "units": "KW",
-          "aggregate": false,
-          "historical": true,
-          "numIntervals": 4,
-          "frequency": -1,
-          "reportIntervals": "INTERVALS",
-          "targets": [
-            "ev://vehicle/VIN001",
-            "ev://vehicle/VIN002",
-            "ev://vehicle/VIN003"
-          ]
-        },
-        {
-          "payloadType": "GPS_LAT",
-          "readingType": "DIRECT_READ",
-          "units": "DEGREES",
-          "aggregate": false,
-          "historical": true,
-          "numIntervals": 4,
-          "frequency": -1,
-          "reportIntervals": "INTERVALS",
-          "targets": [
-            "ev://vehicle/VIN001",
-            "ev://vehicle/VIN002",
-            "ev://vehicle/VIN003"
-          ]
-        },
-        {
-          "payloadType": "GPS_LON",
-          "readingType": "DIRECT_READ",
-          "units": "DEGREES",
-          "aggregate": false,
-          "historical": true,
-          "numIntervals": 4,
-          "frequency": -1,
-          "reportIntervals": "INTERVALS",
-          "targets": [
-            "ev://vehicle/VIN001",
-            "ev://vehicle/VIN002",
-            "ev://vehicle/VIN003"
-          ]
+          "id": "commitment-flex-vendor-001"
         }
-      ]
+      ],
+      "contractAttributes": {
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld",
+        "@type": "BecknReportRequest",
+        "reportName": "VENDOR_TELEMETRY_USAGE",
+        "eventId": "evt-2026-04-01-vendor-001",
+        "reportDescriptors": [
+          {
+            "payloadType": "USAGE",
+            "readingType": "DIRECT_READ",
+            "units": "KW",
+            "aggregate": false,
+            "historical": true,
+            "numIntervals": 4,
+            "frequency": -1,
+            "reportIntervals": "INTERVALS",
+            "targets": [
+              "ev://vehicle/VIN001",
+              "ev://vehicle/VIN002",
+              "ev://vehicle/VIN003"
+            ]
+          },
+          {
+            "payloadType": "SOC",
+            "readingType": "DIRECT_READ",
+            "units": "PERCENT",
+            "aggregate": false,
+            "historical": true,
+            "numIntervals": 4,
+            "frequency": -1,
+            "reportIntervals": "INTERVALS",
+            "targets": [
+              "ev://vehicle/VIN001",
+              "ev://vehicle/VIN002",
+              "ev://vehicle/VIN003"
+            ]
+          },
+          {
+            "payloadType": "POWER",
+            "readingType": "DIRECT_READ",
+            "units": "KW",
+            "aggregate": false,
+            "historical": true,
+            "numIntervals": 4,
+            "frequency": -1,
+            "reportIntervals": "INTERVALS",
+            "targets": [
+              "ev://vehicle/VIN001",
+              "ev://vehicle/VIN002",
+              "ev://vehicle/VIN003"
+            ]
+          },
+          {
+            "payloadType": "GPS_LAT",
+            "readingType": "DIRECT_READ",
+            "units": "DEGREES",
+            "aggregate": false,
+            "historical": true,
+            "numIntervals": 4,
+            "frequency": -1,
+            "reportIntervals": "INTERVALS",
+            "targets": [
+              "ev://vehicle/VIN001",
+              "ev://vehicle/VIN002",
+              "ev://vehicle/VIN003"
+            ]
+          },
+          {
+            "payloadType": "GPS_LON",
+            "readingType": "DIRECT_READ",
+            "units": "DEGREES",
+            "aggregate": false,
+            "historical": true,
+            "numIntervals": 4,
+            "frequency": -1,
+            "reportIntervals": "INTERVALS",
+            "targets": [
+              "ev://vehicle/VIN001",
+              "ev://vehicle/VIN002",
+              "ev://vehicle/VIN003"
+            ]
+          }
+        ]
+      }
     }
   }
 }

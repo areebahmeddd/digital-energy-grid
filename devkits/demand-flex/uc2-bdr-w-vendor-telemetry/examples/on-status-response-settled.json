@@ -26,64 +26,6 @@
       "status": {
         "code": "ACTIVE"
       },
-      "tags": [
-        {
-          "descriptor": {
-            "code": "settlement-summary",
-            "name": "OPA-computed revenue flows from demand_flex_uc2_revenue.rego (snapshot for visibility)"
-          },
-          "list": [
-            {
-              "descriptor": {
-                "code": "totalReductionKwh"
-              },
-              "value": "40.0"
-            },
-            {
-              "descriptor": {
-                "code": "incentiveTotal"
-              },
-              "value": "140.0 INR"
-            },
-            {
-              "descriptor": {
-                "code": "co2AvoidedKg"
-              },
-              "value": "32.8"
-            },
-            {
-              "descriptor": {
-                "code": "carbonCreditValue"
-              },
-              "value": "49.2 INR"
-            },
-            {
-              "descriptor": {
-                "code": "flow.buyer"
-              },
-              "value": "-140.0 INR (tpddl-north-delhi)"
-            },
-            {
-              "descriptor": {
-                "code": "flow.seller"
-              },
-              "value": "+189.2 INR (greenflex-agg)"
-            },
-            {
-              "descriptor": {
-                "code": "flow.carbonBuyer"
-              },
-              "value": "-49.2 INR (delhi-carbon-registry)"
-            },
-            {
-              "descriptor": {
-                "code": "netZero"
-              },
-              "value": "true"
-            }
-          ]
-        }
-      ],
       "commitments": [
         {
           "id": "commitment-flex-vendor-001",
