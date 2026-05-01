@@ -1,0 +1,31 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:BecknReportDescriptors",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Report Descriptors",
+      "rdfs:comment": "Sidecar array declaring which OpenADR 3.1.0 reportPayloadDescriptors a seller commits to providing under a contract."
+    },
+    {
+      "@id": "deg:BecknReportPayloadDescriptor",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Report Payload Descriptor",
+      "rdfs:comment": "OpenADR 3.1.0 reportPayloadDescriptor extended with a cardinality field (PER_INTERVAL | PER_EVENT)."
+    },
+    {
+      "@id": "deg:cardinality",
+      "@type": "rdf:Property",
+      "rdfs:label": "Cardinality",
+      "rdfs:comment": "How often a payloadType is expected on the wire — PER_INTERVAL (every interval) or PER_EVENT (once per event, on interval 0)."
+    }
+  ]
+}

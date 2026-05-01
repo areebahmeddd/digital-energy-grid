@@ -14,7 +14,10 @@
     "value": "deg:value",
     "currency": "deg:currency",
     "buyer": "deg:RoleBuyer",
-    "seller": "deg:RoleSeller"
+    "seller": "deg:RoleSeller",
+    "buyerDiscom": "deg:RoleBuyerDiscom",
+    "sellerDiscom": "deg:RoleSellerDiscom",
+    "carbonBuyer": "deg:RoleCarbonBuyer"
   },
   "@graph": []
 }

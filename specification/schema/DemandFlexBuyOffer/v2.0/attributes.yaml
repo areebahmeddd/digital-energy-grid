@@ -54,4 +54,24 @@ components:
           description: >
             Role-specific inputs. Structure varies by role and contract type.
             For buyer: incentivePerKwh, currency, penaltyRate, baselineMethodology, etc.
-            For seller: plannedDemandChange (beckn:Quantity), participatingMeters, etc.
+            For seller: plannedDemandChange (beckn:Quantity),
+            participatingMeters, vendorDevices, and reportDescriptors
+            (see below).
+          properties:
+            reportDescriptors:
+              description: >
+                Seller-side declaration of what telemetry will be
+                delivered for this contract. Set to `null` when the
+                contract requires no telemetry.
+
+                When non-null, the seller commits to delivering a
+                BecknTimeSeries (per device, in performance.meters[].
+                telemetry on the on_status reply) whose
+                payloadDescriptors cover every entry in this array.
+
+                See BecknReportDescriptors for the canonical payloadType
+                / units / cardinality table (USAGE, POWER, SOC_END,
+                GPS_LAT, GPS_LON, …).
+              oneOf:
+                - $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportDescriptors/v1.0/attributes.yaml#/components/schemas/BecknReportDescriptors"
+                - type: "null"

@@ -1,0 +1,69 @@
+openapi: 3.1.1
+info:
+  title: BecknReportDescriptors — Telemetry Sidecar (v1.0)
+  version: 1.0.0
+  description: >
+    Minimal, OpenADR 3.1.0-aligned sidecar declaring what telemetry a
+    seller commits to providing under a contract. Each entry $ref-reuses
+    OpenADR's `reportPayloadDescriptor` 1:1 (the same descriptor type
+    used inside `BecknTimeSeries.payloadDescriptors`) and adds one
+    DEG extension — `cardinality` — to disambiguate signals that are
+    reported every interval (USAGE, POWER) from signals reported once
+    per event (SOC_END, GPS_LAT, GPS_LON).
+
+    Embedded as `inputs[seller].inputs.reportDescriptors` in DemandFlexBuyOffer
+    (or any equivalent offer). The property is nullable: set to `null`
+    when the contract requires no telemetry.
+
+    For the actual report body, see BecknTimeSeries; the descriptors here
+    declare the schema, the time-series carries the values.
+
+components:
+  schemas:
+
+    BecknReportDescriptors:
+      type: array
+      minItems: 1
+      description: >
+        Sidecar array — one entry per signal the seller commits to report.
+      items:
+        $ref: "#/components/schemas/BecknReportPayloadDescriptor"
+
+    BecknReportPayloadDescriptor:
+      description: >
+        OpenADR3 `reportPayloadDescriptor` augmented with a `cardinality`
+        field. Required fields and value enums otherwise match OpenADR3.
+      allOf:
+        - $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml#/components/schemas/reportPayloadDescriptor"
+        - type: object
+          properties:
+            cardinality:
+              type: string
+              enum: [PER_INTERVAL, PER_EVENT]
+              default: PER_INTERVAL
+              description: |
+                How often this payload is expected on the wire:
+
+                  PER_INTERVAL  - reported in every interval of the
+                                  BecknTimeSeries (default). Use for
+                                  power-like signals: USAGE, BASELINE,
+                                  POWER (KW per interval).
+                  PER_EVENT     - reported exactly once per event, on
+                                  interval 0 of the BecknTimeSeries.
+                                  Use for slow-changing or summary
+                                  signals: SOC_END (% at end of event),
+                                  GPS_LAT, GPS_LON (vehicle position
+                                  at start of event).
+              example: PER_INTERVAL
+
+  # Canonical payloadType vocabulary used by demand-flex EV vendor
+  # telemetry. Add to this list as new signals are introduced.
+  #
+  # | payloadType | units    | readingType  | cardinality   | meaning                                          |
+  # |-------------|----------|--------------|---------------|--------------------------------------------------|
+  # | BASELINE    | KW       | DIRECT_READ  | PER_INTERVAL  | Reference (vendor-rated) charge power            |
+  # | USAGE       | KW       | DIRECT_READ  | PER_INTERVAL  | Measured charge power during the event           |
+  # | POWER       | KW       | DIRECT_READ  | PER_INTERVAL  | Signed instantaneous power (charge=+, discharge=-)|
+  # | SOC_END     | PERCENT  | DIRECT_READ  | PER_EVENT     | State of charge at end of event                  |
+  # | GPS_LAT     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle latitude at start of event               |
+  # | GPS_LON     | DEGREES  | DIRECT_READ  | PER_EVENT     | Vehicle longitude at start of event              |

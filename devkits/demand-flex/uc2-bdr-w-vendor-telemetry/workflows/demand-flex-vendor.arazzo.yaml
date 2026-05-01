@@ -1,0 +1,132 @@
+arazzo: 1.0.1
+info:
+  title: Demand Flex Vendor-Telemetry Workflow (UC2)
+  version: 1.0.0
+  description: >
+    Beckn 2.0 workflow for vendor-telemetry-settled behavioral demand response.
+    Scenario: TPDDL (DISCOM) curtails 100 kW of EV charging during peak;
+    GreenFlex (Aggregator) commits three EVs (VIN001/002/003); DISCOM
+    publishes per-vendor-device baselines and issues a plain Beckn `status`
+    call (contract + commitment ref only — the report shape was frozen at
+    confirm via the seller's `reportDescriptors[]` sidecar); Aggregator
+    answers via `on_status` with full vendor BecknTimeSeries
+    (BASELINE/USAGE/POWER per interval, SOC_END/GPS once per event); DISCOM
+    settles with carbon-credit revenue flow.
+
+    Role split per call (subscriber IDs are placeholders, fixed to actors):
+
+      bap.example.com  → Aggregator/GreenFlex
+      bpp.example.com  → DISCOM/TPDDL
+
+    Both subscribers carry BAP and BPP roles in the registry. The
+    bapId/bppId values in each message swap only for the
+    `status`/`on_status` vendor-telemetry round-trip (where DISCOM acts
+    as BAP-caller and Aggregator as BPP-caller).
+
+    Run with Redocly respect (from demand-flex/):
+
+      Run all workflows:
+        npx @redocly/cli respect uc2-bdr-w-vendor-telemetry/workflows/demand-flex-vendor.arazzo.yaml \
+          --severity 'SCHEMA_CHECK=off' -v
+
+      Available workflows: publish-catalog, discover, confirm-through-settlement
+
+      Override server URLs (optional, defaults in x-serverUrl):
+        -S beckn-bap-caller=http://localhost:8081/bap/caller \
+        -S beckn-bpp-caller=http://localhost:8082/bpp/caller
+
+sourceDescriptions:
+  - name: beckn-bap-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8081/bap/caller
+
+  - name: beckn-bpp-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8082/bpp/caller
+
+workflows:
+  - workflowId: publish-catalog
+    summary: DISCOM publishes vendor-telemetry-settled curtailment catalog
+    steps:
+      - stepId: publish-catalog
+        description: BPP publishes DemandFlexNeed + DemandFlexBuyOffer with carbonCredit terms (seller block unbound until confirm)
+        operationId: beckn-bpp-caller.catalogPublish
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/publish-catalog.json"
+
+  - workflowId: discover
+    summary: Aggregator discovers EV-curtailment opportunities
+    steps:
+      - stepId: discover
+        description: BAP searches for CURTAILMENT + REDUCE offers
+        operationId: beckn-bap-caller.discover
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/discover-request.json"
+
+  - workflowId: confirm-through-settlement
+    summary: Confirm → baselines → DISCOM-asks-status → vendor telemetry → settlement
+    steps:
+      - stepId: confirm
+        description: Aggregator confirms vendor-telemetry contract (ACTIVE); seller's reportDescriptors[] (with cardinality) bound here
+        operationId: beckn-bap-caller.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-request.json"
+
+      - stepId: on-confirm
+        description: DISCOM confirms contract is ACTIVE — descriptors now frozen on the contract
+        operationId: beckn-bpp-caller.onConfirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-confirm-response.json"
+
+      - stepId: on-status-baselines
+        description: DISCOM publishes per-EV BASELINE timeseries (rated charger power per interval)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-baselines.json"
+
+      - stepId: status-vendor-telemetry
+        description: >
+          DISCOM uses BAP-caller to ask the Aggregator for fulfillment
+          status. Body carries only contract + commitment ids; the report
+          shape was frozen at confirm. bapId and bppId swap for this and
+          the next call only.
+        operationId: beckn-bap-caller.status
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/status-request-vendor-telemetry.json"
+
+      - stepId: on-status-vendor-telemetry
+        description: >
+          Aggregator uses BPP-caller to answer with vendor BecknTimeSeries
+          per EV — PER_INTERVAL (BASELINE/USAGE/POWER) on every interval,
+          PER_EVENT (SOC_END/GPS_LAT/GPS_LON) only on interval 0.
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-vendor-telemetry.json"
+
+      - stepId: on-status-settled
+        description: >
+          DISCOM publishes settlement: 40 kWh verified curtailment ×
+          3.5 INR/kWh = 140 INR incentive; 32.8 kg CO2 avoided × 1500
+          INR/tCO2e = 49.2 INR carbon credit. Net-zero across buyer,
+          seller, and carbonBuyer roles.
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-settled.json"
