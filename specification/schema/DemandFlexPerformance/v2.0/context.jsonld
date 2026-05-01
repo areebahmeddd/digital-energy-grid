@@ -10,7 +10,6 @@
     "dfp": "https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/",
     "DemandFlexPerformance": "deg:DemandFlexPerformance",
     "eventId": "dfp:eventId",
-    "respondsTo": "dfp:respondsTo",
     "methodology": "dfp:methodology",
     "meters": "dfp:meters",
     "meterId": "dfp:meterId",

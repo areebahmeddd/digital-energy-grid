@@ -30,18 +30,6 @@ components:
           x-jsonld:
             "@id": eventId
 
-        respondsTo:
-          type: string
-          description: >
-            For on_status replies that answer a `status` request, the
-            messageId of the originating status request. Lets the BAP
-            correlate the vendor telemetry it just received with the
-            specific question it asked. Omit on unilateral on_status
-            pushes (e.g., DISCOM publishing baselines or settlement).
-          example: "msg-status-vendor-telemetry-001"
-          x-jsonld:
-            "@id": respondsTo
-
         methodology:
           type: string
           description: >

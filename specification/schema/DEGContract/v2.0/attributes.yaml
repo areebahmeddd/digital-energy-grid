@@ -45,7 +45,7 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom, carbonBuyer]
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               participantId:
                 type:
                   - string
@@ -53,8 +53,7 @@ components:
                 description: >
                   Concrete participant id once bound (buyer/seller use the
                   utilityId-meter compound id, e.g. "TPDDL-DL-seller-001";
-                  discom roles use the discom-ledger participant id;
-                  carbonBuyer is the carbon-credit registry participant).
+                  discom roles use the discom-ledger participant id).
                   Null at catalog publish for sides not yet bound.
 
         policy:
@@ -85,7 +84,7 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom, carbonBuyer]
+                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               value:
                 type: number
               currency:
