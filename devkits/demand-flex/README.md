@@ -32,10 +32,12 @@ For the shared stack topology, prerequisites, Quick Start, transaction flow, hos
 
 Uses OPA (Open Policy Agent) via the `opapolicychecker` plugin. Policies are declared in [`config/opa-network-policies.yaml`](./config/opa-network-policies.yaml):
 
-| networkId | Network rego | Used by |
-|---|---|---|
-| `default:` (fallback) | [`policies/demand_flex_network.rego`](./policies/demand_flex_network.rego) — type-coverage check, mirrors [`specification/policies/demand_flex_network.rego`](../../specification/policies/demand_flex_network.rego) | UC1 |
-| `nfh.global/testnet-deg-vendor` | [`policies/demand_flex_uc2_network.rego`](./policies/demand_flex_uc2_network.rego) — type-coverage + GPS-coherence + SOC-monotonicity | UC2 |
+A single rego file ([`policies/demand_flex_network.rego`](./policies/demand_flex_network.rego), mirrors [`specification/policies/demand_flex_network.rego`](../../specification/policies/demand_flex_network.rego)) backs both use cases via two named rules; routing differs only by query path:
+
+| networkId | Query path | Behavior | Used by |
+|---|---|---|---|
+| `nfh.global/testnet-deg` | `data.deg.policy.demand_flex_network.uc2_violations` | Type-coverage **plus** PER_EVENT/PER_INTERVAL cardinality enforcement against the seller's committed `reportDescriptors`. Self-skips cardinality when no offer block is on the wire, so it transparently passes UC1 traffic too. | UC1 + UC2 |
+| `default:` (fallback) | `data.deg.policy.demand_flex_network.violations` | Type-coverage only. | other networkIds |
 
 Settlement rego is referenced per-contract via `contractAttributes.policy.url`:
 

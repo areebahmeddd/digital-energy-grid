@@ -1,9 +1,9 @@
 {
   "context": {
-    "networkId": "nfh.global/testnet-deg-vendor",
+    "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "status",
-    "_comment_role_swap": "DISCOM uses bap/caller for this status call (asks for vendor fulfillment). Aggregator acts as BPP/receiver. Subscriber IDs are placeholders \u2014 bpp.example.com=DISCOM, bap.example.com=Aggregator across the whole devkit; only their bapId/bppId slot assignment swaps for this sub-flow.",
+    "_comment_role_swap": "DISCOM uses bap/caller for this status call (asks aggregator for fulfillment). Aggregator acts as BPP/receiver. bapId/bppId values swap accordingly. Telemetry shape was already agreed at confirm via offer's seller.inputs.reportDescriptors — this status call carries only the contract+commitment ref.",
     "bapId": "bpp.example.com",
     "bapUri": "https://bpp.example.com/beckn",
     "bppId": "bap.example.com",
@@ -12,99 +12,27 @@
     "messageId": "msg-status-vendor-telemetry-001",
     "timestamp": "2026-04-01T10:32:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-vendor-001",
       "commitments": [
-        {
-          "id": "commitment-flex-vendor-001"
-        }
+        { "id": "commitment-flex-vendor-001" }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknReportRequest/v1.0/context.jsonld",
-        "@type": "BecknReportRequest",
-        "reportName": "VENDOR_TELEMETRY_USAGE",
-        "eventId": "evt-2026-04-01-vendor-001",
-        "reportDescriptors": [
-          {
-            "payloadType": "USAGE",
-            "readingType": "DIRECT_READ",
-            "units": "KW",
-            "aggregate": false,
-            "historical": true,
-            "numIntervals": 4,
-            "frequency": -1,
-            "reportIntervals": "INTERVALS",
-            "targets": [
-              "ev://vehicle/VIN001",
-              "ev://vehicle/VIN002",
-              "ev://vehicle/VIN003"
-            ]
-          },
-          {
-            "payloadType": "SOC",
-            "readingType": "DIRECT_READ",
-            "units": "PERCENT",
-            "aggregate": false,
-            "historical": true,
-            "numIntervals": 4,
-            "frequency": -1,
-            "reportIntervals": "INTERVALS",
-            "targets": [
-              "ev://vehicle/VIN001",
-              "ev://vehicle/VIN002",
-              "ev://vehicle/VIN003"
-            ]
-          },
-          {
-            "payloadType": "POWER",
-            "readingType": "DIRECT_READ",
-            "units": "KW",
-            "aggregate": false,
-            "historical": true,
-            "numIntervals": 4,
-            "frequency": -1,
-            "reportIntervals": "INTERVALS",
-            "targets": [
-              "ev://vehicle/VIN001",
-              "ev://vehicle/VIN002",
-              "ev://vehicle/VIN003"
-            ]
-          },
-          {
-            "payloadType": "GPS_LAT",
-            "readingType": "DIRECT_READ",
-            "units": "DEGREES",
-            "aggregate": false,
-            "historical": true,
-            "numIntervals": 4,
-            "frequency": -1,
-            "reportIntervals": "INTERVALS",
-            "targets": [
-              "ev://vehicle/VIN001",
-              "ev://vehicle/VIN002",
-              "ev://vehicle/VIN003"
-            ]
-          },
-          {
-            "payloadType": "GPS_LON",
-            "readingType": "DIRECT_READ",
-            "units": "DEGREES",
-            "aggregate": false,
-            "historical": true,
-            "numIntervals": 4,
-            "frequency": -1,
-            "reportIntervals": "INTERVALS",
-            "targets": [
-              "ev://vehicle/VIN001",
-              "ev://vehicle/VIN002",
-              "ev://vehicle/VIN003"
-            ]
-          }
-        ]
+        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@type": "DEGContract",
+        "roles": [
+          { "role": "buyer",       "participantId": "tpddl-north-delhi" },
+          { "role": "seller",      "participantId": "greenflex-agg" },
+          { "role": "carbonBuyer", "participantId": "delhi-carbon-registry" }
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
+          "queryPath": "data.deg.contracts.demand_flex_uc2"
+        }
       }
     }
   }

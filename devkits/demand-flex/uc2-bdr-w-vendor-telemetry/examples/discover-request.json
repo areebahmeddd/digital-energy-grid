@@ -1,6 +1,6 @@
 {
   "context": {
-    "networkId": "nfh.global/testnet-deg-vendor",
+    "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "search",
     "bapId": "bap.example.com",

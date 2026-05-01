@@ -6,10 +6,12 @@ info:
     Beckn 2.0 workflow for vendor-telemetry-settled behavioral demand response.
     Scenario: TPDDL (DISCOM) curtails 100 kW of EV charging during peak;
     GreenFlex (Aggregator) commits three EVs (VIN001/002/003); DISCOM
-    publishes per-vendor-device baselines and asks for fulfillment status
-    via a Beckn `status` call carrying an OpenADR3-style reportSpecifier;
-    Aggregator answers via `on_status` with full vendor BecknTimeSeries
-    (USAGE/SOC/POWER/GPS); DISCOM settles with carbon-credit revenue flow.
+    publishes per-vendor-device baselines and issues a plain Beckn `status`
+    call (contract + commitment ref only — the report shape was frozen at
+    confirm via the seller's `reportDescriptors[]` sidecar); Aggregator
+    answers via `on_status` with full vendor BecknTimeSeries
+    (BASELINE/USAGE/POWER per interval, SOC_END/GPS once per event); DISCOM
+    settles with carbon-credit revenue flow.
 
     Role split per call (subscriber IDs are placeholders, fixed to actors):
 
@@ -27,7 +29,7 @@ info:
         npx @redocly/cli respect uc2-bdr-w-vendor-telemetry/workflows/demand-flex-vendor.arazzo.yaml \
           --severity 'SCHEMA_CHECK=off' -v
 
-      Available workflows: publish-catalog, discover, select-through-settlement
+      Available workflows: publish-catalog, discover, confirm-through-settlement
 
       Override server URLs (optional, defaults in x-serverUrl):
         -S beckn-bap-caller=http://localhost:8081/bap/caller \
@@ -49,7 +51,7 @@ workflows:
     summary: DISCOM publishes vendor-telemetry-settled curtailment catalog
     steps:
       - stepId: publish-catalog
-        description: BPP publishes DemandFlexNeed + DemandFlexBuyOffer with reportRequirements + carbonCredit terms
+        description: BPP publishes DemandFlexNeed + DemandFlexBuyOffer with carbonCredit terms (seller block unbound until confirm)
         operationId: beckn-bpp-caller.catalogPublish
         requestBody:
           contentType: application/json
@@ -67,43 +69,11 @@ workflows:
           payload:
             $ref: "../examples/discover-request.json"
 
-  - workflowId: select-through-settlement
-    summary: Select → confirm → baselines → DISCOM-asks-status → vendor telemetry → settlement
+  - workflowId: confirm-through-settlement
+    summary: Confirm → baselines → DISCOM-asks-status → vendor telemetry → settlement
     steps:
-      - stepId: select
-        description: Aggregator selects 21 kW (3 × 7 kW EVs) of the 100 kW curtailment offer
-        operationId: beckn-bap-caller.select
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/select-request.json"
-
-      - stepId: on-select
-        description: DISCOM returns DRAFT contract with vendor-telemetry settlement terms
-        operationId: beckn-bpp-caller.onSelect
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-select-response.json"
-
-      - stepId: init
-        description: Aggregator declares 3 vendor EVs (VIN001, VIN002, VIN003)
-        operationId: beckn-bap-caller.init
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/init-request.json"
-
-      - stepId: on-init
-        description: DISCOM acknowledges (DRAFT)
-        operationId: beckn-bpp-caller.onInit
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-init-response.json"
-
       - stepId: confirm
-        description: Aggregator confirms vendor-telemetry contract (ACTIVE)
+        description: Aggregator confirms vendor-telemetry contract (ACTIVE); seller's reportDescriptors[] (with cardinality) bound here
         operationId: beckn-bap-caller.confirm
         requestBody:
           contentType: application/json
@@ -111,7 +81,7 @@ workflows:
             $ref: "../examples/confirm-request.json"
 
       - stepId: on-confirm
-        description: DISCOM confirms contract is ACTIVE
+        description: DISCOM confirms contract is ACTIVE — descriptors now frozen on the contract
         operationId: beckn-bpp-caller.onConfirm
         requestBody:
           contentType: application/json
@@ -119,10 +89,7 @@ workflows:
             $ref: "../examples/on-confirm-response.json"
 
       - stepId: on-status-baselines
-        description: >
-          DISCOM publishes per-EV baselines (rated charger power) with an
-          OpenADR3-style report-request tag declaring the telemetry it
-          will need for settlement.
+        description: DISCOM publishes per-EV BASELINE timeseries (rated charger power per interval)
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json
@@ -131,10 +98,10 @@ workflows:
 
       - stepId: status-vendor-telemetry
         description: >
-          DISCOM uses BAP-caller to issue a `status` request carrying the
-          OpenADR3 reportSpecifier in tags — asking the Aggregator for
-          fulfillment status (USAGE/SOC/POWER/GPS time-series). bapId and
-          bppId swap for this and the next call only.
+          DISCOM uses BAP-caller to ask the Aggregator for fulfillment
+          status. Body carries only contract + commitment ids; the report
+          shape was frozen at confirm. bapId and bppId swap for this and
+          the next call only.
         operationId: beckn-bap-caller.status
         requestBody:
           contentType: application/json
@@ -144,7 +111,8 @@ workflows:
       - stepId: on-status-vendor-telemetry
         description: >
           Aggregator uses BPP-caller to answer with vendor BecknTimeSeries
-          per EV — same OpenADR3-aligned format DISCOM requested.
+          per EV — PER_INTERVAL (BASELINE/USAGE/POWER) on every interval,
+          PER_EVENT (SOC_END/GPS_LAT/GPS_LON) only on interval 0.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json

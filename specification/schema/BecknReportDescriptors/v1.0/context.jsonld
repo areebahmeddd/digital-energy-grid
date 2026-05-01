@@ -1,0 +1,27 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "oadr": "https://openadr.org/ns/oadr3#",
+    "deg": "https://schema.beckn.io/deg/",
+
+    "BecknReportDescriptors": "deg:BecknReportDescriptors",
+    "BecknReportPayloadDescriptor": "deg:BecknReportPayloadDescriptor",
+
+    "objectType": "@type",
+    "payloadType": "oadr:payloadType",
+    "readingType": "oadr:readingType",
+    "units": "oadr:units",
+    "accuracy": { "@id": "oadr:accuracy", "@type": "xsd:float" },
+    "confidence": { "@id": "oadr:confidence", "@type": "xsd:integer" },
+
+    "cardinality": "deg:cardinality",
+    "PER_INTERVAL": "deg:CardinalityPerInterval",
+    "PER_EVENT": "deg:CardinalityPerEvent"
+  },
+  "@graph": []
+}

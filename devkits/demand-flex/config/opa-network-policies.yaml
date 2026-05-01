@@ -1,9 +1,18 @@
 # OPA policy config consumed by the `opapolicychecker` plugin.
 #
 # Each entry is keyed by full networkId. The `default:` entry is the
-# fallback for any networkId without a dedicated entry — UC1 uses this.
-# UC2 (vendor telemetry) declares its own networkId and rego with
-# stricter, vendor-aware checks (GPS coherence, SOC monotonicity).
+# fallback for any networkId without a dedicated entry.
+#
+# Both UC1 (baselining) and UC2 (vendor telemetry) run on
+# `nfh.global/testnet-deg`. A single rego file backs both — the two
+# entries differ only in query path:
+#
+#   - `default:` queries `violations` (UC1 type-coverage only).
+#   - `nfh.global/testnet-deg` queries `uc2_violations` (UC1
+#     type-coverage PLUS PER_EVENT/PER_INTERVAL cardinality enforcement
+#     against the seller's committed `reportDescriptors`). The UC2
+#     rule self-skips cardinality when the wire payload carries no
+#     offer block, so it's safe for UC1 traffic too.
 #
 # Plugin docs:
 #   https://github.com/beckn/beckn-onix/blob/main/pkg/plugin/implementation/opapolicychecker/README.md
@@ -14,7 +23,7 @@ networkPolicies:
     location: ./policies/demand_flex_network.rego
     query: data.deg.policy.demand_flex_network.violations
 
-  nfh.global/testnet-deg-vendor:
+  nfh.global/testnet-deg:
     type: file
-    location: ./policies/demand_flex_uc2_network.rego
-    query: data.deg.policy.demand_flex_uc2_network.violations
+    location: ./policies/demand_flex_network.rego
+    query: data.deg.policy.demand_flex_network.uc2_violations

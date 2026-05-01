@@ -1,6 +1,6 @@
 # UC2 — Behavioral Demand Response with Vendor Telemetry
 
-Vendor-telemetry-settled curtailment: the **DISCOM (TPDDL)** asks the **Aggregator (GreenFlex)** for fulfillment status using a Beckn `status` call that carries an OpenADR3-style `reportSpecifier`. The Aggregator answers via `on_status` with per-EV `BecknTimeSeries` (USAGE, SOC, POWER, GPS). DISCOM settles against vendor-rated baselines and pays both an incentive and a carbon-credit value.
+Vendor-telemetry-settled curtailment: the **DISCOM (TPDDL)** asks the **Aggregator (GreenFlex)** for fulfillment status with a plain Beckn `status` call (just contract + commitment ids — the report shape was frozen at confirm). The Aggregator answers via `on_status` with per-EV `BecknTimeSeries` (BASELINE/USAGE/POWER per interval; SOC_END/GPS_LAT/GPS_LON once per event). DISCOM settles against vendor-rated baselines and pays both an incentive and a carbon-credit value.
 
 For the shared stack topology, prerequisites, and Quick Start, see [../../README.md](../../README.md). For UC1 (grid-meter baselining), see [../uc1-bdr-w-baselining/](../uc1-bdr-w-baselining/).
 
@@ -27,43 +27,49 @@ Each subscriber is registered with **both BAP and BPP roles** in the Beckn regis
 
 | Step | bapId | bppId | Why |
 |---|---|---|---|
-| catalog/publish, search, select, on_select, init, on_init, confirm, on_confirm | bap (Agg) | bpp (DISCOM) | Aggregator drives discovery and contracting. |
-| on_status (baselines, with report-request tag) | bap (Agg) | bpp (DISCOM) | DISCOM unilateral push of baselines. |
+| catalog/publish, search, confirm, on_confirm | bap (Agg) | bpp (DISCOM) | Aggregator drives discovery and contracting. |
+| on_status (baselines) | bap (Agg) | bpp (DISCOM) | DISCOM unilateral push of baselines. |
 | **status (DISCOM asks for vendor telemetry)** | **bpp (DISCOM)** | **bap (Agg)** | DISCOM uses BAP-caller; Aggregator is BPP-receiver. |
 | **on_status (Aggregator returns vendor telemetry)** | **bpp (DISCOM)** | **bap (Agg)** | Aggregator uses BPP-caller; same swap. |
 | on_status (settlement) | bap (Agg) | bpp (DISCOM) | DISCOM unilateral push of settlement. |
 
-This dual-role-per-subscriber pattern is allowed by Beckn 2.0; for live testnet runs, both subscribers must have BAP **and** BPP roles registered with valid signing keys against `nfh.global/testnet-deg-vendor`.
+This dual-role-per-subscriber pattern is allowed by Beckn 2.0; for live testnet runs, both subscribers must have BAP **and** BPP roles registered with valid signing keys against `nfh.global/testnet-deg`.
 
-## OpenADR3 alignment — `BecknReportRequest` / `BecknReportPayload`
+## OpenADR3 alignment — `BecknReportDescriptors` sidecar
 
-DISCOM declares its telemetry needs using the OpenADR3 [`reportDescriptor`](https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml) shape verbatim — one entry per `payloadType`, with `readingType`, `units`, `aggregate`, `historical`, `numIntervals`, `frequency`, `reportIntervals`, and (in the actual status request) `targets`. The descriptors travel inside two new DEG schemas at [`specification/schema/BecknReportRequest/v1.0/`](../../../specification/schema/BecknReportRequest/v1.0/) — `BecknReportRequest` (request side) and `BecknReportPayload` (reply correlation block) — both of which $ref the OpenADR3 reportDescriptor type.
+The seller declares what telemetry it commits to provide as a flat array attached to the offer at confirm time:
 
-The Beckn 2.1 `Contract` schema has `additionalProperties: false`, so the descriptors can't sit at `message.contract.*` directly. They ride inside `contractAttributes`, which is a polymorphic slot typed by `@context` / `@type` (the same `@type`-driven dispatch BecknTimeSeries documents). Two messages use a non-DEGContract type for `contractAttributes`:
+```
+offerAttributes.inputs[seller].inputs.reportDescriptors[]
+```
+
+Each entry is an OpenADR3 [`reportPayloadDescriptor`](https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/external/openadr/3.1.0/openadr3.yaml) — same descriptor type used inside `BecknTimeSeries.payloadDescriptors` — augmented with one DEG extension, `cardinality` (`PER_INTERVAL` or `PER_EVENT`). Schema lives at [`specification/schema/BecknReportDescriptors/v1.0/`](../../../specification/schema/BecknReportDescriptors/v1.0/).
+
+Because the descriptors are committed inside the contract at confirm, the `status` request only needs to reference the contract — it carries no descriptors of its own:
 
 | Message | `contractAttributes.@type` | Carries |
 |---|---|---|
-| `publish-catalog` … `on-confirm` | `DEGContract` | roles, policy. Telemetry needs are pre-declared at `offerAttributes.inputs[buyer].inputs.reportDescriptors[]` (no `targets` yet). |
-| `on-status-baselines` (BPP push) | `DEGContract` | per-EV BASELINE telemetry; the report-request lives on the contract terms already. |
-| **`status` (DISCOM asks)** | **`BecknReportRequest`** | `reportName`, `eventId`, `reportDescriptors[]` with `targets: [VINs]` populated. |
-| **`on_status` (vendor telemetry reply)** | **`BecknReportPayload`** | `respondsTo` (status `messageId`), `reportName`, `eventId`, `intervalDuration`. The actual report body is the `BecknTimeSeries` under `performance[].performanceAttributes.meters[].telemetry`. |
-| `on-status-settled` | `DEGContract` | full settlement contract; OPA evaluates against this. |
+| `publish-catalog` … `on-confirm` | `DEGContract` | Roles, policy. The seller's `reportDescriptors[]` are bound to the offer at confirm. |
+| `on-status-baselines` (BPP push) | `DEGContract` | Per-EV BASELINE timeseries. |
+| `status` (DISCOM asks) | `DEGContract` | Just contract + commitment ids; the report shape was already frozen at confirm. |
+| `on_status` (vendor telemetry reply) | `DEGContract` | The report body is the `BecknTimeSeries` under `performance[].performanceAttributes.meters[].telemetry` — `payloadDescriptors` plus per-interval `payloads[]`. |
+| `on-status-settled` | `DEGContract` | Full settlement contract (offer block included so the network rego can verify telemetry against the seller's commitments). |
 
-This is exactly the OpenADR3 reportSpecifier / reportPayload split — VTN→VEN report request and VEN→VTN report response — mapped onto Beckn's `status` / `on_status` actions and the polymorphic `contractAttributes` extension slot.
+`contractAttributes` stays `DEGContract` everywhere — there's no `@type`-driven polymorphism in the new model.
 
 ## Vendor telemetry payload types
 
-Per-device `payloadDescriptors` use these `payloadType` values (any subset; coverage enforced by the network rego):
+Per-device `payloadDescriptors` and seller-side `reportDescriptors` use these `payloadType` values (any subset; coverage and cardinality enforced by the network rego):
 
-| payloadType | units | Notes |
-|---|---|---|
-| `BASELINE` | KW | DISCOM-supplied vendor-device-rated charging power |
-| `USAGE` | KW | Vendor-reported actual draw during the event |
-| `POWER` | KW | Signed instantaneous power at the charger (charge=+, discharge=−) |
-| `SOC` | PERCENT | State of charge |
-| `GPS_LAT` / `GPS_LON` | DEGREES | Vehicle location, **only while POWER ≠ 0** (network-rego rule) |
+| payloadType | units | cardinality | Notes |
+|---|---|---|---|
+| `BASELINE` | KW | `PER_INTERVAL` | Vendor-rated charging power, repeated each interval |
+| `USAGE` | KW | `PER_INTERVAL` | Vendor-reported actual draw during the event |
+| `POWER` | KW | `PER_INTERVAL` | Signed instantaneous power at the charger (charge=+, discharge=−) |
+| `SOC_END` | PERCENT | `PER_EVENT` | State of charge at end of event (one shot, on interval 0) |
+| `GPS_LAT` / `GPS_LON` | DEGREES | `PER_EVENT` | Vehicle position at start of event (one shot, on interval 0) |
 
-This list is open-ended; future `CO2_AVOIDED` (`KG_CO2E`) or temperature/SoH payloads can be added by extending `payloadDescriptors` without a schema bump.
+`PER_INTERVAL` payloads MUST appear in every `intervals[*].payloads[*]` row; `PER_EVENT` payloads MUST appear in exactly one interval (interval 0 by convention). The [network rego](../policies/demand_flex_uc2_network.rego) enforces both, plus type-coverage against `payloadDescriptors`. The list is open-ended; future `CO2_AVOIDED` (`KG_CO2E`) or temperature/SoH payloads can be added by extending the seller's `reportDescriptors` and the meter's `payloadDescriptors`.
 
 ## Carbon credits in the contract
 
@@ -99,25 +105,21 @@ python3 scripts/generate_postman_collection.py --role BPP --usecase uc2-bdr-w-ve
 
 | File | What it carries |
 |---|---|
-| [`examples/publish-catalog.json`](./examples/publish-catalog.json) | DISCOM publishes vendor-telemetry offer with reportRequirements + carbon terms |
+| [`examples/publish-catalog.json`](./examples/publish-catalog.json) | DISCOM publishes vendor-telemetry offer with carbonCredit terms (seller block unbound until confirm) |
 | [`examples/discover-request.json`](./examples/discover-request.json) | Aggregator searches for CURTAILMENT/REDUCE |
-| [`examples/select-request.json`](./examples/select-request.json) | Aggregator selects 21 kW |
-| [`examples/on-select-response.json`](./examples/on-select-response.json) | DRAFT contract with carbonBuyer role placeholder |
-| [`examples/init-request.json`](./examples/init-request.json) | Aggregator declares 3 EVs (vendorDevices[]) |
-| [`examples/on-init-response.json`](./examples/on-init-response.json) | DISCOM acknowledges |
-| [`examples/confirm-request.json`](./examples/confirm-request.json) | ACTIVE |
-| [`examples/on-confirm-response.json`](./examples/on-confirm-response.json) | ACTIVE confirmed |
-| [`examples/on-status-response-baselines.json`](./examples/on-status-response-baselines.json) | DISCOM publishes per-EV BASELINE + report-request tag |
-| [`examples/status-request-vendor-telemetry.json`](./examples/status-request-vendor-telemetry.json) | **DISCOM asks** (BAP-caller; bapId/bppId swapped) |
+| [`examples/confirm-request.json`](./examples/confirm-request.json) | Aggregator confirms; seller's `reportDescriptors[]` (with `cardinality`) bound here |
+| [`examples/on-confirm-response.json`](./examples/on-confirm-response.json) | DISCOM confirms ACTIVE — descriptors now frozen on the contract |
+| [`examples/on-status-response-baselines.json`](./examples/on-status-response-baselines.json) | DISCOM publishes per-EV BASELINE timeseries |
+| [`examples/status-request-vendor-telemetry.json`](./examples/status-request-vendor-telemetry.json) | **DISCOM asks** (BAP-caller; bapId/bppId swapped) — contract+commitment ref only |
 | [`examples/on-status-response-vendor-telemetry.json`](./examples/on-status-response-vendor-telemetry.json) | **Aggregator answers** with full vendor BecknTimeSeries |
-| [`examples/on-status-response-settled.json`](./examples/on-status-response-settled.json) | DISCOM publishes settlement + computed revenue flows in tags |
+| [`examples/on-status-response-settled.json`](./examples/on-status-response-settled.json) | DISCOM publishes settlement; offer block included so rego can verify telemetry against committed descriptors |
 | [`workflows/demand-flex-vendor.arazzo.yaml`](./workflows/demand-flex-vendor.arazzo.yaml) | Arazzo workflow runner |
 
 ## Policy files
 
 | File | Purpose |
 |---|---|
-| [`../policies/demand_flex_uc2_network.rego`](../policies/demand_flex_uc2_network.rego) | Network-level checks (type-coverage + GPS-coherence + SOC-monotonicity) |
+| [`../policies/demand_flex_network.rego`](../policies/demand_flex_network.rego) (rule `uc2_violations`) | Network-level checks: type-coverage + PER_EVENT/PER_INTERVAL cardinality enforcement against the seller's committed `reportDescriptors`. Same file backs UC1 (rule `violations`); UC2 simply queries the superset rule. |
 | [`../../../specification/policies/demand_flex_uc2_revenue.rego`](../../../specification/policies/demand_flex_uc2_revenue.rego) | Settlement rego — package `deg.contracts.demand_flex_uc2`, computes incentive + carbon-credit revenue flows, net-zero |
 
-UC2 runs on networkId `nfh.global/testnet-deg-vendor`; UC1 continues to run on `nfh.global/testnet-deg`. Routing is configured in [`../config/opa-network-policies.yaml`](../config/opa-network-policies.yaml).
+UC1 and UC2 both run on networkId `nfh.global/testnet-deg`. A single rego file backs both via two named rules: `violations` (UC1 type-coverage) and `uc2_violations` (the strict superset adding cardinality). UC1 traffic transparently passes the UC2 rule because cardinality self-skips when no offer-side `reportDescriptors` are on the wire. Routing is configured in [`../config/opa-network-policies.yaml`](../config/opa-network-policies.yaml).
