@@ -201,50 +201,10 @@
                     }
                   ],
                   "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 2,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 3,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}]}
                   ]
                 }
               },
@@ -264,50 +224,10 @@
                     }
                   ],
                   "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 2,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 3,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}]}
                   ]
                 }
               },
@@ -327,50 +247,10 @@
                     }
                   ],
                   "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 2,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 3,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            7.0
-                          ]
-                        }
-                      ]
-                    }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}]}
                   ]
                 }
               }
