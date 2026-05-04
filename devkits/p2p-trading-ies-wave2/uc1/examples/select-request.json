@@ -193,11 +193,23 @@
         },
         {
           "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger"
+          "participantId": "buyer-discom-ledger",
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@type": "DiscomLedgerProvider",
+            "utilityId": "BRPL-DL",
+            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+          }
         },
         {
           "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger"
+          "participantId": "seller-discom-ledger",
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@type": "DiscomLedgerProvider",
+            "utilityId": "TPDDL-DL",
+            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+          }
         }
       ]
     }
