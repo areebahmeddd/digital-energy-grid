@@ -53,9 +53,11 @@ func New(cfg map[string]string) (*DEGLedgerRecorder, error) {
 		fmt.Printf("[DEGLedgerRecorder] WARNING: No authentication configured for ledger API calls\n")
 	}
 
-	// Log enabled actions and role
-	fmt.Printf("[DEGLedgerRecorder] Enabled actions: [%s], role: %s\n",
-		strings.Join(config.Actions, ", "), config.Role)
+	// Log enabled actions, role, and the three required mode flags so the
+	// active behavior is visible at startup.
+	fmt.Printf("[DEGLedgerRecorder] payloadShape=%s, ledgerUriSource=%s, ledgerApi=%s, role=%s, actions=[%s]\n",
+		config.PayloadShape, config.LedgerUriSource, config.LedgerApi, config.Role,
+		strings.Join(config.Actions, ", "))
 
 	client := NewLedgerClient(
 		config.LedgerHost,
@@ -104,50 +106,172 @@ func (r *DEGLedgerRecorder) Run(ctx *model.StepContext) error {
 }
 
 // handleOnConfirm processes on_confirm events and sends to /ledger/put.
+// Branches on PayloadShape (wave1 vs wave2) and resolves the target ledger
+// base URL per LedgerUriSource (config vs payload).
 func (r *DEGLedgerRecorder) handleOnConfirm(ctx *model.StepContext) error {
-	log.Infof(ctx, "DEGLedgerRecorder: processing on_confirm")
+	log.Infof(ctx, "DEGLedgerRecorder: processing on_confirm (payloadShape=%s, ledgerUriSource=%s, ledgerApi=%s)",
+		r.config.PayloadShape, r.config.LedgerUriSource, r.config.LedgerApi)
 
-	// DEBUG: Log the raw body received
-	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: raw body length=%d", len(ctx.Body))
 	if len(ctx.Body) < 5000 {
 		log.Debugf(ctx, "DEGLedgerRecorder DEBUG: raw body:\n%s", string(ctx.Body))
 	} else {
 		log.Debugf(ctx, "DEGLedgerRecorder DEBUG: raw body (truncated):\n%s...", string(ctx.Body[:5000]))
 	}
 
-	// Parse the on_confirm payload
+	switch r.config.PayloadShape {
+	case PayloadShapeWave1:
+		return r.handleOnConfirmWave1(ctx)
+	case PayloadShapeWave2:
+		return r.handleOnConfirmWave2(ctx)
+	default:
+		log.Warnf(ctx, "DEGLedgerRecorder: unsupported payloadShape=%s", r.config.PayloadShape)
+		return nil
+	}
+}
+
+// handleOnConfirmWave1 — legacy wave1 path: parses beckn:Order/orderItems and
+// emits one ledger record per order item.
+func (r *DEGLedgerRecorder) handleOnConfirmWave1(ctx *model.StepContext) error {
+	if r.config.LedgerApi != LedgerApiLegacyLedger {
+		log.Warnf(ctx, "DEGLedgerRecorder: wave1 path only supports ledgerApi=legacy_ledger (got %s); skipping",
+			r.config.LedgerApi)
+		return nil
+	}
 	payload, err := ParseOnConfirm(ctx.Body)
 	if err != nil {
-		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse on_confirm payload: %v", err)
+		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse wave1 on_confirm payload: %v", err)
 		return nil
 	}
 
-	// DEBUG: Log parsed payload details
-	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: parsed context - transaction_id=%s, action=%s, bap_id=%s, bpp_id=%s",
-		payload.Context.TransactionID, payload.Context.Action, payload.Context.BapID, payload.Context.BppID)
-	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: order items count=%d", len(payload.Message.Order.OrderItems))
+	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: parsed wave1 context - transaction_id=%s, bap_id=%s, bpp_id=%s",
+		payload.Context.TransactionID, payload.Context.BapID, payload.Context.BppID)
 
-	// Map to ledger records (one per order item)
 	records := MapToLedgerRecords(payload, r.config.Role)
-
-	// DEBUG: Log mapped records
-	for i, rec := range records {
-		log.Debugf(ctx, "DEGLedgerRecorder DEBUG: record[%d] - transactionId=%s, orderItemId=%s, platformIdBuyer=%s, platformIdSeller=%s",
-			i, rec.TransactionID, rec.OrderItemID, rec.PlatformIDBuyer, rec.PlatformIDSeller)
-	}
-
 	if len(records) == 0 {
-		log.Warnf(ctx, "DEGLedgerRecorder: no order items found in on_confirm, skipping ledger recording")
+		log.Warnf(ctx, "DEGLedgerRecorder: no order items found in on_confirm, skipping")
 		return nil
 	}
 
-	log.Infof(ctx, "DEGLedgerRecorder: mapped %d ledger records from on_confirm (transaction_id=%s)",
-		len(records), payload.Context.TransactionID)
+	// wave1 always has ledgerUriSource=config; falling back to LedgerHost.
+	baseURL := r.config.LedgerHost
+	if r.config.LedgerUriSource != LedgerUriSourceConfig || baseURL == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: wave1 path requires ledgerUriSource=config and a non-empty ledgerHost (have source=%s, host=%q); skipping",
+			r.config.LedgerUriSource, baseURL)
+		return nil
+	}
 
-	// Send records to ledger asynchronously (fire-and-forget)
-	r.sendPutRecordsAsync(ctx, records, payload.Context.TransactionID)
-
+	log.Infof(ctx, "DEGLedgerRecorder: wave1 mapped %d records (transaction_id=%s) -> %s",
+		len(records), payload.Context.TransactionID, baseURL)
+	r.sendPutRecordsAsync(ctx, baseURL, records)
 	return nil
+}
+
+// handleOnConfirmWave2 — wave2 (P2PTrade/v2.0) path: parses
+// message.contract.commitments, resolves the target URL from either config or
+// the payload's discom participantAttributes, then dispatches to either the
+// legacy_ledger PUT shape or the beckn on_confirm forwarder per LedgerApi.
+func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
+	payload, err := ParseOnConfirmWave2(ctx.Body)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse wave2 on_confirm payload: %v", err)
+		return nil
+	}
+
+	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: parsed wave2 context - transactionId=%s, bapId=%s, bppId=%s",
+		payload.Context.TransactionID, payload.Context.BapID, payload.Context.BppID)
+
+	baseURL, err := r.resolveWave2BaseURL(payload)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: wave2 base URL resolution failed (transaction_id=%s): %v",
+			payload.Context.TransactionID, err)
+		return nil
+	}
+
+	switch r.config.LedgerApi {
+	case LedgerApiLegacyLedger:
+		record, err := MapWave2ToLedgerRecord(payload, r.config.Role)
+		if err != nil {
+			log.Warnf(ctx, "DEGLedgerRecorder: wave2 mapping failed: %v", err)
+			return nil
+		}
+		log.Infof(ctx, "DEGLedgerRecorder: wave2 (legacy_ledger) mapped 1 record (transaction_id=%s) -> %s",
+			payload.Context.TransactionID, baseURL)
+		r.sendPutRecordsAsync(ctx, baseURL, []LedgerPutRequest{record})
+
+	case LedgerApiBeckn:
+		senderHost := r.config.SenderHost
+		if senderHost == "" {
+			senderHost = DeriveSenderHostFromWave2(payload, r.config.Role)
+		}
+		if senderHost == "" {
+			log.Warnf(ctx, "DEGLedgerRecorder: beckn mode requires a sender host (config.senderHost or context.bapUri/bppUri); skipping (transaction_id=%s)",
+				payload.Context.TransactionID)
+			return nil
+		}
+		rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+		if err != nil {
+			log.Warnf(ctx, "DEGLedgerRecorder: beckn context rewrite failed: %v", err)
+			return nil
+		}
+		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm (transaction_id=%s) -> %s/on_confirm (sender=%s)",
+			payload.Context.TransactionID, baseURL, senderHost)
+		r.sendBecknOnConfirmAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+
+	default:
+		log.Warnf(ctx, "DEGLedgerRecorder: unsupported ledgerApi=%s", r.config.LedgerApi)
+	}
+	return nil
+}
+
+// sendBecknOnConfirmAsync forwards a beckn on_confirm body in the background.
+// Mirrors sendPutRecordsAsync but for the beckn API path.
+func (r *DEGLedgerRecorder) sendBecknOnConfirmAsync(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) {
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
+		defer cancel()
+		resp, err := r.client.PostBecknOnConfirm(ctx, baseURL, body)
+		if err != nil {
+			log.Errorf(parentCtx, err,
+				"DEGLedgerRecorder: failed to forward beckn on_confirm (transaction_id=%s, base_url=%s): %v",
+				transactionID, baseURL, err)
+			return
+		}
+		log.Infof(parentCtx,
+			"DEGLedgerRecorder: successfully forwarded beckn on_confirm (transaction_id=%s, record_id=%s, base_url=%s)",
+			transactionID, resp.RecordID, baseURL)
+	}()
+}
+
+// resolveWave2BaseURL picks the target ledger URL according to LedgerUriSource.
+// For payload mode, the side is determined by the configured role:
+// BUYER → buyerDiscom.ledgerUri, SELLER → sellerDiscom.ledgerUri.
+func (r *DEGLedgerRecorder) resolveWave2BaseURL(payload *Wave2OnConfirmPayload) (string, error) {
+	switch r.config.LedgerUriSource {
+	case LedgerUriSourceConfig:
+		if r.config.LedgerHost == "" {
+			return "", fmt.Errorf("ledgerHost is empty")
+		}
+		return r.config.LedgerHost, nil
+	case LedgerUriSourcePayload:
+		var side Side
+		switch r.config.Role {
+		case "BUYER":
+			side = SideBuyer
+		case "SELLER":
+			side = SideSeller
+		default:
+			return "", fmt.Errorf("payload-sourced ledger URI requires role BUYER or SELLER, got %s", r.config.Role)
+		}
+		uri := ExtractWave2DiscomLedgerUri(payload, side)
+		if uri == "" {
+			return "", fmt.Errorf("no ledgerUri found in participants[role=%s].participantAttributes", side)
+		}
+		return uri, nil
+	default:
+		return "", fmt.Errorf("unsupported ledgerUriSource: %s", r.config.LedgerUriSource)
+	}
 }
 
 // handleOnStatus processes on_status events and sends meter readings to /ledger/record.
@@ -205,8 +329,9 @@ func (r *DEGLedgerRecorder) handleOnStatus(ctx *model.StepContext) error {
 }
 
 // sendPutRecordsAsync sends ledger PUT records in the background without blocking the main flow.
-// Used for on_confirm → /ledger/put
-func (r *DEGLedgerRecorder) sendPutRecordsAsync(parentCtx *model.StepContext, records []LedgerPutRequest, transactionID string) {
+// Used for on_confirm → /ledger/put. baseURL is supplied per-call so the same
+// recorder can target different discom ledger TSPs based on payload-sourced URIs.
+func (r *DEGLedgerRecorder) sendPutRecordsAsync(parentCtx *model.StepContext, baseURL string, records []LedgerPutRequest) {
 	for _, record := range records {
 		r.wg.Add(1)
 		go func(rec LedgerPutRequest) {
@@ -216,17 +341,17 @@ func (r *DEGLedgerRecorder) sendPutRecordsAsync(parentCtx *model.StepContext, re
 			ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
 			defer cancel()
 
-			resp, err := r.client.PutRecord(ctx, rec)
+			resp, err := r.client.PutRecord(ctx, baseURL, rec)
 			if err != nil {
 				log.Errorf(parentCtx, err,
-					"DEGLedgerRecorder: failed to PUT record to ledger (transaction_id=%s, order_item_id=%s): %v",
-					rec.TransactionID, rec.OrderItemID, err)
+					"DEGLedgerRecorder: failed to PUT record to ledger (transaction_id=%s, order_item_id=%s, base_url=%s): %v",
+					rec.TransactionID, rec.OrderItemID, baseURL, err)
 				return
 			}
 
 			log.Infof(parentCtx,
-				"DEGLedgerRecorder: successfully PUT record to ledger (transaction_id=%s, order_item_id=%s, record_id=%s)",
-				rec.TransactionID, rec.OrderItemID, resp.RecordID)
+				"DEGLedgerRecorder: successfully PUT record to ledger (transaction_id=%s, order_item_id=%s, record_id=%s, base_url=%s)",
+				rec.TransactionID, rec.OrderItemID, resp.RecordID, baseURL)
 		}(record)
 	}
 }

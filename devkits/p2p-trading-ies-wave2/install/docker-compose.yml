@@ -37,7 +37,7 @@ services:
       retries: 5
 
   onix-bap:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1.1
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-bap
     ports:
       - "8081:8081"
@@ -89,7 +89,7 @@ services:
       retries: 5
 
   onix-bpp:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1.1
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-bpp
     ports:
       - "8082:8082"
