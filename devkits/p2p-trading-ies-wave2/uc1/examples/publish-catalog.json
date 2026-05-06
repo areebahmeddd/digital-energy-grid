@@ -9,11 +9,11 @@
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
     "timestamp": "2026-04-25T06:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/deg/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/deg/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/deg/DEGContract/v2.0/context.jsonld"
+      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
+      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld"
     ]
   },
   "message": {

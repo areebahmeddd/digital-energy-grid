@@ -11,8 +11,8 @@
     "messageId": "msg-discom-on-init-001",
     "timestamp": "2026-04-25T10:06:05Z",
     "schemaContext": [
-      "https://schema.beckn.io/deg/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/deg/DiscomLimitCheck/v2.0/context.jsonld"
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld"
     ]
   },
   "message": {
