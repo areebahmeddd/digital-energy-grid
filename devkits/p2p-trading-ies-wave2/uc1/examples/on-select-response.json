@@ -11,11 +11,12 @@
     "messageId": "msg-on-select-001",
     "timestamp": "2026-04-25T10:00:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld"
+      "https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.beckn.io/deg/EnergyResource/v2.0/context.jsonld",
+      "https://schema.beckn.io/deg/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.beckn.io/deg/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.beckn.io/deg/DiscomLedgerProvider/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -35,7 +36,7 @@
             {
               "id": "energy-resource-solar-001",
               "descriptor": {
-                "name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"
+                "name": "Solar energy slot \u2014 2026-04-26 10:00\u201312:00 IST"
               },
               "quantity": {
                 "@type": "Quantity",
@@ -43,7 +44,6 @@
                 "unitQuantity": 35.0
               },
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
                 "sourceType": "SOLAR",
                 "meterId": "der://meter/seller-001"
@@ -56,7 +56,6 @@
               "energy-resource-solar-001"
             ],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "inputs": [
                 {
@@ -173,7 +172,6 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
@@ -203,7 +201,6 @@
           "role": "seller",
           "participantId": "TPDDL-DL-seller-001",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "der://meter/seller-001",
             "utilityId": "TPDDL-DL",
@@ -214,7 +211,6 @@
           "role": "buyer",
           "participantId": "BRPL-DL-buyer-001",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "der://meter/buyer-001",
             "utilityId": "BRPL-DL",
@@ -225,7 +221,6 @@
           "role": "buyerDiscom",
           "participantId": "buyer-discom-ledger",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "BRPL-DL",
             "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
@@ -235,7 +230,6 @@
           "role": "sellerDiscom",
           "participantId": "seller-discom-ledger",
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TPDDL-DL",
             "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
