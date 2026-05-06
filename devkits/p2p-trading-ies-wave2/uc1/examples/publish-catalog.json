@@ -40,6 +40,7 @@
               "shortDesc": "Up to 30 kWh @ 12 INR/kWh (10-11) and 25 kWh @ 14 INR/kWh (11-12)"
             },
             "resourceAttributes": {
+              "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
               "@type": "EnergyResource",
               "sourceType": "SOLAR",
               "meterId": "der://meter/seller-001"
@@ -62,6 +63,7 @@
             },
             "availableTo": [],
             "offerAttributes": {
+              "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "validityWindow": {
                 "@type": "beckn:TimePeriod",
@@ -165,6 +167,7 @@
                 "name": "Prosumer Solar Farm \u2014 North Delhi"
               },
               "providerAttributes": {
+                "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
                 "@type": "EnergyCustomer",
                 "meterId": "der://meter/seller-001",
                 "utilityId": "TPDDL-DL",

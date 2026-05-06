@@ -57,6 +57,7 @@
             "commitment-p2p-001"
           ],
           "performanceAttributes": {
+            "@context": "https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld",
             "@type": "DiscomLimitCheck",
             "deliveryWindow": {
               "@type": "beckn:TimePeriod",
@@ -82,6 +83,7 @@
         }
       ],
       "contractAttributes": {
+        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
