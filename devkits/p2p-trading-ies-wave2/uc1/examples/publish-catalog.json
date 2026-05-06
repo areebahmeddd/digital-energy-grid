@@ -11,7 +11,8 @@
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -27,15 +28,15 @@
         "provider": {
           "id": "TPDDL-DL-seller-001",
           "descriptor": {
-            "name": "Prosumer Solar Farm \u2014 North Delhi"
+            "name": "Prosumer Solar Farm — North Delhi"
           }
         },
         "resources": [
           {
             "id": "energy-resource-solar-001",
             "descriptor": {
-              "name": "Solar energy slot \u2014 2026-04-26 10:00\u201311:00 IST",
-              "shortDesc": "Up to 30 kWh of rooftop solar, 1-hour delivery slot"
+              "name": "Solar energy — 2026-04-26 10:00–12:00 IST (2 hourly slots)",
+              "shortDesc": "Up to 30 kWh @ 12 INR/kWh (10-11) and 25 kWh @ 14 INR/kWh (11-12)"
             },
             "resourceAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
@@ -49,8 +50,8 @@
           {
             "id": "offer-p2p-001",
             "descriptor": {
-              "name": "Morning Solar @ 12 INR/kWh",
-              "shortDesc": "Up to 30 kWh of rooftop solar for 2026-04-26 10:00\u201311:00 IST"
+              "name": "Morning Solar — 2 hourly slots from 10:00 IST",
+              "shortDesc": "12 INR/kWh (slot 0) and 14 INR/kWh (slot 1)"
             },
             "resourceIds": [
               "energy-resource-solar-001"
@@ -72,22 +73,10 @@
                 "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  {
-                    "role": "buyer",
-                    "participantId": null
-                  },
-                  {
-                    "role": "seller",
-                    "participantId": "TPDDL-DL-seller-001"
-                  },
-                  {
-                    "role": "buyerDiscom",
-                    "participantId": null
-                  },
-                  {
-                    "role": "sellerDiscom",
-                    "participantId": "seller-discom-ledger"
-                  }
+                  {"role": "buyer",       "participantId": null},
+                  {"role": "seller",      "participantId": "TPDDL-DL-seller-001"},
+                  {"role": "buyerDiscom", "participantId": null},
+                  {"role": "sellerDiscom","participantId": "seller-discom-ledger"}
                 ],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
@@ -101,34 +90,18 @@
                   "inputs": {
                     "currency": "INR",
                     "sourceType": "SOLAR",
-                    "offers": [
-                      {
-                        "pricePerKwh": 12,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 30.0
-                        },
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T04:30:00Z",
-                          "schema:endTime": "2026-04-26T05:30:00Z"
-                        }
-                      },
-                      {
-                        "pricePerKwh": 14,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 25.0
-                        },
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T05:30:00Z",
-                          "schema:endTime": "2026-04-26T06:30:00Z"
-                        }
-                      }
-                    ]
+                    "offerTimeseries": {
+                      "@type": "TimeSeries",
+                      "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+                      "payloadDescriptors": [
+                        {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"},
+                        {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "AVAILABLE_QTY",  "units": "KWH"}
+                      ],
+                      "intervals": [
+                        {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12]},   {"type": "AVAILABLE_QTY", "values": [30.0]}]},
+                        {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14]},   {"type": "AVAILABLE_QTY", "values": [25.0]}]}
+                      ]
+                    }
                   }
                 }
               ]
@@ -136,7 +109,7 @@
             "provider": {
               "id": "TPDDL-DL-seller-001",
               "descriptor": {
-                "name": "Prosumer Solar Farm \u2014 North Delhi"
+                "name": "Prosumer Solar Farm — North Delhi"
               },
               "providerAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",

@@ -16,7 +16,8 @@
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyResource/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
       "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyCustomer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -51,9 +52,7 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": [
-              "energy-resource-solar-001"
-            ],
+            "resourceIds": ["energy-resource-solar-001"],
             "offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
@@ -64,34 +63,18 @@
                   "inputs": {
                     "currency": "INR",
                     "sourceType": "SOLAR",
-                    "offers": [
-                      {
-                        "pricePerKwh": 12,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 30.0
-                        },
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T04:30:00Z",
-                          "schema:endTime": "2026-04-26T05:30:00Z"
-                        }
-                      },
-                      {
-                        "pricePerKwh": 14,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 25.0
-                        },
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T05:30:00Z",
-                          "schema:endTime": "2026-04-26T06:30:00Z"
-                        }
-                      }
-                    ]
+                    "offerTimeseries": {
+                      "@type": "TimeSeries",
+                      "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+                      "payloadDescriptors": [
+                        {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"},
+                        {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "AVAILABLE_QTY",  "units": "KWH"}
+                      ],
+                      "intervals": [
+                        {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12]},   {"type": "AVAILABLE_QTY", "values": [30.0]}]},
+                        {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14]},   {"type": "AVAILABLE_QTY", "values": [25.0]}]}
+                      ]
+                    }
                   }
                 },
                 {
@@ -99,44 +82,17 @@
                   "participantId": "BRPL-DL-buyer-001",
                   "inputs": {
                     "sourceType": "GRID",
-                    "offers": [
-                      {
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T04:30:00Z",
-                          "schema:endTime": "2026-04-26T05:30:00Z"
-                        },
-                        "requestedQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 20.0
-                        },
-                        "pricePerKwh": 12,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 30.0
-                        }
-                      },
-                      {
-                        "pricePerKwh": 14,
-                        "availableQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 25.0
-                        },
-                        "deliveryWindow": {
-                          "@type": "beckn:TimePeriod",
-                          "schema:startTime": "2026-04-26T05:30:00Z",
-                          "schema:endTime": "2026-04-26T06:30:00Z"
-                        },
-                        "requestedQuantity": {
-                          "@type": "Quantity",
-                          "unitCode": "KWH",
-                          "unitQuantity": 15.0
-                        }
-                      }
-                    ]
+                    "bidTimeseries": {
+                      "@type": "TimeSeries",
+                      "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+                      "payloadDescriptors": [
+                        {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"}
+                      ],
+                      "intervals": [
+                        {"id": 0, "payloads": [{"type": "REQUESTED_QTY", "values": [20.0]}]},
+                        {"id": 1, "payloads": [{"type": "REQUESTED_QTY", "values": [15.0]}]}
+                      ]
+                    }
                   }
                 }
               ]
@@ -146,77 +102,30 @@
       ],
       "performance": [
         {
-          "id": "perf-p2p-001-window-a",
+          "id": "perf-p2p-001",
           "status": {
             "code": "SETTLED",
-            "name": "Window A settled \u2014 18.5 kWh of 20 requested allocated"
+            "name": "Settled: 2 intervals, 18.5 + 14.2 = 32.7 kWh total"
           },
-          "commitmentIds": [
-            "commitment-p2p-001"
-          ],
+          "commitmentIds": ["commitment-p2p-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeDelivery/v2.0/context.jsonld",
             "@type": "EnergyTradeDelivery",
             "deliveryStatus": "COMPLETED",
             "deliveryMode": "GRID_INJECTION",
-            "deliveryWindow": {
-              "@type": "beckn:TimePeriod",
-              "schema:startTime": "2026-04-26T04:30:00Z",
-              "schema:endTime": "2026-04-26T05:30:00Z"
-            },
-            "buyerSideAllocationKwh": 18.5,
-            "sellerSideAllocationKwh": 19.2,
-            "settledQuantityKwh": 18.5,
-            "meterReadings": [
-              {
-                "beckn:timeWindow": {
-                  "@type": "beckn:TimePeriod",
-                  "schema:startTime": "2026-04-26T04:30:00Z",
-                  "schema:endTime": "2026-04-26T05:30:00Z"
-                },
-                "consumedEnergy": 18.5,
-                "producedEnergy": 19.2,
-                "allocatedEnergy": 18.5,
-                "unit": "kWh"
-              }
-            ]
-          }
-        },
-        {
-          "id": "perf-p2p-001-window-b",
-          "status": {
-            "code": "SETTLED",
-            "name": "Window B settled \u2014 14.2 kWh of 15 requested allocated"
-          },
-          "commitmentIds": [
-            "commitment-p2p-001"
-          ],
-          "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EnergyTradeDelivery/v2.0/context.jsonld",
-            "@type": "EnergyTradeDelivery",
-            "deliveryStatus": "COMPLETED",
-            "deliveryMode": "GRID_INJECTION",
-            "deliveryWindow": {
-              "@type": "beckn:TimePeriod",
-              "schema:startTime": "2026-04-26T05:30:00Z",
-              "schema:endTime": "2026-04-26T06:30:00Z"
-            },
-            "buyerSideAllocationKwh": 14.2,
-            "sellerSideAllocationKwh": 14.7,
-            "settledQuantityKwh": 14.2,
-            "meterReadings": [
-              {
-                "beckn:timeWindow": {
-                  "@type": "beckn:TimePeriod",
-                  "schema:startTime": "2026-04-26T05:30:00Z",
-                  "schema:endTime": "2026-04-26T06:30:00Z"
-                },
-                "consumedEnergy": 14.2,
-                "producedEnergy": 14.7,
-                "allocatedEnergy": 14.2,
-                "unit": "kWh"
-              }
-            ]
+            "performanceTimeseries": {
+              "@type": "TimeSeries",
+              "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+              "payloadDescriptors": [
+                {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_ALLOCATION", "units": "KWH"},
+                {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_INJECTION",  "units": "KWH"},
+                {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SETTLED_QTY",       "units": "KWH"}
+              ],
+              "intervals": [
+                {"id": 0, "payloads": [{"type": "BUYER_ALLOCATION", "values": [18.5]}, {"type": "SELLER_INJECTION", "values": [19.2]}, {"type": "SETTLED_QTY", "values": [18.5]}]},
+                {"id": 1, "payloads": [{"type": "BUYER_ALLOCATION", "values": [14.2]}, {"type": "SELLER_INJECTION", "values": [14.7]}, {"type": "SETTLED_QTY", "values": [14.2]}]}
+              ]
+            }
           }
         }
       ],
@@ -224,22 +133,10 @@
         "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "BRPL-DL-buyer-001"
-          },
-          {
-            "role": "seller",
-            "participantId": "TPDDL-DL-seller-001"
-          },
-          {
-            "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger"
-          },
-          {
-            "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger"
-          }
+          {"role": "buyer",        "participantId": "BRPL-DL-buyer-001"},
+          {"role": "seller",       "participantId": "TPDDL-DL-seller-001"},
+          {"role": "buyerDiscom",  "participantId": "buyer-discom-ledger"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
