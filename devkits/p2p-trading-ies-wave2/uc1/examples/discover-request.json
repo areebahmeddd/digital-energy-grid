@@ -13,7 +13,7 @@
     "intent": {
       "filters": {
         "type": "jsonpath",
-        "expression": "$.catalogs[*].offers[*] ? (@.offerAttributes.pricingModel == 'PER_KWH' && @.offerAttributes['@type'] == 'EnergyTradeOffer')"
+        "expression": "$.catalogs[*].offers[*][?(@.offerAttributes['@type']=='EnergyTradeOffer')]"
       }
     }
   }

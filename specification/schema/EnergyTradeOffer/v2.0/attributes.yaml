@@ -159,7 +159,7 @@ components:
           $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
           description: >
             Seller's time-series of delivery slots (required for role=seller).
-            payloadDescriptors MUST declare:
+            payloadDescriptors MUST declare EVENT_PAYLOAD_DESCRIPTOR entries for:
               PRICE_PER_KWH  with currency: INR
               AVAILABLE_QTY  with units: KWH
             Each interval id is an integer starting from 0; id N corresponds to
@@ -169,7 +169,7 @@ components:
           $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
           description: >
             Buyer's bid time-series (required for role=buyer).
-            payloadDescriptors MUST declare:
+            payloadDescriptors MUST declare EVENT_PAYLOAD_DESCRIPTOR entries for:
               REQUESTED_QTY  with units: KWH
             Interval ids MUST be a subset of the seller's offerTimeseries ids.
             The network policy enforces the subset constraint and validates that

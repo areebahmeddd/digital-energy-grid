@@ -71,6 +71,7 @@
                 "schema:endTime": "2026-04-26T00:30:00Z"
               },
               "contractTerms": {
+                "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
                   {
