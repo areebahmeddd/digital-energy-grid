@@ -4,10 +4,18 @@ info:
   version: 2.0.0
   description: >
     Offer attributes for P2P energy trading. Attached to Offer.offerAttributes
-    to provide validity windows, role-tagged inputs, and an embedded list of
-    delivery slots ("offers"). Each slot in inputs[*].inputs.offers is a
-    {pricePerKwh, availableQuantity, deliveryWindow[, requestedQuantity]}
-    tuple, allowing a single contract to span multiple time windows.
+    to provide validity windows and role-tagged inputs.
+
+    Each role carries a BecknTimeSeries instead of a flat offers[] array:
+      • seller inputs.offerTimeseries — PRICE_PER_KWH (currency: INR) and
+        AVAILABLE_QTY (units: KWH) payloads, one interval per delivery slot
+      • buyer  inputs.bidTimeseries  — REQUESTED_QTY (units: KWH) payloads;
+        interval ids must be a subset of the seller's offerTimeseries ids
+
+    intervalPeriod.start marks the first slot; each subsequent interval adds
+    one duration (e.g. PT1H) to get its window start. This replaces the
+    per-slot deliveryWindow object, reducing a 24-slot day-ahead trade from
+    ~650 lines to ~50 lines.
 
 components:
   schemas:
@@ -30,18 +38,15 @@ components:
           description: >
             Time window during which this offer can be selected/accepted.
             Typically set to expire before the earliest delivery starts.
-            After this window closes, the offer is no longer available.
           x-jsonld:
             "@id": validityWindow
 
         inputs:
           type: array
           description: >
-            Per-role inputs to the offer. Each entry binds a role
-            (seller / buyer) to a participantId and to a list of delivery
-            slots (offers[]). Seller slots specify pricePerKwh,
-            availableQuantity and deliveryWindow; buyer slots additionally
-            specify requestedQuantity for that window.
+            Per-role inputs. Each entry binds a role (seller / buyer) to a
+            participantId and to a BecknTimeSeries of delivery slots.
+            Seller carries offerTimeseries; buyer carries bidTimeseries.
           items:
             $ref: "#/components/schemas/RoleInputs"
 
@@ -49,10 +54,8 @@ components:
           type: object
           additionalProperties: true
           description: >
-            JSON-LD-aware container for the contract terms attached to this
-            offer at catalog/publish time. MUST carry @context and @type
-            (typically pointing at DEGContract). Validated separately by the
-            extended-schema chain via @context.
+            JSON-LD-aware container for contract terms attached at catalog
+            publish time. MUST carry @context and @type (typically DEGContract).
           required: ["@context", "@type"]
           properties:
             "@context":
@@ -66,8 +69,7 @@ components:
         gift:
           type: object
           additionalProperties: true
-          description: >
-            Optional gift parameters for energy gifting.
+          description: Optional gift parameters for energy gifting.
           x-jsonld:
             "@id": gift
 
@@ -85,31 +87,12 @@ components:
           type: string
           format: date-time
           pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-          description: Start time in UTC (ISO 8601 with Z suffix).
           example: "2026-04-26T04:30:00Z"
         "schema:endTime":
           type: string
           format: date-time
           pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-          description: End time in UTC (ISO 8601 with Z suffix).
           example: "2026-04-26T05:30:00Z"
-
-    Quantity:
-      type: object
-      additionalProperties: false
-      required: ["@type", unitCode, unitQuantity]
-      properties:
-        "@type":
-          type: string
-          enum: [Quantity]
-        unitCode:
-          type: string
-          enum: [KWH, MWH, WH]
-          description: Quantity unit code.
-        unitQuantity:
-          type: number
-          minimum: 0
-          description: Numeric quantity in the given unit.
 
     RoleInputs:
       type: object
@@ -127,92 +110,67 @@ components:
             omitted at catalog publish for the buyer side.
         inputs:
           $ref: "#/components/schemas/InputBag"
-      # Buyer slots additionally require requestedQuantity. Seller slots
-      # leave it absent.
       if:
         properties:
           role:
-            const: buyer
+            const: seller
       then:
         properties:
           inputs:
-            properties:
-              offers:
-                items:
-                  required:
-                    - pricePerKwh
-                    - availableQuantity
-                    - deliveryWindow
-                    - requestedQuantity
+            required: [offerTimeseries]
+      else:
+        properties:
+          inputs:
+            required: [bidTimeseries]
 
     InputBag:
       type: object
       additionalProperties: false
-      required: [offers]
       description: >
         Role-specific inputs bag. Single-valued, role-stable attributes
-        (currency, sourceType) live flat at the top of this bag; the
-        time-varying tuples (price, available qty, delivery window, and —
-        for buyers — requestedQuantity) live in the offers[] array, one
-        entry per delivery slot.
+        (currency, sourceType) live flat at the top; the time-varying slots
+        live in a BecknTimeSeries.
+
+        Seller: offerTimeseries with PRICE_PER_KWH and AVAILABLE_QTY payloads.
+        Buyer:  bidTimeseries  with REQUESTED_QTY payloads; interval ids must
+                be a subset of the seller's offerTimeseries ids. Buyer does NOT
+                repeat price or availability — those are read from the seller's
+                offerTimeseries by matching interval id.
       properties:
 
         currency:
           type: string
           minLength: 3
           maxLength: 3
-          description: ISO-4217 currency code (e.g., INR, USD). Applies to all entries in offers[].
+          description: >
+            ISO-4217 currency code (e.g. INR). Applies to PRICE_PER_KWH values
+            in the seller's offerTimeseries and is also declared as the
+            payloadDescriptor currency field on that type.
           example: "INR"
 
         sourceType:
           type: string
           enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
           description: >
-            Energy source type for this side. Seller side typically declares
-            generation source (e.g., SOLAR); buyer side may declare
-            consumption-side context (e.g., GRID). Applies to all entries
-            in offers[].
+            Energy source type. Seller side: generation source (e.g. SOLAR).
+            Buyer side: consumption context (e.g. GRID).
 
-        offers:
-          type: array
-          minItems: 1
+        offerTimeseries:
+          $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
           description: >
-            One entry per delivery time window. For seller role:
-            {pricePerKwh, availableQuantity, deliveryWindow}. For buyer
-            role: same three plus requestedQuantity. Multiple entries let
-            a single contract span multiple time windows (e.g. several
-            consecutive hours), avoiding duplication of currency /
-            sourceType / role identity.
-          items:
-            $ref: "#/components/schemas/OfferSlot"
+            Seller's time-series of delivery slots (required for role=seller).
+            payloadDescriptors MUST declare:
+              PRICE_PER_KWH  with currency: INR
+              AVAILABLE_QTY  with units: KWH
+            Each interval id is an integer starting from 0; id N corresponds to
+            the delivery window starting at intervalPeriod.start + N × duration.
 
-    OfferSlot:
-      type: object
-      additionalProperties: false
-      required: [pricePerKwh, availableQuantity, deliveryWindow]
-      description: >
-        A single trade slot — one delivery window with its price and
-        available quantity. requestedQuantity is added when this slot is
-        carried under a buyer-role inputs entry (enforced via the if/then
-        on RoleInputs above).
-      properties:
-        pricePerKwh:
-          type: number
-          minimum: 0
-          description: Per-kWh price for this delivery window.
-        availableQuantity:
-          allOf:
-            - $ref: "#/components/schemas/Quantity"
-          description: Energy quantity the seller has on offer for this window.
-        deliveryWindow:
-          allOf:
-            - $ref: "#/components/schemas/TimePeriod"
+        bidTimeseries:
+          $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
           description: >
-            Specific time period (UTC, ISO 8601 with Z suffix) when energy
-            delivery occurs for this slot.
-        requestedQuantity:
-          allOf:
-            - $ref: "#/components/schemas/Quantity"
-          description: >
-            Energy quantity the buyer is requesting for this window.
-            Required only when the parent RoleInputs.role is "buyer".
+            Buyer's bid time-series (required for role=buyer).
+            payloadDescriptors MUST declare:
+              REQUESTED_QTY  with units: KWH
+            Interval ids MUST be a subset of the seller's offerTimeseries ids.
+            The network policy enforces the subset constraint and validates that
+            REQUESTED_QTY ≤ AVAILABLE_QTY for each matched interval.

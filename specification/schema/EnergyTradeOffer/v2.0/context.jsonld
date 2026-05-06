@@ -10,13 +10,11 @@
     "startTime": "schema:startTime",
     "endTime": "schema:endTime",
     "EnergyTradeOffer": "deg:EnergyTradeOffer",
-    "pricingModel": {
-      "@id": "deg:pricingModel",
-      "@type": "@id"
-    },
     "validityWindow": "deg:validityWindow",
     "deliveryWindow": "deg:deliveryWindow",
     "gift": "deg:gift",
+    "offerTimeseries": "deg:offerTimeseries",
+    "bidTimeseries": "deg:bidTimeseries",
     "PER_KWH": "deg:PricingModelPerKwh",
     "PER-KWH": "deg:PricingModelPerKwh",
     "TIME_OF_DAY": "deg:PricingModelTimeOfDay",

@@ -77,6 +77,14 @@
       "schema:rangeIncludes": "schema:Number"
     },
     {
+      "@id": "deg:performanceTimeseries",
+      "@type": "rdf:Property",
+      "rdfs:label": "Performance timeseries",
+      "rdfs:comment": "BecknTimeSeries of per-interval meter readings (BUYER_ALLOCATION, SELLER_INJECTION, SETTLED_QTY); interval ids match seller's offerTimeseries.",
+      "rdfs:domain": "deg:EnergyTradeDelivery",
+      "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/TimeSeries" }
+    },
+    {
       "@id": "deg:curtailmentReason",
       "@type": "rdf:Property",
       "rdfs:label": "Curtailment reason",

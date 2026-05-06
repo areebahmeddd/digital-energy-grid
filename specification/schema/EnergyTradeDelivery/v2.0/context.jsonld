@@ -19,10 +19,7 @@
       "@type": "@id"
     },
     "deliveredQuantity": "deg:deliveredQuantity",
-    "meterReadings": "deg:meterReadings",
-    "consumedEnergy": "deg:consumedEnergy",
-    "producedEnergy": "deg:producedEnergy",
-    "allocatedEnergy": "deg:allocatedEnergy",
+    "performanceTimeseries": "deg:performanceTimeseries",
     "curtailedQuantity": "deg:curtailedQuantity",
     "curtailmentReason": {
       "@id": "deg:curtailmentReason",

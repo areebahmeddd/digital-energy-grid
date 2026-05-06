@@ -48,6 +48,22 @@
       "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/EnergyGift/v2.0/EnergyGift" }
     },
     {
+      "@id": "deg:offerTimeseries",
+      "@type": "rdf:Property",
+      "rdfs:label": "Offer timeseries",
+      "rdfs:comment": "Seller's BecknTimeSeries of delivery slots (PRICE_PER_KWH, AVAILABLE_QTY per interval).",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/TimeSeries" }
+    },
+    {
+      "@id": "deg:bidTimeseries",
+      "@type": "rdf:Property",
+      "rdfs:label": "Bid timeseries",
+      "rdfs:comment": "Buyer's BecknTimeSeries of requested quantities (REQUESTED_QTY per interval); ids subset of seller's offerTimeseries.",
+      "rdfs:domain": "deg:EnergyTradeOffer",
+      "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/TimeSeries" }
+    },
+    {
       "@id": "deg:PricingModel",
       "@type": "schema:Enumeration",
       "schema:name": "Pricing Model",

@@ -4,11 +4,17 @@ info:
   version: 2.0.0
   description: >
     Fulfillment attributes for energy trade deliveries. Attached to
-    Performance.performanceAttributes (or fulfillmentAttributes for catalog
-    flows) to track physical transfer of energy including delivery status,
-    meter readings, allocation breakdowns, and settlement data.
-    consumedEnergy = energy TO customer (imported);
-    producedEnergy = energy FROM customer (exported to grid).
+    Performance.performanceAttributes in on_status callbacks to report
+    physical delivery of energy including status, mode, curtailment, and
+    meter-reading telemetry.
+
+    Meter readings are carried as a BecknTimeSeries in performanceTimeseries:
+      BUYER_ALLOCATION  — energy consumed by buyer's meter (kWh)
+      SELLER_INJECTION  — energy injected by seller's meter (kWh)
+      SETTLED_QTY       — agreed settled quantity for revenue computation (kWh)
+
+    Interval ids correspond to the seller's offerTimeseries interval ids,
+    so the rego policy can match SETTLED_QTY to PRICE_PER_KWH by id.
 
 components:
   schemas:
@@ -28,8 +34,8 @@ components:
         deliveryStatus:
           type: string
           enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED]
-          description: Delivery status for the energy transfer.
-          example: "IN_PROGRESS"
+          description: Overall delivery status across all intervals.
+          example: "COMPLETED"
           x-jsonld:
             "@id": deliveryStatus
 
@@ -41,93 +47,39 @@ components:
           x-jsonld:
             "@id": deliveryMode
 
-        deliveryWindow:
-          type: object
-          additionalProperties: true
+        performanceTimeseries:
+          $ref: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml#/components/schemas/BecknTimeSeries"
           description: >
-            Settlement delivery window (UTC, ISO 8601 with Z suffix).
+            Per-interval meter readings as a BecknTimeSeries.
+            payloadDescriptors MUST declare:
+              BUYER_ALLOCATION  with units: KWH
+              SELLER_INJECTION  with units: KWH
+              SETTLED_QTY       with units: KWH
+            Interval ids MUST correspond to the seller's offerTimeseries ids.
+            The revenue rego matches SETTLED_QTY to PRICE_PER_KWH by interval id.
           x-jsonld:
-            "@id": deliveryWindow
+            "@id": performanceTimeseries
 
         deliveredQuantity:
           type: number
           minimum: 0
-          description: Total quantity delivered so far in kilowatt-hours (kWh).
-          example: 15.0
+          description: Total quantity delivered across all intervals (kWh).
+          example: 32.7
           x-jsonld:
             "@id": deliveredQuantity
-
-        buyerSideAllocationKwh:
-          type: number
-          minimum: 0
-          description: >
-            Energy attributed to the buyer's discom ledger after settlement
-            reconciliation (kWh).
-          x-jsonld:
-            "@id": buyerSideAllocationKwh
-
-        sellerSideAllocationKwh:
-          type: number
-          minimum: 0
-          description: >
-            Energy attributed to the seller's discom ledger after settlement
-            reconciliation (kWh).
-          x-jsonld:
-            "@id": sellerSideAllocationKwh
-
-        settledQuantityKwh:
-          type: number
-          minimum: 0
-          description: >
-            Final settled quantity used for revenue-flow computation (kWh).
-          x-jsonld:
-            "@id": settledQuantityKwh
-
-        meterReadings:
-          type: array
-          description: >
-            Array of meter readings for this delivery. Each reading covers a
-            time window and reports energy delivered/received during that
-            period. Times are in UTC (ISO 8601 with Z suffix).
-          items:
-            type: object
-            additionalProperties: true
-            properties:
-              "beckn:timeWindow":
-                type: object
-                additionalProperties: true
-              consumedEnergy:
-                type: number
-                minimum: 0
-              producedEnergy:
-                type: number
-                minimum: 0
-              allocatedEnergy:
-                type: number
-                minimum: 0
-              unit:
-                type: string
-                enum: ["kWh", "MWh", "Wh"]
-                default: "kWh"
-          x-jsonld:
-            "@id": meterReadings
 
         curtailedQuantity:
           type: number
           minimum: 0
-          description: >
-            Quantity curtailed from original contracted amount (kWh). Used
-            by BAP/BPP to reconcile payment vs. original contracted quantity.
-          example: 5.0
+          description: Quantity curtailed from original contracted amount (kWh).
+          example: 2.3
           x-jsonld:
             "@id": curtailedQuantity
 
         curtailmentReason:
           type: string
           enum: [GRID_OUTAGE, EMERGENCY, CONGESTION, MAINTENANCE, OTHER]
-          description: >
-            Reason for curtailment. Useful for audit trail and dispute
-            resolution.
+          description: Reason for curtailment (if any).
           example: "GRID_OUTAGE"
           x-jsonld:
             "@id": curtailmentReason
@@ -135,8 +87,7 @@ components:
         lastUpdated:
           type: string
           format: date-time
-          description: >
-            Last delivery update timestamp in UTC (ISO 8601 with Z suffix).
-          example: "2024-10-04T15:30:00Z"
+          description: Last delivery update timestamp in UTC (ISO 8601 with Z suffix).
+          example: "2026-04-26T06:30:00Z"
           x-jsonld:
             "@id": "schema:dateModified"
