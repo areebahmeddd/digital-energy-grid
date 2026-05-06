@@ -11,15 +11,9 @@
   },
   "message": {
     "intent": {
-      "offer": {
-        "offerAttributes": {
-          "@type": "EnergyTradeOffer"
-        }
-      },
       "filters": {
-        "type": "structured",
-        "sourceType": "SOLAR",
-        "currency": "INR"
+        "type": "jsonpath",
+        "expression": "$.catalogs[*].offers[*][?(@.offerAttributes['@type']=='EnergyTradeOffer')]"
       }
     }
   }
