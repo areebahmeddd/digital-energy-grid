@@ -14,11 +14,34 @@
   "message": {
     "contract": {
       "id": "d4e5f6a7-b8c9-0123-def0-123456789012",
-      "descriptor": {
-        "name": "credential_renewal",
-        "shortDesc": "BAP requests credential rotation before fulfillment:credentialExpiresAt"
-      },
-      "updateTarget": "performance[ffl-ami-mqtt-20260507-001].streamConnection"
+      "commitments": [
+        {
+          "id": "commitment-stream-mqtt-001",
+          "status": {
+            "descriptor": { "code": "ACTIVE" }
+          },
+          "resources": [
+            {
+              "id": "stream-ami-mqtt-blr-zone-a",
+              "descriptor": { "name": "AMI Smart Meter Stream — Bengaluru Zone A" },
+              "quantity": { "unitText": "stream", "unitCode": "EA", "value": "1" }
+            }
+          ],
+          "offer": {
+            "id": "offer-ami-mqtt-monthly",
+            "descriptor": { "name": "Monthly MQTT stream subscription" },
+            "resourceIds": ["stream-ami-mqtt-blr-zone-a"],
+            "offerAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
+              "@type": "DatasetItem",
+              "schema:identifier": "stream-ami-mqtt-blr-zone-a",
+              "schema:name": "AMI Smart Meter Stream — Bengaluru Zone A",
+              "schema:temporalCoverage": "2026-05-07/..",
+              "dataset:accessMethod": "MQTT"
+            }
+          }
+        }
+      ]
     }
   }
 }

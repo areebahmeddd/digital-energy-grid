@@ -24,6 +24,9 @@
       "commitments": [
         {
           "id": "commitment-stream-mqtt-001",
+          "status": {
+            "descriptor": { "code": "ACTIVE" }
+          },
           "resources": [
             {
               "id": "stream-ami-mqtt-blr-zone-a",
@@ -41,6 +44,7 @@
       "consideration": [
         {
           "id": "consideration-stream-001",
+          "status": { "code": "ACTIVE" },
           "considerationAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
             "@type": "PriceSpecification",
