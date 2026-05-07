@@ -1,6 +1,6 @@
 # BillingSummary
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyBillingSummary`](https://schema.beckn.io/EnergyBillingSummary)
+> **Canonical IRI:** [`https://schema.beckn.io/EnergyBillingSummaryGB`](https://schema.beckn.io/EnergyBillingSummaryGB)
 > **Tags:** `energy`, `billing`, `green-button`, `espi`, `deg`
 > **Namespace:** `https://schema.beckn.io/deg/`
 > Part of the [DEG Specification](../../../README.md)
@@ -28,9 +28,9 @@ ESPI/Green Button billing summary data for a single meter. Contains ServiceCateg
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyBillingSummary` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyBillingSummary/v1.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummary/v1.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummary/v1.0/vocab.jsonld` |
+| Canonical IRI | `https://schema.beckn.io/EnergyBillingSummaryGB` |
+| JSON Schema (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0` |
+| context.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0/vocab.jsonld` |
 | ESPI context (imported) | `https://schema.beckn.io/external/espi/context.jsonld` |
 | CustomerProfile (imported) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0/context.jsonld` |
