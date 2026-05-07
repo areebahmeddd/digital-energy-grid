@@ -1,6 +1,6 @@
 openapi: 3.1.1
 info:
-  title: EnergyBillingSummary
+  title: EnergyBillingSummaryGB
   version: 1.0.0
   description: ESPI/Green Button billing summary data for a single meter. Uses native ESPI types and enum codes.
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
@@ -10,8 +10,8 @@ servers:
 paths: {}
 components:
   schemas:
-    EnergyBillingSummary:
-      $id: https://schema.beckn.io/EnergyBillingSummary/v1.0
+    EnergyBillingSummaryGB:
+      $id: https://schema.beckn.io/EnergyBillingSummaryGB/v1.0
       title: BillingSummary
       description: ESPI/Green Button billing summary data for a single meter. Uses native ESPI types and enum codes.
       x-tags: [energy, billing, green-button, espi, deg]
