@@ -29,8 +29,7 @@ components:
         - deg
       type: object
       additionalProperties: true
-      allOf:
-        - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+      x-extends: "https://schema.beckn.io/EnergyCredential/v2.0"
       x-jsonld:
         "@context": ./context.jsonld
         "@type": ElectricityCredential
