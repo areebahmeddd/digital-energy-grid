@@ -81,19 +81,7 @@ components:
                     - NetMeter
                     - Other
                 idRef:
-                  description: Reusable identity reference — an identity issued by an external authority.
-                  type: object
-                  required:
-                    - issuedBy
-                    - subjectId
-                  properties:
-                    issuedBy:
-                      type: string
-                      format: uri
-                      description: DID of the authority that issued the identity.
-                    subjectId:
-                      type: string
-                      description: "Identifier in the format authority-domain:id-value."
+                  $ref: "#/components/schemas/IdRef"
             customerDetails:
               description: Customer personal and address information.
               x-jsonld:
@@ -159,25 +147,7 @@ components:
               type: array
               minItems: 1
               items:
-                type: object
-                required:
-                  - premisesType
-                  - connectionType
-                  - sanctionedLoadKW
-                  - tariffCategoryCode
-                properties:
-                  premisesType:
-                    type: string
-                    enum: [Residential, Commercial, Industrial, Agricultural]
-                  connectionType:
-                    type: string
-                    enum: [Single-phase, Three-phase]
-                  sanctionedLoadKW:
-                    type: number
-                    description: Sanctioned electrical load in kW.
-                  tariffCategoryCode:
-                    type: string
-                    description: Billing/tariff category code assigned by the utility.
+                $ref: "#/components/schemas/ConsumptionProfile"
             generationProfiles:
               description: >
                 DER generation assets. Array to support customers with multiple generation units
@@ -187,27 +157,7 @@ components:
               type: array
               minItems: 1
               items:
-                type: object
-                required:
-                  - generationType
-                  - capacityKW
-                  - commissioningDate
-                properties:
-                  assetId:
-                    type: string
-                  generationType:
-                    type: string
-                    enum: [Solar, Wind, MicroHydro, Other]
-                  capacityKW:
-                    type: number
-                    description: Installed generation capacity in kW.
-                  commissioningDate:
-                    type: string
-                    format: date-time
-                  manufacturer:
-                    type: string
-                  modelNumber:
-                    type: string
+                $ref: "#/components/schemas/GenerationProfile"
             storageProfiles:
               description: >
                 Energy storage assets. Array to support customers with multiple batteries.
@@ -216,30 +166,8 @@ components:
               type: array
               minItems: 1
               items:
-                type: object
-                required:
-                  - storageCapacityKWh
-                  - powerRatingKW
-                  - commissioningDate
-                properties:
-                  assetId:
-                    type: string
-                  storageCapacityKWh:
-                    type: number
-                    description: Storage capacity in kWh.
-                  powerRatingKW:
-                    type: number
-                    description: Charge/discharge power rating in kW.
-                  commissioningDate:
-                    type: string
-                    format: date-time
-                  storageType:
-                    type: string
-                    enum: [LithiumIon, LeadAcid, FlowBattery, Other]
+                $ref: "#/components/schemas/StorageProfile"
 
-    # Named schema definitions kept for discoverability and reuse by other files.
-    # Not referenced with $ref from within ElectricityCredential to avoid resolver
-    # cascade failures when the allOf external URL is unavailable (e.g. Swagger Editor).
     ConsumptionProfile:
       description: Connection and consumption characteristics for load management and tariff purposes.
       type: object
