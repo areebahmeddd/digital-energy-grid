@@ -70,27 +70,48 @@
       },
       "serviceConnectionDate": "2025-01-10T00:00:00-05:00"
     },
-    "consumptionProfile": {
-      "premisesType": "Residential",
-      "connectionType": "Single-phase",
-      "sanctionedLoadKW": 5,
-      "tariffCategoryCode": "RES-01"
-    },
-    "generationProfile": {
-      "assetId": "DER-SOLAR-001",
-      "generationType": "Solar",
-      "capacityKW": 3,
-      "commissioningDate": "2025-01-12T00:00:00-05:00",
-      "manufacturer": "SunPower Corporation",
-      "modelNumber": "SPR-X22-360"
-    },
-    "storageProfile": {
-      "assetId": "BESS-001",
-      "storageCapacityKWh": 10,
-      "powerRatingKW": 5,
-      "commissioningDate": "2025-01-12T00:00:00-05:00",
-      "storageType": "LithiumIon"
-    }
+    "consumptionProfiles": [
+      {
+        "premisesType": "Residential",
+        "connectionType": "Single-phase",
+        "sanctionedLoadKW": 5,
+        "tariffCategoryCode": "RES-01"
+      }
+    ],
+    "generationProfiles": [
+      {
+        "assetId": "DER-SOLAR-001",
+        "generationType": "Solar",
+        "capacityKW": 3,
+        "commissioningDate": "2025-01-12T00:00:00-05:00",
+        "manufacturer": "SunPower Corporation",
+        "modelNumber": "SPR-X22-360"
+      },
+      {
+        "assetId": "DER-WIND-001",
+        "generationType": "Wind",
+        "capacityKW": 1.5,
+        "commissioningDate": "2025-03-01T00:00:00-05:00",
+        "manufacturer": "Windmill Co.",
+        "modelNumber": "WM-MICRO-150"
+      }
+    ],
+    "storageProfiles": [
+      {
+        "assetId": "BESS-001",
+        "storageCapacityKWh": 10,
+        "powerRatingKW": 5,
+        "commissioningDate": "2025-01-12T00:00:00-05:00",
+        "storageType": "LithiumIon"
+      },
+      {
+        "assetId": "BESS-002",
+        "storageCapacityKWh": 5,
+        "powerRatingKW": 2.5,
+        "commissioningDate": "2025-06-01T00:00:00-05:00",
+        "storageType": "LithiumIon"
+      }
+    ]
   },
   "proof": {
     "type": "Ed25519Signature2020",

@@ -125,7 +125,7 @@
         },
         "credentialSubject": {
             "type": "object",
-            "description": "Single subject with five profile sections: customerProfile (required), customerDetails, consumptionProfile, generationProfile, storageProfile (all optional except customerProfile)",
+            "description": "Subject with profile sections: customerProfile (required), customerDetails, consumptionProfiles, generationProfiles, storageProfiles.",
             "required": [
                 "customerProfile"
             ],
@@ -141,14 +141,23 @@
                 "customerDetails": {
                     "$ref": "#/$defs/CustomerDetails"
                 },
-                "consumptionProfile": {
-                    "$ref": "#/$defs/ConsumptionProfile"
+                "consumptionProfiles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/ConsumptionProfile" },
+                    "description": "Connection and consumption characteristics. Array supports multiple meters or tariff categories."
                 },
-                "generationProfile": {
-                    "$ref": "#/$defs/GenerationProfile"
+                "generationProfiles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/GenerationProfile" },
+                    "description": "DER generation assets. Array supports multiple generation units."
                 },
-                "storageProfile": {
-                    "$ref": "#/$defs/StorageProfile"
+                "storageProfiles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/StorageProfile" },
+                    "description": "Energy storage assets. Array supports multiple batteries."
                 }
             }
         },
