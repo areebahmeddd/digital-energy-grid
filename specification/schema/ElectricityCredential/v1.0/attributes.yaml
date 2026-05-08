@@ -38,7 +38,7 @@ components:
         credentialSubject:
           description: >
             The credential subject containing customer identity and optional
-            consumption, generation, and storage profiles for a single meter.
+            consumptionProfiles, generationProfiles, and storageProfiles arrays.
           x-jsonld:
             "@id": deg:credentialSubject
           type: object
@@ -138,78 +138,104 @@ components:
                   type: string
                   format: date-time
                   description: Date and time the electricity connection was activated (with timezone offset).
-            consumptionProfile:
-              description: Connection and consumption characteristics for load management and tariff purposes.
+            consumptionProfiles:
+              description: >
+                Connection and consumption characteristics for load management and tariff purposes.
+                Array to support customers with multiple meters or tariff categories.
               x-jsonld:
-                "@id": deg:consumptionProfile
-              type: object
-              required:
-                - premisesType
-                - connectionType
-                - sanctionedLoadKW
-                - tariffCategoryCode
-              properties:
-                premisesType:
-                  type: string
-                  enum: [Residential, Commercial, Industrial, Agricultural]
-                connectionType:
-                  type: string
-                  enum: [Single-phase, Three-phase]
-                sanctionedLoadKW:
-                  type: number
-                  description: Sanctioned electrical load in kW.
-                tariffCategoryCode:
-                  type: string
-                  description: Billing/tariff category code assigned by the utility.
-            generationProfile:
-              description: DER generation capability.
+                "@id": deg:consumptionProfiles
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/ConsumptionProfile"
+            generationProfiles:
+              description: >
+                DER generation assets. Array to support customers with multiple generation units
+                (e.g., rooftop solar + wind turbine).
               x-jsonld:
-                "@id": deg:generationProfile
-              type: object
-              required:
-                - generationType
-                - capacityKW
-                - commissioningDate
-              properties:
-                assetId:
-                  type: string
-                generationType:
-                  type: string
-                  enum: [Solar, Wind, MicroHydro, Other]
-                capacityKW:
-                  type: number
-                  description: Installed generation capacity in kW.
-                commissioningDate:
-                  type: string
-                  format: date-time
-                manufacturer:
-                  type: string
-                modelNumber:
-                  type: string
-            storageProfile:
-              description: Battery/energy storage capability.
+                "@id": deg:generationProfiles
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/GenerationProfile"
+            storageProfiles:
+              description: >
+                Energy storage assets. Array to support customers with multiple batteries.
               x-jsonld:
-                "@id": deg:storageProfile
-              type: object
-              required:
-                - storageCapacityKWh
-                - powerRatingKW
-                - commissioningDate
-              properties:
-                assetId:
-                  type: string
-                storageCapacityKWh:
-                  type: number
-                  description: Storage capacity in kWh.
-                powerRatingKW:
-                  type: number
-                  description: Charge/discharge power rating in kW.
-                commissioningDate:
-                  type: string
-                  format: date-time
-                storageType:
-                  type: string
-                  enum: [LithiumIon, LeadAcid, FlowBattery, Other]
+                "@id": deg:storageProfiles
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/StorageProfile"
+
+    ConsumptionProfile:
+      description: Connection and consumption characteristics for load management and tariff purposes.
+      type: object
+      required:
+        - premisesType
+        - connectionType
+        - sanctionedLoadKW
+        - tariffCategoryCode
+      properties:
+        premisesType:
+          type: string
+          enum: [Residential, Commercial, Industrial, Agricultural]
+        connectionType:
+          type: string
+          enum: [Single-phase, Three-phase]
+        sanctionedLoadKW:
+          type: number
+          description: Sanctioned electrical load in kW.
+        tariffCategoryCode:
+          type: string
+          description: Billing/tariff category code assigned by the utility.
+
+    GenerationProfile:
+      description: DER generation capability.
+      type: object
+      required:
+        - generationType
+        - capacityKW
+        - commissioningDate
+      properties:
+        assetId:
+          type: string
+        generationType:
+          type: string
+          enum: [Solar, Wind, MicroHydro, Other]
+        capacityKW:
+          type: number
+          description: Installed generation capacity in kW.
+        commissioningDate:
+          type: string
+          format: date-time
+        manufacturer:
+          type: string
+        modelNumber:
+          type: string
+
+    StorageProfile:
+      description: Battery/energy storage capability.
+      type: object
+      required:
+        - storageCapacityKWh
+        - powerRatingKW
+        - commissioningDate
+      properties:
+        assetId:
+          type: string
+        storageCapacityKWh:
+          type: number
+          description: Storage capacity in kWh.
+        powerRatingKW:
+          type: number
+          description: Charge/discharge power rating in kW.
+        commissioningDate:
+          type: string
+          format: date-time
+        storageType:
+          type: string
+          enum: [LithiumIon, LeadAcid, FlowBattery, Other]
 
     IdRef:
       description: Reusable identity reference — an identity issued by an external authority.

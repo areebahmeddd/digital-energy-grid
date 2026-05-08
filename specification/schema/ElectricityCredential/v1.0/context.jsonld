@@ -187,9 +187,10 @@
                 }
             }
         },
-        "consumptionProfile": {
-            "@id": "deg:consumptionProfile",
+        "consumptionProfiles": {
+            "@id": "deg:consumptionProfiles",
             "@type": "@id",
+            "@container": "@set",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
@@ -211,9 +212,10 @@
                 }
             }
         },
-        "generationProfile": {
-            "@id": "deg:generationProfile",
+        "generationProfiles": {
+            "@id": "deg:generationProfiles",
             "@type": "@id",
+            "@container": "@set",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
@@ -243,9 +245,10 @@
                 }
             }
         },
-        "storageProfile": {
-            "@id": "deg:storageProfile",
+        "storageProfiles": {
+            "@id": "deg:storageProfiles",
             "@type": "@id",
+            "@container": "@set",
             "@context": {
                 "@version": 1.1,
                 "@protected": true,
