@@ -78,13 +78,14 @@ modules:
         steps:
           - id: degledgerrecorder
             config:
-              # Wave2 (P2PTrade/v2.0) on_confirm shape; ledger URL is read
-              # per-call from the payload's buyerDiscom participantAttributes.
+              # Wave2: on_confirm → ledger record per interval; on_status with
+              # performance data → forward to buyerDiscom ledger. Ledger URL
+              # read per-call from payload's buyerDiscom participantAttributes.
               payloadShape: wave2
               ledgerUriSource: payload
-              ledgerApi: legacy_ledger
+              ledgerApi: beckn
               role: BUYER
-              actions: on_confirm
+              actions: on_confirm,on_status
               enabled: "true"
               asyncTimeout: "30000"
               # Signing config (same keys as simplekeymanager)
@@ -156,8 +157,23 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          - id: degledgerrecorder
+            config:
+              # Wave2: outgoing status → forward to buyerDiscom ledger (symmetric path A).
+              payloadShape: wave2
+              ledgerUriSource: payload
+              ledgerApi: beckn
+              role: BUYER
+              actions: status
+              enabled: "true"
+              asyncTimeout: "30000"
+              signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+              networkParticipant: bap.example.com
+              keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
       steps:
         - validateSchema
         - checkPolicy
         - addRoute
         - sign
+        - degledgerrecorder

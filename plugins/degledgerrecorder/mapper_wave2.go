@@ -43,8 +43,16 @@ type Wave2Context struct {
 type Wave2Contract struct {
 	ID                 string                 `json:"id"`
 	Commitments        []Wave2Commitment      `json:"commitments"`
+	Performance        []Wave2Performance     `json:"performance"`
 	Participants       []Wave2Participant     `json:"participants"`
 	ContractAttributes map[string]interface{} `json:"contractAttributes"`
+}
+
+// Wave2Performance is `message.contract.performance[*]`.
+type Wave2Performance struct {
+	ID                    string                 `json:"id"`
+	CommitmentIDs         []string               `json:"commitmentIds"`
+	PerformanceAttributes map[string]interface{} `json:"performanceAttributes"`
 }
 
 // Wave2Commitment is `message.contract.commitments[*]`.
@@ -91,13 +99,12 @@ func ParseOnConfirmWave2(body []byte) (*Wave2OnConfirmPayload, error) {
 	return &payload, nil
 }
 
-// MapWave2ToLedgerRecord builds a single LedgerPutRequest from a wave2 on_confirm
-// payload. orderItemId == context.transactionId per the wave2 mapping
-// (one ledger record per transaction; multi-commitment is collapsed by taking
-// the first commitment).
-func MapWave2ToLedgerRecord(payload *Wave2OnConfirmPayload, role string) (LedgerPutRequest, error) {
+// MapWave2ToLedgerRecords builds one LedgerPutRequest per interval found in the
+// first commitment's seller offerTimeseries. record_id format:
+// {transactionId}_{contractId}_{intervalId}.
+func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]LedgerPutRequest, error) {
 	if len(payload.Message.Contract.Commitments) == 0 {
-		return LedgerPutRequest{}, fmt.Errorf("wave2 payload has no commitments")
+		return nil, fmt.Errorf("wave2 payload has no commitments")
 	}
 	commitment := payload.Message.Contract.Commitments[0]
 	if len(payload.Message.Contract.Commitments) > 1 {
@@ -119,30 +126,41 @@ func MapWave2ToLedgerRecord(payload *Wave2OnConfirmPayload, role string) (Ledger
 	}
 
 	tradeQty, tradeUnit := extractWave2QuantityAndUnit(commitment.Resources)
+	contractID := payload.Message.Contract.ID
+	intervalIDs := extractWave2IntervalIDs(commitment.Offer.OfferAttributes)
 
-	record := LedgerPutRequest{
-		Role:              role,
-		TransactionID:     payload.Context.TransactionID,
-		OrderItemID:       payload.Context.TransactionID, // wave2: single record per txn
-		PlatformIDBuyer:   payload.Context.BapID,
-		PlatformIDSeller:  payload.Context.BppID,
-		DiscomIDBuyer:     wave2StringAttr(buyerPart, "utilityId"),
-		DiscomIDSeller:    wave2StringAttr(sellerPart, "utilityId"),
-		BuyerID:           wave2StringAttr(buyerPart, "meterId"),
-		SellerID:          wave2StringAttr(sellerPart, "meterId"),
-		TradeTime:         payload.Context.Timestamp,
-		DeliveryStartTime: deliveryStart,
-		DeliveryEndTime:   deliveryEnd,
-		TradeDetails: []TradeDetail{
-			{
-				TradeQty:  tradeQty,
-				TradeType: "ENERGY",
-				TradeUnit: normalizeTradeUnit(tradeUnit),
-			},
-		},
-		ClientReference: generateClientReference(payload.Context.TransactionID, payload.Context.TransactionID),
+	// Always emit at least one record even if interval list is empty (id=0).
+	if len(intervalIDs) == 0 {
+		intervalIDs = []int{0}
 	}
-	return record, nil
+
+	records := make([]LedgerPutRequest, 0, len(intervalIDs))
+	for _, intervalID := range intervalIDs {
+		orderItemID := fmt.Sprintf("%s_%s_%d", payload.Context.TransactionID, contractID, intervalID)
+		records = append(records, LedgerPutRequest{
+			Role:              role,
+			TransactionID:     payload.Context.TransactionID,
+			OrderItemID:       orderItemID,
+			PlatformIDBuyer:   payload.Context.BapID,
+			PlatformIDSeller:  payload.Context.BppID,
+			DiscomIDBuyer:     wave2StringAttr(buyerPart, "utilityId"),
+			DiscomIDSeller:    wave2StringAttr(sellerPart, "utilityId"),
+			BuyerID:           wave2StringAttr(buyerPart, "meterId"),
+			SellerID:          wave2StringAttr(sellerPart, "meterId"),
+			TradeTime:         payload.Context.Timestamp,
+			DeliveryStartTime: deliveryStart,
+			DeliveryEndTime:   deliveryEnd,
+			TradeDetails: []TradeDetail{
+				{
+					TradeQty:  tradeQty,
+					TradeType: "ENERGY",
+					TradeUnit: normalizeTradeUnit(tradeUnit),
+				},
+			},
+			ClientReference: generateClientReference(payload.Context.TransactionID, orderItemID),
+		})
+	}
+	return records, nil
 }
 
 // ExtractWave2DiscomLedgerUri returns the ledgerUri for the requested side from
@@ -288,4 +306,210 @@ func hostBase(rawURI string) string {
 		return ""
 	}
 	return u.Scheme + "://" + u.Host
+}
+
+// extractWave2IntervalIDs walks offerAttributes.inputs[role=seller].inputs.offerTimeseries.intervals
+// and returns each interval's numeric id. Returns nil if the path is missing.
+func extractWave2IntervalIDs(offerAttrs map[string]interface{}) []int {
+	if offerAttrs == nil {
+		return nil
+	}
+	inputs, ok := offerAttrs["inputs"].([]interface{})
+	if !ok {
+		return nil
+	}
+	for _, raw := range inputs {
+		entry, ok := raw.(map[string]interface{})
+		if !ok || entry["role"] != "seller" {
+			continue
+		}
+		inner, ok := entry["inputs"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		ts, ok := inner["offerTimeseries"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+		intervals, ok := ts["intervals"].([]interface{})
+		if !ok {
+			continue
+		}
+		ids := make([]int, 0, len(intervals))
+		for _, iv := range intervals {
+			m, ok := iv.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			switch v := m["id"].(type) {
+			case float64:
+				ids = append(ids, int(v))
+			case int:
+				ids = append(ids, v)
+			}
+		}
+		return ids
+	}
+	return nil
+}
+
+// -------------------------
+// wave2 status types and parsers
+// -------------------------
+
+// Wave2StatusPayload is the wave2 `status` request body. The contract carries
+// minimum id + participants (with ledgerUri) so the plugin can route to the
+// right ledger without a cache lookup.
+type Wave2StatusPayload struct {
+	Context  Wave2Context      `json:"context"`
+	Message  Wave2StatusMessage `json:"message"`
+}
+
+type Wave2StatusMessage struct {
+	Contract Wave2StatusContract `json:"contract"`
+}
+
+// Wave2StatusContract carries only what is needed for ledger routing.
+type Wave2StatusContract struct {
+	ID           string             `json:"id"`
+	Participants []Wave2Participant `json:"participants"`
+}
+
+// ParseStatusWave2 unmarshals a wave2 status body.
+func ParseStatusWave2(body []byte) (*Wave2StatusPayload, error) {
+	var payload Wave2StatusPayload
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse wave2 status payload: %w", err)
+	}
+	return &payload, nil
+}
+
+// ExtractWave2StatusDiscomLedgerUri returns the ledgerUri for the given side
+// from a wave2 status payload's participants array.
+func ExtractWave2StatusDiscomLedgerUri(payload *Wave2StatusPayload, side Side) string {
+	for i := range payload.Message.Contract.Participants {
+		if payload.Message.Contract.Participants[i].Role == string(side) {
+			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUri")
+		}
+	}
+	return ""
+}
+
+// DeriveSenderHostFromWave2Status returns the sender host from the status payload context.
+func DeriveSenderHostFromWave2Status(payload *Wave2StatusPayload, role string) string {
+	switch role {
+	case "BUYER":
+		return hostBase(payload.Context.BapURI)
+	case "SELLER":
+		return hostBase(payload.Context.BppURI)
+	default:
+		return ""
+	}
+}
+
+// -------------------------
+// wave2 on_status types, parsers, and performance guard
+// -------------------------
+
+// performancePayloadTypes are the columns emitted by the ledger in on_status.
+var performancePayloadTypes = map[string]bool{
+	"BUYER_DISCOM_ALLOC":   true,
+	"SELLER_DISCOM_ALLOC":  true,
+	"BUYER_DISCOM_STATUS":  true,
+	"SELLER_DISCOM_STATUS": true,
+	"FINAL_ALLOC":          true,
+}
+
+// Wave2OnStatusPayload is the wave2 `on_status` body.
+type Wave2OnStatusPayload struct {
+	Context Wave2Context      `json:"context"`
+	Message Wave2OnStatusMessage `json:"message"`
+}
+
+type Wave2OnStatusMessage struct {
+	Contract Wave2OnStatusContract `json:"contract"`
+}
+
+type Wave2OnStatusContract struct {
+	ID           string             `json:"id"`
+	Status       map[string]interface{} `json:"status"`
+	Performance  []Wave2Performance `json:"performance"`
+	Participants []Wave2Participant `json:"participants"`
+}
+
+// ParseOnStatusWave2 unmarshals a wave2 on_status body.
+func ParseOnStatusWave2(body []byte) (*Wave2OnStatusPayload, error) {
+	var payload Wave2OnStatusPayload
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse wave2 on_status payload: %w", err)
+	}
+	return &payload, nil
+}
+
+// Wave2OnStatusHasPerformanceData returns true if any performance entry contains
+// at least one non-empty value for a recognised performance payload type.
+func Wave2OnStatusHasPerformanceData(payload *Wave2OnStatusPayload) bool {
+	for _, perf := range payload.Message.Contract.Performance {
+		ts := extractPerformanceTimeseries(perf.PerformanceAttributes)
+		if ts == nil {
+			continue
+		}
+		intervals, _ := ts["intervals"].([]interface{})
+		for _, iv := range intervals {
+			m, ok := iv.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			payloads, _ := m["payloads"].([]interface{})
+			for _, p := range payloads {
+				pm, ok := p.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				typ, _ := pm["type"].(string)
+				if !performancePayloadTypes[typ] {
+					continue
+				}
+				vals, _ := pm["values"].([]interface{})
+				if len(vals) > 0 {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// ExtractWave2OnStatusDiscomLedgerUri returns ledgerUri for the given side.
+func ExtractWave2OnStatusDiscomLedgerUri(payload *Wave2OnStatusPayload, side Side) string {
+	for i := range payload.Message.Contract.Participants {
+		if payload.Message.Contract.Participants[i].Role == string(side) {
+			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUri")
+		}
+	}
+	return ""
+}
+
+// DeriveSenderHostFromWave2OnStatus returns the sender host from the on_status context.
+func DeriveSenderHostFromWave2OnStatus(payload *Wave2OnStatusPayload, role string) string {
+	switch role {
+	case "BUYER":
+		return hostBase(payload.Context.BapURI)
+	case "SELLER":
+		return hostBase(payload.Context.BppURI)
+	default:
+		return ""
+	}
+}
+
+// extractPerformanceTimeseries walks performanceAttributes to find performanceTimeseries.
+func extractPerformanceTimeseries(attrs map[string]interface{}) map[string]interface{} {
+	if attrs == nil {
+		return nil
+	}
+	ts, ok := attrs["performanceTimeseries"].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return ts
 }

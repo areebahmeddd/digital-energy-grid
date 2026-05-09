@@ -22,6 +22,7 @@ const (
 const (
 	ActionOnConfirm = "on_confirm"
 	ActionOnStatus  = "on_status"
+	ActionStatus    = "status"
 )
 
 // Supported payload shapes — selects which mapper parses the on_confirm body.
@@ -339,6 +340,7 @@ func isValidAction(action string) bool {
 	validActions := map[string]bool{
 		ActionOnConfirm: true,
 		ActionOnStatus:  true,
+		ActionStatus:    true,
 	}
 	return validActions[action]
 }

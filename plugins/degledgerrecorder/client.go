@@ -157,6 +157,159 @@ func (c *LedgerClient) PostBecknOnConfirm(ctx context.Context, baseURL string, b
 	return nil, lastErr
 }
 
+// PostBecknStatus forwards a beckn status body to <baseURL>/status. The ledger
+// TSP is expected to respond with ACK and later call back with on_status.
+func (c *LedgerClient) PostBecknStatus(ctx context.Context, baseURL string, body []byte) error {
+	if baseURL == "" {
+		return fmt.Errorf("baseURL is required for PostBecknStatus")
+	}
+	var lastErr error
+	for attempt := 0; attempt <= c.retryCount; attempt++ {
+		if attempt > 0 {
+			fmt.Printf("[DEGLedgerRecorder] Retry attempt %d/%d for beckn status\n", attempt, c.retryCount)
+		}
+		if err := c.doBecknStatusRequest(ctx, baseURL, body, attempt); err == nil {
+			return nil
+		} else {
+			lastErr = err
+		}
+		if ctx.Err() != nil {
+			return fmt.Errorf("context cancelled: %w", ctx.Err())
+		}
+		if attempt < c.retryCount {
+			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
+		}
+	}
+	return lastErr
+}
+
+// PostBecknOnStatus forwards a beckn on_status body to <baseURL>/on_status.
+// Used by the buyer-side plugin to relay performance data to the buyer ledger.
+func (c *LedgerClient) PostBecknOnStatus(ctx context.Context, baseURL string, body []byte) (*LedgerPutResponse, error) {
+	if baseURL == "" {
+		return nil, fmt.Errorf("baseURL is required for PostBecknOnStatus")
+	}
+	var lastErr error
+	for attempt := 0; attempt <= c.retryCount; attempt++ {
+		if attempt > 0 {
+			fmt.Printf("[DEGLedgerRecorder] Retry attempt %d/%d for beckn on_status\n", attempt, c.retryCount)
+		}
+		resp, err := c.doBecknOnStatusRequest(ctx, baseURL, body, attempt)
+		if err == nil {
+			return resp, nil
+		}
+		lastErr = err
+		if ctx.Err() != nil {
+			return nil, fmt.Errorf("context cancelled: %w", ctx.Err())
+		}
+		if attempt < c.retryCount {
+			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
+		}
+	}
+	return nil, lastErr
+}
+
+// doBecknStatusRequest performs a single beckn status POST and expects ACK.
+func (c *LedgerClient) doBecknStatusRequest(ctx context.Context, baseURL string, body []byte, attempt int) error {
+	requestID := uuid.New().String()[:8]
+	startTime := time.Now()
+
+	targetURL := fmt.Sprintf("%s/status", strings.TrimRight(baseURL, "/"))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, targetURL, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Request-ID", requestID)
+	c.setAuthHeader(req, body)
+	c.logSimpleRequest(requestID, req, body, "BECKN status", attempt)
+
+	resp, err := c.httpClient.Do(req)
+	duration := time.Since(startTime)
+	if err != nil {
+		c.logError(requestID, "HTTP request failed", err, duration)
+		return fmt.Errorf("ledger beckn status request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(resp.Body)
+	c.logResponse(requestID, resp, respBody, duration)
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	return nil
+}
+
+// doBecknOnStatusRequest performs a single beckn on_status POST.
+func (c *LedgerClient) doBecknOnStatusRequest(ctx context.Context, baseURL string, body []byte, attempt int) (*LedgerPutResponse, error) {
+	requestID := uuid.New().String()[:8]
+	startTime := time.Now()
+
+	targetURL := fmt.Sprintf("%s/on_status", strings.TrimRight(baseURL, "/"))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, targetURL, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Request-ID", requestID)
+	c.setAuthHeader(req, body)
+	c.logSimpleRequest(requestID, req, body, "BECKN on_status", attempt)
+
+	resp, err := c.httpClient.Do(req)
+	duration := time.Since(startTime)
+	if err != nil {
+		c.logError(requestID, "HTTP request failed", err, duration)
+		return nil, fmt.Errorf("ledger beckn on_status request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(resp.Body)
+	c.logResponse(requestID, resp, respBody, duration)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	var envelope BecknAckEnvelope
+	if err := json.Unmarshal(respBody, &envelope); err != nil {
+		// Non-fatal: ledger ACK'd but response shape unknown; return empty record.
+		return &LedgerPutResponse{}, nil
+	}
+	ledger := envelope.Message.Ledger
+	return &ledger, nil
+}
+
+// setAuthHeader applies signing or API-key auth to req, factored out so all
+// beckn request helpers share the same logic.
+func (c *LedgerClient) setAuthHeader(req *http.Request, body []byte) {
+	if c.signer != nil && c.signer.IsConfigured() {
+		if authHeader, err := c.signer.GenerateAuthHeader(body); err == nil {
+			req.Header.Set("Authorization", authHeader)
+		}
+	} else if c.apiKey != "" {
+		req.Header.Set(c.authHeader, c.apiKey)
+	}
+}
+
+// logSimpleRequest logs an outgoing beckn request with action label, used by
+// the status/on_status paths that don't have a structured request body type.
+func (c *LedgerClient) logSimpleRequest(requestID string, req *http.Request, body []byte, label string, attempt int) {
+	fmt.Println("")
+	fmt.Printf("╔═══════════════════════════════════════════════════════════════════╗\n")
+	fmt.Printf("║  DEGLedgerRecorder - OUTGOING REQUEST (%s)\n", label)
+	fmt.Printf("╠═══════════════════════════════════════════════════════════════════╣\n")
+	fmt.Printf("║ Request ID: %s  Attempt: %d/%d\n", requestID, attempt+1, c.retryCount+1)
+	fmt.Printf("║ %s %s\n", req.Method, req.URL.String())
+	fmt.Printf("╠═══════════════════════════════════════════════════════════════════╣\n")
+	var pretty bytes.Buffer
+	if err := json.Indent(&pretty, body, "║   ", "  "); err == nil {
+		for _, line := range strings.Split(pretty.String(), "\n") {
+			fmt.Printf("║   %s\n", line)
+		}
+	}
+	fmt.Printf("╚═══════════════════════════════════════════════════════════════════╝\n")
+}
+
 // doBecknOnConfirmRequest performs a single beckn on_confirm POST.
 func (c *LedgerClient) doBecknOnConfirmRequest(ctx context.Context, baseURL string, body []byte, attempt int) (*LedgerPutResponse, error) {
 	requestID := uuid.New().String()[:8]

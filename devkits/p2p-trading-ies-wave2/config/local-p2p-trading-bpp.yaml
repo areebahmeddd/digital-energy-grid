@@ -75,11 +75,27 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
+        steps:
+          - id: degledgerrecorder
+            config:
+              # Wave2: incoming status → forward to sellerDiscom ledger so the
+              # ledger can look up and return current fulfillment performance.
+              payloadShape: wave2
+              ledgerUriSource: payload
+              ledgerApi: beckn
+              role: SELLER
+              actions: status
+              enabled: "true"
+              asyncTimeout: "30000"
+              signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
+              networkParticipant: bpp.example.com
+              keyId: 76EU7ofwRCF1aobQkShARrf1PAUsNpHqWUJoynPu9w45YFKmzqaPmy
       steps:
         - validateSign
         - checkPolicy
         - addRoute
         - validateSchema
+        - degledgerrecorder
 
   - name: bppTxnCaller
     path: /bpp/caller/
@@ -144,11 +160,6 @@ modules:
               actions: "on_status"
               debugLogging: "true"
               allowedDomains: "raw.githubusercontent.com"
-              # Wave2 writes rego output to a Beckn-native Consideration entry
-              # (idempotent on retry via the [id=auto-revenue-flows] selector).
-              # The considerationAttributes block carries a JSON-LD-wrapped
-              # RevenueFlow object the extended-schema validator picks up via
-              # @context.
               outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
@@ -158,16 +169,15 @@ modules:
         steps:
           - id: degledgerrecorder
             config:
-              # Wave2 (P2PTrade/v2.0) on_confirm shape; ledger URL is read
-              # per-call from the payload's sellerDiscom participantAttributes.
+              # Wave2: on_confirm → one ledger record per interval; ledger URL
+              # read from sellerDiscom participantAttributes.
               payloadShape: wave2
               ledgerUriSource: payload
-              ledgerApi: legacy_ledger
+              ledgerApi: beckn
               role: SELLER
               actions: on_confirm
               enabled: "true"
               asyncTimeout: "30000"
-              # Signing config (same keys as simplekeymanager)
               signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
               networkParticipant: bpp.example.com
               keyId: 76EU7ofwRCF1aobQkShARrf1PAUsNpHqWUJoynPu9w45YFKmzqaPmy

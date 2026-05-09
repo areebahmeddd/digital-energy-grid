@@ -197,17 +197,17 @@
               "payloadDescriptors": [
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "BUYER_ALLOCATION",
+                  "payloadType": "BUYER_DISCOM_ALLOC",
                   "units": "KWH"
                 },
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "SELLER_INJECTION",
+                  "payloadType": "SELLER_DISCOM_ALLOC",
                   "units": "KWH"
                 },
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "SETTLED_QTY",
+                  "payloadType": "FINAL_ALLOC",
                   "units": "KWH"
                 }
               ],
@@ -216,19 +216,19 @@
                   "id": 0,
                   "payloads": [
                     {
-                      "type": "BUYER_ALLOCATION",
+                      "type": "BUYER_DISCOM_ALLOC",
                       "values": [
                         18.5
                       ]
                     },
                     {
-                      "type": "SELLER_INJECTION",
+                      "type": "SELLER_DISCOM_ALLOC",
                       "values": [
                         19.2
                       ]
                     },
                     {
-                      "type": "SETTLED_QTY",
+                      "type": "FINAL_ALLOC",
                       "values": [
                         18.5
                       ]
@@ -239,19 +239,19 @@
                   "id": 1,
                   "payloads": [
                     {
-                      "type": "BUYER_ALLOCATION",
+                      "type": "BUYER_DISCOM_ALLOC",
                       "values": [
                         14.2
                       ]
                     },
                     {
-                      "type": "SELLER_INJECTION",
+                      "type": "SELLER_DISCOM_ALLOC",
                       "values": [
                         14.7
                       ]
                     },
                     {
-                      "type": "SETTLED_QTY",
+                      "type": "FINAL_ALLOC",
                       "values": [
                         14.2
                       ]
@@ -319,7 +319,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "BRPL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://beckn-router:9000/ledger"
           }
         },
         {
@@ -329,7 +329,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TPDDL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://beckn-router:9000/ledger"
           }
         }
       ]
