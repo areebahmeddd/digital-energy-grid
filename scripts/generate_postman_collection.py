@@ -153,11 +153,17 @@ DEVKIT_CONFIGS = {
         "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bpp_receiver_url": "http://localhost:8082/bpp/receiver",
         "ledger_adapter_url": "http://localhost:8083/ledger/caller",
         "ledger_host_buyer": "http://beckn-router:9000",
         "ledger_host_seller": "http://beckn-router:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
-        "structure": "flat"
+        "usecase": "uc1",
+        "structure": "flat",
+        # Actions that hit the BPP receiver directly rather than the BPP caller.
+        # Used when the BPP collection needs to include BAP-initiated actions for
+        # round-trip testing (e.g. status triggers degledgerrecorder on bpp/receiver).
+        "bpp_receiver_actions": ["status"],
     },
     "data-exchange-uc1-meter-data": {
         "domain": "nfh.global/testnet-deg",
@@ -194,7 +200,8 @@ ROLE_FILTERS = {
         r"^(?!cascaded-).*-response.*\.json$",  # P2P trading/enrollment: *-response*.json (excludes cascaded-)
         r"^\d+_on_(discover|select|init|confirm|update|track|status|rating|support|cancel).*\.json$",  # EV charging: on_* folders
         r"^on[-_](discover|select|init|confirm|update|track|status|rating|support|cancel).*\.json$",  # General pattern (on- or on_)
-        r"^publish-.*\.json$"  # BPP-initiated publish action to CDS
+        r"^publish-.*\.json$",  # BPP-initiated publish action to CDS
+        r"^status-request.*\.json$",  # BAP-initiated status included for BPP round-trip testing
     ],
     "UtilityBPP": [
         r"^cascaded-.*\.json$"  # Cascaded requests/responses
@@ -216,8 +223,11 @@ BAP_ACTIONS = {
 }
 
 # BPP-initiated actions (not callbacks, but BPP initiating requests to CDS, etc.)
+# Also includes BAP-originated actions that BPP devkits include for round-trip testing
+# (e.g. status → hits bpp/receiver to trigger degledgerrecorder).
 BPP_INITIATED_ACTIONS = {
     "publish": "publish",
+    "status": "status",
 }
 
 # BPP response actions
@@ -349,11 +359,20 @@ def extract_action_from_filename(filename: str, role: str) -> Optional[str]:
     
     elif role == "BPP":
         # BPP matches *-response*.json (not *-request*.json) AND publish-*.json
+        # AND *-request*.json whose action is in BPP_INITIATED_ACTIONS (e.g. status-request.json)
         # Patterns: action-response, on-action-response, action-response-suffix, publish-*
 
         # First check for BPP-initiated actions (like publish-catalog.json)
         if name.startswith('publish-'):
             match = re.match(r'^(publish)-', name, re.IGNORECASE)
+            if match:
+                action = match.group(1).lower()
+                if action in BPP_INITIATED_ACTIONS:
+                    return action
+
+        # Check for request files whose action is in BPP_INITIATED_ACTIONS (e.g. status-request.json)
+        if '-request' in name and '-response' not in name:
+            match = re.match(r'^([a-z]+)-request', name, re.IGNORECASE)
             if match:
                 action = match.group(1).lower()
                 if action in BPP_INITIATED_ACTIONS:
@@ -713,6 +732,11 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
         variables.append({"key": "bpp_adapter_url", "value": config["bpp_adapter_url"]})
         variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
 
+    # BPP receiver URL (separate from bpp_adapter_url/caller; used for actions like status
+    # that hit bpp/receiver directly for round-trip testing)
+    if "bpp_receiver_url" in config and role == "BPP":
+        variables.append({"key": "bpp_receiver_url", "value": config["bpp_receiver_url"]})
+
     # Ledger host variables (wave2 and other devkits that route through a separate ledger)
     if "ledger_host_buyer" in config:
         variables.append({"key": "ledger_host_buyer", "value": config["ledger_host_buyer"]})
@@ -815,9 +839,17 @@ def generate_collection(
             if json_data is None:
                 continue
             
+            # Use bpp_receiver_url for actions that hit the BPP receiver directly
+            bpp_receiver_actions = config.get("bpp_receiver_actions", [])
+            effective_adapter_var = (
+                "bpp_receiver_url"
+                if (role == "BPP" and action in bpp_receiver_actions and "bpp_receiver_url" in config)
+                else adapter_url_var
+            )
+
             # Create Postman request
             request = create_postman_request(
-                json_data, action, endpoint, request_name, role, adapter_url_var, host_root_style,
+                json_data, action, endpoint, request_name, role, effective_adapter_var, host_root_style,
                 ledger_host_buyer=config.get("ledger_host_buyer"),
                 ledger_host_seller=config.get("ledger_host_seller"),
             )
@@ -898,10 +930,18 @@ def main():
         help="Output directory for Postman collection (required)"
     )
     parser.add_argument(
+        "--usecase",
+        type=str,
+        default=None,
+        dest="usecase",
+        help="Use-case identifier (e.g. uc1). When set, collection name becomes "
+             "<devkit>-<usecase>.<role>-DEG. Overrides the devkit config default if any."
+    )
+    parser.add_argument(
         "--name",
         type=str,
         default=None,
-        help="Collection name (default: auto-generated from devkit and role)"
+        help="Explicit collection name (overrides --usecase auto-generation)"
     )
     parser.add_argument(
         "--description",
@@ -950,10 +990,14 @@ def main():
     examples_dir = repo_root_dir / (args.examples or config["examples_path"])
     
     # Generate collection name if not provided
-    if args.name is None:
-        collection_name = f"{args.devkit}.{args.role}-DEG"
-    else:
+    if args.name is not None:
         collection_name = args.name
+    else:
+        usecase = args.usecase or config.get("usecase")
+        if usecase:
+            collection_name = f"{args.devkit}-{usecase}.{args.role}-DEG"
+        else:
+            collection_name = f"{args.devkit}.{args.role}-DEG"
     
     # Construct output filename from collection name
     filename = f"{collection_name}.postman_collection.json"

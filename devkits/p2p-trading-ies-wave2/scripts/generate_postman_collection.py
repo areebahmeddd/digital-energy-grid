@@ -49,8 +49,8 @@ cmd = [
     sys.executable, str(TOP_LEVEL_SCRIPT),
     "--devkit", "p2p-trading-ies-wave2",
     "--role", ROLE,
+    "--usecase", usecase,
     "--output-dir", output_dir,
-    "--name", f"p2p-trading-ies-wave2-{usecase}.{ROLE}-DEG",
     "--no-validate",
 ]
 if LEDGER_HOST_BUYER:
