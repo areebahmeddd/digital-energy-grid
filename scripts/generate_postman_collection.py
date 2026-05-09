@@ -153,6 +153,9 @@ DEVKIT_CONFIGS = {
         "bpp_host_root": "http://beckn-router:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "ledger_adapter_url": "http://localhost:8083/ledger/caller",
+        "ledger_host_buyer": "http://beckn-router:9000",
+        "ledger_host_seller": "http://beckn-router:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
         "structure": "flat"
     },
@@ -514,6 +517,38 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) 
     return result
 
 
+def replace_ledger_uri_macros(
+    data: Any,
+    buyer_var: str = "ledger_host_buyer",
+    seller_var: str = "ledger_host_seller",
+) -> Any:
+    """Replace ledgerUri in participants with {{ledger_host_buyer|seller}}/ledger/receiver."""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key == "participants" and isinstance(value, list):
+                new_parts = []
+                for participant in value:
+                    p = dict(participant)
+                    role = p.get("role", "")
+                    attrs = p.get("participantAttributes")
+                    if isinstance(attrs, dict) and "ledgerUri" in attrs:
+                        attrs = dict(attrs)
+                        if role == "buyerDiscom":
+                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}/ledger/receiver"
+                        elif role == "sellerDiscom":
+                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}/ledger/receiver"
+                        p["participantAttributes"] = attrs
+                    new_parts.append(p)
+                result[key] = new_parts
+            else:
+                result[key] = replace_ledger_uri_macros(value, buyer_var, seller_var)
+        return result
+    elif isinstance(data, list):
+        return [replace_ledger_uri_macros(item, buyer_var, seller_var) for item in data]
+    return data
+
+
 def create_postman_request(
     json_data: Dict[str, Any],
     action: str,
@@ -521,7 +556,9 @@ def create_postman_request(
     request_name: str,
     role: str,
     adapter_url_var: str,
-    host_root_style: bool = False
+    host_root_style: bool = False,
+    ledger_host_buyer: Optional[str] = None,
+    ledger_host_seller: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Create a Postman request object from JSON data.
@@ -534,9 +571,13 @@ def create_postman_request(
         role: Role (BAP, BPP, UtilityBPP)
         adapter_url_var: Variable name for adapter URL (e.g., "bap_adapter_url")
         host_root_style: Template bapUri/bppUri as {{bap_host_root}}/bap/receiver
+        ledger_host_buyer: Override for buyer ledger host (uses config default if None)
+        ledger_host_seller: Override for seller ledger host (uses config default if None)
     """
     # Replace macros in the JSON
     request_body = replace_context_macros(json_data, host_root_style)
+    if ledger_host_buyer is not None or ledger_host_seller is not None:
+        request_body = replace_ledger_uri_macros(request_body)
 
     # Format JSON, preserving the same compact-array formatting used in the
     # example payloads on disk: each item of a small repetitive array (intervals,
@@ -671,7 +712,15 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     elif role == "UtilityBPP":
         variables.append({"key": "bpp_adapter_url", "value": config["bpp_adapter_url"]})
         variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
-    
+
+    # Ledger host variables (wave2 and other devkits that route through a separate ledger)
+    if "ledger_host_buyer" in config:
+        variables.append({"key": "ledger_host_buyer", "value": config["ledger_host_buyer"]})
+    if "ledger_host_seller" in config:
+        variables.append({"key": "ledger_host_seller", "value": config["ledger_host_seller"]})
+    if "ledger_adapter_url" in config:
+        variables.append({"key": "ledger_adapter_url", "value": config["ledger_adapter_url"]})
+
     return variables
 
 
@@ -681,11 +730,13 @@ def generate_collection(
     devkit: str,
     role: str,
     collection_name: Optional[str] = None,
-    collection_description: Optional[str] = None
+    collection_description: Optional[str] = None,
+    ledger_host_buyer: Optional[str] = None,
+    ledger_host_seller: Optional[str] = None,
 ) -> None:
     """
     Generate Postman collection from examples.
-    
+
     Args:
         examples_dir: Path to examples directory
         output_path: Output path for collection
@@ -693,8 +744,14 @@ def generate_collection(
         role: "BAP", "BPP", or "UtilityBPP"
         collection_name: Optional collection name (auto-generated if None)
         collection_description: Optional description (auto-generated if None)
+        ledger_host_buyer: Override buyer discom ledger host (e.g. http://beckn-router:9000)
+        ledger_host_seller: Override seller discom ledger host
     """
-    config = DEVKIT_CONFIGS[devkit]
+    config = dict(DEVKIT_CONFIGS[devkit])  # shallow copy so overrides don't mutate global
+    if ledger_host_buyer is not None:
+        config["ledger_host_buyer"] = ledger_host_buyer
+    if ledger_host_seller is not None:
+        config["ledger_host_seller"] = ledger_host_seller
     structure = config["structure"]
     host_root_style = "bap_host_root" in config
 
@@ -760,7 +817,9 @@ def generate_collection(
             
             # Create Postman request
             request = create_postman_request(
-                json_data, action, endpoint, request_name, role, adapter_url_var, host_root_style
+                json_data, action, endpoint, request_name, role, adapter_url_var, host_root_style,
+                ledger_host_buyer=config.get("ledger_host_buyer"),
+                ledger_host_seller=config.get("ledger_host_seller"),
             )
             action_items.append(request)
         
@@ -862,7 +921,23 @@ def main():
         action="store_false",
         help="Skip schema validation"
     )
-    
+    parser.add_argument(
+        "--ledger-host-buyer",
+        type=str,
+        default=None,
+        dest="ledger_host_buyer",
+        help="Buyer discom ledger host root, e.g. http://beckn-router:9000 "
+             "(default: devkit config value; sets {{ledger_host_buyer}} collection variable)"
+    )
+    parser.add_argument(
+        "--ledger-host-seller",
+        type=str,
+        default=None,
+        dest="ledger_host_seller",
+        help="Seller discom ledger host root, e.g. http://beckn-router:9000 "
+             "(default: devkit config value; sets {{ledger_host_seller}} collection variable)"
+    )
+
     args = parser.parse_args()
     
     # Get devkit configuration
@@ -896,7 +971,9 @@ def main():
         devkit=args.devkit,
         role=args.role,
         collection_name=collection_name,
-        collection_description=args.description
+        collection_description=args.description,
+        ledger_host_buyer=args.ledger_host_buyer,
+        ledger_host_seller=args.ledger_host_seller,
     )
     
     # Validate collection if requested
