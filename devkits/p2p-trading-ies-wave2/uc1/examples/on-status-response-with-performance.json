@@ -3,10 +3,10 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "bapId": "bpp.example.com",
-    "bapUri": "http://beckn-router:9000/bpp",
-    "bppId": "seller-discom-ledger",
-    "bppUri": "http://beckn-router:9000/ledger",
+    "bapId": "bap.example.com",
+    "bapUri": "http://beckn-router:9000/bap/receiver",
+    "bppId": "bpp.example.com",
+    "bppUri": "http://beckn-router:9000/bpp/caller",
     "transactionId": "txn-p2p-001",
     "messageId": "msg-on-status-perf-001",
     "timestamp": "2026-04-26T06:30:00Z",
@@ -22,6 +22,23 @@
     "contract": {
       "id": "contract-p2p-001",
       "status": { "code": "ACTIVE" },
+      "commitments": [
+        { "id": "commitment-p2p-001", "status": { "descriptor": { "code": "ACTIVE" } }, "resources": [ { "id": "energy-resource-solar-001", "quantity": { "@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35 } } ], "offer": { "id": "offer-p2p-001", "resourceIds": ["energy-resource-solar-001"] } }
+      ],
+      "contractAttributes": {
+        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@type": "DEGContract",
+        "roles": [
+          {"role": "buyer", "participantId": "BRPL-DL-buyer-001"},
+          {"role": "seller", "participantId": "TPDDL-DL-seller-001"},
+          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger"}
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+          "queryPath": "data.deg.contracts.p2p_trading"
+        }
+      },
       "performance": [
         {
           "id": "perf-p2p-001",
@@ -80,7 +97,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "BRPL-DL",
-            "ledgerUri": "http://beckn-router:9000/ledger"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
         {
@@ -90,7 +107,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TPDDL-DL",
-            "ledgerUri": "http://beckn-router:9000/ledger"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }
       ]

@@ -143,7 +143,7 @@ services:
       retries: 5
 
   onix-ledger:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v2
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-ledger
     ports:
       - "8083:8083"
@@ -172,7 +172,7 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - ../ledger-fixtures:/app/src/webhook/jsons/beckn.one.deg.p2p-trading/response/ledger
+      - ../ledger-fixtures:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3003/api/health"]
       interval: 10s

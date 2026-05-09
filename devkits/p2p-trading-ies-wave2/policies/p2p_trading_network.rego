@@ -31,12 +31,12 @@
 #
 # ── performance validation (on_status with performanceTimeseries) ──
 #
-# P1.  payloadTypes declared: BUYER_ALLOCATION, SELLER_INJECTION, SETTLED_QTY.
+# P1.  payloadTypes declared: BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC, FINAL_ALLOC.
 # P2.  Performance qty units: all three types must carry units: KWH.
 # P3.  Interval coverage: performance interval ids must be a subset of seller
 #      offer interval ids.
-# P4.  Settlement consistency: SETTLED_QTY ≤ min(BUYER_ALLOCATION,
-#      SELLER_INJECTION) per interval.
+# P4.  Settlement consistency: FINAL_ALLOC ≤ min(BUYER_DISCOM_ALLOC,
+#      SELLER_DISCOM_ALLOC) per interval.
 #
 # ── TEST / PROD separation ──
 #
@@ -291,24 +291,24 @@ _perf_ts := _contract.performance[0].performanceAttributes.performanceTimeseries
 
 _perf_interval_ids := {i.id | some i in _perf_ts.intervals}
 
-_performance_violations contains "performance timeseries payloadDescriptors must include BUYER_ALLOCATION" if {
+_performance_violations contains "performance timeseries payloadDescriptors must include BUYER_DISCOM_ALLOC" if {
 	_perf_ts
-	not "BUYER_ALLOCATION" in _ts_types(_perf_ts)
+	not "BUYER_DISCOM_ALLOC" in _ts_types(_perf_ts)
 }
 
-_performance_violations contains "performance timeseries payloadDescriptors must include SELLER_INJECTION" if {
+_performance_violations contains "performance timeseries payloadDescriptors must include SELLER_DISCOM_ALLOC" if {
 	_perf_ts
-	not "SELLER_INJECTION" in _ts_types(_perf_ts)
+	not "SELLER_DISCOM_ALLOC" in _ts_types(_perf_ts)
 }
 
-_performance_violations contains "performance timeseries payloadDescriptors must include SETTLED_QTY" if {
+_performance_violations contains "performance timeseries payloadDescriptors must include FINAL_ALLOC" if {
 	_perf_ts
-	not "SETTLED_QTY" in _ts_types(_perf_ts)
+	not "FINAL_ALLOC" in _ts_types(_perf_ts)
 }
 
 _performance_violations contains msg if {
 	_perf_ts
-	some ptype in {"BUYER_ALLOCATION", "SELLER_INJECTION", "SETTLED_QTY"}
+	some ptype in {"BUYER_DISCOM_ALLOC", "SELLER_DISCOM_ALLOC", "FINAL_ALLOC"}
 	ptype in _ts_types(_perf_ts)
 	u := _ts_units(_perf_ts, ptype)
 	u != "KWH"
@@ -329,14 +329,14 @@ _performance_violations contains msg if {
 _performance_violations contains msg if {
 	_perf_ts
 	some pi in _perf_ts.intervals
-	settled := _payload_val(pi, "SETTLED_QTY")
-	buyer_alloc := _payload_val(pi, "BUYER_ALLOCATION")
-	seller_inj := _payload_val(pi, "SELLER_INJECTION")
-	min_alloc := min({buyer_alloc, seller_inj})
-	settled > min_alloc
+	final_alloc := _payload_val(pi, "FINAL_ALLOC")
+	buyer_alloc := _payload_val(pi, "BUYER_DISCOM_ALLOC")
+	seller_alloc := _payload_val(pi, "SELLER_DISCOM_ALLOC")
+	min_alloc := min({buyer_alloc, seller_alloc})
+	final_alloc > min_alloc
 	msg := sprintf(
-		"performance interval %v: SETTLED_QTY %v > min(BUYER_ALLOCATION %v, SELLER_INJECTION %v)",
-		[pi.id, settled, buyer_alloc, seller_inj],
+		"performance interval %v: FINAL_ALLOC %v > min(BUYER_DISCOM_ALLOC %v, SELLER_DISCOM_ALLOC %v)",
+		[pi.id, final_alloc, buyer_alloc, seller_alloc],
 	)
 }
 

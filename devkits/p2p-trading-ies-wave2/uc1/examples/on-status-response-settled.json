@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "action": "on_status",
     "bapId": "bap.example.com",
-    "bapUri": "https://bap.example.com/beckn",
+    "bapUri": "http://beckn-router:9000/bap/receiver",
     "bppId": "bpp.example.com",
-    "bppUri": "https://bpp.example.com/beckn",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
     "transactionId": "txn-p2p-001",
     "messageId": "msg-on-status-settled-001",
     "timestamp": "2026-04-26T06:30:00Z",
@@ -319,7 +319,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "BRPL-DL",
-            "ledgerUri": "http://beckn-router:9000/ledger"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
         {
@@ -329,7 +329,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TPDDL-DL",
-            "ledgerUri": "http://beckn-router:9000/ledger"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }
       ]
