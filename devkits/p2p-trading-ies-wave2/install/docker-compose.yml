@@ -169,6 +169,9 @@ services:
       - NODE_ENV=production
       - PORT=3003
       - PERSONA=ledger
+      # Route on_status callback through onix-ledger's caller so it is signed
+      # with the ledger identity before being forwarded to the BAP receiver.
+      - BPP_CALLBACK_ENDPOINT=http://onix-ledger:8083/ledger/caller
     ports:
       - "3003:3003"
     volumes:
