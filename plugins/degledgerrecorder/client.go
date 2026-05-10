@@ -301,12 +301,7 @@ func (c *LedgerClient) logSimpleRequest(requestID string, req *http.Request, bod
 	fmt.Printf("║ Request ID: %s  Attempt: %d/%d\n", requestID, attempt+1, c.retryCount+1)
 	fmt.Printf("║ %s %s\n", req.Method, req.URL.String())
 	fmt.Printf("╠═══════════════════════════════════════════════════════════════════╣\n")
-	var pretty bytes.Buffer
-	if err := json.Indent(&pretty, body, "║   ", "  "); err == nil {
-		for _, line := range strings.Split(pretty.String(), "\n") {
-			fmt.Printf("║   %s\n", line)
-		}
-	}
+	fmt.Printf("║   %s\n", string(body))
 	fmt.Printf("╚═══════════════════════════════════════════════════════════════════╝\n")
 }
 
@@ -407,14 +402,7 @@ func (c *LedgerClient) logBecknRequest(requestID string, req *http.Request, body
 	}
 	fmt.Println("╠════════════════════════════════════════════════════════════════════╣")
 	fmt.Println("║ REQUEST BODY (JSON):")
-	var pretty bytes.Buffer
-	if err := json.Indent(&pretty, body, "║   ", "  "); err == nil {
-		for _, line := range strings.Split(pretty.String(), "\n") {
-			fmt.Printf("║   %s\n", line)
-		}
-	} else {
-		fmt.Printf("║   %s\n", string(body))
-	}
+	fmt.Printf("║   %s\n", string(body))
 	fmt.Println("╚════════════════════════════════════════════════════════════════════╝")
 }
 
@@ -659,15 +647,11 @@ func (c *LedgerClient) logRequest(requestID string, req *http.Request, record Le
 	fmt.Println("╠════════════════════════════════════════════════════════════════════╣")
 	fmt.Println("║ REQUEST BODY (JSON):")
 
-	// Pretty print the request body
-	prettyBody, err := json.MarshalIndent(record, "║   ", "  ")
+	compactBody, err := json.Marshal(record)
 	if err != nil {
 		fmt.Printf("║   (error formatting body: %v)\n", err)
 	} else {
-		lines := strings.Split(string(prettyBody), "\n")
-		for _, line := range lines {
-			fmt.Printf("║   %s\n", line)
-		}
+		fmt.Printf("║   %s\n", string(compactBody))
 	}
 	fmt.Println("╚════════════════════════════════════════════════════════════════════╝")
 }
@@ -710,15 +694,11 @@ func (c *LedgerClient) logRecordRequest(requestID string, req *http.Request, rec
 	fmt.Println("╠════════════════════════════════════════════════════════════════════╣")
 	fmt.Println("║ REQUEST BODY (JSON):")
 
-	// Pretty print the request body
-	prettyBody, err := json.MarshalIndent(record, "║   ", "  ")
+	compactBody, err := json.Marshal(record)
 	if err != nil {
 		fmt.Printf("║   (error formatting body: %v)\n", err)
 	} else {
-		lines := strings.Split(string(prettyBody), "\n")
-		for _, line := range lines {
-			fmt.Printf("║   %s\n", line)
-		}
+		fmt.Printf("║   %s\n", string(compactBody))
 	}
 	fmt.Println("╚════════════════════════════════════════════════════════════════════╝")
 }
@@ -753,21 +733,11 @@ func (c *LedgerClient) logResponse(requestID string, resp *http.Response, body [
 	fmt.Println("╠════════════════════════════════════════════════════════════════════╣")
 	fmt.Println("║ RESPONSE BODY:")
 
-	// Try to pretty print JSON, fall back to raw if not valid JSON
-	var prettyBody bytes.Buffer
-	if err := json.Indent(&prettyBody, body, "║   ", "  "); err == nil {
-		lines := strings.Split(prettyBody.String(), "\n")
-		for _, line := range lines {
-			fmt.Printf("║   %s\n", line)
-		}
-	} else {
-		// Not JSON or invalid JSON, print raw (truncated if too long)
-		bodyStr := string(body)
-		if len(bodyStr) > 2000 {
-			bodyStr = bodyStr[:2000] + "... (truncated)"
-		}
-		fmt.Printf("║   %s\n", bodyStr)
+	bodyStr := string(body)
+	if len(bodyStr) > 2000 {
+		bodyStr = bodyStr[:2000] + "... (truncated)"
 	}
+	fmt.Printf("║   %s\n", bodyStr)
 	fmt.Println("╚════════════════════════════════════════════════════════════════════╝")
 }
 
