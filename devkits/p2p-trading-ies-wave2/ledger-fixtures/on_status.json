@@ -60,8 +60,8 @@
                 { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "FINAL_ALLOC", "units": "KWH" }
               ],
               "intervals": [
-                { "id": 0, "payloads": [{ "type": "BUYER_DISCOM_ALLOC", "values": [18.5] }, { "type": "SELLER_DISCOM_ALLOC", "values": [19.2] }, { "type": "BUYER_DISCOM_STATUS", "values": ["APPROVED"] }, { "type": "SELLER_DISCOM_STATUS", "values": ["APPROVED"] }, { "type": "FINAL_ALLOC", "values": [18.5] }] },
-                { "id": 1, "payloads": [{ "type": "BUYER_DISCOM_ALLOC", "values": [14.2] }, { "type": "SELLER_DISCOM_ALLOC", "values": [14.7] }, { "type": "BUYER_DISCOM_STATUS", "values": ["APPROVED"] }, { "type": "SELLER_DISCOM_STATUS", "values": ["APPROVED"] }, { "type": "FINAL_ALLOC", "values": [14.2] }] }
+                { "id": 0, "payloads": [{ "type": "BUYER_DISCOM_ALLOC", "values": [18.5] }, { "type": "SELLER_DISCOM_ALLOC", "values": [19.2] }, { "type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"] }, { "type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"] }, { "type": "FINAL_ALLOC", "values": [18.5] }] },
+                { "id": 1, "payloads": [{ "type": "BUYER_DISCOM_ALLOC", "values": [14.2] }, { "type": "SELLER_DISCOM_ALLOC", "values": [14.7] }, { "type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"] }, { "type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"] }, { "type": "FINAL_ALLOC", "values": [14.2] }] }
               ]
             }
           }
