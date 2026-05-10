@@ -29,8 +29,8 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {"role": "buyer", "participantId": "BRPL-DL-buyer-001"},
-          {"role": "seller", "participantId": "TPDDL-DL-seller-001"},
+          {"role": "buyer", "participantId": "TEST_BUYER_001"},
+          {"role": "seller", "participantId": "TEST_SELLER_001"},
           {"role": "buyerDiscom", "participantId": "buyer-discom-ledger"},
           {"role": "sellerDiscom", "participantId": "seller-discom-ledger"}
         ],
@@ -70,24 +70,24 @@
       "participants": [
         {
           "role": "seller",
-          "participantId": "TPDDL-DL-seller-001",
+          "participantId": "TEST_SELLER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/seller-001",
-            "utilityId": "TPDDL-DL",
-            "utilityCustomerId": "TPDDL-CUST-S-001"
+            "meterId": "TEST_METER_SELLER_001",
+            "utilityId": "TEST_DISCOM_SELLER",
+            "utilityCustomerId": "TEST_CUST_SELLER_001"
           }
         },
         {
           "role": "buyer",
-          "participantId": "BRPL-DL-buyer-001",
+          "participantId": "TEST_BUYER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/buyer-001",
-            "utilityId": "BRPL-DL",
-            "utilityCustomerId": "BRPL-CUST-B-001"
+            "meterId": "TEST_METER_BUYER_001",
+            "utilityId": "TEST_DISCOM_BUYER",
+            "utilityCustomerId": "TEST_CUST_BUYER_001"
           }
         },
         {
@@ -96,7 +96,7 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "BRPL-DL",
+            "utilityId": "TEST_DISCOM_BUYER",
             "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
@@ -106,7 +106,7 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "TPDDL-DL",
+            "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }

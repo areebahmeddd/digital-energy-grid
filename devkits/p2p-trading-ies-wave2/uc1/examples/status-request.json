@@ -34,7 +34,7 @@
               "id": "energy-resource-solar-001",
               "descriptor": {"name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"},
               "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35},
-              "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "sourceType": "SOLAR", "meterId": "der://meter/seller-001"}
+              "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "sourceType": "SOLAR", "meterId": "TEST_METER_SELLER_001"}
             }
           ],
           "offer": {
@@ -44,8 +44,8 @@
               "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "inputs": [
-                {"role": "seller", "participantId": "TPDDL-DL-seller-001", "inputs": {"currency": "INR", "sourceType": "SOLAR", "offerTimeseries": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"}, {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "AVAILABLE_QTY", "units": "KWH"}], "intervals": [{"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12]}, {"type": "AVAILABLE_QTY", "values": [30]}]}, {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14]}, {"type": "AVAILABLE_QTY", "values": [25]}]}]}}},
-                {"role": "buyer", "participantId": "BRPL-DL-buyer-001", "inputs": {"sourceType": "GRID", "bidTimeseries": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"}], "intervals": [{"id": 0, "payloads": [{"type": "REQUESTED_QTY", "values": [20]}]}, {"id": 1, "payloads": [{"type": "REQUESTED_QTY", "values": [15]}]}]}}}
+                {"role": "seller", "participantId": "TEST_SELLER_001", "inputs": {"currency": "INR", "sourceType": "SOLAR", "offerTimeseries": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"}, {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "AVAILABLE_QTY", "units": "KWH"}], "intervals": [{"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12]}, {"type": "AVAILABLE_QTY", "values": [30]}]}, {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14]}, {"type": "AVAILABLE_QTY", "values": [25]}]}]}}},
+                {"role": "buyer", "participantId": "TEST_BUYER_001", "inputs": {"sourceType": "GRID", "bidTimeseries": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"}], "intervals": [{"id": 0, "payloads": [{"type": "REQUESTED_QTY", "values": [20]}]}, {"id": 1, "payloads": [{"type": "REQUESTED_QTY", "values": [15]}]}]}}}
               ]
             }
           }
@@ -55,8 +55,8 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {"role": "buyer", "participantId": "BRPL-DL-buyer-001"},
-          {"role": "seller", "participantId": "TPDDL-DL-seller-001"},
+          {"role": "buyer", "participantId": "TEST_BUYER_001"},
+          {"role": "seller", "participantId": "TEST_SELLER_001"},
           {"role": "buyerDiscom", "participantId": "buyer-discom-ledger"},
           {"role": "sellerDiscom", "participantId": "seller-discom-ledger"}
         ],
@@ -68,24 +68,24 @@
       "participants": [
         {
           "role": "seller",
-          "participantId": "TPDDL-DL-seller-001",
+          "participantId": "TEST_SELLER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/seller-001",
-            "utilityId": "TPDDL-DL",
-            "utilityCustomerId": "TPDDL-CUST-S-001"
+            "meterId": "TEST_METER_SELLER_001",
+            "utilityId": "TEST_DISCOM_SELLER",
+            "utilityCustomerId": "TEST_CUST_SELLER_001"
           }
         },
         {
           "role": "buyer",
-          "participantId": "BRPL-DL-buyer-001",
+          "participantId": "TEST_BUYER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/buyer-001",
-            "utilityId": "BRPL-DL",
-            "utilityCustomerId": "BRPL-CUST-B-001"
+            "meterId": "TEST_METER_BUYER_001",
+            "utilityId": "TEST_DISCOM_BUYER",
+            "utilityCustomerId": "TEST_CUST_BUYER_001"
           }
         },
         {
@@ -94,7 +94,7 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "BRPL-DL",
+            "utilityId": "TEST_DISCOM_BUYER",
             "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
@@ -104,7 +104,7 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "TPDDL-DL",
+            "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }

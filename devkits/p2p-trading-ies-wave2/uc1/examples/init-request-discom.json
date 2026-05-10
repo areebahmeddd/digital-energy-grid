@@ -60,7 +60,7 @@
             "@context": "https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld",
             "@type": "DiscomLimitCheck",
             "subject": "buyer",
-            "subjectMeterId": "der://meter/buyer-001",
+            "subjectMeterId": "TEST_METER_BUYER_001",
             "discomParticipantId": "buyer-discom-ledger",
             "deliveryWindow": {
               "@type": "beckn:TimePeriod",
