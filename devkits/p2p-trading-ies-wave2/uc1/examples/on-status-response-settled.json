@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "action": "on_status",
     "bapId": "bap.example.com",
-    "bapUri": "https://bap.example.com/beckn",
+    "bapUri": "http://beckn-router:9000/bap/receiver",
     "bppId": "bpp.example.com",
-    "bppUri": "https://bpp.example.com/beckn",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
     "transactionId": "txn-p2p-001",
     "messageId": "msg-on-status-settled-001",
     "timestamp": "2026-04-26T06:30:00Z",
@@ -47,7 +47,7 @@
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
                 "sourceType": "SOLAR",
-                "meterId": "der://meter/seller-001"
+                "meterId": "TEST_METER_SELLER_001"
               }
             }
           ],
@@ -62,7 +62,7 @@
               "inputs": [
                 {
                   "role": "seller",
-                  "participantId": "TPDDL-DL-seller-001",
+                  "participantId": "TEST_SELLER_001",
                   "inputs": {
                     "currency": "INR",
                     "sourceType": "SOLAR",
@@ -125,7 +125,7 @@
                 },
                 {
                   "role": "buyer",
-                  "participantId": "BRPL-DL-buyer-001",
+                  "participantId": "TEST_BUYER_001",
                   "inputs": {
                     "sourceType": "GRID",
                     "bidTimeseries": {
@@ -197,17 +197,17 @@
               "payloadDescriptors": [
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "BUYER_ALLOCATION",
+                  "payloadType": "BUYER_DISCOM_ALLOC",
                   "units": "KWH"
                 },
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "SELLER_INJECTION",
+                  "payloadType": "SELLER_DISCOM_ALLOC",
                   "units": "KWH"
                 },
                 {
                   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                  "payloadType": "SETTLED_QTY",
+                  "payloadType": "FINAL_ALLOC",
                   "units": "KWH"
                 }
               ],
@@ -216,19 +216,19 @@
                   "id": 0,
                   "payloads": [
                     {
-                      "type": "BUYER_ALLOCATION",
+                      "type": "BUYER_DISCOM_ALLOC",
                       "values": [
                         18.5
                       ]
                     },
                     {
-                      "type": "SELLER_INJECTION",
+                      "type": "SELLER_DISCOM_ALLOC",
                       "values": [
                         19.2
                       ]
                     },
                     {
-                      "type": "SETTLED_QTY",
+                      "type": "FINAL_ALLOC",
                       "values": [
                         18.5
                       ]
@@ -239,19 +239,19 @@
                   "id": 1,
                   "payloads": [
                     {
-                      "type": "BUYER_ALLOCATION",
+                      "type": "BUYER_DISCOM_ALLOC",
                       "values": [
                         14.2
                       ]
                     },
                     {
-                      "type": "SELLER_INJECTION",
+                      "type": "SELLER_DISCOM_ALLOC",
                       "values": [
                         14.7
                       ]
                     },
                     {
-                      "type": "SETTLED_QTY",
+                      "type": "FINAL_ALLOC",
                       "values": [
                         14.2
                       ]
@@ -269,11 +269,11 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "BRPL-DL-buyer-001"
+            "participantId": "TEST_BUYER_001"
           },
           {
             "role": "seller",
-            "participantId": "TPDDL-DL-seller-001"
+            "participantId": "TEST_SELLER_001"
           },
           {
             "role": "buyerDiscom",
@@ -292,24 +292,24 @@
       "participants": [
         {
           "role": "seller",
-          "participantId": "TPDDL-DL-seller-001",
+          "participantId": "TEST_SELLER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/seller-001",
-            "utilityId": "TPDDL-DL",
-            "utilityCustomerId": "TPDDL-CUST-S-001"
+            "meterId": "TEST_METER_SELLER_001",
+            "utilityId": "TEST_DISCOM_SELLER",
+            "utilityCustomerId": "TEST_CUST_SELLER_001"
           }
         },
         {
           "role": "buyer",
-          "participantId": "BRPL-DL-buyer-001",
+          "participantId": "TEST_BUYER_001",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
-            "meterId": "der://meter/buyer-001",
-            "utilityId": "BRPL-DL",
-            "utilityCustomerId": "BRPL-CUST-B-001"
+            "meterId": "TEST_METER_BUYER_001",
+            "utilityId": "TEST_DISCOM_BUYER",
+            "utilityCustomerId": "TEST_CUST_BUYER_001"
           }
         },
         {
@@ -318,8 +318,8 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "BRPL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "utilityId": "TEST_DISCOM_BUYER",
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
         {
@@ -328,8 +328,8 @@
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
-            "utilityId": "TPDDL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "utilityId": "TEST_DISCOM_SELLER",
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }
       ]

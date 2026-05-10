@@ -99,6 +99,8 @@ func (r *DEGLedgerRecorder) Run(ctx *model.StepContext) error {
 		return r.handleOnConfirm(ctx)
 	case ActionOnStatus:
 		return r.handleOnStatus(ctx)
+	case ActionStatus:
+		return r.handleStatus(ctx)
 	default:
 		log.Debugf(ctx, "DEGLedgerRecorder: no handler for action '%s', skipping", action)
 		return nil
@@ -189,14 +191,14 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 
 	switch r.config.LedgerApi {
 	case LedgerApiLegacyLedger:
-		record, err := MapWave2ToLedgerRecord(payload, r.config.Role)
+		records, err := MapWave2ToLedgerRecords(payload, r.config.Role)
 		if err != nil {
 			log.Warnf(ctx, "DEGLedgerRecorder: wave2 mapping failed: %v", err)
 			return nil
 		}
-		log.Infof(ctx, "DEGLedgerRecorder: wave2 (legacy_ledger) mapped 1 record (transaction_id=%s) -> %s",
-			payload.Context.TransactionID, baseURL)
-		r.sendPutRecordsAsync(ctx, baseURL, []LedgerPutRequest{record})
+		log.Infof(ctx, "DEGLedgerRecorder: wave2 (legacy_ledger) mapped %d record(s) (transaction_id=%s) -> %s",
+			len(records), payload.Context.TransactionID, baseURL)
+		r.sendPutRecordsAsync(ctx, baseURL, records)
 
 	case LedgerApiBeckn:
 		senderHost := r.config.SenderHost
@@ -274,13 +276,23 @@ func (r *DEGLedgerRecorder) resolveWave2BaseURL(payload *Wave2OnConfirmPayload) 
 	}
 }
 
-// handleOnStatus processes on_status events and sends meter readings to /ledger/record.
+// handleOnStatus processes on_status events.
+// For BUYER/SELLER roles with ledgerApi=beckn: forwards to the appropriate
+// discom ledger when performance data is present (wave2 path).
+// For BUYER_DISCOM/SELLER_DISCOM roles: writes meter readings to /ledger/record (wave1 path).
 func (r *DEGLedgerRecorder) handleOnStatus(ctx *model.StepContext) error {
-	log.Infof(ctx, "DEGLedgerRecorder: processing on_status")
+	log.Infof(ctx, "DEGLedgerRecorder: processing on_status (role=%s, ledgerApi=%s, payloadShape=%s)",
+		r.config.Role, r.config.LedgerApi, r.config.PayloadShape)
 
-	// Validate role - only discom roles can use /ledger/record
+	// Wave2 beckn forwarding path: BUYER or SELLER role forwards on_status with performance data.
+	if r.config.PayloadShape == PayloadShapeWave2 && r.config.LedgerApi == LedgerApiBeckn &&
+		(r.config.Role == "BUYER" || r.config.Role == "SELLER") {
+		return r.handleOnStatusWave2(ctx)
+	}
+
+	// Wave1 / DISCOM path: write meter readings to /ledger/record.
 	if !r.config.IsDiscomRole() {
-		log.Warnf(ctx, "DEGLedgerRecorder: on_status requires BUYER_DISCOM or SELLER_DISCOM role, got %s", r.config.Role)
+		log.Warnf(ctx, "DEGLedgerRecorder: on_status requires BUYER_DISCOM or SELLER_DISCOM role for legacy path, got %s", r.config.Role)
 		return nil
 	}
 
@@ -326,6 +338,161 @@ func (r *DEGLedgerRecorder) handleOnStatus(ctx *model.StepContext) error {
 	r.sendRecordActualsAsync(ctx, records, payload.Context.TransactionID)
 
 	return nil
+}
+
+// handleStatus forwards an incoming wave2 beckn `status` request to the
+// appropriate discom ledger as a beckn `status` call. The ledger will
+// asynchronously call back with `on_status`.
+// SELLER role → sellerDiscom.ledgerUri; BUYER role → buyerDiscom.ledgerUri.
+func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
+	log.Infof(ctx, "DEGLedgerRecorder: processing status (role=%s, ledgerApi=%s)", r.config.Role, r.config.LedgerApi)
+
+	if r.config.LedgerApi != LedgerApiBeckn {
+		log.Warnf(ctx, "DEGLedgerRecorder: status forwarding only supported with ledgerApi=beckn (got %s); skipping", r.config.LedgerApi)
+		return nil
+	}
+
+	payload, err := ParseStatusWave2(ctx.Body)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse wave2 status payload: %v", err)
+		return nil
+	}
+
+	var side Side
+	switch r.config.Role {
+	case "SELLER":
+		side = SideSeller
+	case "BUYER":
+		side = SideBuyer
+	default:
+		log.Warnf(ctx, "DEGLedgerRecorder: status forwarding requires BUYER or SELLER role, got %s", r.config.Role)
+		return nil
+	}
+
+	baseURL := r.config.LedgerHost
+	if r.config.LedgerUriSource == LedgerUriSourcePayload {
+		baseURL = ExtractWave2StatusDiscomLedgerUri(payload, side)
+	}
+	if baseURL == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for status forwarding (role=%s, side=%s)", r.config.Role, side)
+		return nil
+	}
+
+	senderHost := r.config.SenderHost
+	if senderHost == "" {
+		senderHost = DeriveSenderHostFromWave2Status(payload, r.config.Role)
+	}
+	if senderHost == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: beckn status forwarding requires a sender host; skipping (transaction_id=%s)", payload.Context.TransactionID)
+		return nil
+	}
+
+	rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: beckn status context rewrite failed: %v", err)
+		return nil
+	}
+
+	log.Infof(ctx, "DEGLedgerRecorder: forwarding status (transaction_id=%s, contract_id=%s) -> %s/status (sender=%s)",
+		payload.Context.TransactionID, payload.Message.Contract.ID, baseURL, senderHost)
+	r.sendBecknStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+	return nil
+}
+
+// handleOnStatusWave2 checks whether the on_status body carries actual
+// performance data and, if so, forwards it as a beckn on_status to the
+// appropriate discom ledger.
+// BUYER role → buyerDiscom.ledgerUri; SELLER role → sellerDiscom.ledgerUri.
+func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
+	payload, err := ParseOnStatusWave2(ctx.Body)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse wave2 on_status payload: %v", err)
+		return nil
+	}
+
+	if !Wave2OnStatusHasPerformanceData(payload) {
+		log.Debugf(ctx, "DEGLedgerRecorder: on_status has no performance payload columns; skipping ledger forward (transaction_id=%s)", payload.Context.TransactionID)
+		return nil
+	}
+
+	var side Side
+	switch r.config.Role {
+	case "BUYER":
+		side = SideBuyer
+	case "SELLER":
+		side = SideSeller
+	default:
+		log.Warnf(ctx, "DEGLedgerRecorder: on_status wave2 forwarding requires BUYER or SELLER role, got %s", r.config.Role)
+		return nil
+	}
+
+	baseURL := r.config.LedgerHost
+	if r.config.LedgerUriSource == LedgerUriSourcePayload {
+		baseURL = ExtractWave2OnStatusDiscomLedgerUri(payload, side)
+	}
+	if baseURL == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for on_status forwarding (role=%s, side=%s)", r.config.Role, side)
+		return nil
+	}
+
+	senderHost := r.config.SenderHost
+	if senderHost == "" {
+		senderHost = DeriveSenderHostFromWave2OnStatus(payload, r.config.Role)
+	}
+	if senderHost == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: beckn on_status forwarding requires a sender host; skipping (transaction_id=%s)", payload.Context.TransactionID)
+		return nil
+	}
+
+	rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: beckn on_status context rewrite failed: %v", err)
+		return nil
+	}
+
+	log.Infof(ctx, "DEGLedgerRecorder: forwarding on_status with performance data (transaction_id=%s) -> %s/on_status (sender=%s)",
+		payload.Context.TransactionID, baseURL, senderHost)
+	r.sendBecknOnStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+	return nil
+}
+
+// sendBecknStatusAsync forwards a beckn status body in the background.
+func (r *DEGLedgerRecorder) sendBecknStatusAsync(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) {
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
+		defer cancel()
+		if err := r.client.PostBecknStatus(ctx, baseURL, body); err != nil {
+			log.Errorf(parentCtx, err,
+				"DEGLedgerRecorder: failed to forward beckn status (transaction_id=%s, base_url=%s): %v",
+				transactionID, baseURL, err)
+			return
+		}
+		log.Infof(parentCtx,
+			"DEGLedgerRecorder: successfully forwarded beckn status (transaction_id=%s, base_url=%s)",
+			transactionID, baseURL)
+	}()
+}
+
+// sendBecknOnStatusAsync forwards a beckn on_status body in the background.
+func (r *DEGLedgerRecorder) sendBecknOnStatusAsync(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) {
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
+		defer cancel()
+		resp, err := r.client.PostBecknOnStatus(ctx, baseURL, body)
+		if err != nil {
+			log.Errorf(parentCtx, err,
+				"DEGLedgerRecorder: failed to forward beckn on_status (transaction_id=%s, base_url=%s): %v",
+				transactionID, baseURL, err)
+			return
+		}
+		log.Infof(parentCtx,
+			"DEGLedgerRecorder: successfully forwarded beckn on_status (transaction_id=%s, record_id=%s, base_url=%s)",
+			transactionID, resp.RecordID, baseURL)
+	}()
 }
 
 // sendPutRecordsAsync sends ledger PUT records in the background without blocking the main flow.

@@ -1,4 +1,4 @@
-appName: "onix-local"
+appName: "onix-ledger-local"
 log:
   level: debug
   destinations:
@@ -9,7 +9,7 @@ log:
     - subscriber_id
     - module_id
 http:
-  port: 8081
+  port: 8083
   timeout:
     read: 30
     write: 30
@@ -17,11 +17,11 @@ http:
 pluginManager:
   root: ./plugins
 modules:
-  - name: bapTxnReceiver
-    path: /bap/receiver/
+  - name: ledgerTxnReceiver
+    path: /ledger/receiver/
     handler:
       type: std
-      role: bap
+      role: bpp
       httpClientConfig:
         maxIdleConns: 1000
         maxIdleConnsPerHost: 200
@@ -38,12 +38,12 @@ modules:
         keyManager:
           id: simplekeymanager
           config:
-            networkParticipant: bap.example.com
-            keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
-            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
-            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
-            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
-            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            networkParticipant: ledger.example.com
+            keyId: 76EU7ledgerKeyIdMockForDevkitTestingOnly000000000000000000000000
+            signingPrivateKey: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+            signingPublicKey: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+            encrPrivateKey: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+            encrPublicKey: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
         schemaValidator:
           id: schemav2validator
           config:
@@ -55,52 +55,25 @@ modules:
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
             extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.beckn.io"
-        checkPolicy:
-          id: opapolicychecker
-          config:
-            networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
         cache:
           id: cache
           config:
-            addr: redis:6379
-        signValidator:
-          id: signvalidator
+            addr: redis-ledger:6379
         router:
           id: router
           config:
-            routingConfig: ./config/local-p2p-trading-routing-BAP-Receiver.yaml
+            routingConfig: ./config/local-p2p-trading-routing-Ledger-Receiver.yaml
         middleware:
           - id: reqpreprocessor
             config:
               uuidKeys: transaction_id,message_id
-              role: bap
-        steps:
-          - id: degledgerrecorder
-            config:
-              # Wave2: on_confirm → ledger record per interval; on_status with
-              # performance data → forward to buyerDiscom ledger. Ledger URL
-              # read per-call from payload's buyerDiscom participantAttributes.
-              payloadShape: wave2
-              ledgerUriSource: payload
-              ledgerApi: beckn
-              role: BUYER
-              actions: on_confirm,on_status
-              enabled: "true"
-              asyncTimeout: "30000"
-              # Signing config (same keys as simplekeymanager)
-              signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
-              networkParticipant: bap.example.com
-              keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
+              role: bpp
       steps:
-        - validateSign
-        - checkPolicy
         - addRoute
         - validateSchema
-        - degledgerrecorder
 
-  - name: bapTxnCaller
-    path: /bap/caller/
+  - name: ledgerTxnCaller
+    path: /ledger/caller/
     handler:
       type: std
       role: bap
@@ -137,19 +110,14 @@ modules:
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
             extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.beckn.io"
-        checkPolicy:
-          id: opapolicychecker
-          config:
-            networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
         cache:
           id: cache
           config:
-            addr: redis:6379
+            addr: redis-ledger:6379
         router:
           id: router
           config:
-            routingConfig: ./config/local-p2p-trading-routing-BAP-Caller.yaml
+            routingConfig: ./config/local-p2p-trading-routing-Ledger-Caller.yaml
         signer:
           id: signer
         middleware:
@@ -157,23 +125,7 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
-        steps:
-          - id: degledgerrecorder
-            config:
-              # Wave2: outgoing status → forward to buyerDiscom ledger (symmetric path A).
-              payloadShape: wave2
-              ledgerUriSource: payload
-              ledgerApi: beckn
-              role: BUYER
-              actions: status
-              enabled: "true"
-              asyncTimeout: "30000"
-              signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
-              networkParticipant: bap.example.com
-              keyId: 76EU7LZ7gfqj13dWDKR1Uitnim11mCoxWBPdzLxUpAMBPVdANKgyFM
       steps:
         - validateSchema
-        - checkPolicy
         - addRoute
         - sign
-        - degledgerrecorder
