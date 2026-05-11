@@ -14,7 +14,7 @@ Part of the [DEG Specification](../../../../README.md) · [BillingSummary](../RE
 
 ## Dependencies
 
-- [`espiGreenButton`](../../../external/schema/espiGreenButton/) — ESPI types (UsageSummary, SummaryMeasurement, LineItem, DateTimeInterval)
+- [`espiGreenButton`](../../espiGreenButton/) — ESPI types (UsageSummary, SummaryMeasurement, LineItem, DateTimeInterval)
 - [`CustomerProfile`](../../CustomerProfile/) — shared customer identity
 
 ## Properties

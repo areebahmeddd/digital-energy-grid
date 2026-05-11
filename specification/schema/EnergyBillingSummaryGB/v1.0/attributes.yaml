@@ -48,6 +48,6 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: "../../../external/schema/espiGreenButton/attributes.yaml#/components/schemas/UsageSummary"
+            $ref: "../../espiGreenButton/v1.0/attributes.yaml#/components/schemas/UsageSummary"
           description: Array of ESPI UsageSummary entries — one per billing period.
       additionalProperties: false

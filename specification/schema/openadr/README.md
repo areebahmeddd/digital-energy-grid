@@ -2,7 +2,7 @@
 
 External dependency schema for OpenADR 3.1.0 types used by DEG schemas.
 
-Part of the [DEG External Schema](../../) · [openadr](./README.md)
+Part of the [DEG Schema](../../) · [openadr](./README.md)
 
 ## Files
 

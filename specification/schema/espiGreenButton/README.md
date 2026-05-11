@@ -4,7 +4,7 @@
 > **Tags:** `energy`, `metering`, `green-button`, `espi`, `naesb`
 > **Namespace:** `http://naesb.org/espi#`
 > **Source XSD:** [`https://www.naesb.org/espi.xsd`](https://www.naesb.org/espi.xsd)
-> Part of the [DEG Specification](../../../README.md)
+> Part of the [DEG Specification](../../README.md)
 
 ---
 
@@ -16,9 +16,9 @@ This schema provides the core metering and billing types used by the Meter Data 
 
 | File | Description |
 |------|-------------|
-| [attributes.yaml](./attributes.yaml) | OpenAPI 3.0 schema definitions for all ESPI types (generated from `espi.xsd`) |
-| [context.jsonld](./context.jsonld) | JSON-LD context mapping ESPI types and properties to `http://naesb.org/espi#` IRIs |
-| [vocab.jsonld](./vocab.jsonld) | RDF vocabulary (RDFS classes and properties) with `skos:exactMatch` links to ESPI XSD types |
+| [v1.0/attributes.yaml](./v1.0/attributes.yaml) | OpenAPI 3.0 schema definitions for all ESPI types (generated from `espi.xsd`) |
+| [v1.0/context.jsonld](./v1.0/context.jsonld) | JSON-LD context mapping ESPI types and properties to `http://naesb.org/espi#` IRIs |
+| [v1.0/vocab.jsonld](./v1.0/vocab.jsonld) | RDF vocabulary (RDFS classes and properties) with `skos:exactMatch` links to ESPI XSD types |
 
 ## Linked Data
 
@@ -26,8 +26,8 @@ This schema provides the core metering and billing types used by the Meter Data 
 |----------|-----|
 | Namespace IRI | `http://naesb.org/espi#` |
 | Source XSD | `https://www.naesb.org/espi.xsd` |
-| JSON-LD context | `https://schema.beckn.io/external/espi/context.jsonld` |
-| RDF vocabulary | `https://schema.beckn.io/external/espi/vocab.jsonld` |
+| JSON-LD context | `https://schema.beckn.io/espiGreenButton/v1.0/context.jsonld` |
+| RDF vocabulary | `https://schema.beckn.io/espiGreenButton/v1.0/vocab.jsonld` |
 | Green Button docs | [utilityapi.com/docs/greenbutton/xml](https://utilityapi.com/docs/greenbutton/xml) |
 
 ## Types
