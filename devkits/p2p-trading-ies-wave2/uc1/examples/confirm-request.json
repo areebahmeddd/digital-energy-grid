@@ -123,6 +123,7 @@
             }
           },
           "commitmentAttributes": {
+            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {
               "start": "2026-04-26T04:30:00Z",
@@ -152,19 +153,19 @@
                   {
                     "type": "PRICE_PER_KWH",
                     "values": [
-                      12
+                      12.5
                     ]
                   },
                   {
                     "type": "AVAILABLE_QTY",
                     "values": [
-                      30.0
+                      30.5
                     ]
                   },
                   {
                     "type": "REQUESTED_QTY",
                     "values": [
-                      20.0
+                      20.5
                     ]
                   }
                 ]
@@ -175,19 +176,19 @@
                   {
                     "type": "PRICE_PER_KWH",
                     "values": [
-                      14
+                      14.5
                     ]
                   },
                   {
                     "type": "AVAILABLE_QTY",
                     "values": [
-                      25.0
+                      25.5
                     ]
                   },
                   {
                     "type": "REQUESTED_QTY",
                     "values": [
-                      15.0
+                      15.5
                     ]
                   }
                 ]

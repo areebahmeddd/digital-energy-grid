@@ -154,24 +154,13 @@ modules:
           - id: degledgerrecorder
             config:
               # Wave2: on_confirm → write commitment to sellerDiscom ledger.
+              # TODO: on_status → buyerDiscom ledger write requires per-action
+              # role support in the plugin (roleOnConfirm/roleOnStatus config keys).
               payloadShape: wave2
               ledgerUriSource: payload
               ledgerApi: beckn
               role: SELLER
               actions: on_confirm
-              enabled: "true"
-              asyncTimeout: "30000"
-              signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-              networkParticipant: bpp.example.com
-              keyId: 76EU7ofwRCF1aobQkShARrf1PAUsNpHqWUJoynPu9w45YFKmzqaPmy
-          - id: degledgerrecorder-buyer-status
-            config:
-              # Wave2: on_status → write discom alloc data to buyerDiscom ledger.
-              payloadShape: wave2
-              ledgerUriSource: payload
-              ledgerApi: beckn
-              role: BUYER
-              actions: on_status
               enabled: "true"
               asyncTimeout: "30000"
               signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
@@ -183,4 +172,3 @@ modules:
         - addRoute
         - sign
         - degledgerrecorder
-        - degledgerrecorder-buyer-status

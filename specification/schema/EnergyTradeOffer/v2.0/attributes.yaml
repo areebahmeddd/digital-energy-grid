@@ -64,6 +64,25 @@ components:
           items:
             $ref: "#/components/schemas/RoleInputs"
 
+        commitmentAttributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Seller's initial BecknTimeSeries published at catalog time. Contains
+            PRICE_PER_KWH and AVAILABLE_QTY intervals for each offered delivery
+            slot. MUST carry @context (BecknTimeSeries/v1.0/context.jsonld) and
+            @type: TimeSeries.
+          required: ["@context", "@type"]
+          properties:
+            "@context":
+              type: string
+              format: uri
+            "@type":
+              type: string
+              enum: ["TimeSeries"]
+          x-jsonld:
+            "@id": commitmentAttributes
+
         contractTerms:
           type: object
           additionalProperties: true

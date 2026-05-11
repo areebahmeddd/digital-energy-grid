@@ -28,14 +28,14 @@
         "provider": {
           "id": "TEST_SELLER_001",
           "descriptor": {
-            "name": "Prosumer Solar Farm — North Delhi"
+            "name": "Prosumer Solar Farm \u2014 North Delhi"
           }
         },
         "resources": [
           {
             "id": "energy-resource-solar-001",
             "descriptor": {
-              "name": "Solar energy — 2026-04-26 10:00–12:00 IST (2 hourly slots)",
+              "name": "Solar energy \u2014 2026-04-26 10:00\u201312:00 IST (2 hourly slots)",
               "shortDesc": "Up to 30 kWh @ 12 INR/kWh (slot 0) and 25 kWh @ 14 INR/kWh (slot 1)"
             },
             "resourceAttributes": {
@@ -50,7 +50,7 @@
           {
             "id": "offer-p2p-001",
             "descriptor": {
-              "name": "Morning Solar — 2 hourly slots from 10:00 IST",
+              "name": "Morning Solar \u2014 2 hourly slots from 10:00 IST",
               "shortDesc": "12 INR/kWh (slot 0) and 14 INR/kWh (slot 1)"
             },
             "resourceIds": [
@@ -160,7 +160,7 @@
             "provider": {
               "id": "TEST_SELLER_001",
               "descriptor": {
-                "name": "Prosumer Solar Farm — North Delhi"
+                "name": "Prosumer Solar Farm \u2014 North Delhi"
               },
               "providerAttributes": {
                 "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",

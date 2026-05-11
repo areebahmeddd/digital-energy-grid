@@ -70,7 +70,7 @@ components:
           description: Data points for this payload type.
           example: [0.17]
           items:
-            oneOf:
+            anyOf:
               - type: number
               - type: integer
               - type: string
