@@ -43,35 +43,29 @@
             "resourceIds": [
               "energy-resource-solar-001"
             ]
-          }
-        }
-      ],
-      "performance": [
-        {
-          "id": "perf-discom-limit-check",
-          "status": {
-            "code": "DISCOM_LIMIT_CHECK_REQUESTED",
-            "name": "Optional discom-ledger limit check (Phase 2)"
           },
-          "commitmentIds": [
-            "commitment-p2p-001"
-          ],
-          "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld",
-            "@type": "DiscomLimitCheck",
-            "subject": "buyer",
-            "subjectMeterId": "TEST_METER_BUYER_001",
-            "discomParticipantId": "buyer-discom-ledger",
-            "deliveryWindow": {
-              "@type": "beckn:TimePeriod",
-              "schema:startTime": "2026-04-26T04:30:00Z",
-              "schema:endTime": "2026-04-26T05:30:00Z"
+          "commitmentAttributes": {
+            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {
+              "start": "2026-04-26T04:30:00Z",
+              "duration": "PT1H"
             },
-            "tradeQuantity": {
-              "@type": "Quantity",
-              "unitCode": "KWH",
-              "unitQuantity": 20.0
-            }
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "REQUESTED_QTY",
+                "units": "KWH"
+              }
+            ],
+            "intervals": [
+              {
+                "id": 0,
+                "payloads": [
+                  {"type": "REQUESTED_QTY", "values": [20.5]}
+                ]
+              }
+            ]
           }
         }
       ],

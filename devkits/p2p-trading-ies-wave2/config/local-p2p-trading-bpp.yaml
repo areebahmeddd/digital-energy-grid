@@ -75,27 +75,11 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
-        steps:
-          - id: degledgerrecorder
-            config:
-              # Wave2: incoming status → forward to sellerDiscom ledger so the
-              # ledger can look up and return current fulfillment performance.
-              payloadShape: wave2
-              ledgerUriSource: payload
-              ledgerApi: beckn
-              role: SELLER
-              actions: status
-              enabled: "true"
-              asyncTimeout: "30000"
-              signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-              networkParticipant: bpp.example.com
-              keyId: 76EU7ofwRCF1aobQkShARrf1PAUsNpHqWUJoynPu9w45YFKmzqaPmy
       steps:
         - validateSign
         - checkPolicy
         - addRoute
         - validateSchema
-        - degledgerrecorder
 
   - name: bppTxnCaller
     path: /bpp/caller/
@@ -169,8 +153,9 @@ modules:
         steps:
           - id: degledgerrecorder
             config:
-              # Wave2: on_confirm → one ledger record per interval; ledger URL
-              # read from sellerDiscom participantAttributes.
+              # Wave2: on_confirm → write commitment to sellerDiscom ledger.
+              # TODO: on_status → buyerDiscom ledger write requires per-action
+              # role support in the plugin (roleOnConfirm/roleOnStatus config keys).
               payloadShape: wave2
               ledgerUriSource: payload
               ledgerApi: beckn

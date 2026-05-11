@@ -43,20 +43,8 @@
             "resourceIds": [
               "energy-resource-solar-001"
             ]
-          }
-        }
-      ],
-      "performance": [
-        {
-          "id": "perf-discom-limit-check",
-          "status": {
-            "code": "DISCOM_LIMIT_CHECK_OK",
-            "name": "Discom-ledger limit check passed for both sides"
           },
-          "commitmentIds": [
-            "commitment-p2p-001"
-          ],
-          "performanceAttributes": {
+          "commitmentAttributes": {
             "@context": "https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld",
             "@type": "DiscomLimitCheck",
             "deliveryWindow": {

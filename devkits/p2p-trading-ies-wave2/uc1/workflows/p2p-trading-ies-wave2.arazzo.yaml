@@ -32,7 +32,7 @@ info:
         npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml \
           -w status-roundtrip-via-seller --severity 'SCHEMA_CHECK=off' -v
 
-      Available workflows: publish-catalog, discover, select-through-settlement,
+      Available workflows: publish-catalog, select-through-settlement,
         status-roundtrip-via-seller, status-roundtrip-direct-buyer-ledger
 
       Override server URLs (optional, defaults in x-serverUrl):
@@ -86,22 +86,6 @@ workflows:
   - workflowId: select-through-settlement
     summary: Buyer selects, optionally pre-checks discom headroom, confirms, and settles
     steps:
-      - stepId: select
-        description: Buyer TP selects 20 kWh from the 30 kWh offer
-        operationId: beckn-bap-caller.select
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/select-request.json"
-
-      - stepId: on-select
-        description: Seller TP returns DRAFT contract with seller-side terms bound
-        operationId: beckn-bpp-caller.onSelect
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-select-response.json"
-
       - stepId: init
         description: Buyer TP provides buyer-side identity (meter, utility, customer ID)
         operationId: beckn-bap-caller.init
