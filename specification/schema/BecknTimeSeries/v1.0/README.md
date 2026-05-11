@@ -121,7 +121,7 @@ layer):
 
 OpenADR's `report.resources[].intervals[]` is the most battle-tested
 shape for interval-aligned energy data. Published at `schema.beckn.io/openadr/3.1.0` (source in
-[`specification/external/schema/openadr/3.1.0/`](../../../external/schema/openadr/3.1.0/))
+[`specification/schema/openadr/v3.1.0/`](../../openadr/v3.1.0/))
 and `$ref`-imported via that URL, giving DEG schemas a uniform time-series idiom
 without copying types. Each domain schema (e.g. `DemandFlexPerformance`)
 embeds `BecknTimeSeries` under whatever attribute carries series data

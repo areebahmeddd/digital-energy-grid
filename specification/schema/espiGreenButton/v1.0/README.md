@@ -2,7 +2,7 @@
 
 JSON-LD context and RDF vocabulary for Green Button / ESPI types (NAESB REQ.21).
 
-Part of the [DEG External Schema](../../) · [espiGreenButton](../README.md)
+Part of the [DEG Schema](../../) · [espiGreenButton](../README.md)
 
 ## Files
 

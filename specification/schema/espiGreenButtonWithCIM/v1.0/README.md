@@ -2,7 +2,7 @@
 
 CIM (IEC 61968/61970) extension types for Green Button / ESPI, covering meter telemetry at consumer, distribution-transformer, and transmission levels.
 
-Part of the [DEG External Schema](../../) · [espiGreenButtonWithCIM](../README.md)
+Part of the [DEG Schema](../../) · [espiGreenButtonWithCIM](../README.md)
 
 ## Files
 

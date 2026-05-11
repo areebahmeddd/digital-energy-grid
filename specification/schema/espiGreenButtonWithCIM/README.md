@@ -3,7 +3,7 @@
 > **Tags:** `energy`, `metering`, `green-button`, `espi`, `cim`, `iec-61968`, `iec-61970`
 > **Extends:** [espiGreenButton](../espiGreenButton/)
 > **Source standards:** IEC 61968-9, IEC 61970, NAESB REQ.21
-> Part of the [DEG Specification](../../../README.md)
+> Part of the [DEG Specification](../../README.md)
 
 ---
 
@@ -15,7 +15,7 @@ All schemas here are **additive** — the base ESPI types in [espiGreenButton](.
 
 | File | Description |
 |------|-------------|
-| [attributes.yaml](./attributes.yaml) | OpenAPI 3.0 schema definitions for CIM extension types (38 classes) |
+| [v1.0/attributes.yaml](./v1.0/attributes.yaml) | OpenAPI 3.0 schema definitions for CIM extension types (38 classes) |
 
 ## Types
 
