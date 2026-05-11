@@ -1,0 +1,29 @@
+{
+    "@context": {
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "skos": "http://www.w3.org/2004/02/skos/core#",
+        "espi": "http://naesb.org/espi#",
+        "cim": "http://iec.ch/TC57/CIM#",
+        "oadr": "https://www.openadr.org/oadr3#"
+    },
+    "@graph": [
+        { "@id": "espi:IntervalBlock", "@type": "rdfs:Class", "rdfs:label": "ESPI Interval Block", "rdfs:comment": "Time sequence of Readings of the same ReadingType (NAESB ESPI)." },
+        { "@id": "espi:DateTimeInterval", "@type": "rdfs:Class", "rdfs:label": "ESPI Date Time Interval", "rdfs:comment": "Interval of date and time defined by a start timestamp and duration in seconds (NAESB ESPI)." },
+        { "@id": "espi:ReadingType", "@type": "rdfs:Class", "rdfs:label": "ESPI Reading Type", "rdfs:comment": "Metadata describing what is being measured — commodity, unit, direction, and accumulation behavior (NAESB ESPI)." },
+        { "@id": "espi:ServiceCategory", "@type": "rdfs:Class", "rdfs:label": "ESPI Service Category", "rdfs:comment": "Category of service provided to the customer (NAESB ESPI)." },
+        { "@id": "espi:UsageSummary", "@type": "rdfs:Class", "rdfs:label": "ESPI Usage Summary", "rdfs:comment": "Summary of usage for a billing period (NAESB ESPI)." },
+
+        { "@id": "cim:EndDevice", "@type": "rdfs:Class", "rdfs:label": "CIM End Device", "rdfs:comment": "Asset container performing end device functions (IEC 61968 Metering::EndDevice)." },
+        { "@id": "cim:Meter", "@type": "rdfs:Class", "rdfs:label": "CIM Meter", "rdfs:comment": "Physical metering asset extending EndDevice (IEC 61968 Metering::Meter).", "rdfs:subClassOf": { "@id": "cim:EndDevice" } },
+        { "@id": "cim:UsagePoint", "@type": "rdfs:Class", "rdfs:label": "CIM Usage Point", "rdfs:comment": "CIM usage point with grid context — voltage, phase, connection state (IEC 61968 Metering::UsagePoint)." },
+        { "@id": "cim:MeterTelemetryReading", "@type": "rdfs:Class", "rdfs:label": "Meter Telemetry Reading", "rdfs:comment": "Composite type extending ESPI MeterReading with CIM meter context." },
+
+        { "@id": "oadr:interval", "@type": "rdfs:Class", "rdfs:label": "OpenADR Interval", "rdfs:comment": "Temporal window with an integer id and typed payloads (OpenADR 3.1.0).", "skos:exactMatch": { "@id": "https://www.openadr.org/oadr3#interval" } },
+        { "@id": "oadr:intervalPeriod", "@type": "rdfs:Class", "rdfs:label": "OpenADR Interval Period", "rdfs:comment": "Start timestamp + ISO 8601 duration; sets temporal bounds for an interval series (OpenADR 3.1.0).", "skos:exactMatch": { "@id": "https://www.openadr.org/oadr3#intervalPeriod" } },
+        { "@id": "oadr:valuesMap", "@type": "rdfs:Class", "rdfs:label": "OpenADR Values Map", "rdfs:comment": "A typed payload row: type names the signal; values carries the data points (OpenADR 3.1.0).", "skos:exactMatch": { "@id": "https://www.openadr.org/oadr3#valuesMap" } },
+        { "@id": "oadr:eventPayloadDescriptor", "@type": "rdfs:Class", "rdfs:label": "OpenADR Event Payload Descriptor", "rdfs:comment": "Sidecar metadata for offer/bid signals (objectType: EVENT_PAYLOAD_DESCRIPTOR) (OpenADR 3.1.0).", "skos:exactMatch": { "@id": "https://www.openadr.org/oadr3#eventPayloadDescriptor" } },
+        { "@id": "oadr:reportPayloadDescriptor", "@type": "rdfs:Class", "rdfs:label": "OpenADR Report Payload Descriptor", "rdfs:comment": "Sidecar metadata for telemetry signals (objectType: REPORT_PAYLOAD_DESCRIPTOR) (OpenADR 3.1.0).", "skos:exactMatch": { "@id": "https://www.openadr.org/oadr3#reportPayloadDescriptor" } }
+    ]
+}
