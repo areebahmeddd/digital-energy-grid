@@ -63,18 +63,62 @@
                 {
                   "role": "seller",
                   "participantId": "TEST_SELLER_001",
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "PRICE_PER_KWH",
-                      "currency": "INR"
+                  "payload": {
+                    "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+                    "@type": "TimeSeries",
+                    "intervalPeriod": {
+                      "start": "2026-04-26T04:30:00Z",
+                      "duration": "PT1H"
                     },
-                    {
-                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "AVAILABLE_QTY",
-                      "units": "KWH"
-                    }
-                  ]
+                    "payloadDescriptors": [
+                      {
+                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "PRICE_PER_KWH",
+                        "currency": "INR"
+                      },
+                      {
+                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "AVAILABLE_QTY",
+                        "units": "KWH"
+                      }
+                    ],
+                    "intervals": [
+                      {
+                        "id": 0,
+                        "payloads": [
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              12.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              30.5
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": 1,
+                        "payloads": [
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              14.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              25.5
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 },
                 {
                   "role": "buyer",

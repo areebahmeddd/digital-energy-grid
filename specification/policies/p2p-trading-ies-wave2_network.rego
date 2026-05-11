@@ -30,6 +30,8 @@
 # N11. Quantity cap: REQUESTED_QTY ≤ AVAILABLE_QTY per matched interval.
 # N12. No self-trade: buyer and seller meter ids must differ.
 # N13. Seller source type must be a generation source (not GRID).
+# N14. Seller payload: the seller offerAttributes.inputs entry must carry a
+#      payload (BecknTimeSeries) — payloadDescriptors alone is not sufficient.
 #
 # ── performance validation (on_status with discom alloc in commitmentAttributes) ──
 #
@@ -302,6 +304,15 @@ _contract_violations contains msg if {
 	st := _commitment.resources[0].resourceAttributes.sourceType
 	st == "GRID"
 	msg := "seller sourceType is GRID; must be a generation source (SOLAR, BATTERY, HYBRID, RENEWABLE)"
+}
+
+# ---------------------------------------------------------------------------
+# N14 — Seller role input must carry a payload (BecknTimeSeries with offer data)
+# ---------------------------------------------------------------------------
+
+_contract_violations contains "seller offerAttributes.inputs entry must carry a payload (BecknTimeSeries)" if {
+	_seller_role_inputs
+	not _seller_role_inputs.payload
 }
 
 # ---------------------------------------------------------------------------
