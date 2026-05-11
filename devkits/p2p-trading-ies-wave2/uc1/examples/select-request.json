@@ -36,7 +36,7 @@
             {
               "id": "energy-resource-solar-001",
               "descriptor": {
-                "name": "Solar energy slot \u2014 2026-04-26 10:00\u201312:00 IST"
+                "name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"
               },
               "quantity": {
                 "@type": "Quantity",
@@ -63,110 +63,61 @@
                 {
                   "role": "seller",
                   "participantId": "TEST_SELLER_001",
-                  "inputs": {
-                    "currency": "INR",
-                    "sourceType": "SOLAR",
-                    "offerTimeseries": {
-                      "@type": "TimeSeries",
-                      "intervalPeriod": {
-                        "start": "2026-04-26T04:30:00Z",
-                        "duration": "PT1H"
-                      },
-                      "payloadDescriptors": [
-                        {
-                          "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                          "payloadType": "PRICE_PER_KWH",
-                          "currency": "INR"
-                        },
-                        {
-                          "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                          "payloadType": "AVAILABLE_QTY",
-                          "units": "KWH"
-                        }
-                      ],
-                      "intervals": [
-                        {
-                          "id": 0,
-                          "payloads": [
-                            {
-                              "type": "PRICE_PER_KWH",
-                              "values": [
-                                12
-                              ]
-                            },
-                            {
-                              "type": "AVAILABLE_QTY",
-                              "values": [
-                                30.0
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "id": 1,
-                          "payloads": [
-                            {
-                              "type": "PRICE_PER_KWH",
-                              "values": [
-                                14
-                              ]
-                            },
-                            {
-                              "type": "AVAILABLE_QTY",
-                              "values": [
-                                25.0
-                              ]
-                            }
-                          ]
-                        }
-                      ]
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "PRICE_PER_KWH",
+                      "currency": "INR"
+                    },
+                    {
+                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "AVAILABLE_QTY",
+                      "units": "KWH"
                     }
-                  }
+                  ]
                 },
                 {
                   "role": "buyer",
                   "participantId": "TEST_BUYER_001",
-                  "inputs": {
-                    "sourceType": "GRID",
-                    "bidTimeseries": {
-                      "@type": "TimeSeries",
-                      "intervalPeriod": {
-                        "start": "2026-04-26T04:30:00Z",
-                        "duration": "PT1H"
-                      },
-                      "payloadDescriptors": [
-                        {
-                          "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                          "payloadType": "REQUESTED_QTY",
-                          "units": "KWH"
-                        }
-                      ],
-                      "intervals": [
-                        {
-                          "id": 0,
-                          "payloads": [
-                            {
-                              "type": "REQUESTED_QTY",
-                              "values": [
-                                20.0
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "id": 1,
-                          "payloads": [
-                            {
-                              "type": "REQUESTED_QTY",
-                              "values": [
-                                15.0
-                              ]
-                            }
-                          ]
-                        }
-                      ]
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "REQUESTED_QTY",
+                      "units": "KWH"
                     }
-                  }
+                  ]
+                },
+                {
+                  "role": "buyerDiscom",
+                  "participantId": "buyer-discom-ledger",
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BUYER_DISCOM_ALLOC",
+                      "units": "KWH"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BUYER_DISCOM_STATUS",
+                      "units": "STRING"
+                    }
+                  ]
+                },
+                {
+                  "role": "sellerDiscom",
+                  "participantId": "seller-discom-ledger",
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "SELLER_DISCOM_ALLOC",
+                      "units": "KWH"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "SELLER_DISCOM_STATUS",
+                      "units": "STRING"
+                    }
+                  ]
                 }
               ]
             }
@@ -229,7 +180,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         },
         {
@@ -239,7 +190,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
           }
         }
       ]
