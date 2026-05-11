@@ -133,13 +133,13 @@ components:
             signals (buyerDiscom, sellerDiscom).
           items:
             oneOf:
-              - $ref: "https://schema.beckn.io/openadr/3.1.0#/components/schemas/eventPayloadDescriptor"
-              - $ref: "https://schema.beckn.io/openadr/3.1.0#/components/schemas/reportPayloadDescriptor"
+              - $ref: "https://schema.beckn.io/openadr/v3.1.0#/components/schemas/eventPayloadDescriptor"
+              - $ref: "https://schema.beckn.io/openadr/v3.1.0#/components/schemas/reportPayloadDescriptor"
             discriminator:
               propertyName: objectType
               mapping:
-                EVENT_PAYLOAD_DESCRIPTOR: "https://schema.beckn.io/openadr/3.1.0#/components/schemas/eventPayloadDescriptor"
-                REPORT_PAYLOAD_DESCRIPTOR: "https://schema.beckn.io/openadr/3.1.0#/components/schemas/reportPayloadDescriptor"
+                EVENT_PAYLOAD_DESCRIPTOR: "https://schema.beckn.io/openadr/v3.1.0#/components/schemas/eventPayloadDescriptor"
+                REPORT_PAYLOAD_DESCRIPTOR: "https://schema.beckn.io/openadr/v3.1.0#/components/schemas/reportPayloadDescriptor"
 
       # Role-specific constraints on payloadDescriptors
       if:
