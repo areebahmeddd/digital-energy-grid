@@ -86,35 +86,15 @@
                       {
                         "id": 0,
                         "payloads": [
-                          {
-                            "type": "PRICE_PER_KWH",
-                            "values": [
-                              12.5
-                            ]
-                          },
-                          {
-                            "type": "AVAILABLE_QTY",
-                            "values": [
-                              30.5
-                            ]
-                          }
+                          {"type": "PRICE_PER_KWH", "values": [12.5]},
+                          {"type": "AVAILABLE_QTY", "values": [30.5]}
                         ]
                       },
                       {
                         "id": 1,
                         "payloads": [
-                          {
-                            "type": "PRICE_PER_KWH",
-                            "values": [
-                              14.5
-                            ]
-                          },
-                          {
-                            "type": "AVAILABLE_QTY",
-                            "values": [
-                              25.5
-                            ]
-                          }
+                          {"type": "PRICE_PER_KWH", "values": [14.5]},
+                          {"type": "AVAILABLE_QTY", "values": [25.5]}
                         ]
                       }
                     ]
@@ -194,47 +174,17 @@
               {
                 "id": 0,
                 "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      12.5
-                    ]
-                  },
-                  {
-                    "type": "AVAILABLE_QTY",
-                    "values": [
-                      30.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      20.5
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": [12.5]},
+                  {"type": "AVAILABLE_QTY", "values": [30.5]},
+                  {"type": "REQUESTED_QTY", "values": [20.5]}
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      14.5
-                    ]
-                  },
-                  {
-                    "type": "AVAILABLE_QTY",
-                    "values": [
-                      25.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      15.5
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": [14.5]},
+                  {"type": "AVAILABLE_QTY", "values": [25.5]},
+                  {"type": "REQUESTED_QTY", "values": [15.5]}
                 ]
               }
             ]

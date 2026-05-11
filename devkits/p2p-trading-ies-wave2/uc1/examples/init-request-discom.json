@@ -62,12 +62,7 @@
               {
                 "id": 0,
                 "payloads": [
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      20.5
-                    ]
-                  }
+                  {"type": "REQUESTED_QTY", "values": [20.5]}
                 ]
               }
             ]
