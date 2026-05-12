@@ -3,10 +3,10 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_init",
-    "bapId": "bap.example.com",
-    "bapUri": "http://beckn-router:9000/bap/receiver",
-    "bppId": "bpp.example.com",
-    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "bapId": "buyerapp.example.com",
+    "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
+    "bppId": "sellerapp.example.com",
+    "bppUri": "http://sellerapp.example.com:9000/bpp/receiver",
     "transactionId": "txn-p2p-001-discom-check",
     "messageId": "msg-discom-on-init-001",
     "timestamp": "2026-04-25T10:06:05Z",
@@ -58,12 +58,12 @@
               "unitQuantity": 20.0
             },
             "buyerSide": {
-              "discomParticipantId": "buyer-discom-ledger",
+              "discomParticipantId": "buyer-discom-ledger.example.com",
               "limitCheckResult": "OK",
               "remainingHeadroomKwh": 80.0
             },
             "sellerSide": {
-              "discomParticipantId": "seller-discom-ledger",
+              "discomParticipantId": "seller-discom-ledger.example.com",
               "limitCheckResult": "OK",
               "remainingHeadroomKwh": 120.0
             }
@@ -84,11 +84,11 @@
           },
           {
             "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger"
+            "participantId": "buyer-discom-ledger.example.com"
           },
           {
             "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger"
+            "participantId": "seller-discom-ledger.example.com"
           }
         ],
         "policy": {

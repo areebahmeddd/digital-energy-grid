@@ -1,0 +1,15 @@
+# SellerApp BPP-Receiver routing: BAP-originated requests → sandbox-sellerapp
+# Only request actions (select, init, confirm, status, update, cancel) land
+# here per Beckn semantics. Responses (on_*) come back at /bap/receiver.
+routingRules:
+  - version: "2.0.0"
+    targetType: "url"
+    target:
+      url: "http://sandbox-sellerapp:3002/api/webhook"
+    endpoints:
+      - select
+      - init
+      - confirm
+      - status
+      - update
+      - cancel

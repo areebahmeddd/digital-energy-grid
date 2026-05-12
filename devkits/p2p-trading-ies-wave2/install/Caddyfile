@@ -2,24 +2,31 @@
 # upstream (ngrok tunnel, host reverse proxy, or managed edge — see
 # devkits/README.md "Hosting the site"). auto_https off keeps Caddy
 # from probing :80 or attempting Let's Encrypt issuance for the
-# bare-port site address.
-# To let Caddy itself do TLS in production, drop this block and change
-# `:9000` below to your real hostname.
+# bare-port site addresses.
 {
     auto_https off
 }
 
+# Each Beckn participant gets its own hostname matching its subscriberId in
+# the dedi registry. Containers resolve these via Docker network aliases on
+# the beckn-router service (see compose). Standard Beckn paths (/bap/receiver,
+# /bpp/receiver, etc.) live under each hostname — multi-host routing matches
+# how a production Beckn deployment carves up the namespace.
+
+http://buyerapp.example.com:9000 {
+    reverse_proxy onix-buyerapp:8081
+}
+http://sellerapp.example.com:9000 {
+    reverse_proxy onix-sellerapp:8082
+}
+http://seller-discom-ledger.example.com:9000 {
+    reverse_proxy onix-ledger-sellerdiscom:8083
+}
+http://buyer-discom-ledger.example.com:9000 {
+    reverse_proxy onix-ledger-buyerdiscom:8084
+}
+
+# Fallback for the bare beckn-router hostname (used by the health check).
 :9000 {
-    handle /bap/* {
-        reverse_proxy onix-bap:8081
-    }
-    handle /bpp/* {
-        reverse_proxy onix-bpp:8082
-    }
-    handle /ledger/* {
-        reverse_proxy onix-ledger:8083
-    }
-    handle {
-        respond "beckn-router ok" 200
-    }
+    respond "beckn-router ok" 200
 }

@@ -3,10 +3,10 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "confirm",
-    "bapId": "bap.example.com",
-    "bapUri": "http://beckn-router:9000/bap/receiver",
-    "bppId": "bpp.example.com",
-    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "bapId": "buyerapp.example.com",
+    "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
+    "bppId": "sellerapp.example.com",
+    "bppUri": "http://sellerapp.example.com:9000/bpp/receiver",
     "transactionId": "txn-p2p-001",
     "messageId": "msg-confirm-001",
     "timestamp": "2026-04-25T10:10:00Z",
@@ -36,7 +36,7 @@
             {
               "id": "energy-resource-solar-001",
               "descriptor": {
-                "name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"
+                "name": "Solar energy slot \u2014 2026-04-26 10:00\u201312:00 IST"
               },
               "quantity": {
                 "@type": "Quantity",
@@ -86,15 +86,35 @@
                       {
                         "id": 0,
                         "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [12.5]},
-                          {"type": "AVAILABLE_QTY", "values": [30.5]}
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              12.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              30.5
+                            ]
+                          }
                         ]
                       },
                       {
                         "id": 1,
                         "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [14.5]},
-                          {"type": "AVAILABLE_QTY", "values": [25.5]}
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              14.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              25.5
+                            ]
+                          }
                         ]
                       }
                     ]
@@ -113,7 +133,7 @@
                 },
                 {
                   "role": "buyerDiscom",
-                  "participantId": "buyer-discom-ledger",
+                  "participantId": "buyer-discom-ledger.example.com",
                   "payloadDescriptors": [
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
@@ -129,7 +149,7 @@
                 },
                 {
                   "role": "sellerDiscom",
-                  "participantId": "seller-discom-ledger",
+                  "participantId": "seller-discom-ledger.example.com",
                   "payloadDescriptors": [
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
@@ -174,17 +194,47 @@
               {
                 "id": 0,
                 "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [12.5]},
-                  {"type": "AVAILABLE_QTY", "values": [30.5]},
-                  {"type": "REQUESTED_QTY", "values": [20.5]}
+                  {
+                    "type": "PRICE_PER_KWH",
+                    "values": [
+                      12.5
+                    ]
+                  },
+                  {
+                    "type": "AVAILABLE_QTY",
+                    "values": [
+                      30.5
+                    ]
+                  },
+                  {
+                    "type": "REQUESTED_QTY",
+                    "values": [
+                      20.5
+                    ]
+                  }
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [14.5]},
-                  {"type": "AVAILABLE_QTY", "values": [25.5]},
-                  {"type": "REQUESTED_QTY", "values": [15.5]}
+                  {
+                    "type": "PRICE_PER_KWH",
+                    "values": [
+                      14.5
+                    ]
+                  },
+                  {
+                    "type": "AVAILABLE_QTY",
+                    "values": [
+                      25.5
+                    ]
+                  },
+                  {
+                    "type": "REQUESTED_QTY",
+                    "values": [
+                      15.5
+                    ]
+                  }
                 ]
               }
             ]
@@ -205,11 +255,11 @@
           },
           {
             "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger"
+            "participantId": "buyer-discom-ledger.example.com"
           },
           {
             "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger"
+            "participantId": "seller-discom-ledger.example.com"
           }
         ],
         "policy": {
@@ -226,7 +276,8 @@
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_SELLER_001",
             "utilityId": "TEST_DISCOM_SELLER",
-            "utilityCustomerId": "TEST_CUST_SELLER_001"
+            "utilityCustomerId": "TEST_CUST_SELLER_001",
+            "platformUri": "http://sellerapp.example.com:9000"
           }
         },
         {
@@ -237,27 +288,28 @@
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_BUYER_001",
             "utilityId": "TEST_DISCOM_BUYER",
-            "utilityCustomerId": "TEST_CUST_BUYER_001"
+            "utilityCustomerId": "TEST_CUST_BUYER_001",
+            "platformUri": "http://buyerapp.example.com:9000"
           }
         },
         {
           "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger",
+          "participantId": "buyer-discom-ledger.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
+            "ledgerUri": "http://buyer-discom-ledger.example.com:9000/bap/receiver"
           }
         },
         {
           "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger",
+          "participantId": "seller-discom-ledger.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUri": "http://beckn-router:9000/ledger/receiver"
+            "ledgerUri": "http://seller-discom-ledger.example.com:9000/bpp/receiver"
           }
         }
       ]

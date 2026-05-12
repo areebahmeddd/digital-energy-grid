@@ -5,22 +5,27 @@ info:
   description: >
     End-to-end Beckn 2.0 LTS workflow for inter-discom Peer-to-Peer energy
     trading. Scenario: a prosumer on TPDDL (seller) publishes a 1-hour solar
-    slot; a prosumer on BRPL (buyer) selects, optionally pre-checks discom
-    headroom, confirms, and settles after meter-data reconciliation. The
-    contract names four roles — buyer, seller, buyerDiscom, sellerDiscom —
-    and the linked rego computes net revenueFlows (wheeling/penalty charges
-    are placeholder zeros today; the structure is ready for real tariff
-    rules).
+    slot; a prosumer on BRPL (buyer) selects, confirms, and settles after
+    meter-data reconciliation. The contract names four roles — buyer, seller,
+    buyerDiscom, sellerDiscom — and the linked rego computes net revenueFlows.
 
-    Two ledger round-trip workflows are included:
+    Per-node hostname design (wave2):
+      buyer.beckn-router         — onix-buyerapp (BAP role)
+      seller.beckn-router        — onix-sellerapp (BPP role)
+      sellerdiscom.beckn-router  — onix-ledger-sellerdiscom (BPP-role discom)
+      buyerdiscom.beckn-router   — onix-ledger-buyerdiscom (BAP-role discom, sink)
 
-      status-roundtrip-via-seller: BAP sends status → BPP forwards to seller
-        ledger (auto) → ledger returns on_status with performance columns →
-        BPP routes on_status to BAP → BAP forwards on_status to buyer ledger (auto).
+    Cascade chain (purely plugin-automated):
+      buyer/bap/caller  --status-->     seller/bpp/receiver
+      seller            --status-->     sellerdiscom/bpp/receiver   (Rule 1)
+      sellerdiscom      --on_status-->  seller/bap/receiver
+      seller            --on_status-->  buyer/bap/receiver          (Rule 2a)
+      buyer             --on_status-->  buyerdiscom/bap/receiver    (Rule 2b)
 
-      status-roundtrip-direct-buyer-ledger: BAP sends status directly to
-        buyer ledger (symmetric path A) → ledger returns on_status with
-        performance columns → BAP receives on_status.
+    Rule 1: /status at /bpp/receiver → cascade to own discom (sellerDiscom.ledgerUri).
+    Rule 2: /on_status at /bap/receiver → check context.bppId:
+        if it matches own discom's participantId → forward to peer's /bap/receiver,
+        else → cascade to own discom's ledgerUri.
 
     Run with Redocly respect (from p2p-trading-ies-wave2/):
 
@@ -30,15 +35,10 @@ info:
 
       Run a single workflow:
         npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml \
-          -w status-roundtrip-via-seller --severity 'SCHEMA_CHECK=off' -v
+          -w status-roundtrip-via-seller-discom --severity 'SCHEMA_CHECK=off' -v
 
       Available workflows: publish-catalog, select-through-settlement,
-        status-roundtrip-via-seller, status-roundtrip-direct-buyer-ledger
-
-      Override server URLs (optional, defaults in x-serverUrl):
-        -S beckn-bap-caller=http://localhost:8081/bap/caller \
-        -S beckn-bpp-caller=http://localhost:8082/bpp/caller \
-        -S beckn-ledger-caller=http://localhost:8083/ledger/caller
+        status-roundtrip-via-seller-discom
 
 sourceDescriptions:
   - name: beckn-bap-caller
@@ -51,10 +51,10 @@ sourceDescriptions:
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bpp/caller
 
-  - name: beckn-ledger-caller
+  - name: beckn-sellerdiscom-bpp-caller
     type: openapi
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
-    x-serverUrl: http://localhost:8083/ledger/caller
+    x-serverUrl: http://localhost:8083/bpp/caller
 
 workflows:
   # ── Catalog & Discovery ──
@@ -81,10 +81,10 @@ workflows:
           payload:
             $ref: "../examples/discover-request.json"
 
-  # ── Contract lifecycle: select → optional discom check → confirm → settlement ──
+  # ── Contract lifecycle: select → confirm → settlement ──
 
   - workflowId: select-through-settlement
-    summary: Buyer selects, optionally pre-checks discom headroom, confirms, and settles
+    summary: Buyer selects, confirms, and settles
     steps:
       - stepId: init
         description: Buyer TP provides buyer-side identity (meter, utility, customer ID)
@@ -93,27 +93,6 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/init-request.json"
-
-      - stepId: discom-init
-        description: >
-          OPTIONAL — Phase 2 discom-ledger limit check. Buyer TP and Seller TP
-          ask their respective discom ledgers to confirm contract qty fits
-          within the prosumer's allocation envelope for the delivery window.
-        operationId: beckn-bap-caller.init
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/init-request-discom.json"
-
-      - stepId: discom-on-init
-        description: >
-          OPTIONAL — Both discom ledgers respond OK with remaining headroom.
-          Final-adjustment logic (per spec) is intentionally omitted in this devkit.
-        operationId: beckn-bpp-caller.onInit
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-init-response-discom.json"
 
       - stepId: on-init
         description: Seller TP acknowledges buyer-side identity (DRAFT)
@@ -143,75 +122,45 @@ workflows:
         description: >
           Phase 5 — after physical delivery and discom-ledger reconciliation,
           Seller TP reports allocations + settled qty. The revenueflows
-          middleware evaluates the linked rego and emits revenueFlows summing
-          to zero across buyer/seller/buyerDiscom/sellerDiscom (wheeling and
-          penalty charges are 0 today).
+          middleware evaluates the linked rego and emits revenueFlows.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json
           payload:
             $ref: "../examples/on-status-response-settled.json"
 
-  # ── Ledger round-trip: status raised by buyer, flows to seller ledger, back to buyer ledger ──
+  # ── Status cascade via sellerDiscom ──
 
-  - workflowId: status-roundtrip-via-seller
+  - workflowId: status-roundtrip-via-seller-discom
     summary: >
-      Buyer requests fulfillment status → seller ledger responds with
-      performance columns → on_status propagates back to buyer ledger.
-      Tests the full automation chain: BPP degledgerrecorder forwards status
-      to seller ledger; BAP degledgerrecorder forwards on_status (with
-      performance data) to buyer ledger.
+      Buyer sends /status → seller cascades /status to sellerDiscom (Rule 1) →
+      sellerDiscom emits /on_status (simulated by step 2) → seller's /bap/receiver
+      forwards to buyer (Rule 2a) → buyer's /bap/receiver cascades to buyerDiscom
+      (Rule 2b). All steps return ACK; no fan-out loops; chain is linear.
     steps:
       - stepId: buyer-sends-status
         description: >
-          BAP sends status with full contract participants (including
-          sellerDiscom.ledgerUri and buyerDiscom.ledgerUri pointing to the
-          local mock onix-ledger). BPP degledgerrecorder will auto-forward to
-          seller ledger on receipt.
+          Buyer/bap/caller sends /status to seller/bpp/receiver. Seller's
+          degledgerrecorder cascades /status to sellerDiscom/bpp/receiver
+          (Rule 1). sellerDiscom mock then asynchronously emits /on_status
+          via its /bpp/caller back to seller/bap/receiver, kicking off the
+          downstream cascade (Rules 2a → 2b).
         operationId: beckn-bap-caller.status
         requestBody:
           contentType: application/json
           payload:
             $ref: "../examples/status-request.json"
 
-      - stepId: seller-ledger-responds-on-status
+      - stepId: seller-discom-responds-on-status
         description: >
-          Mock seller ledger (sandbox-ledger PERSONA=ledger) returns on_status
-          with all five performance columns populated: BUYER_DISCOM_ALLOC,
-          SELLER_DISCOM_ALLOC, BUYER_DISCOM_STATUS, SELLER_DISCOM_STATUS,
-          FINAL_ALLOC. BPP routes this to BAP; BAP degledgerrecorder then
-          auto-forwards on_status to buyer ledger.
-        operationId: beckn-bpp-caller.onStatus
+          Explicit synchronous simulation of the sellerDiscom on_status response
+          (the async path above does the same thing but timing-dependent).
+          Posts to sellerdiscom/bpp/caller, which routes /on_status to
+          seller/bap/receiver. The recorder there detects context.bppId
+          matches sellerDiscom.participantId (Rule 2a) → forwards to
+          buyer/bap/receiver → cascades to buyerDiscom (Rule 2b).
+        operationId: beckn-sellerdiscom-bpp-caller.onStatus
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/on-status-response-with-performance.json"
-
-  # ── Ledger round-trip (symmetric path A): buyer sends status directly to buyer ledger ──
-
-  - workflowId: status-roundtrip-direct-buyer-ledger
-    summary: >
-      BAP sends status directly to buyer ledger (symmetric path A, bypassing
-      seller). Buyer ledger returns on_status with performance columns. Tests
-      the BAP bapTxnCaller degledgerrecorder forwarding status to buyerDiscom
-      ledger.
-    steps:
-      - stepId: buyer-sends-status-to-buyer-ledger
-        description: >
-          BAP sends status via bap/caller. degledgerrecorder (BUYER role,
-          action=status) intercepts and forwards to buyerDiscom.ledgerUri.
-        operationId: beckn-bap-caller.status
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/status-request.json"
-
-      - stepId: buyer-ledger-responds-on-status
-        description: >
-          Mock buyer ledger returns on_status with performance data. Confirms
-          the direct buyer → buyer-ledger path is operational.
-        operationId: beckn-ledger-caller.onStatus
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-status-response-with-performance.json"
+            $ref: "../../ledger-fixtures/sellerdiscom/on_status.json"

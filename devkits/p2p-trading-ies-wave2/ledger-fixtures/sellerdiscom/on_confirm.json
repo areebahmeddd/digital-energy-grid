@@ -4,11 +4,11 @@
     "version": "2.0.0",
     "action": "on_confirm",
     "bapId": "sellerapp.example.com",
-    "bapUri": "http://beckn-router:9000/bpp",
+    "bapUri": "http://sellerapp.example.com:9000/bpp/receiver",
     "bppId": "seller-discom-ledger.example.com",
-    "bppUri": "http://beckn-router:9000/ledger",
+    "bppUri": "http://seller-discom-ledger.example.com:9000/bpp/receiver",
     "transactionId": "txn-p2p-001",
-    "messageId": "msg-ledger-on-confirm-001",
+    "messageId": "msg-sellerdiscom-on-confirm-001",
     "timestamp": "2026-04-25T10:10:10Z"
   },
   "message": {

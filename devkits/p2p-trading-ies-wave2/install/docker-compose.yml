@@ -6,12 +6,10 @@
 # ONLY container with a foot in both networks; it accepts traffic on :9000
 # and routes /bap/* and /bpp/* to the respective onix adapter on its own side.
 #
-# Effect: onix-bap cannot resolve or reach onix-bpp on the docker bridge.
-# All BAP↔BPP traffic flows through the router on :9000. By default the
-# Arazzo runner uses http://beckn-router:9000 in payload URIs (router
-# bridges locally, no internet needed). To prove end-to-end public-internet
-# traversal, expose the router via ngrok and run with PUBLIC_URL set to
-# the tunnel URL.
+# Split discom design (wave2):
+#   onix-ledger-sellerdiscom (8083) + sandbox-ledger-sellerdiscom (3003) live on bpp_side.
+#   onix-ledger-buyerdiscom  (8084) + sandbox-ledger-buyerdiscom  (3004) live on bap_side.
+#   beckn-router exposes /ledger-sellerdiscom/* and /ledger-buyerdiscom/* to bridge both sides.
 #
 # Run full stack:
 #   docker compose up -d
@@ -36,13 +34,13 @@ services:
       timeout: 3s
       retries: 5
 
-  onix-bap:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
-    container_name: onix-bap
+  onix-buyerapp:
+    image: onix-adapter-deg.local
+    container_name: onix-buyerapp
     ports:
       - "8081:8081"
     environment:
-      CONFIG_FILE: "/app/config/local-p2p-trading-bap.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-trading-buyerapp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -53,12 +51,12 @@ services:
       - ../config:/app/config
       - ../schemas:/app/schemas
       - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-p2p-trading-bap.yaml"]
+    command: ["./server", "--config=/app/config/local-p2p-trading-buyerapp.yaml"]
     networks:
       - bap_side
 
-  sandbox-bap:
-    container_name: sandbox-bap
+  sandbox-buyerapp:
+    container_name: sandbox-buyerapp
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -88,13 +86,13 @@ services:
       timeout: 3s
       retries: 5
 
-  onix-bpp:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
-    container_name: onix-bpp
+  onix-sellerapp:
+    image: onix-adapter-deg.local
+    container_name: onix-sellerapp
     ports:
       - "8082:8082"
     environment:
-      CONFIG_FILE: "/app/config/local-p2p-trading-bpp.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-trading-sellerapp.yaml"
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
       REDIS_ADDR: redis:6379
@@ -105,12 +103,12 @@ services:
       - ../config:/app/config
       - ../schemas:/app/schemas
       - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-p2p-trading-bpp.yaml"]
+    command: ["./server", "--config=/app/config/local-p2p-trading-sellerapp.yaml"]
     networks:
       - bpp_side
 
-  sandbox-bpp:
-    container_name: sandbox-bpp
+  sandbox-sellerapp:
+    container_name: sandbox-sellerapp
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
@@ -128,7 +126,7 @@ services:
     networks:
       - bpp_side
 
-  # ---------- Ledger side (mock ledger TSP — bridges both networks) ----------
+  # ---------- Seller Discom Ledger (BPP side) ----------
   redis-ledger:
     image: redis:alpine
     hostname: redis-ledger
@@ -142,40 +140,39 @@ services:
       timeout: 3s
       retries: 5
 
-  onix-ledger:
-    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
-    container_name: onix-ledger
+  onix-ledger-sellerdiscom:
+    image: onix-adapter-deg.local
+    container_name: onix-ledger-sellerdiscom
     ports:
       - "8083:8083"
     environment:
-      CONFIG_FILE: "/app/config/local-p2p-trading-ledger.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-trading-ledger-sellerdiscom.yaml"
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
       - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-p2p-trading-ledger.yaml"]
+    command: ["./server", "--config=/app/config/local-p2p-trading-ledger-sellerdiscom.yaml"]
     networks:
-      - bap_side
       - bpp_side
     depends_on:
       redis-ledger:
         condition: service_healthy
 
-  sandbox-ledger:
-    container_name: sandbox-ledger
+  sandbox-ledger-sellerdiscom:
+    container_name: sandbox-ledger-sellerdiscom
     image: fidedocker/sandbox-2.0:latest
     platform: linux/amd64
     environment:
       - NODE_ENV=production
       - PORT=3003
       - PERSONA=ledger
-      # Route on_status callback through onix-ledger's caller so it is signed
-      # with the ledger identity before being forwarded to the BAP receiver.
-      - BPP_CALLBACK_ENDPOINT=http://onix-ledger:8083/ledger/caller
+      # Route on_status callback through onix-ledger-sellerdiscom caller so it
+      # is signed before forwarding to the BPP receiver (targetType: bpp).
+      - BPP_CALLBACK_ENDPOINT=http://onix-ledger-sellerdiscom:8083/bpp/caller
     ports:
       - "3003:3003"
     volumes:
-      - ../ledger-fixtures:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
+      - ../ledger-fixtures/sellerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3003/api/health"]
       interval: 10s
@@ -183,18 +180,75 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - bap_side
       - bpp_side
 
-  # ---------- Path router (only container on both sides) ----------
+  # ---------- Buyer Discom Ledger (BAP side) ----------
+  onix-ledger-buyerdiscom:
+    image: onix-adapter-deg.local
+    container_name: onix-ledger-buyerdiscom
+    ports:
+      - "8084:8084"
+    environment:
+      CONFIG_FILE: "/app/config/local-p2p-trading-ledger-buyerdiscom.yaml"
+    volumes:
+      - ../config:/app/config
+      - ../schemas:/app/schemas
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-trading-ledger-buyerdiscom.yaml"]
+    networks:
+      - bap_side
+    depends_on:
+      redis-ledger:
+        condition: service_healthy
+
+  sandbox-ledger-buyerdiscom:
+    container_name: sandbox-ledger-buyerdiscom
+    image: fidedocker/sandbox-2.0:latest
+    platform: linux/amd64
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - PERSONA=ledger
+      # buyerdiscom is a terminal sink in the wave2 chain (BAP role: only
+      # receives /on_status); no callback is fired so this env var is unset.
+    ports:
+      - "3004:3004"
+    volumes:
+      - ../ledger-fixtures/buyerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3004/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - bap_side
+
+  # ---------- Host router (only container on both sides) ----------
+  # Caddy listens on :9000 and routes by Host header. Network aliases below
+  # give each Beckn participant its own resolvable hostname (buyer.beckn-router,
+  # seller.beckn-router, sellerdiscom.beckn-router, buyerdiscom.beckn-router)
+  # so containers can reach any participant by name. Each alias is declared on
+  # both networks because callers live on either side and must resolve every
+  # participant — Docker DNS only sees aliases on its own network.
   beckn-router:
     image: caddy:alpine
     container_name: beckn-router
     ports:
       - "9000:9000"
     networks:
-      - bap_side
-      - bpp_side
+      bap_side:
+        aliases:
+          - buyerapp.example.com
+          - sellerapp.example.com
+          - seller-discom-ledger.example.com
+          - buyer-discom-ledger.example.com
+      bpp_side:
+        aliases:
+          - buyerapp.example.com
+          - sellerapp.example.com
+          - seller-discom-ledger.example.com
+          - buyer-discom-ledger.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 

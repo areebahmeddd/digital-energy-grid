@@ -24,8 +24,10 @@ run_arazzo() {
   local here="$1"
   local devkit="$2"
   local arazzo="$3"
-  local usecase_root
+  local usecase_root devkit_root uc_name
   usecase_root="$(cd "$here/.." && pwd)"
+  devkit_root="$(cd "$usecase_root/.." && pwd)"
+  uc_name="$(basename "$usecase_root")"  # e.g. "uc1", "uc1-meter-data"
 
   local public_url="${PUBLIC_URL:-http://beckn-router:9000}"
   public_url="${public_url%/}"
@@ -39,33 +41,75 @@ run_arazzo() {
   local work
   work="$(mktemp -d "${TMPDIR:-/tmp}/${devkit}-arazzo-XXXXXX")"
   trap "rm -rf \"$work\"" EXIT
-  mkdir -p "$work/workflows" "$work/examples"
 
-  cp "$usecase_root/workflows/$arazzo" "$work/workflows/"
+  # Preserve the usecase directory level so $ref relative paths in the arazzo
+  # resolve identically in the tmpdir and the real repo.
+  # e.g. arazzo at $work/uc1/workflows/ means:
+  #   ../examples/          → $work/uc1/examples/
+  #   ../../ledger-fixtures/ → $work/ledger-fixtures/
+  mkdir -p "$work/$uc_name/workflows" "$work/$uc_name/examples"
 
-  PUBLIC_URL="$public_url" python3 - "$usecase_root/examples" "$work/examples" <<'PY'
+  cp "$usecase_root/workflows/$arazzo" "$work/$uc_name/workflows/"
+
+  # Shared URI-patching helper — rewrites context.bapUri/bppUri and
+  # participant ledgerUris so each participant lives on its own hostname
+  # (matching its Beckn subscriberId). The hostnames come from PUBLIC_URL's
+  # port; the hostname strings are the subscriber IDs themselves so they
+  # line up with the dedi registry entries.
+  local patch_py='
 import json, os, sys, pathlib
+from urllib.parse import urlparse, urlunparse
 src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-pub = os.environ['PUBLIC_URL']
-# rglob to support both flat (data-exchange) and nested (ev-charging) layouts.
-# Both snake_case (p2p-trading-ies-wave1) and camelCase URI keys are handled.
-for f in sorted(src.rglob('*.json')):
+pub = os.environ["PUBLIC_URL"]
+u = urlparse(pub)
+
+def base_for(host):
+    netloc = f"{host}:{u.port}" if u.port else host
+    return urlunparse((u.scheme, netloc, "", "", "", ""))
+
+bap_base          = base_for("buyerapp.example.com")
+bpp_base          = base_for("sellerapp.example.com")
+sellerdiscom_base = base_for("seller-discom-ledger.example.com")
+buyerdiscom_base  = base_for("buyer-discom-ledger.example.com")
+
+discom_ledger_uri = {
+    "sellerDiscom": sellerdiscom_base + "/bpp/receiver",
+    "buyerDiscom":  buyerdiscom_base  + "/bap/receiver",
+}
+
+for f in sorted(src.rglob("*.json")):
     rel = f.relative_to(src)
     out = dst / rel
     out.parent.mkdir(parents=True, exist_ok=True)
     d = json.load(open(f))
-    ctx = d.get('context') if isinstance(d, dict) else None
+    if not isinstance(d, dict):
+        json.dump(d, open(out, "w"), indent=2)
+        continue
+    ctx = d.get("context")
     if isinstance(ctx, dict):
-        if 'bapUri' in ctx:
-            ctx['bapUri'] = pub + '/bap/receiver'
-        if 'bppUri' in ctx:
-            ctx['bppUri'] = pub + '/bpp/receiver'
-        if 'bap_uri' in ctx:
-            ctx['bap_uri'] = pub + '/bap/receiver'
-        if 'bpp_uri' in ctx:
-            ctx['bpp_uri'] = pub + '/bpp/receiver'
-    json.dump(d, open(out, 'w'), indent=2)
-PY
+        if "bapUri" in ctx:  ctx["bapUri"]  = bap_base + "/bap/receiver"
+        if "bppUri" in ctx:  ctx["bppUri"]  = bpp_base + "/bpp/receiver"
+        if "bap_uri" in ctx: ctx["bap_uri"] = bap_base + "/bap/receiver"
+        if "bpp_uri" in ctx: ctx["bpp_uri"] = bpp_base + "/bpp/receiver"
+    participants = (d.get("message", {}) or {}).get("contract", {}).get("participants") or []
+    for p in participants:
+        attrs = p.get("participantAttributes")
+        if isinstance(attrs, dict) and "ledgerUri" in attrs and p.get("role") in discom_ledger_uri:
+            attrs["ledgerUri"] = discom_ledger_uri[p["role"]]
+    json.dump(d, open(out, "w"), indent=2)
+'
+
+  PUBLIC_URL="$public_url" python3 -c "$patch_py" "$usecase_root/examples" "$work/$uc_name/examples"
+
+  # Copy ledger-fixtures when present (wave2 split-discom layout).
+  # Placed at $work/ledger-fixtures/ so ../../ledger-fixtures/ from
+  # $work/<uc>/workflows/ resolves correctly.
+  # NOTE: copy verbatim — the fixtures encode discom self-identifying contexts
+  # (e.g. context.bppId = seller-discom-ledger) that the generic URI rewriter
+  # would clobber by assuming bppId always means the original BPP.
+  if [ -d "$devkit_root/ledger-fixtures" ]; then
+    cp -R "$devkit_root/ledger-fixtures" "$work/ledger-fixtures"
+  fi
 
   local respect_args=(--severity 'SCHEMA_CHECK=off')
   if [ "${#RUN_ARAZZO_ARGS[@]}" -gt 0 ]; then
@@ -77,12 +121,12 @@ PY
   set +e
   if [ "$public_url" = "http://beckn-router:9000" ]; then
     npx --yes @redocly/cli respect \
-      "$work/workflows/$arazzo" \
+      "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       "${respect_args[@]}"
   else
     npx --yes @redocly/cli respect \
-      "$work/workflows/$arazzo" \
+      "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       -S "beckn-bap-caller=$public_url/bap/caller" \
       -S "beckn-bpp-caller=$public_url/bpp/caller" \
