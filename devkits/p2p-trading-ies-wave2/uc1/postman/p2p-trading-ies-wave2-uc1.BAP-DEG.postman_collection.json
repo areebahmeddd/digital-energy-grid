@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "fb2b8972-5530-475c-9d03-e55793789074",
+    "_postman_id": "03f8c3a0-252b-4b53-9f03-f97ff806157b",
     "name": "p2p-trading-ies-wave2-uc1.BAP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
@@ -76,33 +76,6 @@
     {
       "name": "init",
       "item": [
-        {
-          "name": "init-request-discom",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"init\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\"https://schema.beckn.io/DEGContract/v2.0/context.jsonld\", \"https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"contract\": {\n      \"status\": {\n        \"code\": \"DRAFT\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"DRAFT\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-p2p-001\",\n            \"resourceIds\": [\"energy-resource-solar-001\"]\n          },\n          \"commitmentAttributes\": {\n            \"@context\": \"https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld\",\n            \"@type\": \"TimeSeries\",\n            \"intervalPeriod\": {\n              \"start\": \"2026-04-26T04:30:00Z\",\n              \"duration\": \"PT1H\"\n            },\n            \"payloadDescriptors\": [\n              {\"objectType\": \"EVENT_PAYLOAD_DESCRIPTOR\", \"payloadType\": \"REQUESTED_QTY\", \"units\": \"KWH\"}\n            ],\n            \"intervals\": [\n              {\"id\": 0, \"payloads\": [{\"type\": \"REQUESTED_QTY\", \"values\": [20.5]}]}\n            ]\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\"role\": \"buyer\", \"participantId\": \"example.bap.com\"},\n          {\"role\": \"seller\", \"participantId\": \"example.bpp.com\"},\n          {\"role\": \"buyerDiscom\", \"participantId\": \"buyer-discom-ledger.example.com\"},\n          {\"role\": \"sellerDiscom\", \"participantId\": \"seller-discom-ledger.example.com\"}\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bap_adapter_url}}/init",
-              "host": [
-                "{{bap_adapter_url}}"
-              ],
-              "path": [
-                "init"
-              ]
-            },
-            "description": "Init request: init-request-discom"
-          },
-          "response": []
-        },
         {
           "name": "init-request",
           "request": {

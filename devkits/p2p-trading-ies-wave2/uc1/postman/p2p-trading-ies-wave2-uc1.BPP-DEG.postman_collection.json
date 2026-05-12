@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "2a53fc0e-5731-44c3-a3de-e3f884890cab",
+    "_postman_id": "d0aefa2a-bcda-48b2-ac0e-4d0f1024bb2a",
     "name": "p2p-trading-ies-wave2-uc1.BPP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
@@ -41,33 +41,6 @@
     {
       "name": "on_init",
       "item": [
-        {
-          "name": "on-init-response-discom",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"on_init\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\"https://schema.beckn.io/DEGContract/v2.0/context.jsonld\", \"https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"contract\": {\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"energy-resource-solar-001\",\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 20\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-p2p-001\",\n            \"resourceIds\": [\"energy-resource-solar-001\"]\n          },\n          \"commitmentAttributes\": {\n            \"@context\": \"https://schema.beckn.io/DiscomLimitCheck/v2.0/context.jsonld\",\n            \"@type\": \"DiscomLimitCheck\",\n            \"deliveryWindow\": {\n              \"@type\": \"beckn:TimePeriod\",\n              \"schema:startTime\": \"2026-04-26T04:30:00Z\",\n              \"schema:endTime\": \"2026-04-26T05:30:00Z\"\n            },\n            \"tradeQuantity\": {\n              \"@type\": \"Quantity\",\n              \"unitCode\": \"KWH\",\n              \"unitQuantity\": 20.0\n            },\n            \"buyerSide\": {\n              \"discomParticipantId\": \"buyer-discom-ledger.example.com\",\n              \"limitCheckResult\": \"OK\",\n              \"remainingHeadroomKwh\": 80.0\n            },\n            \"sellerSide\": {\n              \"discomParticipantId\": \"seller-discom-ledger.example.com\",\n              \"limitCheckResult\": \"OK\",\n              \"remainingHeadroomKwh\": 120.0\n            }\n          }\n        }\n      ],\n      \"contractAttributes\": {\n        \"@context\": \"https://schema.beckn.io/DEGContract/v2.0/context.jsonld\",\n        \"@type\": \"DEGContract\",\n        \"roles\": [\n          {\"role\": \"buyer\", \"participantId\": \"example.bap.com\"},\n          {\"role\": \"seller\", \"participantId\": \"example.bpp.com\"},\n          {\"role\": \"buyerDiscom\", \"participantId\": \"buyer-discom-ledger.example.com\"},\n          {\"role\": \"sellerDiscom\", \"participantId\": \"seller-discom-ledger.example.com\"}\n        ],\n        \"policy\": {\n          \"url\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego\",\n          \"queryPath\": \"data.deg.contracts.p2p_trading\"\n        }\n      }\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_adapter_url}}/on_init",
-              "host": [
-                "{{bpp_adapter_url}}"
-              ],
-              "path": [
-                "on_init"
-              ]
-            },
-            "description": "On_init request: on-init-response-discom"
-          },
-          "response": []
-        },
         {
           "name": "on-init-response",
           "request": {
