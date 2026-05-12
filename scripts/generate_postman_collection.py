@@ -147,16 +147,20 @@ DEVKIT_CONFIGS = {
     },
     "p2p-trading-ies-wave2": {
         "domain": "nfh.global/testnet-deg",
-        "bap_id": "bap.example.com",
-        "bap_host_root": "http://beckn-router:9000",
-        "bpp_id": "bpp.example.com",
-        "bpp_host_root": "http://beckn-router:9000",
+        # Per-node Beckn hostnames matching subscriberIds (resolve via Caddy
+        # host-routing + Docker network aliases on beckn-router). Each
+        # participant lives on its own host; standard Beckn paths (/bap/receiver,
+        # /bpp/receiver, etc.) live under each. SubscriberIds name the entity
+        # (buyerapp/sellerapp), not the protocol role.
+        "bap_id": "buyerapp.example.com",
+        "bap_host_root": "http://buyerapp.example.com:9000",
+        "bpp_id": "sellerapp.example.com",
+        "bpp_host_root": "http://sellerapp.example.com:9000",
         "bap_adapter_url": "http://localhost:8081/bap/caller",
         "bpp_adapter_url": "http://localhost:8082/bpp/caller",
         "bpp_receiver_url": "http://localhost:8082/bpp/receiver",
-        "ledger_adapter_url": "http://localhost:8083/ledger/caller",
-        "ledger_host_buyer": "http://beckn-router:9000",
-        "ledger_host_seller": "http://beckn-router:9000",
+        "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
+        "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
         "usecase": "uc1",
         "structure": "flat",
@@ -541,7 +545,12 @@ def replace_ledger_uri_macros(
     buyer_var: str = "ledger_host_buyer",
     seller_var: str = "ledger_host_seller",
 ) -> Any:
-    """Replace ledgerUri in participants with {{ledger_host_buyer|seller}}/ledger/receiver."""
+    """Replace ledgerUri in participants with {{ledger_host_*}}/<path>.
+
+    Path matches the discom's Beckn role in the cascade:
+      - sellerDiscom is BPP-style (receives /status at /bpp/receiver)
+      - buyerDiscom  is BAP-style (receives /on_status at /bap/receiver)
+    """
     if isinstance(data, dict):
         result = {}
         for key, value in data.items():
@@ -554,9 +563,9 @@ def replace_ledger_uri_macros(
                     if isinstance(attrs, dict) and "ledgerUri" in attrs:
                         attrs = dict(attrs)
                         if role == "buyerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}/ledger/receiver"
+                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}/bap/receiver"
                         elif role == "sellerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}/ledger/receiver"
+                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}/bpp/receiver"
                         p["participantAttributes"] = attrs
                     new_parts.append(p)
                 result[key] = new_parts

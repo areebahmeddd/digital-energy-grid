@@ -1,4 +1,4 @@
-# BPP Caller routing: on_* callbacks from BPP → BAP adapter
+# SellerApp (BPP) Caller routing: on_* callbacks from BPP → BAP adapter
 routingRules:
   - version: "2.0.0"
     targetType: "bap"

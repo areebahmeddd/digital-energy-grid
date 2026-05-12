@@ -3,6 +3,7 @@ package degledgerrecorder
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"sync"
 
@@ -378,31 +379,47 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil
 	}
 
-	senderHost := r.config.SenderHost
-	if senderHost == "" {
-		senderHost = DeriveSenderHostFromWave2Status(payload, r.config.Role)
-	}
-	if senderHost == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: beckn status forwarding requires a sender host; skipping (transaction_id=%s)", payload.Context.TransactionID)
+	// Rewrite context for the seller→sellerDiscom sub-transaction:
+	//   New BAP = the trading platform (this handler, acting as BAP towards discom)
+	//   New BPP = the discom
+	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
+	ownPlatformURI := ParticipantEndpointURI(payload.Message.Contract.Participants, strings.ToLower(r.config.Role), "platformUri")
+	if ownPlatformURI == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s]; skipping status forward (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
 		return nil
 	}
-
-	rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+	subTx := SubTxContext{
+		BapURI: strings.TrimRight(ownPlatformURI, "/") + "/bap/receiver",
+		BppURI: baseURL,
+	}
+	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
 		log.Warnf(ctx, "DEGLedgerRecorder: beckn status context rewrite failed: %v", err)
 		return nil
 	}
 
-	log.Infof(ctx, "DEGLedgerRecorder: forwarding status (transaction_id=%s, contract_id=%s) -> %s/status (sender=%s)",
-		payload.Context.TransactionID, payload.Message.Contract.ID, baseURL, senderHost)
+	log.Infof(ctx, "DEGLedgerRecorder: forwarding status (transaction_id=%s, contract_id=%s) -> %s/status (sub-tx bap=%s, bpp=%s)",
+		payload.Context.TransactionID, payload.Message.Contract.ID, baseURL, subTx.BapURI, subTx.BppURI)
 	r.sendBecknStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
 	return nil
 }
 
-// handleOnStatusWave2 checks whether the on_status body carries actual
-// performance data and, if so, forwards it as a beckn on_status to the
-// appropriate discom ledger.
-// BUYER role → buyerDiscom.ledgerUri; SELLER role → sellerDiscom.ledgerUri.
+// handleOnStatusWave2 implements Rule 2: a sender-aware fork at /bap/receiver.
+//
+// On every incoming on_status, look up "own discom" participantId (sellerDiscom
+// for role=SELLER, buyerDiscom for role=BUYER) and compare to context.bppId:
+//
+//   - if equal: the on_status came from our own discom → forward to the peer's
+//     /bap/receiver (Rule 2a). For role=SELLER the peer is buyer (context.bapUri);
+//     for role=BUYER the peer is seller (derived from context.bppUri by swapping
+//     the path from /bpp/receiver to /bap/receiver).
+//
+//   - otherwise: the on_status came from the peer (or any other party) →
+//     cascade to our own discom (Rule 2b). Only fires when the payload carries
+//     performance data; bare ACK-only on_status responses are skipped.
+//
+// This asymmetric forward kills the loop the old symmetric fanOutMode=peer
+// produced: every chain terminates at a discom (which never re-cascades).
 func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	payload, err := ParseOnStatusWave2(ctx.Body)
 	if err != nil {
@@ -410,50 +427,107 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		return nil
 	}
 
-	if !Wave2OnStatusHasPerformanceData(payload) {
-		log.Debugf(ctx, "DEGLedgerRecorder: on_status has no performance payload columns; skipping ledger forward (transaction_id=%s)", payload.Context.TransactionID)
-		return nil
-	}
-
-	var side Side
+	var ownDiscomRole string
+	var ownDiscomSide Side
 	switch r.config.Role {
-	case "BUYER":
-		side = SideBuyer
 	case "SELLER":
-		side = SideSeller
+		ownDiscomRole, ownDiscomSide = "sellerDiscom", SideSeller
+	case "BUYER":
+		ownDiscomRole, ownDiscomSide = "buyerDiscom", SideBuyer
 	default:
 		log.Warnf(ctx, "DEGLedgerRecorder: on_status wave2 forwarding requires BUYER or SELLER role, got %s", r.config.Role)
 		return nil
 	}
 
-	baseURL := r.config.LedgerHost
-	if r.config.LedgerUriSource == LedgerUriSourcePayload {
-		baseURL = ExtractWave2OnStatusDiscomLedgerUri(payload, side)
+	ownDiscomPid := participantIDForRole(payload, ownDiscomRole)
+	fromOwnDiscom := ownDiscomPid != "" && payload.Context.BppID == ownDiscomPid
+
+	// Look up this handler's trading-platform URI; rewriting the context for
+	// the next leg needs it for both Rule 2a (BPP-side of leg 4) and Rule 2b
+	// (BPP-side of leg 5).
+	parts := payload.Message.Contract.Participants
+	ownPlatformURI := ParticipantEndpointURI(parts, strings.ToLower(r.config.Role), "platformUri")
+	if ownPlatformURI == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s] (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
+		return nil
 	}
+	ownBppURI := strings.TrimRight(ownPlatformURI, "/") + "/bpp/receiver"
+
+	var baseURL string
+	var subTx SubTxContext
+	if fromOwnDiscom {
+		// Rule 2a: forward to peer's /bap/receiver.
+		peerRole := "buyer"
+		if r.config.Role == "BUYER" {
+			peerRole = "seller"
+		}
+		peerPlatformURI := ParticipantEndpointURI(parts, peerRole, "platformUri")
+		if peerPlatformURI == "" {
+			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
+			return nil
+		}
+		peerBapURI := strings.TrimRight(peerPlatformURI, "/") + "/bap/receiver"
+		baseURL = peerBapURI
+		subTx = SubTxContext{BapURI: peerBapURI, BppURI: ownBppURI}
+	} else {
+		// Rule 2b: cascade to own discom. Skip if no performance data.
+		if !Wave2OnStatusHasPerformanceData(payload) {
+			log.Debugf(ctx, "DEGLedgerRecorder: on_status has no performance data; skipping discom cascade (transaction_id=%s)", payload.Context.TransactionID)
+			return nil
+		}
+		discomLedgerURI := r.config.LedgerHost
+		if r.config.LedgerUriSource == LedgerUriSourcePayload {
+			discomLedgerURI = ExtractWave2OnStatusDiscomLedgerUri(payload, ownDiscomSide)
+		}
+		baseURL = discomLedgerURI
+		// Discom acts as the BAP-style sink for this push (buyer→buyerdiscom
+		// in the canonical chain), so map it onto bapUri; this handler's
+		// platform is the BPP doing the pushing.
+		subTx = SubTxContext{BapURI: discomLedgerURI, BppURI: ownBppURI}
+	}
+
 	if baseURL == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for on_status forwarding (role=%s, side=%s)", r.config.Role, side)
+		log.Warnf(ctx, "DEGLedgerRecorder: no target URI resolved for on_status forwarding (role=%s, bppId=%s, fromOwnDiscom=%v)", r.config.Role, payload.Context.BppID, fromOwnDiscom)
 		return nil
 	}
 
-	senderHost := r.config.SenderHost
-	if senderHost == "" {
-		senderHost = DeriveSenderHostFromWave2OnStatus(payload, r.config.Role)
-	}
-	if senderHost == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: beckn on_status forwarding requires a sender host; skipping (transaction_id=%s)", payload.Context.TransactionID)
-		return nil
-	}
-
-	rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
 		log.Warnf(ctx, "DEGLedgerRecorder: beckn on_status context rewrite failed: %v", err)
 		return nil
 	}
 
-	log.Infof(ctx, "DEGLedgerRecorder: forwarding on_status with performance data (transaction_id=%s) -> %s/on_status (sender=%s)",
-		payload.Context.TransactionID, baseURL, senderHost)
+	branch := "discom"
+	if fromOwnDiscom {
+		branch = "peer"
+	}
+	log.Infof(ctx, "DEGLedgerRecorder: forwarding on_status (transaction_id=%s, role=%s, branch=%s) -> %s/on_status (sub-tx bap=%s, bpp=%s)",
+		payload.Context.TransactionID, r.config.Role, branch, baseURL, subTx.BapURI, subTx.BppURI)
 	r.sendBecknOnStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
 	return nil
+}
+
+// participantIDForRole returns the participantId of the contract participant
+// with the given role, or "" if not found.
+func participantIDForRole(payload *Wave2OnStatusPayload, role string) string {
+	for _, p := range payload.Message.Contract.Participants {
+		if p.Role == role {
+			return p.ParticipantID
+		}
+	}
+	return ""
+}
+
+// swapURLPath replaces the path component of a URL while preserving scheme,
+// host, port and query. Used to derive a Beckn-companion endpoint URL — e.g.
+// http://seller.beckn-router:9000/bpp/receiver → .../bap/receiver.
+func swapURLPath(rawURL, newPath string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		return ""
+	}
+	u.Path = newPath
+	return u.String()
 }
 
 // sendBecknStatusAsync forwards a beckn status body in the background.

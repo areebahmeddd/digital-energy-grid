@@ -1,4 +1,4 @@
-# BAP Caller routing: outbound requests from BAP → BPP adapter
+# BuyerApp (BAP) Caller routing: outbound requests from BAP → BPP adapter
 routingRules:
   - version: "2.0.0"
     targetType: "bpp"

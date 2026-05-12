@@ -33,11 +33,12 @@
 # N14. Seller payload: the seller offerAttributes.inputs entry must carry a
 #      payload (BecknTimeSeries) — payloadDescriptors alone is not sufficient.
 #
-# ── performance validation (on_status with discom alloc in commitmentAttributes) ──
+# ── performance validation (fires only on final-settlement on_status, i.e.
+#    when FINAL_ALLOC is present in commitmentAttributes) ──
 #
 # P1.  payloadTypes declared: BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC, FINAL_ALLOC.
 # P2.  Performance qty units: all three types must carry units: KWH.
-# P3.  Interval coverage: BUYER_DISCOM_ALLOC interval ids must be a subset of
+# P3.  Interval coverage: FINAL_ALLOC interval ids must be a subset of
 #      AVAILABLE_QTY interval ids.
 # P4.  Settlement consistency: FINAL_ALLOC ≤ min(BUYER_DISCOM_ALLOC,
 #      SELLER_DISCOM_ALLOC) per interval.
@@ -128,7 +129,7 @@ _offer_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.paylo
 
 _bid_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "REQUESTED_QTY"}
 
-_perf_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "BUYER_DISCOM_ALLOC"}
+_perf_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "FINAL_ALLOC"}
 
 _participant_by_role(role) := p if {
 	some p in _contract.participants
@@ -316,7 +317,8 @@ _contract_violations contains "seller offerAttributes.inputs entry must carry a 
 }
 
 # ---------------------------------------------------------------------------
-# Performance validation (when BUYER_DISCOM_ALLOC present in commitmentAttributes)
+# Performance validation (fires only when FINAL_ALLOC is present, signalling
+# a final-settlement report; partial single-discom reports are exempt).
 # ---------------------------------------------------------------------------
 
 _performance_violations contains "commitmentAttributes payloadDescriptors must include BUYER_DISCOM_ALLOC" if {
@@ -329,12 +331,6 @@ _performance_violations contains "commitmentAttributes payloadDescriptors must i
 	is_object(_commit_ts)
 	count(_perf_interval_ids) > 0
 	not "SELLER_DISCOM_ALLOC" in _commit_ts_types
-}
-
-_performance_violations contains "commitmentAttributes payloadDescriptors must include FINAL_ALLOC" if {
-	is_object(_commit_ts)
-	count(_perf_interval_ids) > 0
-	not "FINAL_ALLOC" in _commit_ts_types
 }
 
 _performance_violations contains msg if {
@@ -352,7 +348,7 @@ _performance_violations contains msg if {
 	extra := _perf_interval_ids - _offer_interval_ids
 	count(extra) > 0
 	msg := sprintf(
-		"commitmentAttributes BUYER_DISCOM_ALLOC interval ids %v not present in AVAILABLE_QTY interval ids %v",
+		"commitmentAttributes FINAL_ALLOC interval ids %v not present in AVAILABLE_QTY interval ids %v",
 		[extra, _offer_interval_ids],
 	)
 }

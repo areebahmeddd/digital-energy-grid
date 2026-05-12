@@ -3,8 +3,8 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "catalog/publish",
-    "bppId": "bpp.example.com",
-    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "bppId": "sellerapp.example.com",
+    "bppUri": "http://sellerapp.example.com:9000/bpp/receiver",
     "transactionId": "a1b2c3d4-e5f6-7890-abcd-ef1122334455",
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
     "timestamp": "2026-04-25T06:00:00Z",
@@ -24,8 +24,8 @@
           "name": "Inter-Discom P2P Solar Energy",
           "shortDesc": "Rooftop solar energy from prosumers, traded across discoms"
         },
-        "bppId": "bpp.example.com",
-        "bppUri": "http://bpp.example.com/bpp/receiver",
+        "bppId": "sellerapp.example.com",
+        "bppUri": "http://sellerapp.example.com/bpp/receiver",
         "provider": {
           "id": "TEST_SELLER_001",
           "descriptor": {
@@ -88,7 +88,7 @@
                   },
                   {
                     "role": "sellerDiscom",
-                    "participantId": "seller-discom-ledger"
+                    "participantId": "seller-discom-ledger.example.com"
                   }
                 ],
                 "policy": {
@@ -166,7 +166,7 @@
                 },
                 {
                   "role": "sellerDiscom",
-                  "participantId": "seller-discom-ledger",
+                  "participantId": "seller-discom-ledger.example.com",
                   "payloadDescriptors": [
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
