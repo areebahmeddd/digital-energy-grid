@@ -67,3 +67,21 @@ components:
           example: "TPDDL-DL"
           x-jsonld:
             "@id": utilityId
+
+        platformUri:
+          type: string
+          format: uri
+          description: >
+            Base URL (scheme + host[:port]) of the Beckn trading platform that
+            represents this customer on the network. The platform exposes the
+            standard Beckn paths under this base: `/bap/caller`, `/bap/receiver`,
+            `/bpp/caller`, `/bpp/receiver`. Used by downstream nodes to address
+            this customer's platform for cascade sub-transactions — e.g. a
+            seller-side adapter cascading a /status query into its own discom
+            ledger and needing the discom's response routed back to its own
+            /bap/receiver. The path appended depends on the action's
+            BAP↔BPP direction (/bap/receiver for on_*, /bpp/receiver for
+            request actions).
+          example: "http://bap.example.com:9000"
+          x-jsonld:
+            "@id": platformUri
