@@ -3,32 +3,33 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "_comment_role_swap": "DISCOM unilaterally publishes settlement; standard direction. bapId=Aggregator, bppId=DISCOM.",
+    "_comment_design": "DISCOM publishes per-EV vendor telemetry it has aggregated out-of-band (via the aggregator's vendor-API integrations) AFTER actuals and BEFORE settlement. This is a backstop / reconciliation channel only — settlement is computed by the meter-based revenue rego against grid-meter BASELINE/USAGE in the actuals/settled messages. PER_INTERVAL payloads (BASELINE/USAGE/POWER/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
-    "transactionId": "txn-flex-vendor-001",
-    "messageId": "msg-on-status-vendor-settled-001",
-    "timestamp": "2026-04-01T11:00:00Z",
+    "transactionId": "txn-flex-001",
+    "messageId": "msg-on-status-vendor-telemetry-001",
+    "timestamp": "2026-04-01T10:45:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/BecknTimeSeries/v1.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "id": "contract-flex-vendor-001",
+      "id": "contract-flex-001",
       "status": {
         "code": "ACTIVE"
       },
       "commitments": [
         {
-          "id": "commitment-flex-vendor-001",
+          "id": "commitment-flex-001",
           "status": {
             "descriptor": {
               "code": "ACTIVE"
@@ -36,14 +37,14 @@
           },
           "resources": [
             {
-              "id": "flex-need-north-delhi-evcurt-apr1",
+              "id": "flex-need-north-delhi-apr1",
               "quantity": {
                 "unitCode": "kW",
-                "unitQuantity": 21,
+                "unitQuantity": 150,
                 "@type": "Quantity"
               },
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {
@@ -51,15 +52,17 @@
                   "endDate": "2026-04-01T10:30:00Z"
                 },
                 "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 100
+                "maxCapacityKw": 500
               }
             }
           ],
           "offer": {
-            "id": "offer-flex-vendor-001",
-            "resourceIds": ["flex-need-north-delhi-evcurt-apr1"],
+            "id": "offer-flex-001",
+            "resourceIds": [
+              "flex-need-north-delhi-apr1"
+            ],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -68,16 +71,13 @@
                   "inputs": {
                     "incentivePerKwh": 3.5,
                     "currency": "INR",
-                    "baselineMethodology": "VENDOR_DEVICE_RATED",
+                    "baselineMethodology": {
+                      "bestOf": 5,
+                      "outOf": 10
+                    },
                     "penaltyRate": 1.5,
                     "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false,
-                    "carbonCredit": {
-                      "enabled": true,
-                      "gridEmissionFactorKgPerKwh": 0.82,
-                      "creditPricePerTonneCO2e": 1500.0,
-                      "methodology": "CDM_AMS-II.G_v1"
-                    }
+                    "optOutDefault": false
                   }
                 },
                 {
@@ -85,14 +85,19 @@
                   "participantId": "greenflex-agg",
                   "inputs": {
                     "plannedDemandChange": {
+                      "@type": "Quantity",
                       "unitCode": "KWH",
-                      "unitQuantity": 40.0,
-                      "@type": "Quantity"
+                      "unitQuantity": 150.0
                     },
+                    "participatingMeters": [
+                      "der://meter/001",
+                      "der://meter/002",
+                      "der://meter/003"
+                    ],
                     "vendorDevices": [
-                      {"deviceId": "ev://vehicle/VIN001", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"},
-                      {"deviceId": "ev://vehicle/VIN002", "deviceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "telemetryProvider": "mg-imotion"},
-                      {"deviceId": "ev://vehicle/VIN003", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"}
+                      {"deviceId": "ev://vehicle/VIN001", "behindMeter": "der://meter/001", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"},
+                      {"deviceId": "ev://vehicle/VIN002", "behindMeter": "der://meter/002", "deviceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "telemetryProvider": "mg-imotion"},
+                      {"deviceId": "ev://vehicle/VIN003", "behindMeter": "der://meter/003", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"}
                     ],
                     "reportDescriptors": [
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
@@ -111,17 +116,17 @@
       ],
       "performance": [
         {
-          "id": "perf-evt-vendor-001-actuals",
+          "id": "perf-evt-001-vendor-telemetry",
           "status": {
-            "code": "SETTLED",
-            "name": "Settlement computed from vendor telemetry policy evaluation"
+            "code": "REPORT_DELIVERED",
+            "name": "Vendor backstop telemetry delivered (BASELINE/USAGE/POWER/SOC_END per interval; GPS only on interval 0). Not consulted by settlement rego; used only for complex reconciliation."
           },
-          "commitmentIds": ["commitment-flex-vendor-001"],
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
-            "eventId": "evt-2026-04-01-vendor-001",
-            "methodology": "VENDOR_DEVICE_RATED",
+            "eventId": "evt-2026-04-01-001",
+            "methodology": "VENDOR_DEVICE_BACKSTOP",
             "meters": [
               {
                 "meterId": "ev://vehicle/VIN001",
@@ -200,15 +205,15 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {"role": "buyer", "participantId": "tpddl-north-delhi"},
           {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_uc2_revenue.rego",
-          "queryPath": "data.deg.contracts.demand_flex_uc2"
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
+          "queryPath": "data.deg.contracts.demand_flex"
         }
       },
       "participants": [

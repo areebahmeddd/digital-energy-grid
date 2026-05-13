@@ -3,16 +3,16 @@
 # Each entry is keyed by full networkId. The `default:` entry is the
 # fallback for any networkId without a dedicated entry.
 #
-# Both UC1 (baselining) and UC2 (vendor telemetry) run on
-# `nfh.global/testnet-deg`. A single rego file backs both — the two
-# entries differ only in query path:
+# Both the dedicated `nfh.global/testnet-deg` entry and the fallback
+# query the same `violations` rule, which enforces:
 #
-#   - `default:` queries `violations` (UC1 type-coverage only).
-#   - `nfh.global/testnet-deg` queries `uc2_violations` (UC1
-#     type-coverage PLUS PER_EVENT/PER_INTERVAL cardinality enforcement
-#     against the seller's committed `reportDescriptors`). The UC2
-#     rule self-skips cardinality when the wire payload carries no
-#     offer block, so it's safe for UC1 traffic too.
+#   - BecknTimeSeries cross-field type-coverage (every payload type
+#     used in intervals[*].payloads[*].type is declared in the
+#     meter's payloadDescriptors).
+#   - PER_EVENT / PER_INTERVAL cardinality against the seller's
+#     committed reportDescriptors[]. Self-skips when no offer block
+#     or no declared types are on the wire, so traffic without
+#     vendor reportDescriptors passes transparently.
 #
 # Plugin docs:
 #   https://github.com/beckn/beckn-onix/blob/main/pkg/plugin/implementation/opapolicychecker/README.md
@@ -26,4 +26,4 @@ networkPolicies:
   nfh.global/testnet-deg:
     type: file
     location: ./policies/demand_flex_network.rego
-    query: data.deg.policy.demand_flex_network.uc2_violations
+    query: data.deg.policy.demand_flex_network.violations
