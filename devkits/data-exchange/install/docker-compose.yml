@@ -139,16 +139,19 @@ services:
     networks:
       # Aliases so onix-bap/onix-bpp can resolve the BAP/BPP subscriber
       # hostnames the shared Arazzo runner rewrites payload bapUri/bppUri
-      # to (see devkits/scripts/run-arazzo-lib.sh). Caddy routes purely
+      # to (see devkits/scripts/run-arazzo-lib.sh). The runner uses each
+      # payload's context.bapId / bppId as the hostname, so these aliases
+      # must match this devkit's subscriberIds (bap.example.com /
+      # bpp.example.com — see uc*/examples/*.json). Caddy routes purely
       # on path (/bap/*, /bpp/*) so the host header is irrelevant.
       bap_side:
         aliases:
-          - buyerapp.example.com
-          - sellerapp.example.com
+          - bap.example.com
+          - bpp.example.com
       bpp_side:
         aliases:
-          - buyerapp.example.com
-          - sellerapp.example.com
+          - bap.example.com
+          - bpp.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 

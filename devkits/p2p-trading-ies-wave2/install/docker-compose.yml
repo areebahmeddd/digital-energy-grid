@@ -172,7 +172,7 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - ../ledger-fixtures/sellerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
+      - ../responses/sellerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3003/api/health"]
       interval: 10s
@@ -214,7 +214,7 @@ services:
     ports:
       - "3004:3004"
     volumes:
-      - ../ledger-fixtures/buyerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
+      - ../responses/buyerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3004/api/health"]
       interval: 10s

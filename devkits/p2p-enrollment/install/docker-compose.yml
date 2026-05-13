@@ -134,9 +134,22 @@ services:
     container_name: beckn-router
     ports:
       - "9000:9000"
+    # Aliases so onix-bap/onix-bpp can resolve the BAP/BPP subscriber
+    # hostnames the shared Arazzo runner rewrites payload bap_uri/bpp_uri
+    # to (see devkits/scripts/run-arazzo-lib.sh). The runner uses each
+    # payload's context.bap_id / bpp_id as the hostname, so these aliases
+    # must match this devkit's subscriberIds (p2p-trading-sandbox1.com /
+    # p2p-trading-sandbox2.com — see uc*/examples/*.json). Caddy routes
+    # purely on path (/bap/*, /bpp/*) so the host header is irrelevant.
     networks:
-      - bap_side
-      - bpp_side
+      bap_side:
+        aliases:
+          - p2p-trading-sandbox1.com
+          - p2p-trading-sandbox2.com
+      bpp_side:
+        aliases:
+          - p2p-trading-sandbox1.com
+          - p2p-trading-sandbox2.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 

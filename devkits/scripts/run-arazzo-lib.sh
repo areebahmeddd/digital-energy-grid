@@ -4,9 +4,10 @@
 # Sourced by per-usecase run-arazzo.sh wrappers; drives Redocly Respect,
 # rewrites payload BAP/BPP URIs so BAP↔BPP traffic flows through the local
 # beckn-router (or an ngrok tunnel), and post-processes respect's JSON log
-# to fail the run on any NACK. Native successCriteria crashed respect with
-# "Maximum call stack size exceeded" in both 2.14 and 2.29, so the NACK
-# check is done out-of-band here.
+# to fail the run on any NACK. Native successCriteria still crashes respect
+# with "Maximum call stack size exceeded" (verified on 2.14, 2.29, 2.30.5
+# — even a literal "1 == 1" condition triggers the bug), so the NACK check
+# and the sandbox-callback check are done out-of-band here.
 #
 # Usage from a wrapper:
 #   set -euo pipefail
@@ -45,17 +46,19 @@ run_arazzo() {
   # Preserve the usecase directory level so $ref relative paths in the arazzo
   # resolve identically in the tmpdir and the real repo.
   # e.g. arazzo at $work/uc1/workflows/ means:
-  #   ../examples/          → $work/uc1/examples/
-  #   ../../ledger-fixtures/ → $work/ledger-fixtures/
+  #   ../examples/      → $work/uc1/examples/
+  #   ../../responses/  → $work/responses/
   mkdir -p "$work/$uc_name/workflows" "$work/$uc_name/examples"
 
   cp "$usecase_root/workflows/$arazzo" "$work/$uc_name/workflows/"
 
   # Shared URI-patching helper — rewrites context.bapUri/bppUri and
   # participant ledgerUris so each participant lives on its own hostname
-  # (matching its Beckn subscriberId). The hostnames come from PUBLIC_URL's
-  # port; the hostname strings are the subscriber IDs themselves so they
-  # line up with the dedi registry entries.
+  # (matching its Beckn subscriberId). Each payload's own context.bapId /
+  # bppId is used as the hostname, so the BAP/BPP URLs line up with the
+  # dedi registry entries (which key off subscriberId). beckn-router must
+  # advertise these subscriberId hostnames as network aliases on both
+  # docker networks — see install/docker-compose.yml.
   local patch_py='
 import json, os, sys, pathlib
 from urllib.parse import urlparse, urlunparse
@@ -67,15 +70,20 @@ def base_for(host):
     netloc = f"{host}:{u.port}" if u.port else host
     return urlunparse((u.scheme, netloc, "", "", "", ""))
 
-bap_base          = base_for("buyerapp.example.com")
-bpp_base          = base_for("sellerapp.example.com")
-sellerdiscom_base = base_for("seller-discom-ledger.example.com")
-buyerdiscom_base  = base_for("buyer-discom-ledger.example.com")
-
+# Wave2 split-discom: the ledgerUri for a discom-role participant points to
+# the discom node, not to the original BAP/BPP. These hostnames are stable
+# across wave2 use cases; demand-flex has no participants with these roles
+# so the lookup is a no-op there.
 discom_ledger_uri = {
-    "sellerDiscom": sellerdiscom_base + "/bpp/receiver",
-    "buyerDiscom":  buyerdiscom_base  + "/bap/receiver",
+    "sellerDiscom": base_for("seller-discom-ledger.example.com") + "/bpp/receiver",
+    "buyerDiscom":  base_for("buyer-discom-ledger.example.com")  + "/bap/receiver",
 }
+
+def pick(ctx, *keys):
+    for k in keys:
+        if k in ctx and ctx[k]:
+            return ctx[k]
+    return None
 
 for f in sorted(src.rglob("*.json")):
     rel = f.relative_to(src)
@@ -87,10 +95,16 @@ for f in sorted(src.rglob("*.json")):
         continue
     ctx = d.get("context")
     if isinstance(ctx, dict):
-        if "bapUri" in ctx:  ctx["bapUri"]  = bap_base + "/bap/receiver"
-        if "bppUri" in ctx:  ctx["bppUri"]  = bpp_base + "/bpp/receiver"
-        if "bap_uri" in ctx: ctx["bap_uri"] = bap_base + "/bap/receiver"
-        if "bpp_uri" in ctx: ctx["bpp_uri"] = bpp_base + "/bpp/receiver"
+        bap_id = pick(ctx, "bapId", "bap_id")
+        bpp_id = pick(ctx, "bppId", "bpp_id")
+        if bap_id:
+            bap_base = base_for(bap_id) + "/bap/receiver"
+            if "bapUri"  in ctx: ctx["bapUri"]  = bap_base
+            if "bap_uri" in ctx: ctx["bap_uri"] = bap_base
+        if bpp_id:
+            bpp_base = base_for(bpp_id) + "/bpp/receiver"
+            if "bppUri"  in ctx: ctx["bppUri"]  = bpp_base
+            if "bpp_uri" in ctx: ctx["bpp_uri"] = bpp_base
     participants = (d.get("message", {}) or {}).get("contract", {}).get("participants") or []
     for p in participants:
         attrs = p.get("participantAttributes")
@@ -101,14 +115,16 @@ for f in sorted(src.rglob("*.json")):
 
   PUBLIC_URL="$public_url" python3 -c "$patch_py" "$usecase_root/examples" "$work/$uc_name/examples"
 
-  # Copy ledger-fixtures when present (wave2 split-discom layout).
-  # Placed at $work/ledger-fixtures/ so ../../ledger-fixtures/ from
-  # $work/<uc>/workflows/ resolves correctly.
+  # Copy devkit-level responses/ when present (wave2 split-discom layout puts
+  # discom on_* fixtures here; demand-flex uses per-uc responses mounted
+  # directly into sandbox-bpp and does NOT need this copy).
+  # Placed at $work/responses/ so ../../responses/ from $work/<uc>/workflows/
+  # resolves correctly.
   # NOTE: copy verbatim — the fixtures encode discom self-identifying contexts
   # (e.g. context.bppId = seller-discom-ledger) that the generic URI rewriter
   # would clobber by assuming bppId always means the original BPP.
-  if [ -d "$devkit_root/ledger-fixtures" ]; then
-    cp -R "$devkit_root/ledger-fixtures" "$work/ledger-fixtures"
+  if [ -d "$devkit_root/responses" ]; then
+    cp -R "$devkit_root/responses" "$work/responses"
   fi
 
   local respect_args=(--severity 'SCHEMA_CHECK=off')
@@ -118,6 +134,10 @@ for f in sorted(src.rglob("*.json")):
 
   local json_out="$work/respect-output.json"
   local respect_exit
+  # Capture an RFC3339 timestamp BEFORE the run so the sandbox-callback log
+  # scan below filters out any noise from earlier runs.
+  local respect_started_at
+  respect_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   set +e
   if [ "$public_url" = "http://beckn-router:9000" ]; then
     npx --yes @redocly/cli respect \
@@ -135,14 +155,16 @@ for f in sorted(src.rglob("*.json")):
   respect_exit=$?
   set -e
 
-  python3 - "$json_out" "$respect_exit" <<'PY'
+  local nack_status=0
+  set +e
+  python3 - "$json_out" <<'PY'
 import json, sys
-log_path, respect_exit = sys.argv[1], int(sys.argv[2])
+log_path = sys.argv[1]
 try:
     data = json.load(open(log_path))
 except Exception as e:
     print(f"NACK check: unable to read respect JSON log ({e})")
-    sys.exit(respect_exit)
+    sys.exit(0)
 nacks = []
 for _, file_data in data.get('files', {}).items():
     for wf in file_data.get('executedWorkflows', []):
@@ -162,6 +184,36 @@ if nacks:
         print(f"  - {wf_id} / {step_id}  (HTTP {status})")
     sys.exit(1)
 print("\nNACK check: PASSED — all steps returned ACK.")
-sys.exit(respect_exit)
 PY
+  nack_status=$?
+  set -e
+
+  # Sandbox-callback check: the sandbox (bpp or ledger) emits on_* callbacks
+  # asynchronously after each request. If the BPP caller or the BAP receiver
+  # rejects the on_* payload (schema validation, signing, policy, etc.), the
+  # sandbox's axios.post catches the error and logs it as
+  # "Request failed with status code <4xx/5xx>" or "AxiosError".
+  # Give async callbacks ~3s to flush, then scan sandbox-bpp container logs
+  # since respect_started_at for those error markers.
+  local sandbox_status=0
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx sandbox-bpp; then
+    sleep 3
+    local sandbox_logs
+    sandbox_logs="$(docker logs --since "$respect_started_at" sandbox-bpp 2>&1 || true)"
+    if echo "$sandbox_logs" | grep -Eq 'Request failed with status code|AxiosError'; then
+      echo
+      echo "Sandbox-callback check: FAILED — sandbox-bpp got a non-2xx when posting an on_* payload."
+      echo "  This means a fixture under devkits/<devkit>/.../responses/bpp/ failed validation at"
+      echo "  the BPP caller (or the BAP receiver). Offending log lines:"
+      echo "$sandbox_logs" | grep -E 'Request failed with status code|AxiosError|on_' | head -40 | sed 's/^/    /'
+      sandbox_status=1
+    else
+      echo "Sandbox-callback check: PASSED — sandbox-bpp on_* callbacks accepted by BPP caller and BAP receiver."
+    fi
+  fi
+
+  if [ "$nack_status" -ne 0 ] || [ "$sandbox_status" -ne 0 ]; then
+    return 1
+  fi
+  return "$respect_exit"
 }

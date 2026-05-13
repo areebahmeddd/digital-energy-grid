@@ -16,6 +16,15 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 RUN_ARAZZO_ARGS=("$@")
+
+# Point sandbox-bpp at this use case's response fixtures and recreate the
+# container so the new bind-mount takes effect. Compose evaluates
+# RESPONSES_DIR against install/docker-compose.yml at config time, so a
+# changed value triggers a recreate without touching other services.
+DEVKIT_ROOT="$(cd "$HERE/../.." && pwd)"
+export RESPONSES_DIR="../uc1-bdr-w-baselining/responses"
+(cd "$DEVKIT_ROOT/install" && docker compose up -d sandbox-bpp >/dev/null)
+
 # shellcheck disable=SC1091
 source "$(cd "$HERE/../../.." && pwd)/scripts/run-arazzo-lib.sh"
 run_arazzo "$HERE" "demand-flex" "demand-flex.arazzo.yaml"
