@@ -108,7 +108,7 @@
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "PERCENT", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
                     ]
