@@ -1,0 +1,96 @@
+arazzo: 1.0.1
+info:
+  title: Energy Data Exchange — UC3 (Tariff Policy)
+  version: 2.0.0
+  description: >
+    Minimal Beckn 2.0 workflow for retail tariff policy distribution from
+    a State Electricity Regulatory Commission (SERC) to a distribution
+    licensee. The tariff is carried as an IES_Policy artefact (energy
+    slabs + time-of-day surcharges) inside the DatasetItem dataPayload.
+
+    Run (from uc3-tariff-policy/workflows/):
+      docker compose up -d          # in install/
+      ./run-arazzo.sh               # publish → discover
+      ./run-arazzo.sh -w confirm-through-delivery -v
+
+    Override server URLs:
+      -S beckn-bap-caller=http://localhost:8081/bap/caller \
+      -S beckn-bpp-caller=http://localhost:8082/bpp/caller
+
+sourceDescriptions:
+  - name: beckn-bap-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8081/bap/caller
+
+  - name: beckn-bpp-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8082/bpp/caller
+
+workflows:
+  - workflowId: publish-catalog
+    summary: SERC publishes retail tariff policy catalog
+    steps:
+      - stepId: publish-catalog
+        operationId: beckn-bpp-caller.catalogPublish
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/publish-catalog.json"
+
+  - workflowId: discover
+    summary: Discom discovers available tariff policy datasets
+    steps:
+      - stepId: discover
+        operationId: beckn-bap-caller.discover
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/discover-request.json"
+
+  - workflowId: confirm-through-delivery
+    summary: Discom subscribes to tariff policy and receives the IES_Policy inline
+    steps:
+      - stepId: confirm
+        description: BAP confirms the tariff subscription contract
+        operationId: beckn-bap-caller.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-request.json"
+
+      - stepId: on-confirm
+        description: BPP acknowledges and begins policy artefact preparation
+        operationId: beckn-bpp-caller.onConfirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-confirm-response.json"
+
+      - stepId: status
+        description: BAP polls for delivery readiness
+        operationId: beckn-bap-caller.status
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/status-request.json"
+
+      - stepId: on-status-ready-url
+        description: BPP delivers the tariff policy artefact via signed download URL
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-ready-url.json"
+
+      - stepId: on-status-ready-inline
+        description: >
+          Alternative: BPP delivers the IES_Policy inline via dataPayload
+          (energy slabs + time-of-day surcharges embedded in on_status
+          performanceAttributes).
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-ready-inline.json"
