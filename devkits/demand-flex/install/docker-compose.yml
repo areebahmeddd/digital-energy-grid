@@ -119,6 +119,11 @@ services:
       - PERSONA=bpp
     ports:
       - "3002:3002"
+    # RESPONSES_DIR selects which use-case's on_* fixtures the sandbox serves.
+    # Default is uc1; override per-uc via the run-arazzo.sh wrapper.
+    # Path is relative to this docker-compose.yml's directory (install/).
+    volumes:
+      - ${RESPONSES_DIR:-../uc1-bdr-w-baselining/responses}:/app/dist/webhook/jsons/nfh.global/testnet-deg/response
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3002/api/health"]
       interval: 10s
@@ -134,9 +139,22 @@ services:
     container_name: beckn-router
     ports:
       - "9000:9000"
+    # Aliases so onix-bap/onix-bpp can resolve the BAP/BPP subscriber
+    # hostnames the shared Arazzo runner rewrites payload bapUri/bppUri
+    # to (see devkits/scripts/run-arazzo-lib.sh). The runner uses each
+    # payload's context.bapId / bppId as the hostname, so these aliases
+    # must match this devkit's subscriberIds (bap.example.com /
+    # bpp.example.com — see uc*/examples/*.json). Caddy routes purely
+    # on path (/bap/*, /bpp/*) so the host header is irrelevant.
     networks:
-      - bap_side
-      - bpp_side
+      bap_side:
+        aliases:
+          - bap.example.com
+          - bpp.example.com
+      bpp_side:
+        aliases:
+          - bap.example.com
+          - bpp.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 

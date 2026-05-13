@@ -163,4 +163,4 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../../ledger-fixtures/sellerdiscom/on_status.json"
+            $ref: "../../responses/sellerdiscom/on_status.json"

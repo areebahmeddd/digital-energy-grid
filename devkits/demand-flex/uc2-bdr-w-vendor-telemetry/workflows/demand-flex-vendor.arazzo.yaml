@@ -67,6 +67,11 @@ workflows:
 
   - workflowId: confirm-through-settlement
     summary: Confirm → baselines → DISCOM-asks-status → vendor telemetry → settlement
+    # on_confirm is NOT posted directly here — sandbox-bpp generates it from
+    # ../responses/bpp/on_confirm.json in response to the confirm above. The
+    # arazzo's success therefore also proves that the sandbox-produced
+    # callback passes schema validation at both the BPP caller and the BAP
+    # receiver (see post-run check in run-arazzo-lib.sh).
     steps:
       - stepId: confirm
         description: Aggregator confirms vendor-telemetry contract (ACTIVE); seller's reportDescriptors[] (with cardinality) bound here
@@ -75,14 +80,6 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/confirm-request.json"
-
-      - stepId: on-confirm
-        description: DISCOM confirms contract is ACTIVE — descriptors now frozen on the contract
-        operationId: beckn-bpp-caller.onConfirm
-        requestBody:
-          contentType: application/json
-          payload:
-            $ref: "../examples/on-confirm-response.json"
 
       - stepId: on-status-baselines
         description: DISCOM publishes per-EV BASELINE timeseries (rated charger power per interval)
