@@ -1,6 +1,6 @@
 arazzo: 1.0.1
 info:
-  title: Energy Data Exchange — UC3 (Streaming Transports)
+  title: Energy Data Exchange — UC4 (Streaming Transports)
   version: 1.0.0
   description: >
     Minimal Beckn 2.0 workflow for real-time data stream access using
@@ -14,7 +14,7 @@ info:
     Credential rotation is handled via update/on_update before
     fulfillment:credentialExpiresAt.
 
-    Run (from uc3-streaming/workflows/):
+    Run (from uc4-streaming/workflows/):
       docker compose up -d          # in install/
       ./run-arazzo.sh               # publish → discover
       ./run-arazzo.sh -w confirm-mqtt -v

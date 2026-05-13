@@ -25,10 +25,10 @@ for i, arg in enumerate(sys.argv):
         USECASE = sys.argv[i + 1]
 
 if ROLE is None:
-    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data]")
+    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data|uc3-tariff-policy]")
     sys.exit(1)
 
-usecases = [USECASE] if USECASE else ["uc1-meter-data", "uc2-regulatory-data"]
+usecases = [USECASE] if USECASE else ["uc1-meter-data", "uc2-regulatory-data", "uc3-tariff-policy"]
 
 for uc in usecases:
     devkit = f"data-exchange-{uc}"

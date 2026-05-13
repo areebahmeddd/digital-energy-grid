@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Run the uc3-streaming Arazzo workflows via Redocly Respect.
+# Run the uc4-streaming Arazzo workflows via Redocly Respect.
 #
-# Usage (from uc3-streaming/workflows/):
+# Usage (from uc4-streaming/workflows/):
 #   ./run-arazzo.sh                        # all workflows, local-bridge mode
 #   ./run-arazzo.sh -w publish-catalog -v
 #   ./run-arazzo.sh -w confirm-mqtt -v
