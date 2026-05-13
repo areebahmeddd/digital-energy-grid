@@ -3,13 +3,14 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
+    "_comment_design": "DISCOM publishes per-EV vendor telemetry it has aggregated out-of-band (via the aggregator's vendor-API integrations) AFTER actuals and BEFORE settlement. This is a backstop / reconciliation channel only — settlement is computed by the meter-based revenue rego against grid-meter BASELINE/USAGE in the actuals/settled messages. PER_INTERVAL payloads (BASELINE/USAGE/POWER/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
     "transactionId": "txn-flex-001",
-    "messageId": "msg-on-status-actuals-001",
-    "timestamp": "2026-04-01T10:35:00Z",
+    "messageId": "msg-on-status-vendor-telemetry-001",
+    "timestamp": "2026-04-01T10:45:00Z",
     "schemaContext": [
       "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
@@ -115,62 +116,87 @@
       ],
       "performance": [
         {
-          "id": "perf-evt-001-actuals",
+          "id": "perf-evt-001-vendor-telemetry",
           "status": {
-            "code": "DELIVERY_COMPLETE",
-            "name": "Event completed, actuals measured"
+            "code": "REPORT_DELIVERED",
+            "name": "Vendor backstop telemetry delivered (BASELINE/USAGE/POWER/SOC_END per interval; GPS only on interval 0). Not consulted by settlement rego; used only for complex reconciliation."
           },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
             "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
-            "methodology": "5of10",
+            "methodology": "VENDOR_DEVICE_BACKSTOP",
             "meters": [
               {
-                "meterId": "der://meter/001",
+                "meterId": "ev://vehicle/VIN001",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT30M"
+                  },
                   "payloadDescriptors": [
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE",    "units": "KW", "readingType": "DIRECT_READ" }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "units": "DEGREES"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    { "id": 0, "payloads": [ {"type":"BASELINE","values":[46.0]}, {"type":"USAGE","values":[22.0]} ] },
-                    { "id": 1, "payloads": [ {"type":"BASELINE","values":[44.0]}, {"type":"USAGE","values":[18.0]} ] }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [1.0]}, {"type": "POWER", "values": [1.0]}, {"type": "SOC_END", "values": [20.5]}, {"type": "GPS_LAT", "values": [28.6139]}, {"type": "GPS_LON", "values": [77.209]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [1.0]}, {"type": "POWER", "values": [1.0]}, {"type": "SOC_END", "values": [21.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [1.0]}, {"type": "POWER", "values": [1.0]}, {"type": "SOC_END", "values": [21.5]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [1.0]}, {"type": "POWER", "values": [1.0]}, {"type": "SOC_END", "values": [22.0]}]}
                   ]
                 }
               },
               {
-                "meterId": "der://meter/002",
+                "meterId": "ev://vehicle/VIN002",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT30M"
+                  },
                   "payloadDescriptors": [
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE",    "units": "KW", "readingType": "DIRECT_READ" }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "units": "DEGREES"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    { "id": 0, "payloads": [ {"type":"BASELINE","values":[39.0]}, {"type":"USAGE","values":[16.0]} ] },
-                    { "id": 1, "payloads": [ {"type":"BASELINE","values":[37.0]}, {"type":"USAGE","values":[14.0]} ] }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}, {"type": "GPS_LAT", "values": [28.628]}, {"type": "GPS_LON", "values": [77.241]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]}
                   ]
                 }
               },
               {
-                "meterId": "der://meter/003",
+                "meterId": "ev://vehicle/VIN003",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT30M"
+                  },
                   "payloadDescriptors": [
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ" },
-                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE",    "units": "KW", "readingType": "DIRECT_READ" }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "units": "KW"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "units": "DEGREES"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    { "id": 0, "payloads": [ {"type":"BASELINE","values":[53.0]}, {"type":"USAGE","values":[26.0]} ] },
-                    { "id": 1, "payloads": [ {"type":"BASELINE","values":[51.0]}, {"type":"USAGE","values":[24.0]} ] }
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [12.5]}, {"type": "GPS_LAT", "values": [28.545]}, {"type": "GPS_LON", "values": [77.1925]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [12.0]}]},
+                    {"id": 2, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [11.5]}]},
+                    {"id": 3, "payloads": [{"type": "BASELINE", "values": [7.0]}, {"type": "USAGE", "values": [0.0]}, {"type": "POWER", "values": [0.0]}, {"type": "SOC_END", "values": [11.0]}]}
                   ]
                 }
               }
@@ -182,14 +208,8 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
@@ -197,14 +217,8 @@
         }
       },
       "participants": [
-        {
-          "role": "buyer",
-          "participantId": "tpddl-north-delhi"
-        },
-        {
-          "role": "seller",
-          "participantId": "greenflex-agg"
-        }
+        {"role": "buyer", "participantId": "tpddl-north-delhi"},
+        {"role": "seller", "participantId": "greenflex-agg"}
       ]
     }
   }

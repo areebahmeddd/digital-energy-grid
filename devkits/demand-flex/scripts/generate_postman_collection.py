@@ -5,7 +5,6 @@ Thin wrapper around DEG/scripts/generate_postman_collection.py.
 Usage:
   python3 scripts/generate_postman_collection.py --role BAP
   python3 scripts/generate_postman_collection.py --role BPP
-  python3 scripts/generate_postman_collection.py --role BAP --usecase uc2-bdr-w-vendor-telemetry
 """
 
 import subprocess
@@ -25,7 +24,7 @@ for i, arg in enumerate(sys.argv):
         USECASE = sys.argv[i + 1]
 
 if ROLE is None:
-    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-bdr-w-baselining|uc2-bdr-w-vendor-telemetry]")
+    print("Usage: python3 scripts/generate_postman_collection.py --role BAP|BPP")
     sys.exit(1)
 
 output_dir = str(DEVKIT_ROOT / USECASE / "postman")

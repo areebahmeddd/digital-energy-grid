@@ -4,35 +4,32 @@
 # This file is a copy. Keep in sync.
 #
 # Network-level gate evaluated by the BPP's `checkPolicy` step.
-# Fires NACK when the queried rule's set is non-empty.
+# Fires NACK when `violations` is non-empty.
 #
-# Two query entry points share the same helpers:
+# The `violations` rule combines two checks:
 #
-#   - `violations` (UC1, also fallback for any networkId):
-#       BecknTimeSeries cross-field type-coverage. Every `payloadType`
-#       used in `intervals[*].payloads[*].type` MUST be declared in
-#       `payloadDescriptors[*].payloadType`. Catches typos like
-#       "BASELIN" or undocumented signals on the wire.
+#   1. BecknTimeSeries cross-field type-coverage. Every `payloadType`
+#      used in `intervals[*].payloads[*].type` MUST be declared in
+#      `payloadDescriptors[*].payloadType`. Catches typos like
+#      "BASELIN" or undocumented signals on the wire.
 #
-#   - `uc2_violations` (UC2 vendor-telemetry, opt-in via networkPolicy
-#     query path): includes everything `violations` reports, plus
-#     PER_EVENT / PER_INTERVAL cardinality enforcement against the
-#     seller's committed `reportDescriptors[]` from the offer block.
-#       PER_EVENT  — payloadType MUST appear in EXACTLY ONE interval
-#                    of the meter's BecknTimeSeries (interval 0 by
-#                    convention). Used for SOC_END, GPS_LAT, GPS_LON.
-#       PER_INTERVAL — payloadType MUST appear in EVERY interval.
-#                    Used for BASELINE, USAGE, POWER.
-#     Self-skips cardinality when no offer block is on the wire (e.g.
-#     the status round-trip carries only commitment ids), so this rule
-#     also passes UC1 traffic that lacks a seller `reportDescriptors`
-#     declaration.
+#   2. PER_EVENT / PER_INTERVAL cardinality against the seller's
+#      committed `reportDescriptors[]` from the offer block:
+#        PER_EVENT  — payloadType MUST appear in EXACTLY ONE interval
+#                     of the meter's BecknTimeSeries (interval 0 by
+#                     convention). Used for GPS_LAT, GPS_LON, etc.
+#        PER_INTERVAL — payloadType MUST appear in EVERY interval.
+#                     Used for BASELINE, USAGE, POWER, SOC_END.
+#      Cardinality self-skips when no `reportDescriptors` are on the
+#      wire (e.g. a status round-trip carrying only commitment ids,
+#      or a grid-meter-only on_status whose meter doesn't declare the
+#      vendor payload types in its own `payloadDescriptors`).
 
 package deg.policy.demand_flex_network
 
 import rego.v1
 
-# ----- helpers (UC2 cardinality) ---------------------------------------
+# ----- helpers --------------------------------------------------------
 
 _seller_descriptors := descs if {
 	some perf_input in input.message.contract.commitments[0].offer.offerAttributes.inputs
@@ -69,7 +66,7 @@ _count_payloads(meter, ptype) := n if {
 	n := count(rows)
 }
 
-# ----- UC1: cross-field type-coverage ---------------------------------
+# ----- 1) cross-field type-coverage -----------------------------------
 
 violations contains msg if {
 	some perf in input.message.contract.performance
@@ -81,13 +78,9 @@ violations contains msg if {
 	msg := sprintf("meter %s: payload type '%s' used in intervals but not declared in payloadDescriptors", [meter.meterId, payload.type])
 }
 
-# ----- UC2: superset — type-coverage + PER_EVENT/PER_INTERVAL ----------
+# ----- 2a) PER_EVENT — exactly one occurrence across intervals --------
 
-uc2_violations contains msg if {
-	some msg in violations
-}
-
-uc2_violations contains msg if {
+violations contains msg if {
 	some perf in input.message.contract.performance
 	some meter in perf.performanceAttributes.meters
 	some ptype in _per_event_types
@@ -99,7 +92,9 @@ uc2_violations contains msg if {
 		[meter.meterId, ptype, n])
 }
 
-uc2_violations contains msg if {
+# ----- 2b) PER_INTERVAL — present in every interval -------------------
+
+violations contains msg if {
 	some perf in input.message.contract.performance
 	some meter in perf.performanceAttributes.meters
 	some ptype in _per_interval_types
