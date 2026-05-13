@@ -4,9 +4,10 @@
 # Sourced by per-usecase run-arazzo.sh wrappers; drives Redocly Respect,
 # rewrites payload BAP/BPP URIs so BAP↔BPP traffic flows through the local
 # beckn-router (or an ngrok tunnel), and post-processes respect's JSON log
-# to fail the run on any NACK. Native successCriteria crashed respect with
-# "Maximum call stack size exceeded" in both 2.14 and 2.29, so the NACK
-# check is done out-of-band here.
+# to fail the run on any NACK. Native successCriteria still crashes respect
+# with "Maximum call stack size exceeded" (verified on 2.14, 2.29, 2.30.5
+# — even a literal "1 == 1" condition triggers the bug), so the NACK check
+# and the sandbox-callback check are done out-of-band here.
 #
 # Usage from a wrapper:
 #   set -euo pipefail
