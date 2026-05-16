@@ -99,7 +99,6 @@
                       {"deviceId": "ev://vehicle/VIN003", "behindMeter": "der://meter/003", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"}
                     ],
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},

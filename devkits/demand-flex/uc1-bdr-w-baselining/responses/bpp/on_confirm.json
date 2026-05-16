@@ -105,7 +105,6 @@
                       {"deviceId": "ev://vehicle/VIN002", "behindMeter": "der://meter/002", "deviceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "telemetryProvider": "mg-imotion"}
                     ],
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
