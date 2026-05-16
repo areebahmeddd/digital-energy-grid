@@ -11,8 +11,8 @@
         "action": "status",
         "bapId": "bap.example.com",
         "bppId": "bpp.example.com",
-        "transactionId": "txn-flex-bulk-001",
-        "messageId": "msg-status-pull-p2-001",
+        "transactionId": "01ac9817-da6f-4f6f-908e-bec6f9b2b8cd",
+        "messageId": "e403fe18-94ba-4986-9908-4d0d2e7f133b",
         "timestamp": "2026-04-01T10:34:30Z",
         "tags": [
           {
@@ -35,8 +35,8 @@
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
-    "transactionId": "txn-flex-bulk-001",
-    "messageId": "msg-on-status-actuals-bulk-pull-p2",
+    "transactionId": "01ac9817-da6f-4f6f-908e-bec6f9b2b8cd",
+    "messageId": "ae710ba6-5687-4e72-b6d6-bcce78db1c89",
     "timestamp": "2026-04-01T10:34:31Z",
     "schemaContext": [
       "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
