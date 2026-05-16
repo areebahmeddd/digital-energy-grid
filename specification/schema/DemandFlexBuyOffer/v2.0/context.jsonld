@@ -24,7 +24,16 @@
     "queryPath": "deg:queryPath",
     "bundleUrl": "deg:bundleUrl",
     "plannedDemandChange": "deg:plannedDemandChange",
-    "participatingMeters": "deg:participatingMeters"
+    "participatingMeters": "deg:participatingMeters",
+    "participatingMetersRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
+    "vendorDevicesRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
+    "participatingMetersDigest": {
+      "@id": "deg:participatingMetersDigest",
+      "@context": {
+        "count": { "@id": "https://schema.beckn.io/core/v2.0/count", "@type": "xsd:integer" },
+        "sha256OfSortedIds": { "@id": "https://schema.beckn.io/core/v2.0/sha256OfSortedIds", "@type": "xsd:string" }
+      }
+    }
   },
   "@graph": []
 }

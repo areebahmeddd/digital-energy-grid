@@ -43,7 +43,14 @@ components:
           type: array
           description: >
             Per-meter M&V data. Each entry binds a meter ID to its time-series
-            telemetry for the event window.
+            telemetry for the event window. When the cohort fits in a single
+            message the BPP SHOULD inline the full array and omit `pageInfo`
+            entirely. For larger cohorts the BPP either ships paged slices
+            (sibling `pageInfo` present) or substitutes `metersRef` and omits
+            `meters[]` from this message. Settlement rego runs only on the
+            assembled view — receivers MUST NOT fire settlement-dependent
+            actions until `pageInfo.isLast == true` or the `metersRef` body
+            has been fetched and verified.
           x-jsonld:
             "@id": meters
           items:
@@ -64,3 +71,26 @@ components:
                   payload only needs `@type` (optional) — `@context` is
                   declared once at the envelope level via
                   `context.schemaContext[]`.
+
+        pageInfo:
+          description: >
+            Optional. Present only when the `meters[]` collection has
+            been split across multiple on_status messages (paged inline
+            delivery). Receivers assemble all pages of the same
+            (transactionId, performance.id) by `pageInfo.sequence` and
+            defer settlement until `pageInfo.isLast == true`. Omit
+            entirely when the whole cohort fits in one message —
+            absence of `pageInfo` is the signal that this message is
+            self-contained.
+          $ref: "https://schema.beckn.io/BecknPageInfo/v1.0#/components/schemas/BecknPageInfo"
+
+        metersRef:
+          description: >
+            Optional. Off-protocol delivery of the per-meter telemetry
+            bundle when even paged-inline (`pageInfo`) is too heavy.
+            Mutually exclusive with `meters[]` and `pageInfo` on the
+            same message — the BPP substitutes this reference for the
+            entire collection. Receivers fetch `uri`, verify against
+            `contentHash` and `count`, then run settlement against the
+            fetched body.
+          $ref: "https://schema.beckn.io/BecknResourceRef/v1.0#/components/schemas/BecknResourceRef"

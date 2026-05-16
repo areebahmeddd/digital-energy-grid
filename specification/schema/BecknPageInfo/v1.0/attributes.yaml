@@ -1,0 +1,121 @@
+openapi: 3.1.1
+info:
+  title: BecknPageInfo — Pagination Envelope (v1.0)
+  version: 1.0.0
+  description: >
+    Domain-neutral pagination envelope for any beckn payload that may need
+    to ship a large collection across multiple messages (or out-of-band
+    via a content-addressed reference). Designed to be embedded as a
+    sibling of the collection it paginates — e.g. alongside
+    `performance.meters[]` or `offer.inputs[seller].inputs.participatingMeters[]`.
+
+    Senders that can fit the whole collection in a single message SHOULD
+    omit `pageInfo` entirely. The presence of `pageInfo` is itself the
+    signal that the collection is partial. This keeps the common case
+    (small cohort, single message) unchanged from today.
+
+    Two modes are supported via the same envelope:
+
+      • Push mode (BPP-initiated): BPP fires N back-to-back messages
+        with monotonically-increasing `sequence` (0..N-1) and
+        `isLast: true` on the final one. `cursor` / `nextCursor` are
+        optional in push mode — they exist only for ergonomic parity
+        with pull mode.
+
+      • Pull mode (BAP-initiated): BAP issues a status (or analogous)
+        call carrying `pageCursor` in tags (or wherever the action
+        schema supports it). BPP echoes the requested `cursor` and
+        sets `nextCursor` to whatever opaque value the BAP should
+        return to fetch the next slice; `nextCursor: null` signals the
+        last page (and `isLast: true` is set in parallel).
+
+components:
+  schemas:
+
+    BecknPageInfo:
+      type: object
+      additionalProperties: false
+      required: [sequence, isLast]
+      description: >
+        Pagination state for a single message in a multi-message
+        collection delivery. Sibling to the paginated array, NOT a
+        wrapper around it.
+      x-tags:
+        - pagination
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": PageInfo
+
+      properties:
+
+        "@type":
+          type: string
+          enum: ["PageInfo"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the embedder
+            wants to surface the type in the payload; the parent schema's
+            `$ref` to BecknPageInfo is what drives validation.
+
+        sequence:
+          type: integer
+          minimum: 0
+          description: >
+            Monotonic page index within a (transactionId, collectionId)
+            pair. `0` is the first page. Receivers assemble the full
+            collection by sorting messages by sequence. Gaps or
+            duplicates indicate transport loss and SHOULD trigger
+            re-request (pull mode) or abort (push mode).
+
+        pageSize:
+          type: integer
+          minimum: 1
+          description: >
+            Nominal page size declared by the sender. Actual element
+            count in the accompanying array MAY be less than `pageSize`
+            on the final page; SHOULD equal `pageSize` on all other
+            pages. Useful for receiver-side pre-allocation but NOT a
+            wire-validation constraint.
+
+        total:
+          type: integer
+          minimum: 0
+          description: >
+            Total element count expected across all pages of this
+            collection delivery. Optional — senders that cannot
+            determine the total cheaply MAY omit it; receivers MUST
+            still treat `isLast: true` as authoritative.
+
+        isLast:
+          type: boolean
+          description: >
+            `true` on the final page (sequence == N-1 of a delivery of
+            N pages). Receivers MUST defer any aggregate-dependent
+            actions (settlement, network-rego cardinality checks
+            against `total`, etc.) until this flag is observed. Senders
+            MUST set this exactly once per (transactionId, collectionId)
+            delivery.
+
+        cursor:
+          type: string
+          description: >
+            Opaque token identifying THIS page. Echoed from the
+            preceding `nextCursor` in pull mode; senders MAY include
+            it in push mode for symmetry but receivers SHOULD rely on
+            `sequence` for ordering. The cursor is sender-internal;
+            receivers MUST NOT parse it.
+
+        nextCursor:
+          type: ["string", "null"]
+          description: >
+            Token to include in the next pull request to fetch the
+            following page. `null` (or omitted) on the final page.
+            Sender-opaque, receiver-opaque-other-than-echo.
+
+        collectionId:
+          type: string
+          description: >
+            Identifier of the collection being paginated within the
+            envelope, e.g. `performance.0.id` or `commitments.0.id`.
+            Optional. Disambiguates concurrent deliveries when more
+            than one paginated collection rides the same transaction
+            (rare but possible).

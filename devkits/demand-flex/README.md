@@ -25,6 +25,32 @@ Settlement is computed against the DISCOM's own grid-meter measurements (`BASELI
 | [DEGContract](../../specification/schema/DEGContract/v2.0/) | `contractAttributes` | Roles (buyer/seller), policy reference, revenue flows |
 | [DemandFlexPerformance](../../specification/schema/DemandFlexPerformance/v2.0/) | `performanceAttributes` | M&V baselines and actuals per meter; per-EV vendor BecknTimeSeries for backstop |
 | [BecknReportDescriptors](../../specification/schema/BecknReportDescriptors/v1.0/) | `offerAttributes.inputs[seller].inputs.reportDescriptors` | OpenADR3-aligned descriptors with `cardinality` (PER_INTERVAL / PER_EVENT) committing what vendor telemetry types the seller will report |
+| [BecknPageInfo](../../specification/schema/BecknPageInfo/v1.0/) | `performanceAttributes.pageInfo` | Optional — present only when `meters[]` is split across messages (push or pull). Absence of `pageInfo` is the signal that the message is self-contained. |
+| [BecknResourceRef](../../specification/schema/BecknResourceRef/v1.0/) | `inputs[seller].inputs.participatingMetersRef` / `performanceAttributes.metersRef` | Optional — off-protocol delivery for bulk collections (content-addressed via `sha256`). |
+
+## Bulk cohorts (paginating thousands of meters)
+
+For demonstration purposes the example fixtures carry three meters. Real DR programs routinely span thousands. Pagination kicks in at two distinct points in the flow:
+
+| Where | When inline is fine | When to switch | Mechanism |
+|---|---|---|---|
+| Confirm-time cohort enrollment (`participatingMeters[]` on the seller's offer block) | Up to ~10k meters fits in a single confirm message | Above that threshold the confirm payload becomes unwieldy and the offer can't span messages (offers are bound at confirm) | Replace inline `participatingMeters` with `participatingMetersRef` ([BecknResourceRef](../../specification/schema/BecknResourceRef/v1.0/)) and pin the cohort with `participatingMetersDigest` (on-protocol `sha256` of the sorted meter IDs) so the contract stays auditable even after the off-protocol URL expires. |
+| Performance-time telemetry (`performanceAttributes.meters[]` on `on_status`) | Up to ~10k meters fits in a single on_status | Above that threshold the BPP either splits the delivery across multiple on_status messages (paged inline) or substitutes `metersRef` (off-protocol) | Paged inline: BPP fills `pageInfo` ([BecknPageInfo](../../specification/schema/BecknPageInfo/v1.0/)) on each message; receivers assemble by `sequence` and only settle when `isLast: true`. Off-protocol: BPP omits `meters[]` and ships `metersRef` instead. |
+
+The 10k threshold is a working guideline, not a hard cap — implementations tune to their wire budget.
+
+### Push vs pull pagination
+
+Both delivery patterns share the same `BecknPageInfo` shape; they differ only in who drives the cadence:
+
+- **BPP push** — BPP fires `N` back-to-back `on_status` messages, each with monotonically-increasing `pageInfo.sequence`, ending with `isLast: true`. The BAP does nothing special — it accumulates and fires settlement on the last page. Example: [`on-status-response-actuals-paged-push.json`](./uc1-bdr-w-baselining/examples/on-status-response-actuals-paged-push.json).
+- **BAP pull** — BAP issues `status` calls carrying a `pageCursor` tag, and the BPP returns one page per call. The response echoes `pageInfo.cursor` and advertises `pageInfo.nextCursor` for the next request. Use when the BAP needs flow control or wants to interleave page fetches with other work. Example: [`on-status-response-actuals-paged-pull.json`](./uc1-bdr-w-baselining/examples/on-status-response-actuals-paged-pull.json) (the inbound `status` request that triggered this response is recorded in the `_comment_inbound_request` block of the same file).
+
+Both examples reuse the same 12,000-meter `participatingMetersRef` cohort to show how a bulk-enrolled contract performs at scale.
+
+### Network rego under pagination
+
+The cross-field type-coverage and cardinality checks in [`demand_flex_network.rego`](./policies/demand_flex_network.rego) operate per-meter — they fire on each page in isolation, with no awareness of the wider delivery. That's fine: any malformed meter telemetry NACKs immediately on the page that carries it, regardless of the page's position. Settlement runs against the assembled view only (see [`demand_flex_revenue.rego`](../../specification/policies/demand_flex_revenue.rego)).
 
 ## Postman
 
