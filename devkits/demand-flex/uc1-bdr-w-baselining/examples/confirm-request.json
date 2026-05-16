@@ -7,8 +7,8 @@
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
-    "transactionId": "txn-flex-001",
-    "messageId": "msg-confirm-001",
+    "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
+    "messageId": "54fb3f15-48aa-4408-bca4-52486b767679",
     "timestamp": "2026-03-30T10:10:00Z",
     "schemaContext": [
       "https://schema.beckn.io/DER/v1.0/context.jsonld",

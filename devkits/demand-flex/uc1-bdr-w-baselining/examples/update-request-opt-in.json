@@ -7,8 +7,8 @@
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
-    "transactionId": "txn-flex-001",
-    "messageId": "msg-update-optin-001",
+    "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
+    "messageId": "0ad4f2d6-a48a-4a61-ad57-eb0d2a8a6795",
     "timestamp": "2026-04-01T06:00:00Z",
     "schemaContext": [
       "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
