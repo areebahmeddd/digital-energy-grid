@@ -96,9 +96,9 @@
                       "der://meter/003"
                     ],
                     "ders": [
-                      {"derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
-                      {"derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
-                      {"derId": "der://ev/VIN003", "derType": "EV_CHARGER", "behindMeter": "der://meter/003", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"}
+                      {"@type": "DER", "derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
+                      {"@type": "DER", "derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
+                      {"@type": "DER", "derId": "der://ev/VIN003", "derType": "EV_CHARGER", "behindMeter": "der://meter/003", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"}
                     ],
                     "reportDescriptors": [
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},

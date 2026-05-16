@@ -48,6 +48,7 @@ The DER class fixes **stable identity + rated dimensioning**:
 
 ```jsonc
 {
+  "@type": "DER",
   "derId": "der://ev/VIN001",
   "derType": "EV_CHARGER",
   "behindMeter": "der://meter/001",
@@ -88,8 +89,8 @@ A typical seller-side enrollment block on a demand-flex offer:
     "plannedDemandChange": { "@type": "Quantity", "unitCode": "KWH", "unitQuantity": 150.0 },
     "participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"],
     "ders": [
-      { "derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics" },
-      { "derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion" }
+      { "@type": "DER", "derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics" },
+      { "@type": "DER", "derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion" }
     ],
     "reportDescriptors": [ /* … */ ]
   }
