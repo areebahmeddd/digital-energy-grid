@@ -6,15 +6,16 @@ info:
     End-to-end Beckn 2.0 workflow for behavioral demand response.
     Scenario: TPDDL (utility) publishes a 500 kW curtailment need,
     GreenFlex (aggregator) discovers, commits, and delivers demand
-    flexibility, followed by baseline/actuals/vendor-telemetry/settlement.
+    flexibility, followed by baseline/actuals/der-telemetry/settlement.
 
     Settlement is computed against GRID-METER baselines and actuals
-    (the DISCOM's own measured truth). Per-EV vendor BecknTimeSeries
-    (BASELINE/USAGE/POWER/SOC_END per interval, GPS once per event)
-    is delivered as an additional on_status push between actuals and
-    settled — it is a BACKSTOP / reconciliation channel, never read by
-    the revenue rego, useful only for explaining anomalies after the
-    fact.
+    (the DISCOM's own measured truth). Per-DER BecknTimeSeries
+    (USAGE/POWER/SOC_END per interval, GPS once per event) is
+    delivered as an additional on_status push between actuals and
+    settled — it is a reconciliation channel only, never read by the
+    revenue rego, useful only for explaining anomalies after the
+    fact. BASELINE is exclusively utility-provided and is absent from
+    DER telemetry.
 
     Run with Redocly respect (from demand-flex/):
 
@@ -123,19 +124,20 @@ workflows:
           payload:
             $ref: "../examples/on-status-response-actuals.json"
 
-      - stepId: on-status-vendor-telemetry
+      - stepId: on-status-der-telemetry
         description: >
-          Utility publishes per-EV vendor BecknTimeSeries it has
-          aggregated out-of-band (via the aggregator's vendor-API
-          integrations) — PER_INTERVAL (BASELINE/USAGE/POWER/SOC_END)
-          on every interval, PER_EVENT (GPS_LAT/GPS_LON) only on
-          interval 0. Backstop / reconciliation channel only; the
-          settlement rego does not read this payload.
+          Utility publishes per-DER BecknTimeSeries it has aggregated
+          out-of-band (via the aggregator's vendor-API integrations)
+          — PER_INTERVAL (USAGE/POWER/SOC_END) on every interval,
+          PER_EVENT (GPS_LAT/GPS_LON) only on interval 0. BASELINE
+          is exclusively utility-provided and is absent from DER
+          telemetry. Reconciliation channel only; the settlement
+          rego does not read this payload.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/on-status-response-vendor-telemetry.json"
+            $ref: "../examples/on-status-response-der-telemetry.json"
 
       - stepId: on-status-settled
         description: >

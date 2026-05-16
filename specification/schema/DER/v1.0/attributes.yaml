@@ -1,0 +1,142 @@
+openapi: 3.1.1
+info:
+  title: DER — Distributed Energy Resource (v1.0)
+  version: 1.0.0
+  description: >
+    Domain-neutral class describing a controllable / observable energy
+    asset behind a grid meter — an EV charger, a home battery, a
+    rooftop solar PV system, a smart HVAC unit, a water heater, etc.
+    Designed to be reused across DEG schemas wherever a participant
+    needs to enumerate or reference the DERs that sit behind a
+    metering point (demand-flex offers, EV-charging offers, P2P-trading
+    enrollments, …).
+
+    A DER is identified by a type-discriminated URI scheme:
+    `der://<derType>/<id>` — e.g. `der://ev/VIN001`,
+    `der://battery/BAT001`, `der://solar/PV001`. The leading `der://`
+    namespace is reserved for energy-resource identifiers.
+
+    A DER carries:
+      • a STABLE identity (derId, derType, behindMeter, make, model)
+        fixed at the moment the DER is enrolled in a contract
+      • RATED dimensioning (ratedPowerKw, energyCapacityKwh) describing
+        the manufacturer-declared capability of the asset
+      • a TELEMETRY provenance hint (telemetryProvider) identifying
+        which vendor API / data source reports for this DER
+      • an extensible `derAttributes` bag for type-specific fields
+        the core class doesn't fix (EV → chargingProtocol/VIN, battery
+        → chemistry/cycleCount, solar → panelCount/inverterMake, …)
+
+    The DER class does NOT carry per-event STATE (current SOC,
+    instantaneous power, GPS position at time T). That belongs in
+    BecknTimeSeries telemetry attached to the performance record.
+
+components:
+  schemas:
+
+    DER:
+      type: object
+      additionalProperties: false
+      required: [derId, derType, behindMeter]
+      description: >
+        A single distributed energy resource. Each DER sits behind
+        exactly one grid meter; the (DER → meter) relationship is
+        many-to-one (multiple DERs can share a meter).
+      x-tags:
+        - der
+        - energy-asset
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": DER
+
+      properties:
+
+        "@type":
+          type: string
+          enum: ["DER"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the
+            embedder wants to surface the type in the payload; the
+            parent schema's `$ref` to DER is what drives validation.
+
+        derId:
+          type: string
+          pattern: "^der://[a-z_-]+/[A-Za-z0-9_.:-]+$"
+          description: >
+            Type-discriminated URI for this DER. Format
+            `der://<derType>/<id>` where `<derType>` mirrors the
+            (lowercased) `derType` enum and `<id>` is the asset's
+            stable identifier (VIN for EVs, serial number for
+            batteries / solar / HVAC).
+          example: "der://ev/VIN001"
+
+        derType:
+          type: string
+          description: >
+            Asset class. Open-ended enum so new DER classes can be
+            added without a schema bump; consumers SHOULD treat
+            unknown values as informational and skip type-specific
+            handling. Current values used in DEG fixtures: EV_CHARGER,
+            BATTERY, SOLAR_PV, SMART_HVAC, SMART_WATER_HEATER.
+          example: "EV_CHARGER"
+
+        behindMeter:
+          type: string
+          description: >
+            Meter URI this DER sits behind. Foreign key into the
+            embedding contract's `participatingMeters[*]`. Many DERs
+            MAY share a meter; a DER MUST sit behind exactly one
+            meter per contract.
+          example: "der://meter/001"
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          example: "Tata"
+
+        model:
+          type: string
+          description: Model (free text).
+          example: "Nexon EV"
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak dispatchable power, kW. For
+            chargers / inverters this is the device's rated AC power;
+            for thermal loads it's the rated electrical draw.
+
+        energyCapacityKwh:
+          type: number
+          minimum: 0
+          description: >
+            Rated stored-energy capacity, kWh. Populated for
+            storage-class DERs (BATTERY, EV_CHARGER backed by a
+            vehicle battery). Omit for pure-flow DERs (SOLAR_PV,
+            SMART_HVAC). Used by reconciliation/proof-of-performance
+            consumers to interpret SOC_END telemetry values as a
+            fraction of capacity.
+
+        telemetryProvider:
+          type: string
+          description: >
+            Identifier of the vendor API / data source that supplies
+            telemetry for this DER (e.g. `tata-evp-telematics`,
+            `mg-imotion`, `tesla-fleet-api`). Free text; consumers MAY
+            use it to route data-quality complaints. Not a Beckn
+            participant ID.
+
+        derAttributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Type-specific attribute bag. The core DER class fixes the
+            shape common to ALL energy resources; type-specific
+            fields (EV VIN / chargingProtocol; battery chemistry /
+            cycleCount; solar panelCount; …) ride here. Consumers
+            that don't recognise the derType SHOULD pass this bag
+            through unchanged.
+          example:
+            vin: "MAT123456789012345"
+            chargingProtocol: "OCPP_2_0_1"

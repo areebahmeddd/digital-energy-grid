@@ -1,0 +1,24 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg": "https://schema.beckn.io/deg/",
+
+    "DER": "deg:DER",
+
+    "derId":             { "@id": "deg:derId",             "@type": "xsd:string"  },
+    "derType":           { "@id": "deg:derType",           "@type": "xsd:string"  },
+    "behindMeter":       { "@id": "deg:behindMeter",       "@type": "xsd:string"  },
+    "make":              { "@id": "deg:make",              "@type": "xsd:string"  },
+    "model":             { "@id": "deg:model",             "@type": "xsd:string"  },
+    "ratedPowerKw":      { "@id": "deg:ratedPowerKw",      "@type": "xsd:decimal" },
+    "energyCapacityKwh": { "@id": "deg:energyCapacityKwh", "@type": "xsd:decimal" },
+    "telemetryProvider": { "@id": "deg:telemetryProvider", "@type": "xsd:string"  },
+    "derAttributes":     { "@id": "deg:derAttributes",     "@container": "@graph" }
+  },
+  "@graph": []
+}

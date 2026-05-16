@@ -11,11 +11,12 @@
 # Settlement is UTILITY-ONLY. Only `performance[*]` records whose
 # `performanceAttributes` were authored by the utility (BPP) — grid-meter
 # BASELINE + USAGE in a BecknTimeSeries — are eligible inputs.
-# Vendor-backstop telemetry (`methodology: "VENDOR_DEVICE_BACKSTOP"`,
-# emitted as a separate `on_status` push carrying per-EV reconciliation
-# data) is EXPLICITLY EXCLUDED from this rego's computation. It is
-# allowed on the wire as proof-of-performance / reconciliation evidence,
-# but it is not settlement-grade and never feeds the revenue flow.
+# DER telemetry (`methodology: "DER_TELEMETRY"`, emitted as a separate
+# `on_status` push carrying per-DER reconciliation data — EV chargers,
+# batteries, solar PV, etc.) is EXPLICITLY EXCLUDED from this rego's
+# computation. It is allowed on the wire as proof-of-performance /
+# reconciliation evidence, but it is not settlement-grade and never
+# feeds the revenue flow.
 #
 # Input: full beckn contract payload with:
 #   - contractAttributes.roles[].role             → buyer / seller
@@ -61,21 +62,23 @@ _incentive_per_kwh := _buyer_inputs.incentivePerKwh
 
 _currency := _buyer_inputs.currency
 
-# Vendor-backstop sentinel — perf records authored by the seller's vendor
-# stack carry this methodology and MUST be excluded from settlement input.
-# Keep this list short and explicit; new non-settlement methodologies must
-# be added here AND documented in the devkit README's settlement section.
-_vendor_only_methodologies := {"VENDOR_DEVICE_BACKSTOP"}
+# Non-settlement methodologies — perf records authored by sources other
+# than the utility (currently the seller's DER fleet via out-of-band
+# vendor APIs) carry one of these methodologies and MUST be excluded
+# from settlement input. Keep this list short and explicit; new
+# non-settlement methodologies must be added here AND documented in the
+# devkit README's settlement section.
+_non_settlement_methodologies := {"DER_TELEMETRY"}
 
 # Settlement-eligible perf records: utility-authored M&V data only.
-# Filters out vendor-backstop telemetry by `methodology`. If a payload
-# carries a single utility perf record (the common case) this picks it;
-# if multiple are present (e.g. baselines + actuals on the same message)
-# the FIRST is used — callers SHOULD invoke this rego against the actuals
-# (or settled) message.
+# Filters out DER (proof-of-performance) telemetry by `methodology`. If
+# a payload carries a single utility perf record (the common case) this
+# picks it; if multiple are present (e.g. baselines + actuals on the
+# same message) the FIRST is used — callers SHOULD invoke this rego
+# against the actuals (or settled) message.
 _settlement_perf := perf if {
 	some perf in input.message.contract.performance
-	not perf.performanceAttributes.methodology in _vendor_only_methodologies
+	not perf.performanceAttributes.methodology in _non_settlement_methodologies
 }
 
 _perf_attrs := _settlement_perf.performanceAttributes
@@ -218,15 +221,16 @@ net_zero_ok if _revenue_sum == 0
 
 violations contains msg if {
 	# Defense-in-depth: invoking the rego against a payload whose only
-	# perf records are vendor-backstop is a programming error — the
-	# settlement-eligibility filter silently selects nothing and the
-	# downstream rules would compute nonsense or NaN. Flag explicitly.
+	# perf records are non-settlement (DER telemetry) is a programming
+	# error — the settlement-eligibility filter silently selects
+	# nothing and the downstream rules would compute nonsense or NaN.
+	# Flag explicitly.
 	count(input.message.contract.performance) > 0
 	not _settlement_perf
-	vendor_methodologies := [perf.performanceAttributes.methodology |
+	seen_methodologies := [perf.performanceAttributes.methodology |
 		some perf in input.message.contract.performance
 	]
-	msg := sprintf("no settlement-eligible performance record found — all records are vendor-backstop (methodologies: %v). Settlement requires utility-provided meter telemetry; vendor data is reconciliation-only.", [vendor_methodologies])
+	msg := sprintf("no settlement-eligible performance record found — all records are non-settlement (methodologies: %v). Settlement requires utility-provided meter telemetry; DER telemetry is reconciliation-only.", [seen_methodologies])
 }
 
 violations contains msg if {

@@ -235,20 +235,20 @@ test_baseline_only_emits_violation if {
 }
 
 # ---------------------------------------------------------------------------
-# Vendor-backstop exclusion: utility perf record alongside a vendor perf
-# record should pick the utility one for settlement and IGNORE the vendor
-# data entirely — even if the vendor record sits ahead of the utility
-# record in the array.
+# DER-telemetry exclusion: utility perf record alongside a DER perf record
+# should pick the utility one for settlement and IGNORE the DER data
+# entirely — even if the DER record sits ahead of the utility record in
+# the array.
 # ---------------------------------------------------------------------------
 
-_vendor_perf(meters) := {
-	"id": "p-vendor",
+_der_perf(meters) := {
+	"id": "p-der",
 	"status": {"code": "REPORT_DELIVERED"},
 	"commitmentIds": ["c1"],
 	"performanceAttributes": {
 		"@context": "test", "@type": "DemandFlexPerformance",
 		"eventId": "evt-test",
-		"methodology": "VENDOR_DEVICE_BACKSTOP",
+		"methodology": "DER_TELEMETRY",
 		"meters": meters,
 	},
 }
@@ -294,12 +294,12 @@ _input_with_perf_records(perf_records) := {
 	}},
 }
 
-# Test: vendor perf record listed FIRST is ignored; settlement uses the
+# Test: DER perf record listed FIRST is ignored; settlement uses the
 # utility perf record listed second. Verifies the filter — not the array
 # index — is what picks the eligible record.
-test_vendor_perf_record_excluded_from_settlement if {
-	vendor_meter := {
-		"meterId": "ev://vehicle/VIN001",
+test_der_perf_record_excluded_from_settlement if {
+	der_meter := {
+		"meterId": "der://ev/VIN001",
 		"telemetry": {
 			"@type": "TimeSeries",
 			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
@@ -307,7 +307,7 @@ test_vendor_perf_record_excluded_from_settlement if {
 				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
 				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
 			],
-			# 99 kW vendor USAGE would, if used, blow up settlement
+			# 99 kW DER USAGE would, if used, blow up settlement
 			"intervals": [{"id": 0, "payloads": [
 				{"type": "USAGE", "values": [99.0]},
 				{"type": "SOC_END", "values": [21.0]},
@@ -315,21 +315,21 @@ test_vendor_perf_record_excluded_from_settlement if {
 		},
 	}
 	inp := _input_with_perf_records([
-		_vendor_perf([vendor_meter]),
+		_der_perf([der_meter]),
 		_utility_perf([_meter_with_actual("m1", 45.0, 20.0)]),
 	])
 	# Settlement uses utility data: (45-20) kW × 2h × 3.5 INR/kWh = 175 INR.
-	# If vendor data leaked in, total would be different.
+	# If DER data leaked in, total would be different.
 	total_settlement == 175 with input as inp
 	# And no violations
 	count(violations) == 0 with input as inp
 }
 
-# Test: payload carrying ONLY a vendor-backstop perf record triggers an
+# Test: payload carrying ONLY a DER-telemetry perf record triggers an
 # explicit violation; the rego refuses to compute settlement.
-test_vendor_only_payload_violation if {
-	vendor_meter := {
-		"meterId": "ev://vehicle/VIN001",
+test_der_only_payload_violation if {
+	der_meter := {
+		"meterId": "der://ev/VIN001",
 		"telemetry": {
 			"@type": "TimeSeries",
 			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
@@ -341,8 +341,8 @@ test_vendor_only_payload_violation if {
 			]}],
 		},
 	}
-	inp := _input_with_perf_records([_vendor_perf([vendor_meter])])
+	inp := _input_with_perf_records([_der_perf([der_meter])])
 	vs := violations with input as inp
 	some v in vs
-	contains(v, "vendor-backstop")
+	contains(v, "DER telemetry")
 }
