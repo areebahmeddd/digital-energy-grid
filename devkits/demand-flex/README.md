@@ -1,30 +1,33 @@
 # Demand Flex Devkit
 
-Beckn Protocol v2.0 devkit for **behavioral demand response**. A utility publishes flexibility needs (peak demand reduction), and aggregators discover, commit to, and deliver demand flexibility — with settlement based on measured grid-meter performance and optional per-device vendor backstop telemetry.
+Beckn Protocol v2.0 devkit for **behavioral demand response**. A utility publishes flexibility needs (peak demand reduction), and aggregators discover, commit to, and deliver demand flexibility — with settlement based on measured grid-meter performance and optional per-DER (Distributed Energy Resource) reconciliation telemetry.
 
 For the shared stack topology, prerequisites, Quick Start, transaction flow, hosting, ngrok notes, and cleanup, see [../README.md](../README.md).
 
 ## Scenario
 
-**TPDDL** (Tata Power Delhi Distribution, the utility) publishes a 500 kW curtailment need during a peak event window. **GreenFlex Aggregator** discovers the opportunity, enrolls participating grid meters (each backed by an EV charger as a vendor device), and commits to providing 150 kW of demand reduction. After the event, TPDDL publishes per-meter baselines, measured actuals, and per-EV vendor BecknTimeSeries (collected from GreenFlex out-of-band) before computing settlement (e.g., 150 kWh × 3.5 INR/kWh = 525 INR).
+**TPDDL** (Tata Power Delhi Distribution, the utility) publishes a 500 kW curtailment need during a peak event window. **GreenFlex Aggregator** discovers the opportunity, enrolls participating grid meters (each with one or more DERs sitting behind it — EV chargers in this example), and commits to providing 150 kW of demand reduction. After the event, TPDDL publishes per-meter baselines, measured actuals, and per-DER BecknTimeSeries (collected from GreenFlex out-of-band) before computing settlement (e.g., 150 kWh × 3.5 INR/kWh = 525 INR).
 
-Settlement is computed against the DISCOM's own grid-meter measurements (`BASELINE` and `USAGE` per interval). The per-EV vendor telemetry — `BASELINE` / `USAGE` / `POWER` / `SOC_END` per interval and `GPS_LAT` / `GPS_LON` once per event — flows over the same `on_status` channel as a **backstop / reconciliation** payload only; the settlement rego never reads it. Anomalous meter readings can be cross-checked against vendor truth without changing how revenue is computed.
+**Settlement is utility-only.** Revenue is computed against the DISCOM's own grid-meter measurements (`BASELINE` and `USAGE` per interval), authored by the utility (BPP) and pushed via `on_status`. The settlement rego ([`demand_flex_revenue.rego`](../../specification/policies/demand_flex_revenue.rego)) is hard-wired to ignore any performance record whose `methodology` is in the non-settlement allowlist (`DER_TELEMETRY`) — even if such a record is the first one in the payload, even if it is the only record on the wire (in which case the rego refuses to settle and surfaces an explicit violation). Baselines do not appear in DER telemetry at all.
+
+**DER telemetry is reconciliation-only.** The seller (aggregator) MAY contribute per-DER proof-of-performance telemetry — `USAGE` / `POWER` / `SOC_END` per interval and `GPS_LAT` / `GPS_LON` once per event — which the DISCOM aggregates out-of-band from the aggregator's vendor-API integrations (e.g. Tata EVP Telematics, MG iMotion) and republishes on the same `on_status` channel as a separate performance record (`methodology: "DER_TELEMETRY"`, status `REPORT_DELIVERED`). It exists so anomalous meter readings can be cross-checked against DER truth after the fact; it never feeds the revenue flow.
 
 ## Use Cases
 
 | Use Case | BPP (Provider) | BAP (Consumer) | Description |
 |----------|---------------|----------------|-------------|
-| [uc1-bdr-w-baselining](./uc1-bdr-w-baselining/) | TPDDL (utility) | GreenFlex (aggregator) | Publish flex need → discover → commit → baseline → actuals → vendor backstop telemetry → settle on meter actuals/baselines |
+| [uc1-bdr-w-baselining](./uc1-bdr-w-baselining/) | TPDDL (utility) | GreenFlex (aggregator) | Publish flex need → discover → commit → baseline → actuals → DER telemetry → settle on meter actuals/baselines |
 
 ## Key Schemas
 
 | Schema | Slot | Description |
 |--------|------|-------------|
 | [DemandFlexNeed](../../specification/schema/DemandFlexNeed/v2.0/) | `resourceAttributes` | Direction (REDUCE/INCREASE), event window, capacity type, location |
-| [DemandFlexBuyOffer](../../specification/schema/DemandFlexBuyOffer/v2.0/) | `offerAttributes` | Incentive per kWh, baseline methodology, penalty rate, seller's `participatingMeters` / `vendorDevices` / `reportDescriptors` |
+| [DemandFlexBuyOffer](../../specification/schema/DemandFlexBuyOffer/v2.0/) | `offerAttributes` | Incentive per kWh, baseline methodology, penalty rate, seller's `participatingMeters` / `ders` / `reportDescriptors` |
+| [DER](../../specification/schema/DER/v1.0/) | `offerAttributes.inputs[seller].inputs.ders[*]` | Distributed Energy Resource — stable identity (derId, derType, behindMeter, make, model) + rated dimensioning (ratedPowerKw, energyCapacityKwh). EV chargers, batteries, solar PV, smart HVAC, … |
 | [DEGContract](../../specification/schema/DEGContract/v2.0/) | `contractAttributes` | Roles (buyer/seller), policy reference, revenue flows |
-| [DemandFlexPerformance](../../specification/schema/DemandFlexPerformance/v2.0/) | `performanceAttributes` | M&V baselines and actuals per meter; per-EV vendor BecknTimeSeries for backstop |
-| [BecknReportDescriptors](../../specification/schema/BecknReportDescriptors/v1.0/) | `offerAttributes.inputs[seller].inputs.reportDescriptors` | OpenADR3-aligned descriptors with `cardinality` (PER_INTERVAL / PER_EVENT) committing what vendor telemetry types the seller will report |
+| [DemandFlexPerformance](../../specification/schema/DemandFlexPerformance/v2.0/) | `performanceAttributes` | M&V baselines and actuals per meter; per-DER BecknTimeSeries for reconciliation |
+| [BecknReportDescriptors](../../specification/schema/BecknReportDescriptors/v1.0/) | `offerAttributes.inputs[seller].inputs.reportDescriptors` | OpenADR3-aligned descriptors with `cardinality` (PER_INTERVAL / PER_EVENT) committing what DER telemetry types the seller will report |
 | [BecknPageInfo](../../specification/schema/BecknPageInfo/v1.0/) | `performanceAttributes.pageInfo` | Optional — present only when `meters[]` is split across messages (push or pull). Absence of `pageInfo` is the signal that the message is self-contained. |
 | [BecknResourceRef](../../specification/schema/BecknResourceRef/v1.0/) | `inputs[seller].inputs.participatingMetersRef` / `performanceAttributes.metersRef` | Optional — off-protocol delivery for bulk collections (content-addressed via `sha256`). |
 
@@ -68,16 +71,17 @@ A single rego file ([`policies/demand_flex_network.rego`](./policies/demand_flex
 | PER_EVENT cardinality | Each `PER_EVENT` type declared by the seller (e.g. `GPS_LAT`, `GPS_LON`) must appear in exactly one interval of any meter that declares it. |
 | PER_INTERVAL cardinality | Each `PER_INTERVAL` type declared by the seller (e.g. `BASELINE`, `USAGE`, `POWER`, `SOC_END`) must appear in every interval of any meter that declares it. |
 
-Cardinality self-skips when no `reportDescriptors` are on the wire (e.g. a status round-trip carrying only commitment ids) or when the meter's own `payloadDescriptors` don't declare the type (e.g. a grid-meter baselines push that only declares `BASELINE`). So traffic without vendor commitments passes transparently.
+Cardinality self-skips when no `reportDescriptors` are on the wire (e.g. a status round-trip carrying only commitment ids) or when the meter's own `payloadDescriptors` don't declare the type (e.g. a grid-meter baselines push that only declares `BASELINE`). So traffic without DER commitments passes transparently.
 
-Settlement rego is referenced per-contract via `contractAttributes.policy.url` → [`specification/policies/demand_flex_revenue.rego`](../../specification/policies/demand_flex_revenue.rego), package `deg.contracts.demand_flex`. The settlement rego reads per-meter `BASELINE` / `USAGE` from the performance section and produces a net-zero `buyer pays / seller receives` revenue flow; per-EV vendor telemetry pushed as the prior `on_status` message is ignored by the rego (its perf record's status is `REPORT_DELIVERED`, not `SETTLED`).
+Settlement rego is referenced per-contract via `contractAttributes.policy.url` → [`specification/policies/demand_flex_revenue.rego`](../../specification/policies/demand_flex_revenue.rego), package `deg.contracts.demand_flex`. It picks the first `performance[*]` record whose `performanceAttributes.methodology` is NOT in the non-settlement allowlist (`{"DER_TELEMETRY"}`) and computes a net-zero `buyer pays / seller receives` revenue flow from its per-meter `BASELINE` / `USAGE`. If a payload carries only DER-telemetry perf records, the rego emits an explicit `"no settlement-eligible performance record found"` violation rather than coercing DER numbers into the settlement — see [`demand_flex_revenue_test.rego`](../../specification/policies/demand_flex_revenue_test.rego) `test_der_perf_record_excluded_from_settlement` and `test_der_only_payload_violation`.
 
 Signature/registry lookups currently target `nfh.global/testnet-deg` via the `allowedNetworkIDs` key on the `dediregistry` plugin. Subscriber IDs are placeholders (`bap.example.com` / `bpp.example.com`) with signing keys borrowed from the p2p-trading devkit, so arazzo flows will NACK on lookup until real subscribers are registered on testnet-deg.
 
 ## Related
 
 - [DemandFlexNeed Schema](../../specification/schema/DemandFlexNeed/v2.0/) — Flex resource attributes
-- [DemandFlexBuyOffer Schema](../../specification/schema/DemandFlexBuyOffer/v2.0/) — Incentive and policy terms, including `vendorDevices` and `reportDescriptors`
-- [BecknReportDescriptors Schema](../../specification/schema/BecknReportDescriptors/v1.0/) — OpenADR3-aligned vendor-telemetry commitments
+- [DemandFlexBuyOffer Schema](../../specification/schema/DemandFlexBuyOffer/v2.0/) — Incentive and policy terms, including `ders` and `reportDescriptors`
+- [DER Schema](../../specification/schema/DER/v1.0/) — Distributed Energy Resource class — EV chargers, batteries, solar PV, smart HVAC; reusable across DEG
+- [BecknReportDescriptors Schema](../../specification/schema/BecknReportDescriptors/v1.0/) — OpenADR3-aligned DER-telemetry commitments
 - [Demand Flexibility Implementation Guide](../../docs/implementation-guides/v2/Demand_Flexibility/Demand_Flexibility.md) — Detailed protocol flows and schema mappings
 - [Data Exchange Devkit](../data-exchange/) — Companion devkit for energy data delivery

@@ -1,17 +1,28 @@
 # DEG Contract Policy — Demand Flex Revenue Flows
 #
-# Computes per-meter incentive payouts from M&V baselines/actuals and
-# produces signed revenue flows per ROLE (buyer/seller), not per participant ID.
+# Computes per-meter incentive payouts from utility-provided M&V baselines
+# and actuals, and produces signed revenue flows per ROLE (buyer/seller),
+# not per participant ID.
 #
 # buyer  (utility/DISCOM) → pays     → negative value
 # seller (aggregator)     → receives → positive value
 # Sum of all revenue_flows values MUST equal zero (net-zero).
 #
+# Settlement is UTILITY-ONLY. Only `performance[*]` records whose
+# `performanceAttributes` were authored by the utility (BPP) — grid-meter
+# BASELINE + USAGE in a BecknTimeSeries — are eligible inputs.
+# DER telemetry (`methodology: "DER_TELEMETRY"`, emitted as a separate
+# `on_status` push carrying per-DER reconciliation data — EV chargers,
+# batteries, solar PV, etc.) is EXPLICITLY EXCLUDED from this rego's
+# computation. It is allowed on the wire as proof-of-performance /
+# reconciliation evidence, but it is not settlement-grade and never
+# feeds the revenue flow.
+#
 # Input: full beckn contract payload with:
 #   - contractAttributes.roles[].role             → buyer / seller
 #   - commitments[0].offer.offerAttributes.inputs → incentive terms (role-tagged)
 #   - commitments[0].resources[0].resourceAttributes.eventWindow → hours
-#   - performance[0].performanceAttributes.meters[*].telemetry  → BecknTimeSeries
+#   - performance[*].performanceAttributes.meters[*].telemetry  → BecknTimeSeries
 #
 # Per-meter telemetry is a BecknTimeSeries; mean of BASELINE values across
 # intervals is used as the meter's baseline kW; mean of USAGE values is used
@@ -51,7 +62,26 @@ _incentive_per_kwh := _buyer_inputs.incentivePerKwh
 
 _currency := _buyer_inputs.currency
 
-_perf_attrs := input.message.contract.performance[0].performanceAttributes
+# Non-settlement methodologies — perf records authored by sources other
+# than the utility (currently the seller's DER fleet via out-of-band
+# vendor APIs) carry one of these methodologies and MUST be excluded
+# from settlement input. Keep this list short and explicit; new
+# non-settlement methodologies must be added here AND documented in the
+# devkit README's settlement section.
+_non_settlement_methodologies := {"DER_TELEMETRY"}
+
+# Settlement-eligible perf records: utility-authored M&V data only.
+# Filters out DER (proof-of-performance) telemetry by `methodology`. If
+# a payload carries a single utility perf record (the common case) this
+# picks it; if multiple are present (e.g. baselines + actuals on the
+# same message) the FIRST is used — callers SHOULD invoke this rego
+# against the actuals (or settled) message.
+_settlement_perf := perf if {
+	some perf in input.message.contract.performance
+	not perf.performanceAttributes.methodology in _non_settlement_methodologies
+}
+
+_perf_attrs := _settlement_perf.performanceAttributes
 
 _meters := _perf_attrs.meters
 
@@ -188,6 +218,20 @@ net_zero_ok if _revenue_sum == 0
 # ---------------------------------------------------------------------------
 # Violations
 # ---------------------------------------------------------------------------
+
+violations contains msg if {
+	# Defense-in-depth: invoking the rego against a payload whose only
+	# perf records are non-settlement (DER telemetry) is a programming
+	# error — the settlement-eligibility filter silently selects
+	# nothing and the downstream rules would compute nonsense or NaN.
+	# Flag explicitly.
+	count(input.message.contract.performance) > 0
+	not _settlement_perf
+	seen_methodologies := [perf.performanceAttributes.methodology |
+		some perf in input.message.contract.performance
+	]
+	msg := sprintf("no settlement-eligible performance record found — all records are non-settlement (methodologies: %v). Settlement requires utility-provided meter telemetry; DER telemetry is reconciliation-only.", [seen_methodologies])
+}
 
 violations contains msg if {
 	not "buyer" in _roles

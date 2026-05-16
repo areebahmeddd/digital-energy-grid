@@ -11,6 +11,7 @@
     "messageId": "msg-confirm-001",
     "timestamp": "2026-03-30T10:10:00Z",
     "schemaContext": [
+      "https://schema.beckn.io/DER/v1.0/context.jsonld",
       "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
@@ -100,12 +101,11 @@
                       "der://meter/001",
                       "der://meter/002"
                     ],
-                    "vendorDevices": [
-                      {"deviceId": "ev://vehicle/VIN001", "behindMeter": "der://meter/001", "deviceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "telemetryProvider": "tata-evp-telematics"},
-                      {"deviceId": "ev://vehicle/VIN002", "behindMeter": "der://meter/002", "deviceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "telemetryProvider": "mg-imotion"}
+                    "ders": [
+                      {"@type": "DER", "derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
+                      {"@type": "DER", "derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"}
                     ],
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},

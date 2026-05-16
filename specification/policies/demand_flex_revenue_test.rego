@@ -233,3 +233,116 @@ test_baseline_only_emits_violation if {
 	some v in vs
 	contains(v, "m1")
 }
+
+# ---------------------------------------------------------------------------
+# DER-telemetry exclusion: utility perf record alongside a DER perf record
+# should pick the utility one for settlement and IGNORE the DER data
+# entirely — even if the DER record sits ahead of the utility record in
+# the array.
+# ---------------------------------------------------------------------------
+
+_der_perf(meters) := {
+	"id": "p-der",
+	"status": {"code": "REPORT_DELIVERED"},
+	"commitmentIds": ["c1"],
+	"performanceAttributes": {
+		"@context": "test", "@type": "DemandFlexPerformance",
+		"eventId": "evt-test",
+		"methodology": "DER_TELEMETRY",
+		"meters": meters,
+	},
+}
+
+_utility_perf(meters) := {
+	"id": "p-utility",
+	"status": {"code": "DELIVERY_COMPLETE"},
+	"commitmentIds": ["c1"],
+	"performanceAttributes": {
+		"@context": "test", "@type": "DemandFlexPerformance",
+		"eventId": "evt-test",
+		"methodology": "5of10",
+		"meters": meters,
+	},
+}
+
+_input_with_perf_records(perf_records) := {
+	"message": {"contract": {
+		"id": "test",
+		"status": {"code": "ACTIVE"},
+		"commitments": [{
+			"id": "c1",
+			"status": {"descriptor": {"code": "ACTIVE"}},
+			"resources": [{
+				"id": "r1",
+				"quantity": {"unitCode": "kW", "unitQuantity": 150},
+				"resourceAttributes": {
+					"@context": "test", "@type": "DemandFlexNeed",
+					"direction": "REDUCE", "eventWindow": _default_window,
+					"capacityType": "CURTAILMENT", "maxCapacityKw": 500,
+				},
+			}],
+			"offer": {
+				"id": "o1", "resourceIds": ["r1"],
+				"offerAttributes": {
+					"@context": "test", "@type": "DemandFlexBuyOffer",
+					"inputs": _default_inputs,
+				},
+			},
+		}],
+		"performance": perf_records,
+		"contractAttributes": _deg_contract,
+	}},
+}
+
+# Test: DER perf record listed FIRST is ignored; settlement uses the
+# utility perf record listed second. Verifies the filter — not the array
+# index — is what picks the eligible record.
+test_der_perf_record_excluded_from_settlement if {
+	der_meter := {
+		"meterId": "der://ev/VIN001",
+		"telemetry": {
+			"@type": "TimeSeries",
+			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+			"payloadDescriptors": [
+				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
+				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
+			],
+			# 99 kW DER USAGE would, if used, blow up settlement
+			"intervals": [{"id": 0, "payloads": [
+				{"type": "USAGE", "values": [99.0]},
+				{"type": "SOC_END", "values": [21.0]},
+			]}],
+		},
+	}
+	inp := _input_with_perf_records([
+		_der_perf([der_meter]),
+		_utility_perf([_meter_with_actual("m1", 45.0, 20.0)]),
+	])
+	# Settlement uses utility data: (45-20) kW × 2h × 3.5 INR/kWh = 175 INR.
+	# If DER data leaked in, total would be different.
+	total_settlement == 175 with input as inp
+	# And no violations
+	count(violations) == 0 with input as inp
+}
+
+# Test: payload carrying ONLY a DER-telemetry perf record triggers an
+# explicit violation; the rego refuses to compute settlement.
+test_der_only_payload_violation if {
+	der_meter := {
+		"meterId": "der://ev/VIN001",
+		"telemetry": {
+			"@type": "TimeSeries",
+			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+			"payloadDescriptors": [
+				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
+			],
+			"intervals": [{"id": 0, "payloads": [
+				{"type": "USAGE", "values": [1.0]},
+			]}],
+		},
+	}
+	inp := _input_with_perf_records([_der_perf([der_meter])])
+	vs := violations with input as inp
+	some v in vs
+	contains(v, "DER telemetry")
+}
