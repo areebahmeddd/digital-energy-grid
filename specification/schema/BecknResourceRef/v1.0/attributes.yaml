@@ -1,0 +1,123 @@
+openapi: 3.1.1
+info:
+  title: BecknResourceRef — Off-Protocol Content Reference (v1.0)
+  version: 1.0.0
+  description: >
+    Domain-neutral envelope for delivering a large collection (or any
+    other resource) out-of-band, while keeping the on-protocol payload
+    small and tamper-evident. The on-protocol message carries the
+    reference; the receiver fetches the body from `uri` and verifies
+    integrity against `contentHash`.
+
+    Two use sites in DEG, both opt-in:
+
+      • Replace an inline collection on a frozen-at-confirm object
+        (e.g. `inputs[seller].inputs.participatingMetersRef` in lieu
+        of `participatingMeters[]`) when the cohort is large enough
+        that splitting across messages is impossible (the offer can't
+        span messages).
+
+      • Replace an inline collection on a streamable object (e.g.
+        `performanceAttributes.metersRef` in lieu of `meters[]`) when
+        even paged-inline (`pageInfo`) is too heavy.
+
+    `BecknResourceRef` and `BecknPageInfo` are MUTUALLY EXCLUSIVE on a
+    given collection: a sender chooses on-protocol paged delivery OR
+    off-protocol reference, not both. Consumer schemas SHOULD enforce
+    this with `oneOf`/`if-then`.
+
+    Authentication: this schema commits the BPP to a specific body
+    via `contentHash` (Beckn-signed at the envelope level). Access
+    control on `uri` — signed URLs, OAuth, IP allow-lists — is a BPP
+    implementation choice and outside the spec.
+
+components:
+  schemas:
+
+    BecknResourceRef:
+      type: object
+      additionalProperties: false
+      required: [uri, contentHash, count]
+      description: >
+        Reference to a content-addressed, BPP-hosted JSON document.
+        Receivers fetch `uri`, canonicalize the body per JSON Canonicalization
+        Scheme (RFC 8785), compute SHA-256, and reject on mismatch with
+        `contentHash`.
+      x-tags:
+        - bulk-delivery
+        - off-protocol
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": ResourceRef
+
+      properties:
+
+        "@type":
+          type: string
+          enum: ["ResourceRef"]
+          description: >
+            Optional JSON-LD type discriminator. The parent's `$ref`
+            drives validation.
+
+        uri:
+          type: string
+          format: uri
+          description: >
+            URL the receiver fetches to retrieve the body. MUST be
+            HTTPS. Access control on the URL is the BPP's
+            responsibility (signed URL, OAuth, etc.) — out of scope
+            for this schema.
+
+        contentHash:
+          type: string
+          pattern: "^sha256:[0-9a-f]{64}$"
+          description: >
+            SHA-256 of the fetched body after JSON canonicalization
+            (RFC 8785). Format `sha256:<64-hex>`. Lowercase hex.
+            This field is the integrity anchor — Beckn signing of the
+            enclosing message commits the BPP to this exact hash.
+
+        count:
+          type: integer
+          minimum: 0
+          description: >
+            Element count expected in the referenced collection
+            (e.g. number of meter IDs or number of meter telemetry
+            entries in the body). Cheap cross-check for receivers:
+            mismatched count vs. fetched body is grounds for reject
+            without canonicalizing.
+
+        contentType:
+          type: string
+          description: >
+            MIME / media type of the body at `uri`. Defaults to
+            `application/ld+json` when omitted. Implementations MAY
+            use this to switch parsers (e.g. `application/x-ndjson`
+            for large streaming bodies).
+          default: "application/ld+json"
+
+        schemaContext:
+          type: string
+          format: uri
+          description: >
+            JSON-LD `@context` URL the body conforms to. Receivers
+            use this to pick a validator. Optional but RECOMMENDED;
+            redundant with the body's own `@context` but useful for
+            pre-fetch routing.
+
+        expiresAt:
+          type: string
+          format: date-time
+          description: >
+            Optional RFC 3339 timestamp after which `uri` is no
+            longer guaranteed fetchable. Useful for signed-URL
+            implementations. Independent of `contentHash` — the body
+            itself doesn't change.
+
+        sizeBytes:
+          type: integer
+          minimum: 0
+          description: >
+            Optional declared byte size of the body. Lets receivers
+            short-circuit before downloading multi-GB bodies they
+            can't budget for.

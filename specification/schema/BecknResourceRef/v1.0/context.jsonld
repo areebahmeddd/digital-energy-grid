@@ -1,0 +1,21 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+
+    "ResourceRef": "beckn:BecknResourceRef",
+
+    "uri":            { "@id": "beckn:uri",           "@type": "xsd:anyURI"   },
+    "contentHash":    { "@id": "beckn:contentHash",   "@type": "xsd:string"   },
+    "count":          { "@id": "beckn:count",         "@type": "xsd:integer"  },
+    "contentType":    { "@id": "beckn:contentType",   "@type": "xsd:string"   },
+    "schemaContext":  { "@id": "beckn:schemaContext", "@type": "xsd:anyURI"   },
+    "expiresAt":      { "@id": "beckn:expiresAt",     "@type": "xsd:dateTime" },
+    "sizeBytes":      { "@id": "beckn:sizeBytes",     "@type": "xsd:integer"  }
+  },
+  "@graph": []
+}

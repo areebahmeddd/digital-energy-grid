@@ -13,7 +13,9 @@
     "methodology": "dfp:methodology",
     "meters": "dfp:meters",
     "meterId": "dfp:meterId",
-    "telemetry": "deg:BecknTimeSeries"
+    "telemetry": "deg:BecknTimeSeries",
+    "pageInfo": "beckn:BecknPageInfo",
+    "metersRef": "beckn:BecknResourceRef"
   },
   "@graph": []
 }

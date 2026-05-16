@@ -1,0 +1,17 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "beckn:BecknResourceRef",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Resource Ref",
+      "rdfs:comment": "Content-addressed, BPP-hosted reference to a body delivered out-of-band. Used in place of large inline collections to keep the on-protocol payload small and tamper-evident."
+    }
+  ]
+}
