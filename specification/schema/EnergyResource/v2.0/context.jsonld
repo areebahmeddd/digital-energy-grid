@@ -8,16 +8,6 @@
     "beckn": "https://schema.beckn.io/core/v2.0/",
     "deg": "https://schema.beckn.io/deg/EnergyResource/v2.0/",
     "EnergyResource": "deg:EnergyResource",
-    "sourceType": {
-      "@id": "deg:sourceType",
-      "@type": "@id"
-    },
-    "meterId": "deg:meterId",
-    "SOLAR": "deg:SourceTypeSolar",
-    "BATTERY": "deg:SourceTypeBattery",
-    "GRID": "deg:SourceTypeGrid",
-    "HYBRID": "deg:SourceTypeHybrid",
-    "RENEWABLE": "deg:SourceTypeRenewable",
 
     "resourceId":         { "@id": "deg:resourceId",         "@type": "xsd:string"  },
     "resourceType":       { "@id": "deg:resourceType",       "@type": "xsd:string"  },
@@ -27,7 +17,8 @@
     "energyCapacityKwh":  { "@id": "deg:energyCapacityKwh",  "@type": "xsd:decimal" },
     "telemetryProvider":  { "@id": "deg:telemetryProvider",  "@type": "xsd:string"  },
     "resourceAttributes": { "@id": "deg:resourceAttributes", "@container": "@graph" },
-    "subResources":       { "@id": "deg:subResources",       "@container": "@list"  }
+    "subResources":       { "@id": "deg:subResources",       "@container": "@list"  },
+    "parentResources":    { "@id": "deg:parentResources",    "@container": "@list"  }
   },
   "@graph": []
 }

@@ -42,8 +42,8 @@
             "resourceAttributes": {
               "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
               "@type": "EnergyResource",
-              "sourceType": "SOLAR",
-              "meterId": "TEST_METER_SELLER_001"
+              "resourceType": "SOLAR",
+              "resourceId": "TEST_METER_SELLER_001"
             }
           }
         ],
@@ -123,15 +123,35 @@
                       {
                         "id": 0,
                         "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [12.5]},
-                          {"type": "AVAILABLE_QTY", "values": [30.5]}
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              12.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              30.5
+                            ]
+                          }
                         ]
                       },
                       {
                         "id": 1,
                         "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [14.5]},
-                          {"type": "AVAILABLE_QTY", "values": [25.5]}
+                          {
+                            "type": "PRICE_PER_KWH",
+                            "values": [
+                              14.5
+                            ]
+                          },
+                          {
+                            "type": "AVAILABLE_QTY",
+                            "values": [
+                              25.5
+                            ]
+                          }
                         ]
                       }
                     ]

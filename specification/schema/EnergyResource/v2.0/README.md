@@ -1,6 +1,6 @@
 # EnergyResource — v2.0
 
-Canonical, technology-neutral class for any asset that produces, consumes, stores, or modulates energy. Used today by **P2P-trading** (minimal `{sourceType, meterId}` shape) and **demand-flex** (richer identity + rated dimensioning + topology). Both shapes are valid against the same schema — every new field is optional.
+Canonical, technology-neutral class for any asset that produces, consumes, stores, or modulates energy. Used by **P2P-trading** (`{resourceId, resourceType}` for the asset being sold), **demand-flex** (richer identity + dimensioning + topology to enumerate the assets behind a contract), and reused by every future DEG domain.
 
 Part of the [DEG Schema](../../) · [EnergyResource](../README.md)
 
@@ -16,19 +16,12 @@ Part of the [DEG Schema](../../) · [EnergyResource](../README.md)
 
 No field is `required` at the schema level — domain profiles (demand-flex's network rego, p2p-trading's item gates) enforce their own cross-field expectations.
 
-### Backward-compat (P2P-trading wave2)
+### Identity + rated dimensioning
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `sourceType` | enum | `SOLAR` \| `BATTERY` \| `GRID` \| `HYBRID` \| `RENEWABLE`. Closed set used by P2P-trading. |
-| `meterId` | string | Identifier of the meter associated with this resource. In P2P-trading, the source meter; in demand-flex, the meter the resource sits behind. Typically `der://meter/<id>` but format is open. |
-
-### Identity + rated dimensioning (new in v2.0 additive merge)
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `resourceId` | string | Stable resource identifier; recommended URI scheme `der://<type>/<id>`. |
-| `resourceType` | string (open) | Open-string asset class — `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR_PV`, `WIND`, `BIOGAS`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`, `GRID`, … |
+| `resourceId` | string | Stable identifier; recommended URI scheme `der://<type>/<id>`. |
+| `resourceType` | string (open) | Open-string asset class — `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`, `GRID`, `GRID_METER`, … |
 | `make` / `model` | string | Manufacturer info. |
 | `ratedPowerKw` | number ≥0 | Manufacturer-rated peak dispatchable power, kW. |
 | `energyCapacityKwh` | number ≥0 | Rated stored-energy capacity, kWh — populated for storage-class resources, omitted for pure-flow. |
@@ -39,26 +32,27 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `subResources` | array | Child resources. Each item is **either** a bare `resourceId` (FK to a sibling EnergyResource in the same payload) **or** an inline-nested EnergyResource. |
+| `subResources` | array | Child resources. Each item is **either** a bare `resourceId` string (FK to a sibling EnergyResource in the same payload) **or** an inline-nested EnergyResource. |
+| `parentResources` | array of strings | Parent resources — `resourceId`s of EnergyResources this one sits behind (typically a meter or aggregation point). **String form only** — parents are enumerated elsewhere; inlining them inside a child would be a definitional cycle. |
 
-## Wave2 P2P-trading payload (unchanged shape, valid as-is)
+## P2P-trading payload (wave2)
 
 ```jsonc
 {
   "@type": "EnergyResource",
-  "sourceType": "SOLAR",
-  "meterId": "TEST_METER_SELLER_001"
+  "resourceId": "der://meter/TEST_METER_SELLER_001",
+  "resourceType": "SOLAR"
 }
 ```
 
-## Demand-flex DR payload (uses the new identity + dimensioning fields)
+## Demand-flex DR payload (richer identity + parent linkage)
 
 ```jsonc
 {
   "@type": "EnergyResource",
   "resourceId": "der://ev/VIN001",
   "resourceType": "EV_CHARGER",
-  "meterId": "der://meter/001",
+  "parentResources": ["der://meter/001"],
   "make": "Tata",
   "model": "Nexon EV",
   "ratedPowerKw": 7.0,
@@ -71,14 +65,15 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
 }
 ```
 
-## Topology example — microgrid as parent of solar + BESS + EV
+`parentResources: ["der://meter/001"]` declares this EV sits behind grid meter `der://meter/001`, which is enumerated separately in the contract's `participatingMeters[*]`. The schema does not enforce that the FK resolves — domain profiles do.
+
+## Topology example — microgrid with mixed inline + reference children
 
 ```jsonc
 {
   "@type": "EnergyResource",
   "resourceId": "der://site/MICROGRID01",
   "resourceType": "MICROGRID",
-  "meterId": "der://meter/001",
   "subResources": [
     "der://solar/PV001",
     "der://battery/BAT001",
@@ -86,15 +81,20 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
       "@type": "EnergyResource",
       "resourceId": "der://ev/VIN001",
       "resourceType": "EV_CHARGER",
+      "parentResources": ["der://site/MICROGRID01"],
       "ratedPowerKw": 7.0
     }
   ]
 }
 ```
 
-The first two children are bare `resourceId` strings — they're enumerated as peer resources elsewhere in the same offer. The third is inline-nested because it only exists in this topological context.
+`subResources` (string or inline) and `parentResources` (string only) together form the directed graph. Inline children may also carry an explicit `parentResources` back-pointer if the consumer needs symmetry.
 
-## Changes from v0.3 → v2.0
+## Changes from earlier v2.0 (breaking)
 
-- v0.3 → v2.0 (original release): extracted from combined `EnergyTrade/v0.3/attributes.yaml` into a standalone schema. Two fields: `sourceType`, `meterId`.
-- v2.0 (additive merge, this revision): added identity (`resourceId`, `resourceType`), dimensioning (`make`, `model`, `ratedPowerKw`, `energyCapacityKwh`), provenance hint (`telemetryProvider`), extensible bag (`resourceAttributes`), and topology (`subResources`). Absorbs and supersedes the short-lived [`DER/v1.0/`](../../DER/v1.0/) schema that was introduced and removed in the same release cycle. No fields are `required`; wave2 payloads continue to validate unchanged.
+- **`sourceType` removed** — use `resourceType` (open string, accepts every value the enum did and more).
+- **`meterId` removed** — split into:
+  - `resourceId` for the resource's own identifier (P2P-trading wave2 used `meterId` here),
+  - `parentResources[]` for upward topology (demand-flex used `meterId` for the meter-FK semantic).
+
+Wave2 P2P-trading + demand-flex devkit fixtures migrated alongside this schema revision.

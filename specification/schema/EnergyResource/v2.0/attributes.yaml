@@ -9,24 +9,33 @@ info:
     controllable loads (HVAC, water heaters, …), and the metering
     points / connection points / feeders that anchor them.
 
-    Used in two complementary places today:
+    Used today by:
 
       • P2P-trading: attached to Item.itemAttributes (or
         Resource.resourceAttributes in inter-DISCOM flows). Wave2
-        payloads carry the minimal `{sourceType, meterId}` shape and
-        do not change with this v2.0 revision — every new field is
-        optional.
+        payloads carry `{resourceId, resourceType}` to identify the
+        resource being sold.
 
       • Demand-flex: attached as objects in the seller's
         `offerAttributes.inputs[seller].inputs.energyResources[]` to
         enumerate the assets behind a contract. Uses the richer
-        identity + dimensioning fields below.
+        identity + dimensioning fields, plus `parentResources[]` to
+        link DERs back to the grid meter they sit behind.
 
-    This v2.0 schema is a backward-compatible superset of the
-    original "source-type + meter" shape — the new fields exist so
-    DR programs, EV-charging, P2P-trading, and any future DEG domain
-    can converge on a single canonical EnergyResource class
-    (per beckn/DEG#119 "DEG Hourglass" architecture).
+    This v2.0 revision drops the original two-field `{sourceType,
+    meterId}` surface in favour of a single canonical class
+    (`resourceId` + `resourceType`) that every DEG domain can
+    converge on, per beckn/DEG#119 "DEG Hourglass" architecture.
+    `sourceType`-style enumeration values (`SOLAR`, `BATTERY`,
+    `GRID`, …) live in `resourceType` (open string); the meter
+    linkage formerly carried by `meterId` now rides on
+    `parentResources[]`.
+
+    Breaking change vs. previous v2.0 surface:
+      • `sourceType` removed — use `resourceType` (open-string,
+        accepts every value the enum did).
+      • `meterId` removed — use `resourceId` for the resource's own
+        identifier and `parentResources[]` for upward topology.
 
 components:
   schemas:
@@ -59,37 +68,7 @@ components:
             parent schema's `$ref` to EnergyResource is what drives
             validation.
 
-        # ─── Existing fields (v2.0 backward-compat surface) ───
-
-        sourceType:
-          type: string
-          enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
-          description: >
-            Closed-enum source classification used by P2P-trading.
-            Verified at onboarding but can change post-onboarding
-            (e.g., switching from solar to diesel). Source type
-            influences price but not workflow. Newer payloads SHOULD
-            also (or instead) set `resourceType` — the open-string
-            sibling field — when a more specific class is known.
-          example: "SOLAR"
-          x-jsonld:
-            "@id": sourceType
-
-        meterId:
-          type: string
-          description: >
-            Identifier of the meter associated with this resource.
-            Interpretation depends on context:
-              • P2P-trading: the resource's source meter (the meter
-                generating into the contract).
-              • Demand-flex: the meter the resource sits behind
-                (foreign key into the contract's `participatingMeters[*]`).
-            Typically a `der://meter/<id>` URI, but format is open.
-          example: "der://meter/100200300"
-          x-jsonld:
-            "@id": meterId
-
-        # ─── New fields (additive — wave2 payloads continue to validate without them) ───
+        # ─── Core identity + dimensioning ───
 
         resourceId:
           type: string
@@ -109,14 +88,13 @@ components:
           type: string
           description: >
             Open-string asset class. Common values include
-            `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR_PV`,
-            `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`,
+            `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR`,
+            `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`,
             `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`,
-            `GRID`. Consumers SHOULD treat unknown values as
-            informational and skip type-specific handling. Open-
+            `GRID`, `GRID_METER`. Consumers SHOULD treat unknown values
+            as informational and skip type-specific handling. Open-
             ended so new asset classes can be added without a schema
-            bump; semantically overlaps with `sourceType` but is
-            richer.
+            bump.
           example: "EV_CHARGER"
           x-jsonld:
             "@id": resourceType
@@ -214,3 +192,28 @@ components:
                 description: Inline-nested EnergyResource.
           x-jsonld:
             "@id": subResources
+
+        parentResources:
+          type: array
+          description: >
+            Upward topology — `resourceId`s of parent resources (e.g.
+            a meter, an aggregation point, a virtual plant) that this
+            resource sits behind. Each item is a string (resourceId
+            reference) — NOT an inline EnergyResource. Parents are
+            always enumerated elsewhere in the same payload
+            (`participatingMeters[*]` for demand-flex; a peer entry
+            in `energyResources[*]` for general topology); inlining
+            them inside a child would be a definitional cycle.
+
+            Inverse of `subResources` for the reference form.
+            Permits many-to-many: a DER may sit behind multiple
+            meters (rare — dual-feed setups), and a meter typically
+            has many child resources expressed via the inverse
+            relationship.
+          items:
+            type: string
+            description: >
+              `resourceId` of a parent EnergyResource defined
+              elsewhere in the same payload.
+          x-jsonld:
+            "@id": parentResources
