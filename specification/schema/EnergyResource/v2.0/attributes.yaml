@@ -3,19 +3,46 @@ info:
   title: EnergyResource — Resource Attributes (v2.0)
   version: 2.0.0
   description: >
-    Item attributes for energy resources. Attached to Item.itemAttributes
-    (or Resource.resourceAttributes for inter-discom P2P) to provide
-    energy-specific characteristics including source type and meter
-    identifiers.
+    Canonical, technology-neutral class for any asset that produces,
+    consumes, stores, or modulates energy — solar PV, wind, hydro,
+    biogas, CHP, fuel cells, batteries / BESS, EVs and EVSE/V2G,
+    controllable loads (HVAC, water heaters, …), and the metering
+    points / connection points / feeders that anchor them.
+
+    Used in two complementary places today:
+
+      • P2P-trading: attached to Item.itemAttributes (or
+        Resource.resourceAttributes in inter-DISCOM flows). Wave2
+        payloads carry the minimal `{sourceType, meterId}` shape and
+        do not change with this v2.0 revision — every new field is
+        optional.
+
+      • Demand-flex: attached as objects in the seller's
+        `offerAttributes.inputs[seller].inputs.energyResources[]` to
+        enumerate the assets behind a contract. Uses the richer
+        identity + dimensioning fields below.
+
+    This v2.0 schema is a backward-compatible superset of the
+    original "source-type + meter" shape — the new fields exist so
+    DR programs, EV-charging, P2P-trading, and any future DEG domain
+    can converge on a single canonical EnergyResource class
+    (per beckn/DEG#119 "DEG Hourglass" architecture).
 
 components:
   schemas:
     EnergyResource:
       type: object
       additionalProperties: false
+      description: >
+        Canonical energy-asset class. NO fields are required at the
+        schema level — domains profile this class via their own
+        cross-field checks (e.g. demand-flex's network rego requires
+        resourceId + resourceType + meterId on every entry in the
+        seller's energyResources[]).
       x-tags:
         - energy-trade
         - p2p-trading
+        - demand-flex
         - item
         - energy-resource
       x-jsonld:
@@ -23,13 +50,27 @@ components:
         "@type": EnergyResource
       properties:
 
+        "@type":
+          type: string
+          enum: ["EnergyResource"]
+          description: >
+            Optional JSON-LD type discriminator. Present when the
+            embedder wants to surface the type in the payload; the
+            parent schema's `$ref` to EnergyResource is what drives
+            validation.
+
+        # ─── Existing fields (v2.0 backward-compat surface) ───
+
         sourceType:
           type: string
           enum: [SOLAR, BATTERY, GRID, HYBRID, RENEWABLE]
           description: >
-            Type of energy source. Source verification occurs at onboarding
-            but can change post-onboarding (e.g., switching from solar to
-            diesel). Source type influences price but not workflow.
+            Closed-enum source classification used by P2P-trading.
+            Verified at onboarding but can change post-onboarding
+            (e.g., switching from solar to diesel). Source type
+            influences price but not workflow. Newer payloads SHOULD
+            also (or instead) set `resourceType` — the open-string
+            sibling field — when a more specific class is known.
           example: "SOLAR"
           x-jsonld:
             "@id": sourceType
@@ -37,8 +78,139 @@ components:
         meterId:
           type: string
           description: >
-            Source meter identifier in DER address format
-            (der://meter/{id}). Used for discovery and fulfillment tracking.
+            Identifier of the meter associated with this resource.
+            Interpretation depends on context:
+              • P2P-trading: the resource's source meter (the meter
+                generating into the contract).
+              • Demand-flex: the meter the resource sits behind
+                (foreign key into the contract's `participatingMeters[*]`).
+            Typically a `der://meter/<id>` URI, but format is open.
           example: "der://meter/100200300"
           x-jsonld:
             "@id": meterId
+
+        # ─── New fields (additive — wave2 payloads continue to validate without them) ───
+
+        resourceId:
+          type: string
+          description: >
+            Stable identifier for this resource. Recommended URI
+            scheme `der://<type>/<id>` — type-discriminated and
+            distinct from `meterId`. Required by domain profiles that
+            enumerate multiple resources per contract (demand-flex's
+            seller-side `energyResources[]`); optional in single-
+            resource P2P-trading payloads where the meter URI alone
+            is sufficient.
+          example: "der://ev/VIN001"
+          x-jsonld:
+            "@id": resourceId
+
+        resourceType:
+          type: string
+          description: >
+            Open-string asset class. Common values include
+            `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR_PV`,
+            `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`,
+            `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`,
+            `GRID`. Consumers SHOULD treat unknown values as
+            informational and skip type-specific handling. Open-
+            ended so new asset classes can be added without a schema
+            bump; semantically overlaps with `sourceType` but is
+            richer.
+          example: "EV_CHARGER"
+          x-jsonld:
+            "@id": resourceType
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          example: "Tata"
+          x-jsonld:
+            "@id": make
+
+        model:
+          type: string
+          description: Model (free text).
+          example: "Nexon EV"
+          x-jsonld:
+            "@id": model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak dispatchable power, kW. For
+            chargers / inverters this is the device's rated AC power;
+            for thermal loads it's the rated electrical draw.
+          x-jsonld:
+            "@id": ratedPowerKw
+
+        energyCapacityKwh:
+          type: number
+          minimum: 0
+          description: >
+            Rated stored-energy capacity, kWh. Populated for
+            storage-class resources (BATTERY, BESS, EV with onboard
+            battery). Omit for pure-flow resources (SOLAR_PV,
+            SMART_HVAC). Used by reconciliation/proof-of-performance
+            consumers to interpret SOC_END telemetry values as a
+            fraction of capacity.
+          x-jsonld:
+            "@id": energyCapacityKwh
+
+        telemetryProvider:
+          type: string
+          description: >
+            Identifier of the vendor API / data source that supplies
+            telemetry for this resource (e.g. `tata-evp-telematics`,
+            `mg-imotion`, `tesla-fleet-api`). Free text; consumers MAY
+            use it to route data-quality complaints. Not a Beckn
+            participant ID.
+          x-jsonld:
+            "@id": telemetryProvider
+
+        resourceAttributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Type-specific attribute bag. The core EnergyResource
+            class fixes the shape common to all energy assets;
+            type-specific fields ride here. Examples: EV → VIN,
+            chargingProtocol; battery → chemistry, cycleCount;
+            solar → panelCount, inverterMake. Consumers that don't
+            recognise the `resourceType` SHOULD pass this bag through
+            unchanged.
+          example:
+            vin: "MAT123456789012345"
+            chargingProtocol: "OCPP_2_0_1"
+          x-jsonld:
+            "@id": resourceAttributes
+
+        subResources:
+          type: array
+          description: >
+            Topology — child resources of this one. Each item is
+            EITHER a bare `resourceId` (foreign-key reference to an
+            EnergyResource defined elsewhere in the same offer /
+            contract) OR an inline-nested EnergyResource object.
+
+              • String form (resourceId) — prefer when the child is
+                already enumerated as a peer of this resource in the
+                same payload; avoids duplication.
+              • Inline form — prefer when the child only exists in
+                this topological context (e.g. a virtual aggregation
+                of leaf devices that aren't independently addressable).
+
+            Schema does NOT enforce cycle-detection or recursion
+            depth — left to implementations. The settlement rego does
+            not traverse this tree.
+          items:
+            oneOf:
+              - type: string
+                description: >
+                  resourceId of a sibling EnergyResource. Resolution
+                  is local to the enclosing offer/contract payload.
+              - $ref: "#/components/schemas/EnergyResource"
+                description: Inline-nested EnergyResource.
+          x-jsonld:
+            "@id": subResources

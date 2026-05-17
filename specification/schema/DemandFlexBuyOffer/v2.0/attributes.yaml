@@ -56,20 +56,21 @@ components:
             For buyer: incentivePerKwh, currency, penaltyRate, baselineMethodology, etc.
             For seller: plannedDemandChange (beckn:Quantity),
             participatingMeters (or participatingMetersRef when the
-            cohort is bulk), ders (or dersRef) — DER objects each
-            linked to a participatingMeters[*] entry via behindMeter —
-            and reportDescriptors (see below).
+            cohort is bulk), energyResources (or energyResourcesRef) —
+            EnergyResource objects each linked to a
+            participatingMeters[*] entry via meterId — and
+            reportDescriptors (see below).
 
             Bulk delivery: the offer is bound at confirm and cannot
             span Beckn messages, so when the seller's cohort would
             stretch a single confirm payload beyond a reasonable wire
             budget (e.g. > 10k meters) the *Ref siblings replace the
-            inline arrays. participatingMetersRef / dersRef each carry
-            a BecknResourceRef pointing at a content-addressed BPP-
-            hosted bundle. participatingMetersDigest is an on-protocol
-            tamper-evidence anchor that survives even if the ref URL
-            later goes 404 — Beckn signing of the confirm payload
-            commits the contract to that exact cohort.
+            inline arrays. participatingMetersRef / energyResourcesRef
+            each carry a BecknResourceRef pointing at a content-
+            addressed BPP-hosted bundle. participatingMetersDigest is
+            an on-protocol tamper-evidence anchor that survives even
+            if the ref URL later goes 404 — Beckn signing of the
+            confirm payload commits the contract to that exact cohort.
           properties:
             reportDescriptors:
               description: >
@@ -99,25 +100,28 @@ components:
                 the body's canonicalized form.
               $ref: "https://schema.beckn.io/BecknResourceRef/v1.0#/components/schemas/BecknResourceRef"
 
-            ders:
+            energyResources:
               type: array
               description: >
-                Optional. DERs (Distributed Energy Resources) enrolled
-                in this contract. Each entry is a DER object whose
-                `behindMeter` field references one of the meter URIs
-                in `participatingMeters[*]` (many DERs MAY share a
-                meter). DER identity and rated dimensioning live here;
+                Optional. EnergyResources enrolled in this contract.
+                Each entry is an EnergyResource object whose `meterId`
+                field references one of the meter URIs in
+                `participatingMeters[*]` (many resources MAY share a
+                meter). Identity and rated dimensioning live here;
                 per-event state lives in BecknTimeSeries telemetry on
-                the performance record's meters[].
+                the performance record's meters[]. EnergyResource is
+                the canonical, technology-neutral asset class — EV
+                chargers, batteries, solar PV, smart HVAC, etc. —
+                shared with P2P-trading and any future DEG domain.
               items:
-                $ref: "https://schema.beckn.io/DER/v1.0#/components/schemas/DER"
+                $ref: "https://schema.beckn.io/EnergyResource/v2.0#/components/schemas/EnergyResource"
 
-            dersRef:
+            energyResourcesRef:
               description: >
-                Optional. Off-protocol delivery of the ders cohort
-                when it's too large to inline. Mutually exclusive with
-                `ders`. Same verification rules as
-                `participatingMetersRef`.
+                Optional. Off-protocol delivery of the energyResources
+                cohort when it's too large to inline. Mutually
+                exclusive with `energyResources`. Same verification
+                rules as `participatingMetersRef`.
               $ref: "https://schema.beckn.io/BecknResourceRef/v1.0#/components/schemas/BecknResourceRef"
 
             participatingMetersDigest:
