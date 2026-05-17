@@ -40,10 +40,10 @@ modules:
           config:
             networkParticipant: sellerapp.example.com
             keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
-            signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-            signingPublicKey: CqVy97DW45bcZPPrWIYGe2ldl9C93NFeVciiAEYsvR0=
-            encrPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-            encrPublicKey: CqVy97DW45bcZPPrWIYGe2ldl9C93NFeVciiAEYsvR0=
+            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
         schemaValidator:
           id: schemav2validator
           config:
@@ -87,7 +87,7 @@ modules:
               actions: status
               enabled: "true"
               asyncTimeout: "30000"
-              signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
+              signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
       steps:
@@ -204,10 +204,10 @@ modules:
           config:
             networkParticipant: sellerapp.example.com
             keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
-            signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-            signingPublicKey: CqVy97DW45bcZPPrWIYGe2ldl9C93NFeVciiAEYsvR0=
-            encrPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
-            encrPublicKey: CqVy97DW45bcZPPrWIYGe2ldl9C93NFeVciiAEYsvR0=
+            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
         schemaValidator:
           id: schemav2validator
           config:
@@ -261,7 +261,7 @@ modules:
               actions: on_confirm
               enabled: "true"
               asyncTimeout: "30000"
-              signingPrivateKey: 393fVJJsfqssJCRAjedKR2cKAjSLrjU3t+bICQ5KzYM=
+              signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
       steps:
