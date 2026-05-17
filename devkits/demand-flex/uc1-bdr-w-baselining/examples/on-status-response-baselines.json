@@ -17,7 +17,7 @@
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
       "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/DER/v1.0/context.jsonld",
+      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
       "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
     ]
   },
@@ -94,10 +94,10 @@
                       "der://meter/002",
                       "der://meter/003"
                     ],
-                    "ders": [
-                      {"@type": "DER", "derId": "der://ev/VIN001", "derType": "EV_CHARGER", "behindMeter": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
-                      {"@type": "DER", "derId": "der://ev/VIN002", "derType": "EV_CHARGER", "behindMeter": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
-                      {"@type": "DER", "derId": "der://ev/VIN003", "derType": "EV_CHARGER", "behindMeter": "der://meter/003", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"}
+                    "energyResources": [
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN001", "resourceType": "EV_CHARGER", "meterId": "der://meter/001", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN002", "resourceType": "EV_CHARGER", "meterId": "der://meter/002", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN003", "resourceType": "EV_CHARGER", "meterId": "der://meter/003", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"}
                     ],
                     "reportDescriptors": [
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},

@@ -17,7 +17,17 @@
     "BATTERY": "deg:SourceTypeBattery",
     "GRID": "deg:SourceTypeGrid",
     "HYBRID": "deg:SourceTypeHybrid",
-    "RENEWABLE": "deg:SourceTypeRenewable"
+    "RENEWABLE": "deg:SourceTypeRenewable",
+
+    "resourceId":         { "@id": "deg:resourceId",         "@type": "xsd:string"  },
+    "resourceType":       { "@id": "deg:resourceType",       "@type": "xsd:string"  },
+    "make":               { "@id": "deg:make",               "@type": "xsd:string"  },
+    "model":              { "@id": "deg:model",              "@type": "xsd:string"  },
+    "ratedPowerKw":       { "@id": "deg:ratedPowerKw",       "@type": "xsd:decimal" },
+    "energyCapacityKwh":  { "@id": "deg:energyCapacityKwh",  "@type": "xsd:decimal" },
+    "telemetryProvider":  { "@id": "deg:telemetryProvider",  "@type": "xsd:string"  },
+    "resourceAttributes": { "@id": "deg:resourceAttributes", "@container": "@graph" },
+    "subResources":       { "@id": "deg:subResources",       "@container": "@list"  }
   },
   "@graph": []
 }

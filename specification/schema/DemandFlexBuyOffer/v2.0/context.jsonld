@@ -26,8 +26,8 @@
     "plannedDemandChange": "deg:plannedDemandChange",
     "participatingMeters": "deg:participatingMeters",
     "participatingMetersRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
-    "ders":    { "@id": "https://schema.beckn.io/deg/ders",    "@container": "@set" },
-    "dersRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
+    "energyResources":    { "@id": "https://schema.beckn.io/deg/energyResources", "@container": "@set" },
+    "energyResourcesRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
     "participatingMetersDigest": {
       "@id": "deg:participatingMetersDigest",
       "@context": {
