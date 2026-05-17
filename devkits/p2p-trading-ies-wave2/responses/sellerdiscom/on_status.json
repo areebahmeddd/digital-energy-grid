@@ -7,8 +7,8 @@
     "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
     "bppId": "seller-discom-ledger.example.com",
     "bppUri": "http://seller-discom-ledger.example.com:9000/bpp/caller",
-    "transactionId": "txn-p2p-001",
-    "messageId": "msg-sellerdiscom-on-status-001",
+    "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
+    "messageId": "0027cb22-edf7-4545-9c97-45cc11460750",
     "timestamp": "2026-04-26T06:30:00Z",
     "schemaContext": [
       "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
@@ -46,8 +46,8 @@
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
-                "sourceType": "SOLAR",
-                "meterId": "TEST_METER_SELLER_001"
+                "resourceType": "SOLAR",
+                "resourceId": "TEST_METER_SELLER_001"
               }
             }
           ],

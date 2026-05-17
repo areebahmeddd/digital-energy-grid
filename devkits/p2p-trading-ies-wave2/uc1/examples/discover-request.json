@@ -5,8 +5,8 @@
     "action": "discover",
     "bapId": "buyerapp.example.com",
     "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
-    "transactionId": "txn-p2p-001",
-    "messageId": "msg-discover-001",
+    "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
+    "messageId": "258ed231-2def-4840-86ed-2970320c2294",
     "timestamp": "2026-04-25T09:00:00Z"
   },
   "message": {
