@@ -9,7 +9,7 @@ set -euo pipefail
 
 catalogServiceUrl="https://fabric.nfh.global/beckn/catalog/subscription"
 discoverServiceUrl="https://34.14.221.66.sslip.io/catalog/push"
-networkID="energystackmum.tatapower.com/test-tatapower-mumbai-demand-flex-network"
+networkID="nfh.global/testnet-deg"
 
 curl --location "$catalogServiceUrl" \
   --header 'Content-Type: application/json' \
