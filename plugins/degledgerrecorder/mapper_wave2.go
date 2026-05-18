@@ -335,6 +335,14 @@ func BppCallerEndpoint(hostBase string) string {
 	return strings.TrimRight(hostBase, "/") + "/bpp/caller"
 }
 
+// BppReceiverEndpoint returns "<hostBase>/bpp/receiver" — the inbound endpoint
+// where a BPP-role node receives request actions (status, select, init, …).
+// Used by the recorder when forwarding a request (e.g. status) to a ledger
+// that's playing the BPP-receiver role in that sub-transaction.
+func BppReceiverEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bpp/receiver"
+}
+
 // DeriveSenderHostFromWave2 returns "<scheme>://<host[:port]>" extracted from
 // the original payload's bapUri (BUYER role) or bppUri (SELLER role). Used as
 // a fallback when SenderHost is not configured explicitly. Returns "" if the

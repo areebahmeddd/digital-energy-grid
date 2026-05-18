@@ -398,10 +398,12 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for status forwarding (role=%s, side=%s)", r.config.Role, side)
 		return nil
 	}
-	// ledgerEndpoint = <host>/bap/receiver — ledger's inbound BAP path. The
-	// ledger is the BAP-style sink for cascade traffic from a platform; the
-	// platform plays BPP-caller on this sub-tx (per Beckn-spec alignment).
-	ledgerEndpoint := BapReceiverEndpoint(ledgerHostBase)
+	// status is a REQUEST action; Beckn convention is requester=BAP, responder=BPP.
+	// This platform is the BAP-caller forwarding the status, ledger is the BPP-receiver.
+	// On the wire we POST to <ledger>/bpp/receiver/status; in context.bapUri we
+	// advertise the platform's BAP-receiver endpoint (where the on_status callback
+	// will land), and in context.bppUri the ledger's BPP-receiver endpoint.
+	ledgerEndpoint := BppReceiverEndpoint(ledgerHostBase)
 
 	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
 	ownPlatformURI := ParticipantEndpointURI(payload.Message.Contract.Participants, strings.ToLower(r.config.Role), "platformUri")
@@ -410,8 +412,8 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil
 	}
 	subTx := SubTxContext{
-		BapURI: ledgerEndpoint,
-		BppURI: BppCallerEndpoint(ownPlatformURI),
+		BapURI: BapReceiverEndpoint(ownPlatformURI),
+		BppURI: ledgerEndpoint,
 	}
 	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
