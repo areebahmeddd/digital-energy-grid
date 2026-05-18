@@ -116,6 +116,22 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 	buyerPart := findWave2Participant(payload.Message.Contract.Participants, "buyer")
 	sellerPart := findWave2Participant(payload.Message.Contract.Participants, "seller")
 
+	// Platform identity is trade-scoped: read from participants[role=buyer|seller].participantId
+	// rather than from transport-level context.bapId/bppId. context.bapId/bppId reflect the
+	// current message leg's BAP/BPP (and get rewritten on cascade), while participantId
+	// stays put across the chain — this is what we want to record on the ledger as the
+	// platform identities for the trade.
+	platformIDBuyer := participantID(buyerPart)
+	platformIDSeller := participantID(sellerPart)
+	if platformIDBuyer == "" {
+		log.Printf("WARNING: participants[role=buyer].participantId is empty; falling back to context.bapId (txn: %s)", payload.Context.TransactionID)
+		platformIDBuyer = payload.Context.BapID
+	}
+	if platformIDSeller == "" {
+		log.Printf("WARNING: participants[role=seller].participantId is empty; falling back to context.bppId (txn: %s)", payload.Context.TransactionID)
+		platformIDSeller = payload.Context.BppID
+	}
+
 	deliveryStart, deliveryEnd := extractWave2DeliveryWindow(commitment.Offer.OfferAttributes)
 	if deliveryStart == "" {
 		log.Printf("WARNING: wave2 deliveryStartTime not found (txn: %s, commitment: %s)",
@@ -142,8 +158,8 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 			Role:              role,
 			TransactionID:     payload.Context.TransactionID,
 			OrderItemID:       orderItemID,
-			PlatformIDBuyer:   payload.Context.BapID,
-			PlatformIDSeller:  payload.Context.BppID,
+			PlatformIDBuyer:   platformIDBuyer,
+			PlatformIDSeller:  platformIDSeller,
 			DiscomIDBuyer:     wave2StringAttr(buyerPart, "utilityId"),
 			DiscomIDSeller:    wave2StringAttr(sellerPart, "utilityId"),
 			BuyerID:           wave2StringAttr(buyerPart, "meterId"),
@@ -180,6 +196,15 @@ func findWave2Participant(participants []Wave2Participant, role string) *Wave2Pa
 		}
 	}
 	return nil
+}
+
+// participantID returns p.ParticipantID or "" if p is nil. Mirrors wave2StringAttr
+// for the top-level participantId field (not nested under participantAttributes).
+func participantID(p *Wave2Participant) string {
+	if p == nil {
+		return ""
+	}
+	return p.ParticipantID
 }
 
 // wave2StringAttr reads a string attribute from a participant's participantAttributes.
@@ -247,15 +272,27 @@ func extractWave2QuantityAndUnit(resources []Wave2Resource) (float64, string) {
 	return q.UnitQuantity, q.UnitCode
 }
 
-// RewriteContextForBeckn rewrites context.bppUri and context.bapUri on the
-// raw on_confirm body so that, from the ledger TSP's POV:
+// RewriteContextForBeckn rewrites context.bppUri/bapUri AND context.bppId/bapId
+// on the raw on_confirm body so that the cascade leg is Beckn-spec-compliant —
+// i.e. the (bppId, bppUri) pair identifies the *current* leg's caller (this
+// platform), and (bapId, bapUri) identifies the *current* leg's receiver (the
+// ledger TSP). The original trade-level platform identities live in
+// message.contract.participants[role=buyer|seller].participantId and are NOT
+// touched here.
+//
 //   - bppUri = "<senderHost>/bpp/caller"   — the platform sending this call
+//   - bppId  = senderSubscriberID          — typically config.SubscriberID
 //   - bapUri = "<ledgerURI>/bap/receiver"  — the TSP itself, as the receiving BAP
+//   - bapId  = ledgerSubscriberID          — typically participants[...Discom].participantId
+//
+// senderSubscriberID/ledgerSubscriberID are skipped (left as-is) if empty so
+// the function remains backward-compatible with existing callers that only
+// know about the URI rewrites.
 //
 // Everything else (other context fields, message body) is preserved verbatim.
-// Handles both wave2 (camelCase: bapUri/bppUri) and wave1 (snake_case:
-// bap_uri/bpp_uri) shapes by detecting which key style the original uses.
-func RewriteContextForBeckn(body []byte, senderHost, ledgerURI string) ([]byte, error) {
+// Handles both wave2 (camelCase) and wave1 (snake_case) by detecting which
+// key style the original uses.
+func RewriteContextForBeckn(body []byte, senderHost, ledgerURI, senderSubscriberID, ledgerSubscriberID string) ([]byte, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(body, &raw); err != nil {
 		return nil, fmt.Errorf("rewriteContext: parse body: %w", err)
@@ -265,15 +302,21 @@ func RewriteContextForBeckn(body []byte, senderHost, ledgerURI string) ([]byte, 
 		return nil, fmt.Errorf("rewriteContext: missing or invalid context")
 	}
 
-	bppKey, bapKey := "bppUri", "bapUri"
+	bppKey, bapKey, bppIDKey, bapIDKey := "bppUri", "bapUri", "bppId", "bapId"
 	if _, hasCamel := ctxRaw[bppKey]; !hasCamel {
 		if _, hasSnake := ctxRaw["bpp_uri"]; hasSnake {
-			bppKey, bapKey = "bpp_uri", "bap_uri"
+			bppKey, bapKey, bppIDKey, bapIDKey = "bpp_uri", "bap_uri", "bpp_id", "bap_id"
 		}
 	}
 
 	ctxRaw[bppKey] = strings.TrimRight(senderHost, "/") + "/bpp/caller"
 	ctxRaw[bapKey] = strings.TrimRight(ledgerURI, "/") + "/bap/receiver"
+	if senderSubscriberID != "" {
+		ctxRaw[bppIDKey] = senderSubscriberID
+	}
+	if ledgerSubscriberID != "" {
+		ctxRaw[bapIDKey] = ledgerSubscriberID
+	}
 	raw["context"] = ctxRaw
 
 	return json.Marshal(raw)

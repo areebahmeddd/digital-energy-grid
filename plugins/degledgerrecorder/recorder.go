@@ -211,13 +211,28 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 				payload.Context.TransactionID)
 			return nil
 		}
-		rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL)
+		// Sender (BPP-side on this cascade leg) signs as this plugin's configured
+		// subscriber id; the receiver (BAP-side) is the discom ledger TSP whose
+		// subscriber id lives in participants[role=<side>Discom].participantId.
+		// Both are written into context.bppId/bapId so the cascade leg is
+		// Beckn-spec-compliant — bap/bppId must identify the current leg's
+		// parties, not the original trade's parties.
+		senderSubscriberID := r.config.SubscriberID
+		var ledgerSide string
+		switch r.config.Role {
+		case "BUYER":
+			ledgerSide = "buyerDiscom"
+		case "SELLER":
+			ledgerSide = "sellerDiscom"
+		}
+		ledgerSubscriberID := participantID(findWave2Participant(payload.Message.Contract.Participants, ledgerSide))
+		rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL, senderSubscriberID, ledgerSubscriberID)
 		if err != nil {
 			log.Warnf(ctx, "DEGLedgerRecorder: beckn context rewrite failed: %v", err)
 			return nil
 		}
-		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm (transaction_id=%s) -> %s/on_confirm (sender=%s)",
-			payload.Context.TransactionID, baseURL, senderHost)
+		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm (transaction_id=%s) -> %s/on_confirm (sender=%s bppId=%s bapId=%s)",
+			payload.Context.TransactionID, baseURL, senderHost, senderSubscriberID, ledgerSubscriberID)
 		r.sendBecknOnConfirmAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
 
 	default:

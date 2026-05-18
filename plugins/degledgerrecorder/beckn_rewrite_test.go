@@ -8,7 +8,7 @@ import (
 
 func TestRewriteContextForBeckn_Wave2CamelCase(t *testing.T) {
 	body := []byte(sampleWave2OnConfirm)
-	out, err := RewriteContextForBeckn(body, "https://bap.example.com", "https://ies-p2p-energy-ledger.beckn.io")
+	out, err := RewriteContextForBeckn(body, "https://bap.example.com", "https://ies-p2p-energy-ledger.beckn.io", "", "")
 	if err != nil {
 		t.Fatalf("rewrite: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestRewriteContextForBeckn_Wave2CamelCase(t *testing.T) {
 
 func TestRewriteContextForBeckn_TrimsTrailingSlashes(t *testing.T) {
 	body := []byte(sampleWave2OnConfirm)
-	out, err := RewriteContextForBeckn(body, "https://bap.example.com/", "https://ledger.example.com//")
+	out, err := RewriteContextForBeckn(body, "https://bap.example.com/", "https://ledger.example.com//", "", "")
 	if err != nil {
 		t.Fatalf("rewrite: %v", err)
 	}
@@ -53,7 +53,7 @@ func TestRewriteContextForBeckn_TrimsTrailingSlashes(t *testing.T) {
 func TestRewriteContextForBeckn_SnakeCaseFallback(t *testing.T) {
 	// Wave1-style snake_case context — rewrite must operate on bpp_uri/bap_uri.
 	body := []byte(`{"context":{"bpp_uri":"https://x","bap_uri":"https://y","transaction_id":"t1"},"message":{"order":{}}}`)
-	out, err := RewriteContextForBeckn(body, "https://sender.com", "https://ledger.com")
+	out, err := RewriteContextForBeckn(body, "https://sender.com", "https://ledger.com", "", "")
 	if err != nil {
 		t.Fatalf("rewrite: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestRewriteContextForBeckn_SnakeCaseFallback(t *testing.T) {
 }
 
 func TestRewriteContextForBeckn_MissingContextErrors(t *testing.T) {
-	if _, err := RewriteContextForBeckn([]byte(`{}`), "h", "l"); err == nil {
+	if _, err := RewriteContextForBeckn([]byte(`{}`), "h", "l", "", ""); err == nil {
 		t.Errorf("expected error on missing context")
 	}
 }
@@ -115,10 +115,64 @@ func TestDeriveSenderHost_MissingURIInPayload(t *testing.T) {
 	}
 }
 
+// When senderSubscriberID + ledgerSubscriberID are supplied, the rewrite must
+// also set context.bppId / context.bapId — the Beckn-spec-compliance fix that
+// keeps (bppId, bppUri) and (bapId, bapUri) coherent on cascade legs.
+func TestRewriteContextForBeckn_RewritesIDsWhenSupplied(t *testing.T) {
+	body := []byte(sampleWave2OnConfirm)
+	out, err := RewriteContextForBeckn(
+		body,
+		"https://sellerapp.example.com",
+		"https://seller-discom-ledger.example.com",
+		"sellerapp.example.com",
+		"seller-discom-ledger.example.com",
+	)
+	if err != nil {
+		t.Fatalf("rewrite: %v", err)
+	}
+	var got map[string]interface{}
+	if err := json.Unmarshal(out, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	ctx := got["context"].(map[string]interface{})
+	if v := ctx["bppId"]; v != "sellerapp.example.com" {
+		t.Errorf("bppId: got %v, want sellerapp.example.com", v)
+	}
+	if v := ctx["bapId"]; v != "seller-discom-ledger.example.com" {
+		t.Errorf("bapId: got %v, want seller-discom-ledger.example.com", v)
+	}
+	if v := ctx["bppUri"]; v != "https://sellerapp.example.com/bpp/caller" {
+		t.Errorf("bppUri: got %v", v)
+	}
+	if v := ctx["bapUri"]; v != "https://seller-discom-ledger.example.com/bap/receiver" {
+		t.Errorf("bapUri: got %v", v)
+	}
+}
+
+// Empty subscriber-id args must leave bppId/bapId unchanged (backward compat
+// with callers that only know about URI rewrites).
+func TestRewriteContextForBeckn_PreservesIDsWhenEmpty(t *testing.T) {
+	body := []byte(sampleWave2OnConfirm)
+	out, err := RewriteContextForBeckn(body, "https://x.example.com", "https://y.example.com", "", "")
+	if err != nil {
+		t.Fatalf("rewrite: %v", err)
+	}
+	var got map[string]interface{}
+	_ = json.Unmarshal(out, &got)
+	ctx := got["context"].(map[string]interface{})
+	// the sample payload has the original bapId/bppId — they should still be there
+	if v := ctx["bapId"]; v != "bap.example.com" {
+		t.Errorf("bapId mutated despite empty arg: got %v", v)
+	}
+	if v := ctx["bppId"]; v != "bpp.example.com" {
+		t.Errorf("bppId mutated despite empty arg: got %v", v)
+	}
+}
+
 // Defensive: rewrite leaves message untouched verbatim.
 func TestRewriteContextForBeckn_MessagePreserved(t *testing.T) {
 	body := []byte(sampleWave2OnConfirm)
-	out, err := RewriteContextForBeckn(body, "https://x", "https://y")
+	out, err := RewriteContextForBeckn(body, "https://x", "https://y", "", "")
 	if err != nil {
 		t.Fatalf("rewrite: %v", err)
 	}

@@ -133,17 +133,22 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	rec, err := MapWave2ToLedgerRecord(p, "BUYER")
+	records, err := MapWave2ToLedgerRecords(p, "BUYER")
 	if err != nil {
 		t.Fatalf("map: %v", err)
 	}
+	if len(records) == 0 {
+		t.Fatalf("expected at least one record")
+	}
+	rec := records[0]
 
+	// Platform ids are now sourced from participants[role=buyer|seller].participantId
+	// (trade identity), not from context.bapId/bppId (transport identity).
 	checks := []struct{ name, got, want string }{
 		{"role", rec.Role, "BUYER"},
 		{"transactionId", rec.TransactionID, "txn-p2p-001"},
-		{"orderItemId", rec.OrderItemID, "txn-p2p-001"}, // wave2: orderItemId == transactionId
-		{"platformIdBuyer", rec.PlatformIDBuyer, "bap.example.com"},
-		{"platformIdSeller", rec.PlatformIDSeller, "bpp.example.com"},
+		{"platformIdBuyer", rec.PlatformIDBuyer, "BRPL-DL-buyer-001"},
+		{"platformIdSeller", rec.PlatformIDSeller, "TPDDL-DL-seller-001"},
 		{"discomIdBuyer", rec.DiscomIDBuyer, "BRPL-DL"},
 		{"discomIdSeller", rec.DiscomIDSeller, "TPDDL-DL"},
 		{"buyerId", rec.BuyerID, "der://meter/buyer-001"},
@@ -164,6 +169,29 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	td := rec.TradeDetails[0]
 	if td.TradeQty != 35.0 || td.TradeUnit != "KWH" || td.TradeType != "ENERGY" {
 		t.Errorf("tradeDetail: got qty=%v, unit=%q, type=%q", td.TradeQty, td.TradeUnit, td.TradeType)
+	}
+}
+
+// When participants[role=buyer|seller].participantId is missing, the mapper
+// falls back to context.bapId/bppId so older payloads don't immediately fail.
+func TestMapWave2ToLedgerRecord_FallsBackToContextWhenParticipantIDEmpty(t *testing.T) {
+	const noParticipantIDs = `{
+	  "context": {"transactionId":"t1","bapId":"bap.fallback.com","bppId":"bpp.fallback.com","timestamp":"2026-04-25T10:10:05Z"},
+	  "message": {"contract": {"id":"c1","commitments":[{"id":"co1","resources":[{"quantity":{"unitCode":"KWH","unitQuantity":1}}],"offer":{"id":"o1","offerAttributes":{"inputs":[{"role":"seller","inputs":{"offers":[{"deliveryWindow":{"schema:startTime":"2026-04-26T04:30:00Z","schema:endTime":"2026-04-26T05:30:00Z"}}]}}]}}}],"participants":[{"role":"buyer"},{"role":"seller"}]}}
+	}`
+	p, err := ParseOnConfirmWave2([]byte(noParticipantIDs))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	records, err := MapWave2ToLedgerRecords(p, "BUYER")
+	if err != nil {
+		t.Fatalf("map: %v", err)
+	}
+	if records[0].PlatformIDBuyer != "bap.fallback.com" {
+		t.Errorf("PlatformIDBuyer fallback: got %q", records[0].PlatformIDBuyer)
+	}
+	if records[0].PlatformIDSeller != "bpp.fallback.com" {
+		t.Errorf("PlatformIDSeller fallback: got %q", records[0].PlatformIDSeller)
 	}
 }
 
@@ -196,7 +224,7 @@ func TestExtractWave2DiscomLedgerUri_MissingReturnsEmpty(t *testing.T) {
 
 func TestMapWave2_NoCommitmentsErrors(t *testing.T) {
 	p := &Wave2OnConfirmPayload{}
-	if _, err := MapWave2ToLedgerRecord(p, "BUYER"); err == nil {
+	if _, err := MapWave2ToLedgerRecords(p, "BUYER"); err == nil {
 		t.Errorf("expected error for empty commitments, got nil")
 	}
 }

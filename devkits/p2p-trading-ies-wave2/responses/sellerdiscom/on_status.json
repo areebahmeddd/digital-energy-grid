@@ -121,11 +121,11 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "TEST_BUYER_001"
+            "participantId": "buyerapp.example.com"
           },
           {
             "role": "seller",
-            "participantId": "TEST_SELLER_001"
+            "participantId": "sellerapp.example.com"
           },
           {
             "role": "buyerDiscom",
@@ -144,7 +144,7 @@
       "participants": [
         {
           "role": "seller",
-          "participantId": "TEST_SELLER_001",
+          "participantId": "sellerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
@@ -156,7 +156,7 @@
         },
         {
           "role": "buyer",
-          "participantId": "TEST_BUYER_001",
+          "participantId": "buyerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",

@@ -76,11 +76,11 @@
                 "roles": [
                   {
                     "role": "buyer",
-                    "participantId": null
+                    "participantId": "buyerapp.example.com"
                   },
                   {
                     "role": "seller",
-                    "participantId": "TEST_SELLER_001"
+                    "participantId": "sellerapp.example.com"
                   },
                   {
                     "role": "buyerDiscom",
@@ -99,7 +99,7 @@
               "inputs": [
                 {
                   "role": "seller",
-                  "participantId": "TEST_SELLER_001",
+                  "participantId": "sellerapp.example.com",
                   "payload": {
                     "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                     "@type": "TimeSeries",
