@@ -226,14 +226,19 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 			ledgerSide = "sellerDiscom"
 		}
 		ledgerSubscriberID := participantID(findWave2Participant(payload.Message.Contract.Participants, ledgerSide))
-		rewritten, err := RewriteContextForBeckn(ctx.Body, senderHost, baseURL, senderSubscriberID, ledgerSubscriberID)
+		// Build the receiver and caller endpoint URLs once; they're used both
+		// in the body's bapUri/bppUri AND as the wire URL the client POSTs to.
+		// ledgerEndpoint = <host>/bap/receiver, the ledger's inbound BAP path.
+		ledgerEndpoint := BapReceiverEndpoint(baseURL)
+		senderEndpoint := BppCallerEndpoint(senderHost)
+		rewritten, err := RewriteContextForBeckn(ctx.Body, senderEndpoint, ledgerEndpoint, senderSubscriberID, ledgerSubscriberID)
 		if err != nil {
 			log.Warnf(ctx, "DEGLedgerRecorder: beckn context rewrite failed: %v", err)
 			return nil
 		}
 		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm (transaction_id=%s) -> %s/on_confirm (sender=%s bppId=%s bapId=%s)",
-			payload.Context.TransactionID, baseURL, senderHost, senderSubscriberID, ledgerSubscriberID)
-		r.sendBecknOnConfirmAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+			payload.Context.TransactionID, ledgerEndpoint, senderEndpoint, senderSubscriberID, ledgerSubscriberID)
+		r.sendBecknOnConfirmAsync(ctx, ledgerEndpoint, rewritten, payload.Context.TransactionID)
 
 	default:
 		log.Warnf(ctx, "DEGLedgerRecorder: unsupported ledgerApi=%s", r.config.LedgerApi)
@@ -385,18 +390,19 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil
 	}
 
-	baseURL := r.config.LedgerHost
+	ledgerHostBase := r.config.LedgerHost
 	if r.config.LedgerUriSource == LedgerUriSourcePayload {
-		baseURL = ExtractWave2StatusDiscomLedgerUri(payload, side)
+		ledgerHostBase = ExtractWave2StatusDiscomLedgerUri(payload, side)
 	}
-	if baseURL == "" {
+	if ledgerHostBase == "" {
 		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for status forwarding (role=%s, side=%s)", r.config.Role, side)
 		return nil
 	}
+	// ledgerEndpoint = <host>/bap/receiver — ledger's inbound BAP path. The
+	// ledger is the BAP-style sink for cascade traffic from a platform; the
+	// platform plays BPP-caller on this sub-tx (per Beckn-spec alignment).
+	ledgerEndpoint := BapReceiverEndpoint(ledgerHostBase)
 
-	// Rewrite context for the seller→sellerDiscom sub-transaction:
-	//   New BAP = the trading platform (this handler, acting as BAP towards discom)
-	//   New BPP = the discom
 	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
 	ownPlatformURI := ParticipantEndpointURI(payload.Message.Contract.Participants, strings.ToLower(r.config.Role), "platformUri")
 	if ownPlatformURI == "" {
@@ -404,8 +410,8 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil
 	}
 	subTx := SubTxContext{
-		BapURI: strings.TrimRight(ownPlatformURI, "/") + "/bap/receiver",
-		BppURI: baseURL,
+		BapURI: ledgerEndpoint,
+		BppURI: BppCallerEndpoint(ownPlatformURI),
 	}
 	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
@@ -414,8 +420,8 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	}
 
 	log.Infof(ctx, "DEGLedgerRecorder: forwarding status (transaction_id=%s, contract_id=%s) -> %s/status (sub-tx bap=%s, bpp=%s)",
-		payload.Context.TransactionID, payload.Message.Contract.ID, baseURL, subTx.BapURI, subTx.BppURI)
-	r.sendBecknStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+		payload.Context.TransactionID, payload.Message.Contract.ID, ledgerEndpoint, subTx.BapURI, subTx.BppURI)
+	r.sendBecknStatusAsync(ctx, ledgerEndpoint, rewritten, payload.Context.TransactionID)
 	return nil
 }
 
@@ -459,14 +465,14 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 
 	// Look up this handler's trading-platform URI; rewriting the context for
 	// the next leg needs it for both Rule 2a (BPP-side of leg 4) and Rule 2b
-	// (BPP-side of leg 5).
+	// (BPP-side of leg 5). The platform plays BPP-caller on both forwards.
 	parts := payload.Message.Contract.Participants
 	ownPlatformURI := ParticipantEndpointURI(parts, strings.ToLower(r.config.Role), "platformUri")
 	if ownPlatformURI == "" {
 		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s] (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
 		return nil
 	}
-	ownBppURI := strings.TrimRight(ownPlatformURI, "/") + "/bpp/receiver"
+	ownBppEndpoint := BppCallerEndpoint(ownPlatformURI)
 
 	var baseURL string
 	var subTx SubTxContext
@@ -481,24 +487,24 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
 			return nil
 		}
-		peerBapURI := strings.TrimRight(peerPlatformURI, "/") + "/bap/receiver"
-		baseURL = peerBapURI
-		subTx = SubTxContext{BapURI: peerBapURI, BppURI: ownBppURI}
+		peerBapEndpoint := BapReceiverEndpoint(peerPlatformURI)
+		baseURL = peerBapEndpoint
+		subTx = SubTxContext{BapURI: peerBapEndpoint, BppURI: ownBppEndpoint}
 	} else {
 		// Rule 2b: cascade to own discom. Skip if no performance data.
 		if !Wave2OnStatusHasPerformanceData(payload) {
 			log.Debugf(ctx, "DEGLedgerRecorder: on_status has no performance data; skipping discom cascade (transaction_id=%s)", payload.Context.TransactionID)
 			return nil
 		}
-		discomLedgerURI := r.config.LedgerHost
+		discomLedgerHost := r.config.LedgerHost
 		if r.config.LedgerUriSource == LedgerUriSourcePayload {
-			discomLedgerURI = ExtractWave2OnStatusDiscomLedgerUri(payload, ownDiscomSide)
+			discomLedgerHost = ExtractWave2OnStatusDiscomLedgerUri(payload, ownDiscomSide)
 		}
-		baseURL = discomLedgerURI
-		// Discom acts as the BAP-style sink for this push (buyer→buyerdiscom
-		// in the canonical chain), so map it onto bapUri; this handler's
-		// platform is the BPP doing the pushing.
-		subTx = SubTxContext{BapURI: discomLedgerURI, BppURI: ownBppURI}
+		// Discom is the BAP-style sink for this on_status push; this handler's
+		// platform is the BPP-caller initiating it.
+		discomLedgerEndpoint := BapReceiverEndpoint(discomLedgerHost)
+		baseURL = discomLedgerEndpoint
+		subTx = SubTxContext{BapURI: discomLedgerEndpoint, BppURI: ownBppEndpoint}
 	}
 
 	if baseURL == "" {

@@ -70,13 +70,14 @@ def base_for(host):
     netloc = f"{host}:{u.port}" if u.port else host
     return urlunparse((u.scheme, netloc, "", "", "", ""))
 
-# Wave2 split-discom: the ledgerUri for a discom-role participant points to
-# the discom node, not to the original BAP/BPP. These hostnames are stable
-# across wave2 use cases; demand-flex has no participants with these roles
-# so the lookup is a no-op there.
+# Wave2 split-discom: the ledgerUri for a discom-role participant is the
+# host base of the discom node (scheme + host[:port], no path). The recorder
+# appends /bap/receiver or /bpp/caller per direction. These hostnames are
+# stable across wave2 use cases; demand-flex has no participants with these
+# roles so the lookup is a no-op there.
 discom_ledger_uri = {
-    "sellerDiscom": base_for("seller-discom-ledger.example.com") + "/bpp/receiver",
-    "buyerDiscom":  base_for("buyer-discom-ledger.example.com")  + "/bap/receiver",
+    "sellerDiscom": base_for("seller-discom-ledger.example.com"),
+    "buyerDiscom":  base_for("buyer-discom-ledger.example.com"),
 }
 
 def pick(ctx, *keys):

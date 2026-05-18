@@ -22,12 +22,12 @@ _base_participants := [
 	{
 		"role": "buyerDiscom",
 		"participantId": "buyer-discom-ledger.example.com",
-		"participantAttributes": {"ledgerUri": "http://buyer-discom-ledger.example.com:9000/bap/receiver", "utilityId": "TEST_DISCOM_BUYER"},
+		"participantAttributes": {"ledgerUri": "http://buyer-discom-ledger.example.com:9000", "utilityId": "TEST_DISCOM_BUYER"},
 	},
 	{
 		"role": "sellerDiscom",
 		"participantId": "seller-discom-ledger.example.com",
-		"participantAttributes": {"ledgerUri": "http://seller-discom-ledger.example.com:9000/bap/receiver", "utilityId": "TEST_DISCOM_SELLER"},
+		"participantAttributes": {"ledgerUri": "http://seller-discom-ledger.example.com:9000", "utilityId": "TEST_DISCOM_SELLER"},
 	},
 ]
 

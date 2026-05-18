@@ -17,8 +17,8 @@ http:
 pluginManager:
   root: ./plugins
 modules:
-  - name: bppTxnReceiver
-    path: /bpp/receiver/
+  - name: bapTxnReceiver
+    path: /bap/receiver/
     handler:
       type: std
       role: bpp

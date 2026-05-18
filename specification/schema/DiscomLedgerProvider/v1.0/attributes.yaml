@@ -41,10 +41,22 @@ components:
           type: string
           format: uri
           description: >
-            Base URL of the discom ledger TSP. Platforms POST trade records
-            to `<ledgerUri>/ledger/put` (legacy_ledger mode) or beckn
-            `on_confirm` to `<ledgerUri>/on_confirm` (beckn mode), depending
-            on the platform's `degledgerrecorder` plugin configuration.
+            Host base (scheme + host[:port], no path) of the discom ledger
+            TSP. The ledger acts as a Beckn node and exposes the standard
+            paths under this base:
+
+              `<ledgerUri>/bap/receiver/<action>`  — inbound endpoint where
+                  buyer/seller platforms cascade on_confirm and status to
+                  this ledger. The ledger is BAP-receiver on this leg.
+              `<ledgerUri>/bpp/caller/<action>`    — outbound endpoint from
+                  which the ledger initiates on_status callbacks back to
+                  buyer/seller platforms. The ledger is BPP-caller on that
+                  leg.
+              `<ledgerUri>/ledger/put`             — legacy_ledger mode PUT
+                  for non-beckn writes; kept for backward compatibility.
+
+            The path is appended by the caller per the action being
+            invoked; `ledgerUri` itself MUST NOT include a path component.
           example: "https://ies-p2p-energy-ledger.beckn.io"
           x-jsonld:
             "@id": ledgerUri

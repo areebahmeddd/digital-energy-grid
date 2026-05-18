@@ -280,19 +280,18 @@ func extractWave2QuantityAndUnit(resources []Wave2Resource) (float64, string) {
 // message.contract.participants[role=buyer|seller].participantId and are NOT
 // touched here.
 //
-//   - bppUri = "<senderHost>/bpp/caller"   — the platform sending this call
-//   - bppId  = senderSubscriberID          — typically config.SubscriberID
-//   - bapUri = "<ledgerURI>/bap/receiver"  — the TSP itself, as the receiving BAP
-//   - bapId  = ledgerSubscriberID          — typically participants[...Discom].participantId
+// senderEndpointURI / ledgerEndpointURI are the FULL endpoint URLs (host base
+// + Beckn role path, e.g. "<sender>/bpp/caller", "<ledger>/bap/receiver");
+// they are written verbatim into bppUri/bapUri. Callers build these via
+// BppCallerEndpoint / BapReceiverEndpoint so the routing URL (the URL the
+// client actually POSTs to) and the URI advertised in context stay coherent.
 //
-// senderSubscriberID/ledgerSubscriberID are skipped (left as-is) if empty so
-// the function remains backward-compatible with existing callers that only
-// know about the URI rewrites.
+// senderSubscriberID/ledgerSubscriberID are skipped if empty (left as-is).
 //
-// Everything else (other context fields, message body) is preserved verbatim.
-// Handles both wave2 (camelCase) and wave1 (snake_case) by detecting which
-// key style the original uses.
-func RewriteContextForBeckn(body []byte, senderHost, ledgerURI, senderSubscriberID, ledgerSubscriberID string) ([]byte, error) {
+// Other context fields and the message body are preserved verbatim. Handles
+// both wave2 (camelCase) and wave1 (snake_case) by detecting which key
+// style the original uses.
+func RewriteContextForBeckn(body []byte, senderEndpointURI, ledgerEndpointURI, senderSubscriberID, ledgerSubscriberID string) ([]byte, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(body, &raw); err != nil {
 		return nil, fmt.Errorf("rewriteContext: parse body: %w", err)
@@ -309,8 +308,8 @@ func RewriteContextForBeckn(body []byte, senderHost, ledgerURI, senderSubscriber
 		}
 	}
 
-	ctxRaw[bppKey] = strings.TrimRight(senderHost, "/") + "/bpp/caller"
-	ctxRaw[bapKey] = strings.TrimRight(ledgerURI, "/") + "/bap/receiver"
+	ctxRaw[bppKey] = senderEndpointURI
+	ctxRaw[bapKey] = ledgerEndpointURI
 	if senderSubscriberID != "" {
 		ctxRaw[bppIDKey] = senderSubscriberID
 	}
@@ -320,6 +319,20 @@ func RewriteContextForBeckn(body []byte, senderHost, ledgerURI, senderSubscriber
 	raw["context"] = ctxRaw
 
 	return json.Marshal(raw)
+}
+
+// BapReceiverEndpoint returns "<hostBase>/bap/receiver" — the inbound endpoint
+// where a ledger TSP (or any BAP-role node) receives on_confirm/on_status/
+// status cascades. Idempotent against a trailing slash on hostBase.
+func BapReceiverEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bap/receiver"
+}
+
+// BppCallerEndpoint returns "<hostBase>/bpp/caller" — the outbound endpoint
+// from which a BPP-role node initiates a cascade (e.g. a ledger pushing an
+// on_status callback to a buyer/seller platform).
+func BppCallerEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bpp/caller"
 }
 
 // DeriveSenderHostFromWave2 returns "<scheme>://<host[:port]>" extracted from
