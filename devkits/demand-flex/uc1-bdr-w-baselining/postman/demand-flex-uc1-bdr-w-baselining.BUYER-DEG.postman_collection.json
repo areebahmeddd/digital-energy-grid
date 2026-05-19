@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "086e39fd-0374-4561-b95d-96d4c72e2700",
+    "_postman_id": "748c6f38-2cc9-4ac7-abb8-c0cd4586a94c",
     "name": "demand-flex-uc1-bdr-w-baselining.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing demand-flex APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/confirm",
+              "raw": "{{bap_caller_url}}/confirm",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "confirm"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -91,9 +91,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/init",
+              "raw": "{{bap_caller_url}}/init",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "init"
@@ -123,9 +123,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/select",
+              "raw": "{{bap_caller_url}}/select",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "select"
@@ -155,9 +155,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/update",
+              "raw": "{{bap_caller_url}}/update",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "update"
@@ -219,7 +219,7 @@
       "value": "http://beckn-router:9000"
     },
     {
-      "key": "bap_adapter_url",
+      "key": "bap_caller_url",
       "value": "http://localhost:8081/bap/caller"
     }
   ]

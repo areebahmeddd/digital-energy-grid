@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "e681b232-70fd-4ba9-8ad1-2ba2efbe6d92",
+    "_postman_id": "72007b24-3696-47de-804d-a98381b1c143",
     "name": "data-exchange-uc2-regulatory-data.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc2-regulatory-data APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/confirm",
+              "raw": "{{bap_caller_url}}/confirm",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "confirm"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -91,9 +91,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/status",
+              "raw": "{{bap_caller_url}}/status",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "status"
@@ -155,7 +155,7 @@
       "value": "http://beckn-router:9000"
     },
     {
-      "key": "bap_adapter_url",
+      "key": "bap_caller_url",
       "value": "http://localhost:8081/bap/caller"
     }
   ]

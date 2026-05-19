@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "7a43496f-55f7-4edb-a1e0-dc39013b985a",
+    "_postman_id": "d0253ffe-4556-4693-9be6-37ba3c58682a",
     "name": "p2p-trading-ies-wave2-uc1.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/confirm",
+              "raw": "{{bap_caller_url}}/confirm",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "confirm"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -91,9 +91,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/init",
+              "raw": "{{bap_caller_url}}/init",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "init"
@@ -123,9 +123,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/status",
+              "raw": "{{bap_caller_url}}/status",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "status"
@@ -187,7 +187,7 @@
       "value": "http://sellerapp.example.com:9000"
     },
     {
-      "key": "bap_adapter_url",
+      "key": "bap_caller_url",
       "value": "http://localhost:8081/bap/caller"
     },
     {

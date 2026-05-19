@@ -84,8 +84,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "ev-charging.sandbox2.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/ev-charging/uc1-ev-charging/examples",
         "structure": "folders"  # Folder-based structure
     },
@@ -95,8 +95,8 @@ DEVKIT_CONFIGS = {
         "bap_uri": "http://onix-bap:8081/bap/receiver",
         "bpp_id": "p2p-trading-sandbox2.com",
         "bpp_uri": "http://onix-bpp:8082/bpp/receiver",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "examples/p2p-trading/v2",
         # "output_path": "devkits/p2p-trading/postman",
         "structure": "flat"  # Flat file structure
@@ -107,8 +107,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "p2p-enrollment-sandbox2.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/p2p-enrollment/uc1-p2p-enrollment/examples",
         "structure": "flat"  # Flat file structure (like p2p-trading)
     },
@@ -118,8 +118,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "p2p-trading-sandbox2.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/p2p-trading-interdiscom/uc1-p2p-trading-interdiscom/examples",
         "structure": "flat"  # Flat file structure (like p2p-trading)
     },
@@ -129,8 +129,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/demand-flex/uc1-bdr-w-baselining/examples",
         "structure": "flat"
     },
@@ -140,8 +140,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "p2p-trading-sandbox2.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/p2p-trading-ies-wave1/uc1/examples",
         "structure": "flat"
     },
@@ -156,8 +156,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://buyerapp.example.com:9000",
         "bpp_id": "sellerapp.example.com",
         "bpp_host_root": "http://sellerapp.example.com:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "bpp_receiver_url": "http://localhost:8082/bpp/receiver",
         "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
         "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
@@ -170,8 +170,8 @@ DEVKIT_CONFIGS = {
         # Adapter URLs for the discom-ledger /bpp/caller endpoints (the ledger
         # signs and routes the on_status to context.bapUri). Default host-side
         # ports per install/docker-compose.yml: buyerdiscom=8084, sellerdiscom=8083.
-        "buyer_ledger_adapter_url": "http://localhost:8084/bpp/caller",
-        "seller_ledger_adapter_url": "http://localhost:8083/bpp/caller",
+        "buyer_ledger_bpp_caller_url": "http://localhost:8084/bpp/caller",
+        "seller_ledger_bpp_caller_url": "http://localhost:8083/bpp/caller",
         "usecase": "uc1",
         "structure": "flat",
         # Actions that hit the BPP receiver directly rather than the BPP caller.
@@ -185,8 +185,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/data-exchange/uc1-meter-data/examples",
         "structure": "flat"
     },
@@ -196,8 +196,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/data-exchange/uc2-regulatory-data/examples",
         "structure": "flat"
     },
@@ -207,8 +207,8 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
         "bpp_host_root": "http://beckn-router:9000",
-        "bap_adapter_url": "http://localhost:8081/bap/caller",
-        "bpp_adapter_url": "http://localhost:8082/bpp/caller",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
         "examples_path": "devkits/data-exchange/uc3-tariff-policy/examples",
         "structure": "flat"
     }
@@ -680,7 +680,7 @@ def create_postman_request(
         endpoint: API endpoint path
         request_name: Name for the request
         role: Role (BAP, BPP, UtilityBPP)
-        adapter_url_var: Variable name for adapter URL (e.g., "bap_adapter_url")
+        adapter_url_var: Variable name for adapter URL (e.g., "bap_caller_url")
         host_root_style: Template bapUri/bppUri as {{bap_host_root}}/bap/receiver
         ledger_host_buyer: Override for buyer ledger host (uses config default if None)
         ledger_host_seller: Override for seller ledger host (uses config default if None)
@@ -831,18 +831,18 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     
     # Add adapter URLs based on canonical role
     if role == "BAP":
-        variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
+        variables.append({"key": "bap_caller_url", "value": config["bap_caller_url"]})
     elif role == "BPP":
-        variables.append({"key": "bpp_adapter_url", "value": config["bpp_adapter_url"]})
+        variables.append({"key": "bpp_caller_url", "value": config["bpp_caller_url"]})
     elif role == "UtilityBPP":
-        variables.append({"key": "bpp_adapter_url", "value": config["bpp_adapter_url"]})
-        variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
+        variables.append({"key": "bpp_caller_url", "value": config["bpp_caller_url"]})
+        variables.append({"key": "bap_caller_url", "value": config["bap_caller_url"]})
     elif role == "BUYERDISCOMLEDGER":
-        variables.append({"key": "buyer_ledger_adapter_url", "value": config["buyer_ledger_adapter_url"]})
+        variables.append({"key": "buyer_ledger_bpp_caller_url", "value": config["buyer_ledger_bpp_caller_url"]})
     elif role == "SELLERDISCOMLEDGER":
-        variables.append({"key": "seller_ledger_adapter_url", "value": config["seller_ledger_adapter_url"]})
+        variables.append({"key": "seller_ledger_bpp_caller_url", "value": config["seller_ledger_bpp_caller_url"]})
 
-    # BPP receiver URL (separate from bpp_adapter_url/caller; used for actions like status
+    # BPP receiver URL (separate from bpp_caller_url/caller; used for actions like status
     # that hit bpp/receiver directly for round-trip testing)
     if "bpp_receiver_url" in config and role == "BPP":
         variables.append({"key": "bpp_receiver_url", "value": config["bpp_receiver_url"]})
@@ -892,22 +892,22 @@ def generate_collection(
     # Determine action mapping and adapter URL based on canonical role
     if role == "BAP":
         action_mapping = BAP_ACTIONS
-        adapter_url_var = "bap_adapter_url"
+        adapter_url_var = "bap_caller_url"
     elif role == "BPP":
         # BPP uses both callback actions and BPP-initiated actions (like publish to CDS)
         action_mapping = {**BPP_ACTIONS, **BPP_INITIATED_ACTIONS}
-        adapter_url_var = "bpp_adapter_url"
+        adapter_url_var = "bpp_caller_url"
     elif role == "UtilityBPP":
         action_mapping = BAP_ACTIONS  # UtilityBPP uses BAP actions
-        adapter_url_var = "bpp_adapter_url"
+        adapter_url_var = "bpp_caller_url"
     elif role == "BUYERDISCOMLEDGER":
         # On-status callback only; sent via the buyer-discom ledger's /bpp/caller
         action_mapping = {"on_status": "on_status"}
-        adapter_url_var = "buyer_ledger_adapter_url"
+        adapter_url_var = "buyer_ledger_bpp_caller_url"
     elif role == "SELLERDISCOMLEDGER":
         # On-status callback only; sent via the seller-discom ledger's /bpp/caller
         action_mapping = {"on_status": "on_status"}
-        adapter_url_var = "seller_ledger_adapter_url"
+        adapter_url_var = "seller_ledger_bpp_caller_url"
     else:
         raise ValueError(f"Unknown role: {role}")
 
@@ -936,54 +936,91 @@ def generate_collection(
         print("No valid examples found. Exiting.")
         return
     
-    # Build collection items (folders)
+    # Build collection items (folders). "test-harness" actions (BAP-originated
+    # requests included in a BPP collection for in-isolation testing — e.g.
+    # status posted directly to seller /bpp/receiver to exercise the recorder
+    # cascade without spinning up the BAP) get parked under a top-level
+    # `_test_harness` folder so the SELLER collection's main folders only
+    # show requests the seller actually initiates.
+    bpp_receiver_actions = config.get("bpp_receiver_actions", [])
     collection_items = []
-    
+    test_harness_items = []
+
     # Process each action in order (include all BAP actions, even if no examples)
     all_actions = sorted(set(list(actions_map.keys()) + list(action_mapping.keys())))
-    
+
     for action in all_actions:
         if action not in action_mapping:
             continue
-        
+
         endpoint = action_mapping[action]
         files_list = actions_map.get(action, [])
-        
+
+        # Is this folder a "BAP-request-hits-BPP-receiver" test-harness for
+        # the current (BPP-style) role?
+        is_test_harness = (
+            role == "BPP"
+            and action in bpp_receiver_actions
+            and "bpp_receiver_url" in config
+        )
+
         # Create folder for this action
         action_items = []
-        
+
         for json_file, request_name in sorted(files_list):
             print(f"  Processing: {json_file.name}")
-            
+
             # Load JSON
             json_data = load_example_json(json_file)
             if json_data is None:
                 continue
-            
-            # Use bpp_receiver_url for actions that hit the BPP receiver directly
-            bpp_receiver_actions = config.get("bpp_receiver_actions", [])
-            effective_adapter_var = (
-                "bpp_receiver_url"
-                if (role == "BPP" and action in bpp_receiver_actions and "bpp_receiver_url" in config)
-                else adapter_url_var
+
+            # Test-harness requests go to the BPP receiver (not the BPP caller),
+            # bypassing the normal BAP→BPP hop.
+            effective_caller_url_var = "bpp_receiver_url" if is_test_harness else adapter_url_var
+
+            # Annotate test-harness request names for unambiguous reading.
+            harness_request_name = (
+                f"{request_name} (test-harness: direct to BPP-receiver)"
+                if is_test_harness else request_name
             )
 
             # Create Postman request
             request = create_postman_request(
-                json_data, action, endpoint, request_name, role, effective_adapter_var, host_root_style,
+                json_data, action, endpoint, harness_request_name, role, effective_caller_url_var, host_root_style,
                 ledger_host_buyer=config.get("ledger_host_buyer"),
                 ledger_host_seller=config.get("ledger_host_seller"),
             )
             action_items.append(request)
-        
+
         # Only create folder if it has requests
         if action_items:
             folder = {
                 "name": action,
                 "item": action_items
             }
-            collection_items.append(folder)
-            print(f"  Created folder '{action}' with {len(action_items)} request(s)")
+            if is_test_harness:
+                test_harness_items.append(folder)
+                print(f"  Created test-harness folder '{action}' with {len(action_items)} request(s)")
+            else:
+                collection_items.append(folder)
+                print(f"  Created folder '{action}' with {len(action_items)} request(s)")
+
+    # If we collected any test-harness sub-folders, append them under a single
+    # top-level `_test_harness` group so they're clearly separated from the
+    # collection's role-owned actions.
+    if test_harness_items:
+        collection_items.append({
+            "name": "_test_harness",
+            "description": (
+                "Harness shortcuts that bypass the normal BAP→BPP routing and "
+                "POST a BAP-originated payload directly at the BPP-receiver. "
+                "Used to exercise BPP-side plugins (e.g. degledgerrecorder) "
+                "in isolation without standing up the BAP-side onix instance. "
+                "These are NOT requests this role initiates in production."
+            ),
+            "item": test_harness_items,
+        })
     
     # Build collection
     collection = {

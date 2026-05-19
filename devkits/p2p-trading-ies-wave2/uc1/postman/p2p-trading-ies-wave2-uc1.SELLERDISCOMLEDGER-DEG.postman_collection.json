@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "4d1a4d7c-e09b-48a3-ba92-103518e2e227",
+    "_postman_id": "98ed8dba-6fcf-4efe-bab1-9409225cdfc4",
     "name": "p2p-trading-ies-wave2-uc1.SELLERDISCOMLEDGER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Seller-discom ledger TSP (emits on_status callbacks) implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{seller_ledger_adapter_url}}/on_status",
+              "raw": "{{seller_ledger_bpp_caller_url}}/on_status",
               "host": [
-                "{{seller_ledger_adapter_url}}"
+                "{{seller_ledger_bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -88,7 +88,7 @@
       "value": "http://seller-discom-ledger.example.com:9000"
     },
     {
-      "key": "seller_ledger_adapter_url",
+      "key": "seller_ledger_bpp_caller_url",
       "value": "http://localhost:8083/bpp/caller"
     },
     {

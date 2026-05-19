@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "af929d98-a911-46ec-a406-97ea171f9e56",
+    "_postman_id": "2a3df50f-da0d-413a-b9be-35bb36d56e5a",
     "name": "data-exchange-uc1-meter-data.SELLER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc1-meter-data APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_confirm",
+              "raw": "{{bpp_caller_url}}/on_confirm",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_confirm"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -83,9 +83,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -110,9 +110,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -142,9 +142,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/publish",
+              "raw": "{{bpp_caller_url}}/publish",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "publish"
@@ -174,9 +174,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/status",
+              "raw": "{{bpp_caller_url}}/status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "status"
@@ -238,7 +238,7 @@
       "value": "http://beckn-router:9000"
     },
     {
-      "key": "bpp_adapter_url",
+      "key": "bpp_caller_url",
       "value": "http://localhost:8082/bpp/caller"
     }
   ]
