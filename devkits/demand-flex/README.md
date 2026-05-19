@@ -57,7 +57,7 @@ The cross-field type-coverage and cardinality checks in [`demand_flex_network.re
 
 ## Postman
 
-`uc1-bdr-w-baselining/postman/demand-flex-uc1-bdr-w-baselining.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
+`uc1-bdr-w-baselining/postman/demand-flex-uc1-bdr-w-baselining.{BUYER,SELLER}-DEG.postman_collection.json`, where BUYER is the utility issuing `DemandFlexBuyOffers` and SELLER is the prosumer offering flexibility. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BUYER|SELLER` (or `--all`). Legacy `--role BAP|BPP` still works via the alias table.
 
 ## Policy Enforcement
 

@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "928578d4-6e11-44df-8c88-6287ce1155e8",
+    "_postman_id": "60a40b42-4fa1-4c1c-9074-3395dad9706c",
     "name": "ev-charging-uc1-ev-charging.BAP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing ev-charging APIs based on Beckn Protocol v2"
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/cancel",
+              "raw": "{{bap_caller_url}}/cancel",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "cancel"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/confirm",
+              "raw": "{{bap_caller_url}}/confirm",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "confirm"
@@ -80,7 +80,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]\"\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:id == 'IND*CPO1*cs-01*evse-01*connectorid-01')]\"\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -88,9 +88,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -110,7 +110,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:provider.beckn:id == 'ecopower-charging')]\"\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:provider.beckn:id == 'ecopower-charging')]\"\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -118,9 +118,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -140,7 +140,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:id=='ev-charger-ccs2-001')]\"\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:id=='ev-charger-ccs2-001')]\"\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -148,9 +148,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -170,7 +170,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [\n            77.59,\n            12.94\n          ]\n        },\n        \"distanceMeters\": 10000\n      }\n    ]\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [77.59, 12.94]\n        },\n        \"distanceMeters\": 10000\n      }\n    ]\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -178,9 +178,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -200,7 +200,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:itemAttributes.connectorType == 'Type2' && @.beckn:availabilityWindow.schema:startTime <= '11:30:00' && @.beckn:availabilityWindow.schema:endTime >= '14:30:00')]\"\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:itemAttributes.connectorType == 'Type2' && @.beckn:availabilityWindow.schema:startTime <= '11:30:00' && @.beckn:availabilityWindow.schema:endTime >= '14:30:00')]\"\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -208,9 +208,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -230,7 +230,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:itemAttributes.maxPowerKW >= 50)]\"\n    },\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [\n            77.59,\n            12.94\n          ]\n        },\n        \"distanceMeters\": 10000\n      }\n    ]\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:itemAttributes.connectorType == 'CCS2' && @.beckn:itemAttributes.maxPowerKW >= 50)]\"\n    },\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [77.59, 12.94]\n        },\n        \"distanceMeters\": 10000\n      }\n    ]\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -238,9 +238,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -260,7 +260,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\n      \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:fulfillment.beckn:deliveryAttributes.vehicle.make == 'Tata' && @.beckn:fulfillment.beckn:deliveryAttributes.vehicle.model == 'Nexon-EV' )]\"\n    },\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [\n            77.6,\n            12.95\n          ]\n        },\n        \"distanceMeters\": 8000\n      }\n    ]\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"domain\": \"{{domain}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"schema_context\": [\"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingService/v1.0/context.jsonld\"]\n  },\n  \"message\": {\n    \"filters\": {\n      \"type\": \"jsonpath\",\n      \"expression\": \"$[?(@.beckn:fulfillment.beckn:deliveryAttributes.vehicle.make == 'Tata' && @.beckn:fulfillment.beckn:deliveryAttributes.vehicle.model == 'Nexon-EV' )]\"\n    },\n    \"spatial\": [\n      {\n        \"op\": \"s_dwithin\",\n        \"targets\": \"$['beckn:itemAttributes.chargingStation.serviceLocation.geo']\",\n        \"geometry\": {\n          \"type\": \"Point\",\n          \"coordinates\": [77.6, 12.95]\n        },\n        \"distanceMeters\": 8000\n      }\n    ]\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -268,9 +268,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/discover",
+              "raw": "{{bap_caller_url}}/discover",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "discover"
@@ -303,9 +303,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/init",
+              "raw": "{{bap_caller_url}}/init",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "init"
@@ -330,9 +330,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/init",
+              "raw": "{{bap_caller_url}}/init",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "init"
@@ -354,7 +354,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"rating\",\n    \"domain\": \"{{domain}}\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\"\n  },\n  \"message\": {\n    \"ratings\": [\n      {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n        \"@type\": \"beckn:RatingInput\",\n        \"id\": \"fulfillment-001\",\n        \"ratingValue\": 4,\n        \"bestRating\": 5,\n        \"worstRating\": 1,\n        \"category\": \"FULFILLMENT\",\n        \"feedback\": {\n          \"comments\": \"Excellent charging experience! The station was clean, easy to find, and the charging was fast and reliable. The staff was helpful and the payment process was smooth.\",\n          \"tags\": [\n            \"fast-charging\",\n            \"easy-to-use\",\n            \"clean-station\",\n            \"helpful-staff\",\n            \"smooth-payment\"\n          ]\n        }\n      }\n    ]\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"rating\",\n    \"domain\": \"{{domain}}\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\"\n  },\n  \"message\": {\n    \"ratings\": [\n      {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n        \"@type\": \"beckn:RatingInput\",\n        \"id\": \"fulfillment-001\",\n        \"ratingValue\": 4,\n        \"bestRating\": 5,\n        \"worstRating\": 1,\n        \"category\": \"FULFILLMENT\",\n        \"feedback\": {\n          \"comments\": \"Excellent charging experience! The station was clean, easy to find, and the charging was fast and reliable. The staff was helpful and the payment process was smooth.\",\n          \"tags\": [\"fast-charging\", \"easy-to-use\", \"clean-station\", \"helpful-staff\", \"smooth-payment\"]\n        }\n      }\n    ]\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -362,9 +362,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/rating",
+              "raw": "{{bap_caller_url}}/rating",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "rating"
@@ -386,7 +386,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"select\",\n    \"domain\": \"{{domain}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"order\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n      \"@type\": \"beckn:Order\",\n      \"beckn:orderStatus\": \"CREATED\",\n      \"beckn:seller\": \"ecopower-charging\",\n      \"beckn:buyer\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n        \"@type\": \"beckn:Buyer\",\n        \"beckn:id\": \"user-123\",\n        \"beckn:role\": \"BUYER\",\n        \"beckn:displayName\": \"Ravi Kumar\",\n        \"beckn:telephone\": \"+91-9876543210\",\n        \"beckn:email\": \"ravi.kumar@example.com\",\n        \"beckn:taxID\": \"GSTIN29ABCDE1234F1Z5\"\n      },\n      \"beckn:orderItems\": [\n        {\n          \"beckn:orderedItem\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n          \"beckn:quantity\": {\n            \"unitText\": \"Kilowatt Hour\",\n            \"unitCode\": \"KWH\",\n            \"unitQuantity\": 2.5\n          },\n          \"beckn:acceptedOffer\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n            \"@type\": \"beckn:Offer\",\n            \"beckn:id\": \"offer-ccs2-60kw-kwh\",\n            \"beckn:descriptor\": {\n              \"@type\": \"beckn:Descriptor\",\n              \"schema:name\": \"Per-kWh Tariff - CCS2 60kW\"\n            },\n            \"beckn:items\": [\n              \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\"\n            ],\n            \"beckn:provider\": \"ecopower-charging\",\n            \"beckn:price\": {\n              \"currency\": \"INR\",\n              \"value\": 45.0,\n              \"applicableQuantity\": {\n                \"unitText\": \"Kilowatt Hour\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 1\n              }\n            }\n          }\n        }\n      ],\n      \"beckn:orderAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingSession/v1.0/context.jsonld\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2025-12-20T10:00:00Z\",\n          \"endTime\": \"2025-12-20T11:30:00Z\"\n        }\n      }\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"select\",\n    \"domain\": \"{{domain}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"ttl\": \"PT30S\"\n  },\n  \"message\": {\n    \"order\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n      \"@type\": \"beckn:Order\",\n      \"beckn:orderStatus\": \"CREATED\",\n      \"beckn:seller\": \"ecopower-charging\",\n      \"beckn:buyer\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n        \"@type\": \"beckn:Buyer\",\n        \"beckn:id\": \"user-123\",\n        \"beckn:role\": \"BUYER\",\n        \"beckn:displayName\": \"Ravi Kumar\",\n        \"beckn:telephone\": \"+91-9876543210\",\n        \"beckn:email\": \"ravi.kumar@example.com\",\n        \"beckn:taxID\": \"GSTIN29ABCDE1234F1Z5\"\n      },\n      \"beckn:orderItems\": [\n        {\n          \"beckn:orderedItem\": \"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\",\n          \"beckn:quantity\": {\n            \"unitText\": \"Kilowatt Hour\",\n            \"unitCode\": \"KWH\",\n            \"unitQuantity\": 2.5\n          },\n          \"beckn:acceptedOffer\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n            \"@type\": \"beckn:Offer\",\n            \"beckn:id\": \"offer-ccs2-60kw-kwh\",\n            \"beckn:descriptor\": {\n              \"@type\": \"beckn:Descriptor\",\n              \"schema:name\": \"Per-kWh Tariff - CCS2 60kW\"\n            },\n            \"beckn:items\": [\"IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A\"],\n            \"beckn:provider\": \"ecopower-charging\",\n            \"beckn:price\": {\n              \"currency\": \"INR\",\n              \"value\": 45.0,\n              \"applicableQuantity\": {\n                \"unitText\": \"Kilowatt Hour\",\n                \"unitCode\": \"KWH\",\n                \"unitQuantity\": 1\n              }\n            }\n          }\n        }\n      ],\n      \"beckn:orderAttributes\": {\n        \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingSession/v1.0/context.jsonld\",\n        \"@type\": \"ChargingSession\",\n        \"buyerFinderFee\": {\n          \"feeType\": \"PERCENTAGE\",\n          \"feeValue\": 2.5\n        },\n        \"preferences\": {\n          \"startTime\": \"2025-12-20T10:00:00Z\",\n          \"endTime\": \"2025-12-20T11:30:00Z\"\n        }\n      }\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -394,9 +394,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/select",
+              "raw": "{{bap_caller_url}}/select",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "select"
@@ -426,9 +426,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/status",
+              "raw": "{{bap_caller_url}}/status",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "status"
@@ -453,9 +453,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/status",
+              "raw": "{{bap_caller_url}}/status",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "status"
@@ -477,7 +477,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"support\",\n    \"domain\": \"{{domain}}\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\"\n  },\n  \"message\": {\n    \"refId\": \"order-ev-charging-001\",\n    \"refType\": \"ORDER\",\n    \"support\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n      \"@type\": \"beckn:SupportInfo\",\n      \"name\": \"Ravi Kumar\",\n      \"phone\": \"+91-9876543210\",\n      \"email\": \"ravi.kumar@example.com\",\n      \"hours\": \"Mon\\u2013Sun: 6:00 PM - 10:00 PM IST\",\n      \"channels\": [\n        \"PHONE\",\n        \"WHATSAPP\"\n      ]\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"support\",\n    \"domain\": \"{{domain}}\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"ttl\": \"PT30S\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\"\n  },\n  \"message\": {\n    \"refId\": \"order-ev-charging-001\",\n    \"refType\": \"ORDER\",\n    \"support\": {\n      \"@context\": \"https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld\",\n      \"@type\": \"beckn:SupportInfo\",\n      \"name\": \"Ravi Kumar\",\n      \"phone\": \"+91-9876543210\",\n      \"email\": \"ravi.kumar@example.com\",\n      \"hours\": \"Mon\\u2013Sun: 6:00 PM - 10:00 PM IST\",\n      \"channels\": [\"PHONE\", \"WHATSAPP\"]\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -485,9 +485,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/support",
+              "raw": "{{bap_caller_url}}/support",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "support"
@@ -517,9 +517,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/update",
+              "raw": "{{bap_caller_url}}/update",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "update"
@@ -544,9 +544,9 @@
               }
             },
             "url": {
-              "raw": "{{bap_adapter_url}}/update",
+              "raw": "{{bap_caller_url}}/update",
               "host": [
-                "{{bap_adapter_url}}"
+                "{{bap_caller_url}}"
               ],
               "path": [
                 "update"
@@ -608,7 +608,7 @@
       "value": "http://beckn-router:9000"
     },
     {
-      "key": "bap_adapter_url",
+      "key": "bap_caller_url",
       "value": "http://localhost:8081/bap/caller"
     }
   ]
