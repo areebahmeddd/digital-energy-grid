@@ -17,14 +17,14 @@ All use cases share the same docker stack, adapter configs, and runner.
 
 ## Postman
 
-Each use case ships BAP and BPP Postman collections under `postman/`:
+Each use case ships BUYER (data consumer) and SELLER (data provider) Postman collections under `postman/`:
 
-- `uc1-meter-data/postman/data-exchange-uc1-meter-data.{BAP,BPP}-DEG.postman_collection.json`
-- `uc2-regulatory-data/postman/data-exchange-uc2-regulatory-data.{BAP,BPP}-DEG.postman_collection.json`
-- `uc3-tariff-policy/postman/data-exchange-uc3-tariff-policy.{BAP,BPP}-DEG.postman_collection.json`
-- `uc4-streaming/postman/data-exchange-uc4-streaming.{BAP,BPP}-DEG.postman_collection.json`
+- `uc1-meter-data/postman/data-exchange-uc1-meter-data.{BUYER,SELLER}-DEG.postman_collection.json`
+- `uc2-regulatory-data/postman/data-exchange-uc2-regulatory-data.{BUYER,SELLER}-DEG.postman_collection.json`
+- `uc3-tariff-policy/postman/data-exchange-uc3-tariff-policy.{BUYER,SELLER}-DEG.postman_collection.json`
+- `uc4-streaming/postman/data-exchange-uc4-streaming.{BUYER,SELLER}-DEG.postman_collection.json`
 
-Import a collection into Postman and hit Send. Default request URLs point at `localhost:8081`/`8082` (BAP/BPP caller endpoints); change them to your ngrok URL to send over the tunnel. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP [--usecase uc1-meter-data|uc2-regulatory-data|uc3-tariff-policy]`.
+Import a collection into Postman and hit Send. Default request URLs point at `localhost:8081`/`8082` (BUYER/SELLER caller endpoints — BUYER initiates requests as BAP, SELLER initiates callbacks as BPP); change them to your ngrok URL to send over the tunnel. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BUYER|SELLER [--usecase uc1-meter-data|uc2-regulatory-data|uc3-tariff-policy]` (or `--all`). Legacy `--role BAP|BPP` still works via the alias table.
 
 ## Related
 

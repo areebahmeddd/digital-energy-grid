@@ -37,8 +37,8 @@ info:
         npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml \
           -w status-roundtrip-via-seller-discom --severity 'SCHEMA_CHECK=off' -v
 
-      Available workflows: publish-catalog, select-through-settlement,
-        status-roundtrip-via-seller-discom
+      Available workflows: publish-catalog, discover, select-through-settlement,
+        status-roundtrip-via-seller-discom, buyer-discom-emits-on-status
 
 sourceDescriptions:
   - name: beckn-bap-caller
@@ -55,6 +55,11 @@ sourceDescriptions:
     type: openapi
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bpp/caller
+
+  - name: beckn-buyerdiscom-bpp-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8084/bpp/caller
 
 workflows:
   # ── Catalog & Discovery ──
@@ -164,3 +169,24 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../../responses/sellerdiscom/on_status.json"
+
+  # ── BuyerDiscom-emitted on_status (direct callback path) ──
+
+  - workflowId: buyer-discom-emits-on-status
+    summary: >
+      Symmetric counterpart: buyerDiscom ledger directly emits /on_status via
+      its /bpp/caller, addressed at buyer/bap/receiver. The buyer recorder
+      recognizes context.bppId == buyerDiscom.participantId (Rule 2a) and
+      forwards to the peer (seller) /bap/receiver; seller then cascades to
+      sellerDiscom (Rule 2b) when performance data is present.
+    steps:
+      - stepId: buyer-discom-responds-on-status
+        description: >
+          Direct POST to buyerdiscom/bpp/caller. Mirrors the sellerDiscom test
+          above but exercises the buyer-side ledger callback path. Exercises
+          the BUYERDISCOMLEDGER postman collection.
+        operationId: beckn-buyerdiscom-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../../responses/buyerdiscom/on_status.json"

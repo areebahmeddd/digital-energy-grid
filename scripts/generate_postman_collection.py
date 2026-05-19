@@ -162,6 +162,16 @@ DEVKIT_CONFIGS = {
         "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
         "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
+        # Source dirs for the discom-ledger TSP collections. The on_status.json
+        # response fixtures here ARE the canonical outbound on_status payloads
+        # the ledger sends back to platforms.
+        "buyerdiscomledger_examples_path": "devkits/p2p-trading-ies-wave2/responses/buyerdiscom",
+        "sellerdiscomledger_examples_path": "devkits/p2p-trading-ies-wave2/responses/sellerdiscom",
+        # Adapter URLs for the discom-ledger /bpp/caller endpoints (the ledger
+        # signs and routes the on_status to context.bapUri). Default host-side
+        # ports per install/docker-compose.yml: buyerdiscom=8084, sellerdiscom=8083.
+        "buyer_ledger_adapter_url": "http://localhost:8084/bpp/caller",
+        "seller_ledger_adapter_url": "http://localhost:8083/bpp/caller",
         "usecase": "uc1",
         "structure": "flat",
         # Actions that hit the BPP receiver directly rather than the BPP caller.
@@ -204,7 +214,39 @@ DEVKIT_CONFIGS = {
     }
 }
 
-# Role-based file name filters (regex patterns)
+# Public-role -> canonical-role aliases. The CLI accepts both BAP/BPP/UtilityBPP
+# (legacy transport-role names) and business-role names (BUYER, SELLER, …)
+# plus the new ledger roles. Aliases let one filter/action table cover multiple
+# devkit semantics: e.g. demand-flex's "BUYER" (utility issuing
+# DemandFlexBuyOffers) and p2p's "BUYER" (consumer buying energy) both map to
+# BAP plumbing; only the output filename uses the public name.
+#
+# BUYERDISCOMLEDGER / SELLERDISCOMLEDGER are NOT aliases — they're new
+# canonical roles for discom-ledger TSPs. They source files from a separate
+# examples path (the response fixtures dir) and emit on_status callbacks only.
+ROLE_ALIAS = {
+    # Legacy transport roles (identity)
+    "BAP": "BAP",
+    "BPP": "BPP",
+    "UtilityBPP": "UtilityBPP",
+    # Business-role names for v2 LTS devkits
+    "BUYER": "BAP",
+    "SELLER": "BPP",
+    # Discom-ledger TSP roles (new canonical)
+    "BUYERDISCOMLEDGER": "BUYERDISCOMLEDGER",
+    "SELLERDISCOMLEDGER": "SELLERDISCOMLEDGER",
+}
+
+
+def canonical_role(public_role: str) -> str:
+    """Translate the CLI-facing role name to the canonical role used by filters,
+    action tables, and adapter URL lookup. Raises ValueError on unknown roles."""
+    if public_role not in ROLE_ALIAS:
+        raise ValueError(f"Unknown role: {public_role!r}; expected one of {sorted(ROLE_ALIAS.keys())}")
+    return ROLE_ALIAS[public_role]
+
+
+# Role-based file name filters (regex patterns). Keyed by canonical role.
 ROLE_FILTERS = {
     "BAP": [
         r".*-request.*\.json$",  # P2P trading/enrollment: *-request*.json (includes suffixes like -otp, -oauth2)
@@ -220,7 +262,18 @@ ROLE_FILTERS = {
     ],
     "UtilityBPP": [
         r"^cascaded-.*\.json$"  # Cascaded requests/responses
-    ]
+    ],
+    # Discom-ledger TSP: outbound on_status emissions only (per design — the
+    # collection lets a tester directly fire the ledger's on_status callback
+    # via the ledger's /bpp/caller endpoint, bypassing the sandbox).
+    "BUYERDISCOMLEDGER": [
+        r"^on_status.*\.json$",
+        r"^on-status.*\.json$",
+    ],
+    "SELLERDISCOMLEDGER": [
+        r"^on_status.*\.json$",
+        r"^on-status.*\.json$",
+    ],
 }
 
 # All BAP-initiated actions (including status)
@@ -419,7 +472,16 @@ def extract_action_from_filename(filename: str, role: str) -> Optional[str]:
                 action = match.group(1)
                 if action in BAP_ACTIONS:
                     return action
-    
+
+    elif role in ("BUYERDISCOMLEDGER", "SELLERDISCOMLEDGER"):
+        # Discom ledger TSP collections expose outbound on_status only.
+        # Source file is the sandbox response fixture (on_status.json or
+        # on-status.json). Action is always on_status; the test client POSTs
+        # to <ledger>/bpp/caller/on_status which signs and forwards to the
+        # bapUri in the body.
+        if re.match(r'^on[-_]status', name, re.IGNORECASE):
+            return "on_status"
+
     return None
 
 
@@ -491,7 +553,7 @@ def load_example_json(filepath: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) -> Dict[str, Any]:
+def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, role: Optional[str] = None) -> Dict[str, Any]:
     """
     Replace hardcoded context values with Postman macros.
 
@@ -501,9 +563,19 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) 
     "{{bap_host_root}}/bap/receiver" / "{{bpp_host_root}}/bpp/receiver" so a
     single host variable (e.g., http://beckn-router:9000 or an ngrok URL)
     drives both request targeting and callback routing.
+
+    For discom-ledger roles (BUYERDISCOMLEDGER, SELLERDISCOMLEDGER), the BPP
+    in the outbound on_status is the LEDGER acting as BPP-caller, so bppUri
+    is templated to /bpp/caller (not /bpp/receiver).
     """
     if not isinstance(data, dict):
         return data
+
+    # Pick the Beckn path the BPP advertises in this collection's outbound
+    # call. Default = "/bpp/receiver" (request-direction; e.g. a status
+    # request arrives at the BPP's receiver). Ledger on_status collections
+    # advertise /bpp/caller (callback-direction; the ledger is initiating).
+    bpp_path = "/bpp/caller" if role in ("BUYERDISCOMLEDGER", "SELLERDISCOMLEDGER") else "/bpp/receiver"
 
     result = {}
 
@@ -523,7 +595,7 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) 
                 elif ctx_key in ("bpp_id", "bppId"):
                     new_context[ctx_key] = "{{bpp_id}}"
                 elif ctx_key in ("bpp_uri", "bppUri"):
-                    new_context[ctx_key] = "{{bpp_host_root}}/bpp/receiver" if host_root_style else "{{bpp_uri}}"
+                    new_context[ctx_key] = f"{{{{bpp_host_root}}}}{bpp_path}" if host_root_style else "{{bpp_uri}}"
                 elif ctx_key in ("transaction_id", "transactionId"):
                     new_context[ctx_key] = "{{transaction_id}}"
                 elif ctx_key in ("message_id", "messageId"):
@@ -538,12 +610,12 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False) 
                     new_context[ctx_key] = ctx_value
                 else:
                     # Preserve other context fields (e.g., location)
-                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style) if isinstance(ctx_value, (dict, list)) else ctx_value
+                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style, role) if isinstance(ctx_value, (dict, list)) else ctx_value
 
             result[key] = new_context
         elif isinstance(value, (dict, list)):
             # Recursively process nested structures in message
-            result[key] = replace_context_macros(value, host_root_style)
+            result[key] = replace_context_macros(value, host_root_style, role)
         else:
             # Preserve other fields as-is
             result[key] = value
@@ -614,7 +686,7 @@ def create_postman_request(
         ledger_host_seller: Override for seller ledger host (uses config default if None)
     """
     # Replace macros in the JSON
-    request_body = replace_context_macros(json_data, host_root_style)
+    request_body = replace_context_macros(json_data, host_root_style, role)
     if ledger_host_buyer is not None or ledger_host_seller is not None:
         request_body = replace_ledger_uri_macros(request_body)
 
@@ -726,11 +798,25 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     """Get collection variables based on devkit and role."""
     config = DEVKIT_CONFIGS[devkit]
 
+    # For discom-ledger TSP roles, the BPP of the collection's outbound call IS
+    # the ledger itself — so bpp_id / bpp_host_root variables get overridden to
+    # the ledger's identity. bap_id stays pointing at the recipient platform
+    # (buyerapp by default, matching the response fixtures); testers swap it
+    # in postman if firing the on_status at sellerapp instead.
+    bpp_id_value = config["bpp_id"]
+    bpp_host_root_value = config.get("bpp_host_root")
+    if role == "BUYERDISCOMLEDGER":
+        bpp_id_value = "buyer-discom-ledger.example.com"
+        bpp_host_root_value = config.get("ledger_host_buyer", "http://buyer-discom-ledger.example.com:9000")
+    elif role == "SELLERDISCOMLEDGER":
+        bpp_id_value = "seller-discom-ledger.example.com"
+        bpp_host_root_value = config.get("ledger_host_seller", "http://seller-discom-ledger.example.com:9000")
+
     variables = [
         {"key": "domain", "value": config["domain"]},
         {"key": "version", "value": "2.0.0"},
         {"key": "bap_id", "value": config["bap_id"]},
-        {"key": "bpp_id", "value": config["bpp_id"]},
+        {"key": "bpp_id", "value": bpp_id_value},
         {"key": "transaction_id", "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"},
         {"key": "iso_date", "value": ""}
     ]
@@ -738,12 +824,12 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     # Presence of bap_host_root switches templating to {{bap_host_root}}/bap/receiver
     if "bap_host_root" in config:
         variables.append({"key": "bap_host_root", "value": config["bap_host_root"]})
-        variables.append({"key": "bpp_host_root", "value": config["bpp_host_root"]})
+        variables.append({"key": "bpp_host_root", "value": bpp_host_root_value or config["bpp_host_root"]})
     else:
         variables.append({"key": "bap_uri", "value": config["bap_uri"]})
         variables.append({"key": "bpp_uri", "value": config["bpp_uri"]})
     
-    # Add adapter URLs based on role
+    # Add adapter URLs based on canonical role
     if role == "BAP":
         variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
     elif role == "BPP":
@@ -751,6 +837,10 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     elif role == "UtilityBPP":
         variables.append({"key": "bpp_adapter_url", "value": config["bpp_adapter_url"]})
         variables.append({"key": "bap_adapter_url", "value": config["bap_adapter_url"]})
+    elif role == "BUYERDISCOMLEDGER":
+        variables.append({"key": "buyer_ledger_adapter_url", "value": config["buyer_ledger_adapter_url"]})
+    elif role == "SELLERDISCOMLEDGER":
+        variables.append({"key": "seller_ledger_adapter_url", "value": config["seller_ledger_adapter_url"]})
 
     # BPP receiver URL (separate from bpp_adapter_url/caller; used for actions like status
     # that hit bpp/receiver directly for round-trip testing)
@@ -799,7 +889,7 @@ def generate_collection(
     structure = config["structure"]
     host_root_style = "bap_host_root" in config
 
-    # Determine action mapping and adapter URL based on role
+    # Determine action mapping and adapter URL based on canonical role
     if role == "BAP":
         action_mapping = BAP_ACTIONS
         adapter_url_var = "bap_adapter_url"
@@ -810,18 +900,29 @@ def generate_collection(
     elif role == "UtilityBPP":
         action_mapping = BAP_ACTIONS  # UtilityBPP uses BAP actions
         adapter_url_var = "bpp_adapter_url"
+    elif role == "BUYERDISCOMLEDGER":
+        # On-status callback only; sent via the buyer-discom ledger's /bpp/caller
+        action_mapping = {"on_status": "on_status"}
+        adapter_url_var = "buyer_ledger_adapter_url"
+    elif role == "SELLERDISCOMLEDGER":
+        # On-status callback only; sent via the seller-discom ledger's /bpp/caller
+        action_mapping = {"on_status": "on_status"}
+        adapter_url_var = "seller_ledger_adapter_url"
     else:
         raise ValueError(f"Unknown role: {role}")
-    
-    # Auto-generate collection name and description if not provided
+
+    # Auto-generate collection name (uses public/alias name if caller passed
+    # one; otherwise the canonical role name).
     if collection_name is None:
         collection_name = f"{devkit}.{role}-DEG"
-    
+
     if collection_description is None:
         role_desc = {
             "BAP": "Buyer Application Platform",
             "BPP": "Buyer Provider Platform",
-            "UtilityBPP": "Utility BPP (Transmission/Grid Provider Platform)"
+            "UtilityBPP": "Utility BPP (Transmission/Grid Provider Platform)",
+            "BUYERDISCOMLEDGER": "Buyer-discom ledger TSP (emits on_status callbacks)",
+            "SELLERDISCOMLEDGER": "Seller-discom ledger TSP (emits on_status callbacks)",
         }
         devkit_desc = devkit
         collection_description = f"Postman collection for {role_desc[role]} implementing {devkit_desc} APIs based on Beckn Protocol v2"
@@ -932,9 +1033,12 @@ def main():
     parser.add_argument(
         "--role",
         type=str,
-        choices=["BAP", "BPP", "UtilityBPP"],
+        choices=sorted(ROLE_ALIAS.keys()),
         required=True,
-        help="Role: 'BAP', 'BPP', or 'UtilityBPP'"
+        help="Role. Legacy: 'BAP', 'BPP', 'UtilityBPP'. "
+             "Business-role names (preferred for v2 LTS devkits): 'BUYER', 'SELLER'. "
+             "Discom-ledger TSP collections (emits on_status callbacks): "
+             "'BUYERDISCOMLEDGER', 'SELLERDISCOMLEDGER'."
     )
     parser.add_argument(
         "--examples",
@@ -999,41 +1103,62 @@ def main():
     )
 
     args = parser.parse_args()
-    
+
+    # Resolve role alias: --role accepts both legacy (BAP/BPP/UtilityBPP) and
+    # public business names (BUYER/SELLER/BUYERDISCOMLEDGER/SELLERDISCOMLEDGER).
+    # Filters/actions key off the canonical role; the output filename and
+    # collection name use the public name the user typed.
+    public_role = args.role
+    role = canonical_role(public_role)
+
     # Get devkit configuration
     config = DEVKIT_CONFIGS[args.devkit]
-    
+
     # Convert to Path objects
     repo_root_dir = Path(__file__).parent.parent
-    
-    # Use provided paths or defaults from config
-    examples_dir = repo_root_dir / (args.examples or config["examples_path"])
-    
+
+    # Per-role examples path override: discom-ledger roles source from the
+    # response fixtures dir (not the BAP/BPP examples dir). Devkits set
+    # `<canonical_role_lower>_examples_path` to point at it.
+    role_specific_path_key = f"{role.lower()}_examples_path"
+    examples_path = (
+        args.examples
+        or config.get(role_specific_path_key)
+        or config.get("examples_path")
+    )
+    if examples_path is None:
+        raise SystemExit(
+            f"No examples path configured for devkit={args.devkit}, role={role}. "
+            f"Set '{role_specific_path_key}' or 'examples_path' in DEVKIT_CONFIGS, "
+            f"or pass --examples."
+        )
+    examples_dir = repo_root_dir / examples_path
+
     # Generate collection name if not provided
     if args.name is not None:
         collection_name = args.name
     else:
         usecase = args.usecase or config.get("usecase")
         if usecase:
-            collection_name = f"{args.devkit}-{usecase}.{args.role}-DEG"
+            collection_name = f"{args.devkit}-{usecase}.{public_role}-DEG"
         else:
-            collection_name = f"{args.devkit}.{args.role}-DEG"
-    
+            collection_name = f"{args.devkit}.{public_role}-DEG"
+
     # Construct output filename from collection name
     filename = f"{collection_name}.postman_collection.json"
     output_path = repo_root_dir / args.output_dir / filename
-    
+
     print("=" * 60)
     print(f"Postman Collection Generator")
-    print(f"Devkit: {args.devkit}, Role: {args.role}")
+    print(f"Devkit: {args.devkit}, Role: {public_role}" + (f" (canonical: {role})" if public_role != role else ""))
     print("=" * 60)
     print()
-    
+
     output_path = generate_collection(
         examples_dir=examples_dir,
         output_path=output_path,
         devkit=args.devkit,
-        role=args.role,
+        role=role,
         collection_name=collection_name,
         collection_description=args.description,
         ledger_host_buyer=args.ledger_host_buyer,
