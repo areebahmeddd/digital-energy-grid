@@ -61,7 +61,7 @@ if ROLE is None and not ALL:
     print("       [--ledger-host-buyer <url>] [--ledger-host-seller <url>]")
     sys.exit(1)
 
-ROLES_TO_RUN = ["BUYER", "SELLER", "BUYERDISCOMLEDGER", "SELLERDISCOMLEDGER"] if ALL else [ROLE]
+ROLES_TO_RUN = ["BUYER", "SELLER", "BUYERDISCOMLEDGER", "SELLERDISCOMLEDGER", "SELLERDISCOM"] if ALL else [ROLE]
 
 usecase = "uc1"
 output_dir = str(DEVKIT_ROOT / usecase / "postman")
