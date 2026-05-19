@@ -25,57 +25,32 @@
           "status": { "descriptor": { "code": "ACTIVE" } },
           "resources": [
             {
-              "id": "ds-sellerdiscom-meter-actuals-2026-04-26",
-              "descriptor": {
-                "name": "Seller-discom meter actuals — 2026-04-26 04:30–05:30 UTC",
-                "shortDesc": "ACTUAL_PULLED reading from sellerDiscom for the P2P-001 commitment window"
-              },
-              "quantity": {
-                "@type": "Quantity",
-                "unitText": "report",
-                "unitCode": "EA",
-                "value": "1"
-              },
+              "id": "ds-actuals-001",
+              "descriptor": { "name": "Seller-discom meter actuals" },
+              "quantity": { "@type": "Quantity", "unitText": "report", "unitCode": "EA", "value": "1" },
               "resourceAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
                 "@type": "DatasetItem",
-                "schema:identifier": "ds-sellerdiscom-meter-actuals-2026-04-26",
-                "schema:name": "Seller-discom meter actuals — 2026-04-26 04:30–05:30 UTC",
+                "schema:identifier": "ds-actuals-001",
+                "schema:name": "Seller-discom meter actuals",
                 "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
-                "dataset:accessMethod": "INLINE",
-                "dataset:datasetType": "MeterActuals",
-                "dataset:targetTransactionId": "1268c204-675b-4adb-9321-b08231b147b2",
-                "dataset:targetOrderItemId": "1268c204-675b-4adb-9321-b08231b147b2_contract-p2p-001_0",
-                "dataset:targetMeterId": "TEST_METER_SELLER_001",
+                "dataset:meterId": "TEST_METER_SELLER_001",
                 "dataset:discomId": "TEST_DISCOM_SELLER",
                 "dataPayload": {
                   "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-26T04:30:00Z",
-                    "duration": "PT1H"
-                  },
+                  "intervalPeriod": { "start": "2026-04-26T04:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "ACTUAL_PULLED",
-                      "readingType": "DIRECT_READ",
-                      "units": "KWH"
-                    }
+                    { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ACTUAL_PULLED", "units": "KWH" }
                   ],
                   "intervals": [
-                    { "id": 0, "payloads": [{ "type": "ACTUAL_PULLED", "values": [19.2] }] },
-                    { "id": 1, "payloads": [{ "type": "ACTUAL_PULLED", "values": [14.7] }] }
+                    { "id": 0, "payloads": [{ "type": "ACTUAL_PULLED", "values": [19.2] }] }
                   ]
                 }
               }
             }
           ],
-          "offer": {
-            "id": "offer-sellerdiscom-allocation",
-            "descriptor": { "name": "Seller-discom meter actuals push" },
-            "resourceIds": ["ds-sellerdiscom-meter-actuals-2026-04-26"]
-          }
+          "offer": { "id": "offer-001", "resourceIds": ["ds-actuals-001"] }
         }
       ]
     }
