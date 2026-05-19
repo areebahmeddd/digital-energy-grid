@@ -62,7 +62,7 @@
               "inputs": [
                 {
                   "role": "seller",
-                  "participantId": "TEST_SELLER_001",
+                  "participantId": "sellerapp.example.com",
                   "payload": {
                     "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                     "@type": "TimeSeries",
@@ -122,7 +122,7 @@
                 },
                 {
                   "role": "buyer",
-                  "participantId": "TEST_BUYER_001",
+                  "participantId": "buyerapp.example.com",
                   "payloadDescriptors": [
                     {
                       "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
@@ -247,11 +247,11 @@
         "roles": [
           {
             "role": "buyer",
-            "participantId": "TEST_BUYER_001"
+            "participantId": "buyerapp.example.com"
           },
           {
             "role": "seller",
-            "participantId": "TEST_SELLER_001"
+            "participantId": "sellerapp.example.com"
           },
           {
             "role": "buyerDiscom",
@@ -270,7 +270,7 @@
       "participants": [
         {
           "role": "seller",
-          "participantId": "TEST_SELLER_001",
+          "participantId": "sellerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
@@ -282,7 +282,7 @@
         },
         {
           "role": "buyer",
-          "participantId": "TEST_BUYER_001",
+          "participantId": "buyerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
@@ -299,7 +299,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUri": "http://buyer-discom-ledger.example.com:9000/bap/receiver"
+            "ledgerUri": "http://buyer-discom-ledger.example.com:9000"
           }
         },
         {
@@ -309,7 +309,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUri": "http://seller-discom-ledger.example.com:9000/bpp/receiver"
+            "ledgerUri": "http://seller-discom-ledger.example.com:9000"
           }
         }
       ],

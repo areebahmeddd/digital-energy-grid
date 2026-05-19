@@ -116,6 +116,22 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 	buyerPart := findWave2Participant(payload.Message.Contract.Participants, "buyer")
 	sellerPart := findWave2Participant(payload.Message.Contract.Participants, "seller")
 
+	// Platform identity is trade-scoped: read from participants[role=buyer|seller].participantId
+	// rather than from transport-level context.bapId/bppId. context.bapId/bppId reflect the
+	// current message leg's BAP/BPP (and get rewritten on cascade), while participantId
+	// stays put across the chain — this is what we want to record on the ledger as the
+	// platform identities for the trade.
+	platformIDBuyer := participantID(buyerPart)
+	platformIDSeller := participantID(sellerPart)
+	if platformIDBuyer == "" {
+		log.Printf("WARNING: participants[role=buyer].participantId is empty; falling back to context.bapId (txn: %s)", payload.Context.TransactionID)
+		platformIDBuyer = payload.Context.BapID
+	}
+	if platformIDSeller == "" {
+		log.Printf("WARNING: participants[role=seller].participantId is empty; falling back to context.bppId (txn: %s)", payload.Context.TransactionID)
+		platformIDSeller = payload.Context.BppID
+	}
+
 	deliveryStart, deliveryEnd := extractWave2DeliveryWindow(commitment.Offer.OfferAttributes)
 	if deliveryStart == "" {
 		log.Printf("WARNING: wave2 deliveryStartTime not found (txn: %s, commitment: %s)",
@@ -142,8 +158,8 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 			Role:              role,
 			TransactionID:     payload.Context.TransactionID,
 			OrderItemID:       orderItemID,
-			PlatformIDBuyer:   payload.Context.BapID,
-			PlatformIDSeller:  payload.Context.BppID,
+			PlatformIDBuyer:   platformIDBuyer,
+			PlatformIDSeller:  platformIDSeller,
 			DiscomIDBuyer:     wave2StringAttr(buyerPart, "utilityId"),
 			DiscomIDSeller:    wave2StringAttr(sellerPart, "utilityId"),
 			BuyerID:           wave2StringAttr(buyerPart, "meterId"),
@@ -180,6 +196,15 @@ func findWave2Participant(participants []Wave2Participant, role string) *Wave2Pa
 		}
 	}
 	return nil
+}
+
+// participantID returns p.ParticipantID or "" if p is nil. Mirrors wave2StringAttr
+// for the top-level participantId field (not nested under participantAttributes).
+func participantID(p *Wave2Participant) string {
+	if p == nil {
+		return ""
+	}
+	return p.ParticipantID
 }
 
 // wave2StringAttr reads a string attribute from a participant's participantAttributes.
@@ -247,15 +272,26 @@ func extractWave2QuantityAndUnit(resources []Wave2Resource) (float64, string) {
 	return q.UnitQuantity, q.UnitCode
 }
 
-// RewriteContextForBeckn rewrites context.bppUri and context.bapUri on the
-// raw on_confirm body so that, from the ledger TSP's POV:
-//   - bppUri = "<senderHost>/bpp/caller"   — the platform sending this call
-//   - bapUri = "<ledgerURI>/bap/receiver"  — the TSP itself, as the receiving BAP
+// RewriteContextForBeckn rewrites context.bppUri/bapUri AND context.bppId/bapId
+// on the raw on_confirm body so that the cascade leg is Beckn-spec-compliant —
+// i.e. the (bppId, bppUri) pair identifies the *current* leg's caller (this
+// platform), and (bapId, bapUri) identifies the *current* leg's receiver (the
+// ledger TSP). The original trade-level platform identities live in
+// message.contract.participants[role=buyer|seller].participantId and are NOT
+// touched here.
 //
-// Everything else (other context fields, message body) is preserved verbatim.
-// Handles both wave2 (camelCase: bapUri/bppUri) and wave1 (snake_case:
-// bap_uri/bpp_uri) shapes by detecting which key style the original uses.
-func RewriteContextForBeckn(body []byte, senderHost, ledgerURI string) ([]byte, error) {
+// senderEndpointURI / ledgerEndpointURI are the FULL endpoint URLs (host base
+// + Beckn role path, e.g. "<sender>/bpp/caller", "<ledger>/bap/receiver");
+// they are written verbatim into bppUri/bapUri. Callers build these via
+// BppCallerEndpoint / BapReceiverEndpoint so the routing URL (the URL the
+// client actually POSTs to) and the URI advertised in context stay coherent.
+//
+// senderSubscriberID/ledgerSubscriberID are skipped if empty (left as-is).
+//
+// Other context fields and the message body are preserved verbatim. Handles
+// both wave2 (camelCase) and wave1 (snake_case) by detecting which key
+// style the original uses.
+func RewriteContextForBeckn(body []byte, senderEndpointURI, ledgerEndpointURI, senderSubscriberID, ledgerSubscriberID string) ([]byte, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(body, &raw); err != nil {
 		return nil, fmt.Errorf("rewriteContext: parse body: %w", err)
@@ -265,18 +301,46 @@ func RewriteContextForBeckn(body []byte, senderHost, ledgerURI string) ([]byte, 
 		return nil, fmt.Errorf("rewriteContext: missing or invalid context")
 	}
 
-	bppKey, bapKey := "bppUri", "bapUri"
+	bppKey, bapKey, bppIDKey, bapIDKey := "bppUri", "bapUri", "bppId", "bapId"
 	if _, hasCamel := ctxRaw[bppKey]; !hasCamel {
 		if _, hasSnake := ctxRaw["bpp_uri"]; hasSnake {
-			bppKey, bapKey = "bpp_uri", "bap_uri"
+			bppKey, bapKey, bppIDKey, bapIDKey = "bpp_uri", "bap_uri", "bpp_id", "bap_id"
 		}
 	}
 
-	ctxRaw[bppKey] = strings.TrimRight(senderHost, "/") + "/bpp/caller"
-	ctxRaw[bapKey] = strings.TrimRight(ledgerURI, "/") + "/bap/receiver"
+	ctxRaw[bppKey] = senderEndpointURI
+	ctxRaw[bapKey] = ledgerEndpointURI
+	if senderSubscriberID != "" {
+		ctxRaw[bppIDKey] = senderSubscriberID
+	}
+	if ledgerSubscriberID != "" {
+		ctxRaw[bapIDKey] = ledgerSubscriberID
+	}
 	raw["context"] = ctxRaw
 
 	return json.Marshal(raw)
+}
+
+// BapReceiverEndpoint returns "<hostBase>/bap/receiver" — the inbound endpoint
+// where a ledger TSP (or any BAP-role node) receives on_confirm/on_status/
+// status cascades. Idempotent against a trailing slash on hostBase.
+func BapReceiverEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bap/receiver"
+}
+
+// BppCallerEndpoint returns "<hostBase>/bpp/caller" — the outbound endpoint
+// from which a BPP-role node initiates a cascade (e.g. a ledger pushing an
+// on_status callback to a buyer/seller platform).
+func BppCallerEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bpp/caller"
+}
+
+// BppReceiverEndpoint returns "<hostBase>/bpp/receiver" — the inbound endpoint
+// where a BPP-role node receives request actions (status, select, init, …).
+// Used by the recorder when forwarding a request (e.g. status) to a ledger
+// that's playing the BPP-receiver role in that sub-transaction.
+func BppReceiverEndpoint(hostBase string) string {
+	return strings.TrimRight(hostBase, "/") + "/bpp/receiver"
 }
 
 // DeriveSenderHostFromWave2 returns "<scheme>://<host[:port]>" extracted from

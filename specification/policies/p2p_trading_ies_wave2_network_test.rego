@@ -46,7 +46,7 @@ _base_participants := [
 		"participantAttributes": {
 			"@type": "DiscomLedgerProvider",
 			"utilityId": "TEST_DISCOM_BUYER",
-			"ledgerUri": "http://beckn-router:9000/ledger/receiver",
+			"ledgerUri": "http://beckn-router:9000",
 		},
 	},
 	{
@@ -55,7 +55,7 @@ _base_participants := [
 		"participantAttributes": {
 			"@type": "DiscomLedgerProvider",
 			"utilityId": "TEST_DISCOM_SELLER",
-			"ledgerUri": "http://beckn-router:9000/ledger/receiver",
+			"ledgerUri": "http://beckn-router:9000",
 		},
 	},
 ]

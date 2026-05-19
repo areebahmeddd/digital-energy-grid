@@ -32,6 +32,11 @@
 # N13. Seller source type must be a generation source (not GRID).
 # N14. Seller payload: the seller offerAttributes.inputs entry must carry a
 #      payload (BecknTimeSeries) — payloadDescriptors alone is not sufficient.
+# N15. Beckn semantic alignment: context.bppId and context.bapId must each
+#      match a participantId in contract.participants[]. Enforces that the
+#      current leg's caller/receiver (BPP/BAP) are declared trade-scope
+#      participants — catches cascade legs that rewrite bap/bppUri but leak
+#      original trade identifiers into the ID fields.
 #
 # ── performance validation (on_status with discom alloc in commitmentAttributes) ──
 #
@@ -313,6 +318,37 @@ _contract_violations contains msg if {
 _contract_violations contains "seller offerAttributes.inputs entry must carry a payload (BecknTimeSeries)" if {
 	_seller_role_inputs
 	not _seller_role_inputs.payload
+}
+
+# ---------------------------------------------------------------------------
+# N15 — Beckn semantic alignment: bppId and bapId in context must match a
+# participantId declared in contract.participants[]. This catches cascade
+# legs (e.g. seller→sellerDiscom on_confirm forwarding) that rewrite bppUri/
+# bapUri but forget to also rewrite the corresponding bppId/bapId, which
+# would leave context referring to the original trade-leg parties while the
+# transport now targets a new pair.
+# ---------------------------------------------------------------------------
+
+_participant_ids := {p.participantId | some p in _contract.participants}
+
+_contract_violations contains msg if {
+	bpp_id := object.get(input.context, "bppId", "")
+	bpp_id != ""
+	not bpp_id in _participant_ids
+	msg := sprintf(
+		"context.bppId %q does not match any participantId in contract.participants %v",
+		[bpp_id, _participant_ids],
+	)
+}
+
+_contract_violations contains msg if {
+	bap_id := object.get(input.context, "bapId", "")
+	bap_id != ""
+	not bap_id in _participant_ids
+	msg := sprintf(
+		"context.bapId %q does not match any participantId in contract.participants %v",
+		[bap_id, _participant_ids],
+	)
 }
 
 # ---------------------------------------------------------------------------
