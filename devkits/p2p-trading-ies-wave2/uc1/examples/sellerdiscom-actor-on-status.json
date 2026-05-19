@@ -1,0 +1,144 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "on_status",
+    "bapId": "seller-discom-ledger.example.com",
+    "bapUri": "http://seller-discom-ledger.example.com:9000/bap/receiver",
+    "bppId": "sellerdiscom.example.com",
+    "bppUri": "http://sellerdiscom.example.com:9000/bpp/caller",
+    "transactionId": "sdiscom-allocate-001",
+    "messageId": "sdiscom-msg-001",
+    "timestamp": "2026-04-26T06:30:00Z",
+    "schemaContext": [
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld"
+    ]
+  },
+  "message": {
+    "contract": {
+      "id": "contract-p2p-001",
+      "status": { "code": "ACTIVE" },
+      "commitments": [
+        {
+          "id": "commitment-p2p-001",
+          "status": { "descriptor": { "code": "ACTIVE" } },
+          "resources": [
+            {
+              "id": "ds-sellerdiscom-meter-actuals-2026-04-26",
+              "descriptor": {
+                "name": "Seller-discom meter actuals — 2026-04-26 04:30–05:30 UTC",
+                "shortDesc": "ACTUAL_PULLED reading from sellerDiscom for the P2P-001 commitment window"
+              },
+              "quantity": {
+                "@type": "Quantity",
+                "unitText": "report",
+                "unitCode": "EA",
+                "value": "1"
+              },
+              "resourceAttributes": {
+                "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+                "@type": "DatasetItem",
+                "schema:identifier": "ds-sellerdiscom-meter-actuals-2026-04-26",
+                "schema:name": "Seller-discom meter actuals — 2026-04-26 04:30–05:30 UTC",
+                "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
+                "dataset:accessMethod": "INLINE",
+                "dataset:datasetType": "MeterActuals",
+                "dataset:targetTransactionId": "1268c204-675b-4adb-9321-b08231b147b2",
+                "dataset:targetOrderItemId": "1268c204-675b-4adb-9321-b08231b147b2_contract-p2p-001_0",
+                "dataset:targetMeterId": "TEST_METER_SELLER_001",
+                "dataset:discomId": "TEST_DISCOM_SELLER",
+                "dataPayload": {
+                  "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {
+                    "start": "2026-04-26T04:30:00Z",
+                    "duration": "PT1H"
+                  },
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "ACTUAL_PULLED",
+                      "readingType": "DIRECT_READ",
+                      "units": "KWH"
+                    }
+                  ],
+                  "intervals": [
+                    { "id": 0, "payloads": [{ "type": "ACTUAL_PULLED", "values": [19.2] }] },
+                    { "id": 1, "payloads": [{ "type": "ACTUAL_PULLED", "values": [14.7] }] }
+                  ]
+                }
+              }
+            }
+          ],
+          "offer": {
+            "id": "offer-p2p-001",
+            "resourceIds": ["ds-sellerdiscom-meter-actuals-2026-04-26"]
+          }
+        }
+      ],
+      "contractAttributes": {
+        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@type": "DEGContract",
+        "roles": [
+          { "role": "buyer", "participantId": "buyerapp.example.com" },
+          { "role": "seller", "participantId": "sellerapp.example.com" },
+          { "role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com" },
+          { "role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com" }
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+          "queryPath": "data.deg.contracts.p2p_trading"
+        }
+      },
+      "participants": [
+        {
+          "role": "buyer",
+          "participantId": "buyerapp.example.com",
+          "participantAttributes": {
+            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@type": "EnergyCustomer",
+            "meterId": "TEST_METER_BUYER_001",
+            "utilityId": "TEST_DISCOM_BUYER",
+            "utilityCustomerId": "TEST_CUST_BUYER_001",
+            "platformUri": "http://buyerapp.example.com:9000"
+          }
+        },
+        {
+          "role": "seller",
+          "participantId": "sellerapp.example.com",
+          "participantAttributes": {
+            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@type": "EnergyCustomer",
+            "meterId": "TEST_METER_SELLER_001",
+            "utilityId": "TEST_DISCOM_SELLER",
+            "utilityCustomerId": "TEST_CUST_SELLER_001",
+            "platformUri": "http://sellerapp.example.com:9000"
+          }
+        },
+        {
+          "role": "buyerDiscom",
+          "participantId": "buyer-discom-ledger.example.com",
+          "participantAttributes": {
+            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@type": "DiscomLedgerProvider",
+            "utilityId": "TEST_DISCOM_BUYER",
+            "ledgerUri": "http://buyer-discom-ledger.example.com:9000"
+          }
+        },
+        {
+          "role": "sellerDiscom",
+          "participantId": "seller-discom-ledger.example.com",
+          "participantAttributes": {
+            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@type": "DiscomLedgerProvider",
+            "utilityId": "TEST_DISCOM_SELLER",
+            "ledgerUri": "http://seller-discom-ledger.example.com:9000"
+          }
+        }
+      ]
+    }
+  }
+}

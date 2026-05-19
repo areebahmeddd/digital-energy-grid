@@ -224,6 +224,41 @@ services:
     networks:
       - bap_side
 
+  # ---------- Seller Discom Actor (the utility itself, distinct from the
+  #            seller-discom-ledger TSP). New Beckn-native replacement for
+  #            the bespoke /ledger/allocate REST push. Lives on the BPP
+  #            side so it can reach seller-discom-ledger directly via
+  #            docker DNS / network alias. ----------
+  redis-sellerdiscom-actor:
+    image: redis:alpine
+    hostname: redis-sellerdiscom-actor
+    container_name: redis-sellerdiscom-actor
+    networks:
+      - bpp_side
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-sellerdiscom-actor:
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
+    container_name: onix-sellerdiscom-actor
+    ports:
+      - "8086:8086"
+    environment:
+      CONFIG_FILE: "/app/config/local-p2p-trading-sellerdiscom-actor.yaml"
+    volumes:
+      - ../config:/app/config
+      - ../schemas:/app/schemas
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-trading-sellerdiscom-actor.yaml"]
+    networks:
+      - bpp_side
+    depends_on:
+      redis-sellerdiscom-actor:
+        condition: service_healthy
+
   # ---------- Host router (only container on both sides) ----------
   # Caddy listens on :9000 and routes by Host header. Network aliases below
   # give each Beckn participant its own resolvable hostname (buyer.beckn-router,
@@ -243,12 +278,14 @@ services:
           - sellerapp.example.com
           - seller-discom-ledger.example.com
           - buyer-discom-ledger.example.com
+          - sellerdiscom.example.com
       bpp_side:
         aliases:
           - buyerapp.example.com
           - sellerapp.example.com
           - seller-discom-ledger.example.com
           - buyer-discom-ledger.example.com
+          - sellerdiscom.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 

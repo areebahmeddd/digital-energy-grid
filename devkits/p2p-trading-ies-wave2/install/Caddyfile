@@ -25,6 +25,9 @@ http://seller-discom-ledger.example.com:9000 {
 http://buyer-discom-ledger.example.com:9000 {
     reverse_proxy onix-ledger-buyerdiscom:8084
 }
+http://sellerdiscom.example.com:9000 {
+    reverse_proxy onix-sellerdiscom-actor:8086
+}
 
 # Fallback for the bare beckn-router hostname (used by the health check).
 :9000 {

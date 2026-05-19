@@ -39,7 +39,8 @@ info:
 
       Available workflows: publish-catalog, discover, select-through-settlement,
         status-roundtrip-via-seller-discom, buyer-discom-emits-on-status,
-        seller-status-to-buyer, seller-status-to-seller-discom
+        seller-status-to-buyer, seller-status-to-seller-discom,
+        sellerdiscom-actor-pushes-allocation
 
 sourceDescriptions:
   - name: beckn-bap-caller
@@ -68,6 +69,14 @@ sourceDescriptions:
     type: openapi
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bap/caller
+
+  # Sellerdiscom *actor* — the seller-side distribution utility (distinct
+  # from the seller-discom-ledger TSP). New Beckn-native channel for pushing
+  # meter actuals (DatasetItem-wrapped BecknTimeSeries) as on_status.
+  - name: beckn-sellerdiscom-actor-bpp-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8086/bpp/caller
 
 workflows:
   # ── Catalog & Discovery ──
@@ -215,6 +224,29 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/seller-initiated-status-to-seller-discom.json"
+
+  # ── SellerDiscom *actor* pushes allocation via on_status ──
+
+  - workflowId: sellerdiscom-actor-pushes-allocation
+    summary: >
+      Sellerdiscom (the discom utility itself, distinct from the
+      seller-discom-ledger TSP) pushes meter actuals to the ledger as a
+      Beckn `on_status`. The payload wraps the BecknTimeSeries readings
+      inside a `DatasetItem` resource (data-exchange schema) so the ledger
+      can treat the dataset payload as the unit of allocation.
+    steps:
+      - stepId: sellerdiscom-emits-allocation-on-status
+        description: >
+          POSTs to sellerdiscom-actor /bpp/caller; the actor's onix routes
+          via context.bapUri (= seller-discom-ledger /bap/receiver). The
+          ledger reads resources[].resourceAttributes.@type=DatasetItem,
+          matches dataset:targetTransactionId / targetOrderItemId, and
+          allocates. Returns ACK.
+        operationId: beckn-sellerdiscom-actor-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/sellerdiscom-actor-on-status.json"
 
   # ── BuyerDiscom-emitted on_status (direct callback path) ──
 
