@@ -18,11 +18,38 @@ const (
 
 // Wave2OnConfirmPayload is the wave2 (P2PTrade/v2.0) on_confirm body.
 // Wave2 uses camelCase context keys and a `message.contract.commitments` shape.
+// Beckn 2.0 envelope: optional top-level `error` set on NACK responses (the
+// sync ack/nack envelope is a different message, never carried in callback
+// bodies — Beckn 2.0 LTS schema marks `message` with additionalProperties:false
+// so an `ack` field would be rejected by validateSchema before the recorder
+// runs). Contract MAY carry a `status.code` indicating contract lifecycle
+// (ACTIVE / CANCELLED / …). ShouldSkipCascade reads both to decide whether
+// the recorder should write this trade to the discom ledger.
 type Wave2OnConfirmPayload struct {
-	Context Wave2Context `json:"context"`
-	Message struct {
-		Contract Wave2Contract `json:"contract"`
-	} `json:"message"`
+	Context Wave2Context     `json:"context"`
+	Message Wave2Message     `json:"message"`
+	Error   *Wave2ErrorBlock `json:"error,omitempty"`
+}
+
+// Wave2Message wraps the contract payload. Beckn 2.0 has `additionalProperties:false`
+// here, so we don't add anything beyond what the spec allows.
+type Wave2Message struct {
+	Contract Wave2Contract `json:"contract"`
+}
+
+// Wave2ErrorBlock is the Beckn 2.0 envelope-level error block. Presence
+// (with a non-empty code) means the message is an error response.
+type Wave2ErrorBlock struct {
+	Code    string `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+	Path    string `json:"path,omitempty"`
+}
+
+// Wave2ContractStatus captures the contract-level status code emitted on
+// happy-path messages (ACTIVE) and on terminal-failure states the BPP
+// echoes back on the same channel (CANCELLED / REJECTED / EXPIRED / FAILED).
+type Wave2ContractStatus struct {
+	Code string `json:"code,omitempty"`
 }
 
 // Wave2Context — wave2 uses camelCase (bapId, bppId, transactionId), not snake_case.
@@ -42,6 +69,7 @@ type Wave2Context struct {
 // Wave2Contract is `message.contract`.
 type Wave2Contract struct {
 	ID                 string                 `json:"id"`
+	Status             Wave2ContractStatus    `json:"status"`
 	Commitments        []Wave2Commitment      `json:"commitments"`
 	Performance        []Wave2Performance     `json:"performance"`
 	Participants       []Wave2Participant     `json:"participants"`
@@ -424,10 +452,12 @@ func extractWave2IntervalIDs(offerAttrs map[string]interface{}) []int {
 
 // Wave2StatusPayload is the wave2 `status` request body. The contract carries
 // minimum id + participants (with ledgerUri) so the plugin can route to the
-// right ledger without a cache lookup.
+// right ledger without a cache lookup. Carries optional ack/error so
+// ShouldSkipCascade can stay symmetric across all three message shapes.
 type Wave2StatusPayload struct {
-	Context  Wave2Context      `json:"context"`
-	Message  Wave2StatusMessage `json:"message"`
+	Context Wave2Context       `json:"context"`
+	Message Wave2StatusMessage `json:"message"`
+	Error   *Wave2ErrorBlock   `json:"error,omitempty"`
 }
 
 type Wave2StatusMessage struct {
@@ -436,8 +466,9 @@ type Wave2StatusMessage struct {
 
 // Wave2StatusContract carries only what is needed for ledger routing.
 type Wave2StatusContract struct {
-	ID           string             `json:"id"`
-	Participants []Wave2Participant `json:"participants"`
+	ID           string              `json:"id"`
+	Status       Wave2ContractStatus `json:"status"`
+	Participants []Wave2Participant  `json:"participants"`
 }
 
 // ParseStatusWave2 unmarshals a wave2 status body.
@@ -487,8 +518,9 @@ var performancePayloadTypes = map[string]bool{
 
 // Wave2OnStatusPayload is the wave2 `on_status` body.
 type Wave2OnStatusPayload struct {
-	Context Wave2Context      `json:"context"`
+	Context Wave2Context         `json:"context"`
 	Message Wave2OnStatusMessage `json:"message"`
+	Error   *Wave2ErrorBlock     `json:"error,omitempty"`
 }
 
 type Wave2OnStatusMessage struct {
@@ -528,6 +560,56 @@ func Wave2OnStatusHasPerformanceData(payload *Wave2OnStatusPayload) bool {
 		}
 	}
 	return false
+}
+
+// terminalContractStatusCodes are contract.status.code values that indicate
+// the trade did NOT successfully transition to ACTIVE — so the recorder must
+// not write it to the discom ledger (or cascade its status / on_status).
+// Match is case-insensitive.
+var terminalContractStatusCodes = map[string]bool{
+	"CANCELLED": true,
+	"CANCELED":  true,
+	"REJECTED":  true,
+	"EXPIRED":   true,
+	"FAILED":    true,
+}
+
+// shouldSkipFromEnvelope is the shared primitive: given the two error signals
+// — Beckn 2.0 envelope `error` block and `message.contract.status.code` —
+// return whether the recorder should skip cascading this message, and a
+// short reason string for logging.
+func shouldSkipFromEnvelope(err *Wave2ErrorBlock, contractStatusCode string) (bool, string) {
+	if err != nil && err.Code != "" {
+		return true, fmt.Sprintf("envelope error %q", err.Code)
+	}
+	if terminalContractStatusCodes[strings.ToUpper(contractStatusCode)] {
+		return true, fmt.Sprintf("contract.status.code=%s", contractStatusCode)
+	}
+	return false, ""
+}
+
+// ShouldSkipOnConfirmCascade returns true (with a reason) when the on_confirm
+// payload signals failure — recorder should not write a trade to the ledger.
+func ShouldSkipOnConfirmCascade(p *Wave2OnConfirmPayload) (bool, string) {
+	return shouldSkipFromEnvelope(p.Error, p.Message.Contract.Status.Code)
+}
+
+// ShouldSkipStatusCascade — same check for an incoming /status request.
+func ShouldSkipStatusCascade(p *Wave2StatusPayload) (bool, string) {
+	return shouldSkipFromEnvelope(p.Error, p.Message.Contract.Status.Code)
+}
+
+// ShouldSkipOnStatusCascade — same check for an incoming /on_status.
+// The on_status contract.status is loose-typed (map[string]interface{}), so
+// we read the `code` field defensively.
+func ShouldSkipOnStatusCascade(p *Wave2OnStatusPayload) (bool, string) {
+	code := ""
+	if s := p.Message.Contract.Status; s != nil {
+		if v, ok := s["code"].(string); ok {
+			code = v
+		}
+	}
+	return shouldSkipFromEnvelope(p.Error, code)
 }
 
 // timeseriesHasPerformanceData scans a BecknTimeSeries-shaped object for any

@@ -180,6 +180,12 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 		return nil
 	}
 
+	if skip, reason := ShouldSkipOnConfirmCascade(payload); skip {
+		log.Infof(ctx, "DEGLedgerRecorder: skipping on_confirm cascade (transaction_id=%s): %s",
+			payload.Context.TransactionID, reason)
+		return nil
+	}
+
 	log.Debugf(ctx, "DEGLedgerRecorder DEBUG: parsed wave2 context - transactionId=%s, bapId=%s, bppId=%s",
 		payload.Context.TransactionID, payload.Context.BapID, payload.Context.BppID)
 
@@ -379,6 +385,12 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil
 	}
 
+	if skip, reason := ShouldSkipStatusCascade(payload); skip {
+		log.Infof(ctx, "DEGLedgerRecorder: skipping status cascade (transaction_id=%s): %s",
+			payload.Context.TransactionID, reason)
+		return nil
+	}
+
 	var side Side
 	switch r.config.Role {
 	case "SELLER":
@@ -447,6 +459,12 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	payload, err := ParseOnStatusWave2(ctx.Body)
 	if err != nil {
 		log.Warnf(ctx, "DEGLedgerRecorder: failed to parse wave2 on_status payload: %v", err)
+		return nil
+	}
+
+	if skip, reason := ShouldSkipOnStatusCascade(payload); skip {
+		log.Infof(ctx, "DEGLedgerRecorder: skipping on_status forwarding (transaction_id=%s): %s",
+			payload.Context.TransactionID, reason)
 		return nil
 	}
 
