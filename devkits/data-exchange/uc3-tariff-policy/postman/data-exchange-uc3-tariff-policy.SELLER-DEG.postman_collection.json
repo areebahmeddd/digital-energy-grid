@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "1d82e0ce-ef45-47a2-a188-70f9822db2f5",
-    "name": "data-exchange-uc3-tariff-policy.BPP-DEG",
+    "_postman_id": "522c4f71-ae07-40e0-8ae5-9c21bb65c4cd",
+    "name": "data-exchange-uc3-tariff-policy.SELLER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc3-tariff-policy APIs based on Beckn Protocol v2"
   },
@@ -24,9 +24,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_confirm",
+              "raw": "{{bpp_caller_url}}/on_confirm",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_confirm"
@@ -56,9 +56,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -75,7 +75,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"on_status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\"]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"770e9500-f30c-52e5-b827-557766551301\",\n      \"descriptor\": {\n        \"name\": \"Retail Tariff Policy Subscription\",\n        \"shortDesc\": \"MeraShehar DISCOM subscribing to MERC retail tariff orders under public-disclosure norms\"\n      },\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-tariff-policy-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"CLOSED\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-tariff-policy-mum-res-2024-25\",\n              \"descriptor\": {\n                \"name\": \"Mumbai Residential Telescopic Tariff 2024-25\"\n              },\n              \"quantity\": {\n                \"unitText\": \"policy\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-tariff-policy-inline\",\n            \"descriptor\": {\n              \"name\": \"Inline Tariff Policy Delivery - Mumbai Residential 2024-25\"\n            },\n            \"resourceIds\": [\"ds-tariff-policy-mum-res-2024-25\"]\n          }\n        }\n      ],\n      \"performance\": [\n        {\n          \"id\": \"perf-tariff-policy-delivery-001\",\n          \"status\": {\n            \"code\": \"DELIVERY_COMPLETE\",\n            \"name\": \"Tariff policy delivered inline via dataPayload\"\n          },\n          \"commitmentIds\": [\"commitment-tariff-policy-001\"],\n          \"performanceAttributes\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n            \"@type\": \"DatasetItem\",\n            \"schema:identifier\": \"ds-tariff-policy-mum-res-2024-25\",\n            \"schema:name\": \"Mumbai Residential Telescopic Tariff 2024-25\",\n            \"schema:temporalCoverage\": \"2024-04-01/2025-03-31\",\n            \"dataset:accessMethod\": \"INLINE\",\n            \"dataPayload\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/ies-specs/specification/external/schema/ies/core/context.jsonld\",\n              \"@type\": \"POLICY\",\n              \"id\": \"policy-mumbai-res-001\",\n              \"objectType\": \"POLICY\",\n              \"createdDateTime\": \"2024-04-10T11:00:00Z\",\n              \"modificationDateTime\": \"2024-04-10T11:00:00Z\",\n              \"programID\": \"program-merashehar-001\",\n              \"policyID\": \"MUM-RES-T1\",\n              \"policyName\": \"Mumbai Residential Telescopic 2024\",\n              \"policyType\": \"TARIFF\",\n              \"samplingInterval\": \"R/2024-04-10T00:00:00Z/P1M\",\n              \"energySlabs\": [\n                {\n                  \"id\": \"slab-0-100\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 0,\n                  \"end\": 100,\n                  \"price\": 4.5\n                },\n                {\n                  \"id\": \"slab-101-300\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 101,\n                  \"end\": 300,\n                  \"price\": 7.2\n                },\n                {\n                  \"id\": \"slab-301-plus\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 301,\n                  \"end\": null,\n                  \"price\": 9.8\n                }\n              ],\n              \"surchargeTariffs\": [\n                {\n                  \"id\": \"surcharge-evening-peak\",\n                  \"@type\": \"SurchargeTariff\",\n                  \"recurrence\": \"P1D\",\n                  \"interval\": {\n                    \"start\": \"T18:00:00Z\",\n                    \"duration\": \"PT4H\"\n                  },\n                  \"value\": 20,\n                  \"unit\": \"PERCENT\"\n                },\n                {\n                  \"id\": \"discount-night-offpeak\",\n                  \"@type\": \"SurchargeTariff\",\n                  \"recurrence\": \"P1D\",\n                  \"interval\": {\n                    \"start\": \"T23:00:00Z\",\n                    \"duration\": \"PT6H\"\n                  },\n                  \"value\": -10,\n                  \"unit\": \"PERCENT\"\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"participants\": [\n        {\"id\": \"merc-regulator-001\", \"descriptor\": {\"name\": \"Maharashtra Electricity Regulatory Commission\"}},\n        {\"id\": \"merashehar-discom-001\", \"descriptor\": {\"name\": \"MeraShehar - Distribution Company\"}}\n      ],\n      \"settlements\": [\n        {\n          \"id\": \"settlement-tariff-no-charge\",\n          \"considerationId\": \"consideration-tariff-public-good\",\n          \"status\": \"COMPLETE\",\n          \"settlementAttributes\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld\",\n            \"@type\": \"Payment\",\n            \"beckn:paymentStatus\": \"COMPLETED\",\n            \"beckn:amount\": {\n              \"currency\": \"INR\",\n              \"value\": 0\n            }\n          }\n        }\n      ]\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"on_status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\"]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"770e9500-f30c-52e5-b827-557766551301\",\n      \"descriptor\": {\n        \"name\": \"Retail Tariff Policy Subscription\",\n        \"shortDesc\": \"MeraShehar DISCOM subscribing to MERC retail tariff orders under public-disclosure norms\"\n      },\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-tariff-policy-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"CLOSED\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-tariff-policy-mum-res-2024-25\",\n              \"descriptor\": {\n                \"name\": \"Mumbai Residential Telescopic Tariff 2024-25\"\n              },\n              \"quantity\": {\n                \"unitText\": \"policy\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-tariff-policy-inline\",\n            \"descriptor\": {\n              \"name\": \"Inline Tariff Policy Delivery - Mumbai Residential 2024-25\"\n            },\n            \"resourceIds\": [\"ds-tariff-policy-mum-res-2024-25\"]\n          }\n        }\n      ],\n      \"performance\": [\n        {\n          \"id\": \"perf-tariff-policy-delivery-001\",\n          \"status\": {\n            \"code\": \"DELIVERY_COMPLETE\",\n            \"name\": \"Tariff policy delivered inline via dataPayload\"\n          },\n          \"commitmentIds\": [\"commitment-tariff-policy-001\"],\n          \"performanceAttributes\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n            \"@type\": \"DatasetItem\",\n            \"schema:identifier\": \"ds-tariff-policy-mum-res-2024-25\",\n            \"schema:name\": \"Mumbai Residential Telescopic Tariff 2024-25\",\n            \"schema:temporalCoverage\": \"2024-04-01/2025-03-31\",\n            \"dataset:accessMethod\": \"INLINE\",\n            \"dataPayload\": {\n              \"@context\": \"https://raw.githubusercontent.com/beckn/DEG/ies-specs/specification/external/schema/ies/core/context.jsonld\",\n              \"@type\": \"IES_Policy\",\n              \"id\": \"policy-mumbai-res-001\",\n              \"objectType\": \"POLICY\",\n              \"createdDateTime\": \"2024-04-10T11:00:00Z\",\n              \"modificationDateTime\": \"2024-04-10T11:00:00Z\",\n              \"programID\": \"program-merashehar-001\",\n              \"policyID\": \"MUM-RES-T1\",\n              \"policyName\": \"Mumbai Residential Telescopic 2024\",\n              \"policyType\": \"TARIFF\",\n              \"samplingInterval\": \"R/2024-04-10T00:00:00Z/P1M\",\n              \"energySlabs\": [\n                {\n                  \"id\": \"slab-0-100\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 0,\n                  \"end\": 100,\n                  \"price\": 4.5\n                },\n                {\n                  \"id\": \"slab-101-300\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 101,\n                  \"end\": 300,\n                  \"price\": 7.2\n                },\n                {\n                  \"id\": \"slab-301-plus\",\n                  \"@type\": \"EnergySlab\",\n                  \"start\": 301,\n                  \"end\": null,\n                  \"price\": 9.8\n                }\n              ],\n              \"surchargeTariffs\": [\n                {\n                  \"id\": \"surcharge-evening-peak\",\n                  \"@type\": \"SurchargeTariff\",\n                  \"recurrence\": \"P1D\",\n                  \"interval\": {\n                    \"start\": \"T18:00:00Z\",\n                    \"duration\": \"PT4H\"\n                  },\n                  \"value\": 20,\n                  \"unit\": \"PERCENT\"\n                },\n                {\n                  \"id\": \"discount-night-offpeak\",\n                  \"@type\": \"SurchargeTariff\",\n                  \"recurrence\": \"P1D\",\n                  \"interval\": {\n                    \"start\": \"T23:00:00Z\",\n                    \"duration\": \"PT6H\"\n                  },\n                  \"value\": -10,\n                  \"unit\": \"PERCENT\"\n                }\n              ]\n            }\n          }\n        }\n      ],\n      \"participants\": [\n        {\"id\": \"merc-regulator-001\", \"descriptor\": {\"name\": \"Maharashtra Electricity Regulatory Commission\"}},\n        {\"id\": \"merashehar-discom-001\", \"descriptor\": {\"name\": \"MeraShehar - Distribution Company\"}}\n      ],\n      \"settlements\": [\n        {\n          \"id\": \"settlement-tariff-no-charge\",\n          \"considerationId\": \"consideration-tariff-public-good\",\n          \"status\": \"COMPLETE\",\n          \"settlementAttributes\": {\n            \"@context\": \"https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld\",\n            \"@type\": \"Payment\",\n            \"beckn:paymentStatus\": \"COMPLETED\",\n            \"beckn:amount\": {\n              \"currency\": \"INR\",\n              \"value\": 0\n            }\n          }\n        }\n      ]\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -83,9 +83,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -110,9 +110,9 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/on_status",
+              "raw": "{{bpp_caller_url}}/on_status",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
@@ -142,47 +142,15 @@
               }
             },
             "url": {
-              "raw": "{{bpp_adapter_url}}/publish",
+              "raw": "{{bpp_caller_url}}/publish",
               "host": [
-                "{{bpp_adapter_url}}"
+                "{{bpp_caller_url}}"
               ],
               "path": [
                 "publish"
               ]
             },
             "description": "Publish request: publish-catalog"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "status",
-      "item": [
-        {
-          "name": "status-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"770e9500-f30c-52e5-b827-557766551301\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-tariff-policy-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-tariff-policy-mum-res-2024-25\",\n              \"descriptor\": {\n                \"name\": \"Mumbai Residential Telescopic Tariff 2024-25\"\n              },\n              \"quantity\": {\n                \"unitText\": \"policy\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-tariff-policy-inline\",\n            \"descriptor\": {\n              \"name\": \"Inline Tariff Policy Delivery - Mumbai Residential 2024-25\"\n            },\n            \"resourceIds\": [\"ds-tariff-policy-mum-res-2024-25\"]\n          }\n        }\n      ]\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_adapter_url}}/status",
-              "host": [
-                "{{bpp_adapter_url}}"
-              ],
-              "path": [
-                "status"
-              ]
-            },
-            "description": "Status request: status-request"
           },
           "response": []
         }
@@ -238,7 +206,7 @@
       "value": "http://beckn-router:9000"
     },
     {
-      "key": "bpp_adapter_url",
+      "key": "bpp_caller_url",
       "value": "http://localhost:8082/bpp/caller"
     }
   ]

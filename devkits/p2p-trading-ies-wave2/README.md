@@ -38,7 +38,16 @@ The contract names four conceptual actors. Only buyer and seller speak Beckn dir
 
 ## Postman
 
-`uc1/postman/p2p-trading-ies-wave2-uc1.{BAP,BPP}-DEG.postman_collection.json`. Collections are regenerated with `python3 scripts/generate_postman_collection.py --role BAP|BPP`.
+Four role-based collections under `uc1/postman/`:
+
+| Collection | Who | What it contains |
+|---|---|---|
+| `*.BUYER-DEG.postman_collection.json` | buyerapp (trading platform) | Buyer-initiated requests: `discover`, `init`, `confirm`, `status` |
+| `*.SELLER-DEG.postman_collection.json` | sellerapp (trading platform) | Seller-side responses + BPP-initiated `publish-catalog` |
+| `*.BUYERDISCOMLEDGER-DEG.postman_collection.json` | buyer-discom ledger TSP | Outbound `on_status` callbacks the ledger emits from its `/bpp/caller` |
+| `*.SELLERDISCOMLEDGER-DEG.postman_collection.json` | seller-discom ledger TSP | Outbound `on_status` callbacks the ledger emits from its `/bpp/caller` |
+
+Regenerate all four with `python3 scripts/generate_postman_collection.py --all`, or one at a time with `--role BUYER|SELLER|BUYERDISCOMLEDGER|SELLERDISCOMLEDGER`. Legacy `--role BAP|BPP` still works via the alias table in [`scripts/generate_postman_collection.py`](../../scripts/generate_postman_collection.py).
 
 ## Policy Enforcement
 
