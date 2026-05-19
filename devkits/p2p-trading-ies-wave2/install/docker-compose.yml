@@ -35,7 +35,7 @@ services:
       retries: 5
 
   onix-buyerapp:
-    image: onix-adapter-deg.local
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-buyerapp
     ports:
       - "8081:8081"
@@ -87,7 +87,7 @@ services:
       retries: 5
 
   onix-sellerapp:
-    image: onix-adapter-deg.local
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-sellerapp
     ports:
       - "8082:8082"
@@ -141,7 +141,7 @@ services:
       retries: 5
 
   onix-ledger-sellerdiscom:
-    image: onix-adapter-deg.local
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-ledger-sellerdiscom
     ports:
       - "8083:8083"
@@ -184,7 +184,7 @@ services:
 
   # ---------- Buyer Discom Ledger (BAP side) ----------
   onix-ledger-buyerdiscom:
-    image: onix-adapter-deg.local
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-ledger-buyerdiscom
     ports:
       - "8084:8084"
