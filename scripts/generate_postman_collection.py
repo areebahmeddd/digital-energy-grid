@@ -158,7 +158,10 @@ DEVKIT_CONFIGS = {
         "bpp_host_root": "http://sellerapp.example.com:9000",
         "bap_caller_url": "http://localhost:8081/bap/caller",
         "bpp_caller_url": "http://localhost:8082/bpp/caller",
-        "bpp_receiver_url": "http://localhost:8082/bpp/receiver",
+        # Endpoint sellerapp exposes when it initiates a sub-tx (seller-initiated
+        # status to buyer or to seller-discom). New in this devkit; mirrors
+        # buyerapp's /bap/caller but on port 8082.
+        "seller_bap_caller_url": "http://localhost:8082/bap/caller",
         "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
         "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
@@ -174,10 +177,6 @@ DEVKIT_CONFIGS = {
         "seller_ledger_bpp_caller_url": "http://localhost:8083/bpp/caller",
         "usecase": "uc1",
         "structure": "flat",
-        # Actions that hit the BPP receiver directly rather than the BPP caller.
-        # Used when the BPP collection needs to include BAP-initiated actions for
-        # round-trip testing (e.g. status triggers degledgerrecorder on bpp/receiver).
-        "bpp_receiver_actions": ["status"],
     },
     "data-exchange-uc1-meter-data": {
         "domain": "nfh.global/testnet-deg",
@@ -258,7 +257,12 @@ ROLE_FILTERS = {
         r"^\d+_on_(discover|select|init|confirm|update|track|status|rating|support|cancel).*\.json$",  # EV charging: on_* folders
         r"^on[-_](discover|select|init|confirm|update|track|status|rating|support|cancel).*\.json$",  # General pattern (on- or on_)
         r"^publish-.*\.json$",  # BPP-initiated publish action to CDS
-        r"^status-request.*\.json$",  # BAP-initiated status included for BPP round-trip testing
+        # Seller-initiated requests where the seller (a BPP in the original
+        # trade) plays BAP-caller for a sub-transaction it initiates: e.g.
+        # asking the buyer about buyer-discom allocation status, or asking
+        # its own discom ledger about its allocation. These files end up in
+        # the SELLER collection routed to {{seller_bap_caller_url}}.
+        r"^seller-initiated-.*\.json$",
     ],
     "UtilityBPP": [
         r"^cascaded-.*\.json$"  # Cascaded requests/responses
@@ -291,11 +295,8 @@ BAP_ACTIONS = {
 }
 
 # BPP-initiated actions (not callbacks, but BPP initiating requests to CDS, etc.)
-# Also includes BAP-originated actions that BPP devkits include for round-trip testing
-# (e.g. status → hits bpp/receiver to trigger degledgerrecorder).
 BPP_INITIATED_ACTIONS = {
     "publish": "publish",
-    "status": "status",
 }
 
 # BPP response actions
@@ -426,6 +427,16 @@ def extract_action_from_filename(filename: str, role: str) -> Optional[str]:
                     return action
     
     elif role == "BPP":
+        # Seller-initiated request fixtures: action is encoded after the
+        # seller-initiated-<action>- prefix. Routed to {{seller_bap_caller_url}}
+        # later in the pipeline; treated as a regular BAP-side request action.
+        if name.startswith('seller-initiated-'):
+            match = re.match(r'^seller-initiated-([a-z]+)-', name, re.IGNORECASE)
+            if match:
+                action = match.group(1).lower()
+                if action in BAP_ACTIONS:
+                    return action
+
         # BPP matches *-response*.json (not *-request*.json) AND publish-*.json
         # AND *-request*.json whose action is in BPP_INITIATED_ACTIONS (e.g. status-request.json)
         # Patterns: action-response, on-action-response, action-response-suffix, publish-*
@@ -553,7 +564,7 @@ def load_example_json(filepath: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, role: Optional[str] = None) -> Dict[str, Any]:
+def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, role: Optional[str] = None, preserve_party_ids: bool = False) -> Dict[str, Any]:
     """
     Replace hardcoded context values with Postman macros.
 
@@ -567,6 +578,13 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
     For discom-ledger roles (BUYERDISCOMLEDGER, SELLERDISCOMLEDGER), the BPP
     in the outbound on_status is the LEDGER acting as BPP-caller, so bppUri
     is templated to /bpp/caller (not /bpp/receiver).
+
+    preserve_party_ids=True leaves context.bapId / bppId / bapUri / bppUri
+    untouched. Used for seller-initiated request fixtures where the BAP and
+    BPP differ from the collection's default (e.g. seller-initiated-status-
+    to-seller-discom in the SELLER collection has bapId=sellerapp,
+    bppId=seller-discom-ledger — both differ from the default {{bap_id}} /
+    {{bpp_id}} variable values).
     """
     if not isinstance(data, dict):
         return data
@@ -589,13 +607,19 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
                 elif ctx_key == "domain":
                     new_context[ctx_key] = "{{domain}}"
                 elif ctx_key in ("bap_id", "bapId"):
-                    new_context[ctx_key] = "{{bap_id}}"
+                    new_context[ctx_key] = ctx_value if preserve_party_ids else "{{bap_id}}"
                 elif ctx_key in ("bap_uri", "bapUri"):
-                    new_context[ctx_key] = "{{bap_host_root}}/bap/receiver" if host_root_style else "{{bap_uri}}"
+                    if preserve_party_ids:
+                        new_context[ctx_key] = ctx_value
+                    else:
+                        new_context[ctx_key] = "{{bap_host_root}}/bap/receiver" if host_root_style else "{{bap_uri}}"
                 elif ctx_key in ("bpp_id", "bppId"):
-                    new_context[ctx_key] = "{{bpp_id}}"
+                    new_context[ctx_key] = ctx_value if preserve_party_ids else "{{bpp_id}}"
                 elif ctx_key in ("bpp_uri", "bppUri"):
-                    new_context[ctx_key] = f"{{{{bpp_host_root}}}}{bpp_path}" if host_root_style else "{{bpp_uri}}"
+                    if preserve_party_ids:
+                        new_context[ctx_key] = ctx_value
+                    else:
+                        new_context[ctx_key] = f"{{{{bpp_host_root}}}}{bpp_path}" if host_root_style else "{{bpp_uri}}"
                 elif ctx_key in ("transaction_id", "transactionId"):
                     new_context[ctx_key] = "{{transaction_id}}"
                 elif ctx_key in ("message_id", "messageId"):
@@ -610,12 +634,12 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
                     new_context[ctx_key] = ctx_value
                 else:
                     # Preserve other context fields (e.g., location)
-                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style, role) if isinstance(ctx_value, (dict, list)) else ctx_value
+                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style, role, preserve_party_ids) if isinstance(ctx_value, (dict, list)) else ctx_value
 
             result[key] = new_context
         elif isinstance(value, (dict, list)):
             # Recursively process nested structures in message
-            result[key] = replace_context_macros(value, host_root_style, role)
+            result[key] = replace_context_macros(value, host_root_style, role, preserve_party_ids)
         else:
             # Preserve other fields as-is
             result[key] = value
@@ -670,6 +694,7 @@ def create_postman_request(
     host_root_style: bool = False,
     ledger_host_buyer: Optional[str] = None,
     ledger_host_seller: Optional[str] = None,
+    preserve_party_ids: bool = False,
 ) -> Dict[str, Any]:
     """
     Create a Postman request object from JSON data.
@@ -686,7 +711,7 @@ def create_postman_request(
         ledger_host_seller: Override for seller ledger host (uses config default if None)
     """
     # Replace macros in the JSON
-    request_body = replace_context_macros(json_data, host_root_style, role)
+    request_body = replace_context_macros(json_data, host_root_style, role, preserve_party_ids)
     if ledger_host_buyer is not None or ledger_host_seller is not None:
         request_body = replace_ledger_uri_macros(request_body)
 
@@ -842,10 +867,11 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     elif role == "SELLERDISCOMLEDGER":
         variables.append({"key": "seller_ledger_bpp_caller_url", "value": config["seller_ledger_bpp_caller_url"]})
 
-    # BPP receiver URL (separate from bpp_caller_url/caller; used for actions like status
-    # that hit bpp/receiver directly for round-trip testing)
-    if "bpp_receiver_url" in config and role == "BPP":
-        variables.append({"key": "bpp_receiver_url", "value": config["bpp_receiver_url"]})
+    # Seller-initiated /bap/caller URL — present when the SELLER (BPP-role)
+    # collection includes seller-initiated requests (e.g. wave2: seller asking
+    # buyer or seller-discom-ledger for status).
+    if "seller_bap_caller_url" in config and role == "BPP":
+        variables.append({"key": "seller_bap_caller_url", "value": config["seller_bap_caller_url"]})
 
     # Ledger host variables (wave2 and other devkits that route through a separate ledger)
     if "ledger_host_buyer" in config:
@@ -894,8 +920,13 @@ def generate_collection(
         action_mapping = BAP_ACTIONS
         adapter_url_var = "bap_caller_url"
     elif role == "BPP":
-        # BPP uses both callback actions and BPP-initiated actions (like publish to CDS)
+        # BPP uses both callback actions and BPP-initiated actions (like publish to CDS).
+        # If the devkit declares a seller_bap_caller_url, the BPP collection ALSO
+        # includes BAP-side actions (status, etc.) for "seller-initiated" requests
+        # where the BPP-role node plays BAP-caller in a sub-tx it originates.
         action_mapping = {**BPP_ACTIONS, **BPP_INITIATED_ACTIONS}
+        if "seller_bap_caller_url" in config:
+            action_mapping = {**action_mapping, **BAP_ACTIONS}
         adapter_url_var = "bpp_caller_url"
     elif role == "UtilityBPP":
         action_mapping = BAP_ACTIONS  # UtilityBPP uses BAP actions
@@ -936,15 +967,10 @@ def generate_collection(
         print("No valid examples found. Exiting.")
         return
     
-    # Build collection items (folders). "test-harness" actions (BAP-originated
-    # requests included in a BPP collection for in-isolation testing — e.g.
-    # status posted directly to seller /bpp/receiver to exercise the recorder
-    # cascade without spinning up the BAP) get parked under a top-level
-    # `_test_harness` folder so the SELLER collection's main folders only
-    # show requests the seller actually initiates.
-    bpp_receiver_actions = config.get("bpp_receiver_actions", [])
+    # Build collection items (folders, one per action). Per-file the URL var
+    # may differ — e.g. SELLER's status has two seller-initiated requests
+    # going to {{seller_bap_caller_url}}.
     collection_items = []
-    test_harness_items = []
 
     # Process each action in order (include all BAP actions, even if no examples)
     all_actions = sorted(set(list(actions_map.keys()) + list(action_mapping.keys())))
@@ -956,71 +982,43 @@ def generate_collection(
         endpoint = action_mapping[action]
         files_list = actions_map.get(action, [])
 
-        # Is this folder a "BAP-request-hits-BPP-receiver" test-harness for
-        # the current (BPP-style) role?
-        is_test_harness = (
-            role == "BPP"
-            and action in bpp_receiver_actions
-            and "bpp_receiver_url" in config
-        )
-
-        # Create folder for this action
         action_items = []
 
         for json_file, request_name in sorted(files_list):
             print(f"  Processing: {json_file.name}")
 
-            # Load JSON
             json_data = load_example_json(json_file)
             if json_data is None:
                 continue
 
-            # Test-harness requests go to the BPP receiver (not the BPP caller),
-            # bypassing the normal BAP→BPP hop.
-            effective_caller_url_var = "bpp_receiver_url" if is_test_harness else adapter_url_var
-
-            # Annotate test-harness request names for unambiguous reading.
-            harness_request_name = (
-                f"{request_name} (test-harness: direct to BPP-receiver)"
-                if is_test_harness else request_name
+            # Seller-initiated: the BPP-role node (seller) plays BAP-caller for
+            # a sub-tx it initiates (e.g. asking buyer about buyer-discom alloc,
+            # or asking its own discom ledger about settlement). Routes to
+            # {{seller_bap_caller_url}}; body's bap/bppId/Uri are preserved
+            # literally so they don't collide with the collection's default
+            # bap_id/bpp_id macro values (which point at the canonical trade
+            # direction).
+            is_seller_initiated = (
+                role == "BPP"
+                and json_file.name.startswith("seller-initiated-")
+                and "seller_bap_caller_url" in config
             )
 
-            # Create Postman request
+            effective_caller_url_var = (
+                "seller_bap_caller_url" if is_seller_initiated else adapter_url_var
+            )
+
             request = create_postman_request(
-                json_data, action, endpoint, harness_request_name, role, effective_caller_url_var, host_root_style,
+                json_data, action, endpoint, request_name, role, effective_caller_url_var, host_root_style,
                 ledger_host_buyer=config.get("ledger_host_buyer"),
                 ledger_host_seller=config.get("ledger_host_seller"),
+                preserve_party_ids=is_seller_initiated,
             )
             action_items.append(request)
 
-        # Only create folder if it has requests
         if action_items:
-            folder = {
-                "name": action,
-                "item": action_items
-            }
-            if is_test_harness:
-                test_harness_items.append(folder)
-                print(f"  Created test-harness folder '{action}' with {len(action_items)} request(s)")
-            else:
-                collection_items.append(folder)
-                print(f"  Created folder '{action}' with {len(action_items)} request(s)")
-
-    # If we collected any test-harness sub-folders, append them under a single
-    # top-level `_test_harness` group so they're clearly separated from the
-    # collection's role-owned actions.
-    if test_harness_items:
-        collection_items.append({
-            "name": "_test_harness",
-            "description": (
-                "Harness shortcuts that bypass the normal BAP→BPP routing and "
-                "POST a BAP-originated payload directly at the BPP-receiver. "
-                "Used to exercise BPP-side plugins (e.g. degledgerrecorder) "
-                "in isolation without standing up the BAP-side onix instance. "
-                "These are NOT requests this role initiates in production."
-            ),
-            "item": test_harness_items,
-        })
+            collection_items.append({"name": action, "item": action_items})
+            print(f"  Created folder '{action}' with {len(action_items)} request(s)")
     
     # Build collection
     collection = {

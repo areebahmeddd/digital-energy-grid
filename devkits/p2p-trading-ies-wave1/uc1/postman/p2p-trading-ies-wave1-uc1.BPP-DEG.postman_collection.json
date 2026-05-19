@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "d54a3c6c-d742-4a8d-8824-195d6fb96d7f",
+    "_postman_id": "1e2594a8-b53b-4b61-8cfb-6d437b3ef555",
     "name": "p2p-trading-ies-wave1-uc1.BPP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing p2p-trading-ies-wave1 APIs based on Beckn Protocol v2"
@@ -441,38 +441,6 @@
               ]
             },
             "description": "Publish request: publish-revoke-catalog"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "status",
-      "item": [
-        {
-          "name": "status-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"message_id\": \"{{$guid}}\",\n    \"transaction_id\": \"{{transaction_id}}\",\n    \"bap_id\": \"{{bap_id}}\",\n    \"bap_uri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bpp_id\": \"{{bpp_id}}\",\n    \"bpp_uri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"ttl\": \"PT30S\",\n    \"domain\": \"{{domain}}\"\n  },\n  \"message\": {\n    \"order\": {\n      \"beckn:id\": \"order-energy-001\"\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_caller_url}}/status",
-              "host": [
-                "{{bpp_caller_url}}"
-              ],
-              "path": [
-                "status"
-              ]
-            },
-            "description": "Status request: status-request"
           },
           "response": []
         }

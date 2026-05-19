@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "45b3d46f-7556-4f8a-bce7-b89305d220cd",
+    "_postman_id": "11d6fc37-ae0d-4f1e-af95-37538eb446ca",
     "name": "ev-charging-uc1-ev-charging.BPP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing ev-charging APIs based on Beckn Protocol v2"

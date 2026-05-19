@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "72007b24-3696-47de-804d-a98381b1c143",
+    "_postman_id": "90937f92-698f-440d-9a4e-339502a7232d",
     "name": "data-exchange-uc2-regulatory-data.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc2-regulatory-data APIs based on Beckn Protocol v2"

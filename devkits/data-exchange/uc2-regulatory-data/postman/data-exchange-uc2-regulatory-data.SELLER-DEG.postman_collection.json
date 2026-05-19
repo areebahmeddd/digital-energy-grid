@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "c1644951-4bc6-49b9-867f-c4c5b1c51c18",
+    "_postman_id": "92f21f60-f845-4d16-8b8c-5661e31ad9cc",
     "name": "data-exchange-uc2-regulatory-data.SELLER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc2-regulatory-data APIs based on Beckn Protocol v2"
@@ -151,38 +151,6 @@
               ]
             },
             "description": "Publish request: publish-catalog"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "status",
-      "item": [
-        {
-          "name": "status-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"660e9500-f30c-52e5-b827-557766551300\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-arr-filing-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-bescom-arr-filing-fy2025-26\",\n              \"descriptor\": {\n                \"name\": \"BESCOM ARR Filing - FY 2025-26\"\n              },\n              \"quantity\": {\n                \"unitText\": \"filing\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-arr-filing-inline\",\n            \"descriptor\": {\n              \"name\": \"ARR Filing Inline Delivery - BESCOM FY 2025-26\"\n            },\n            \"resourceIds\": [\"ds-bescom-arr-filing-fy2025-26\"]\n          }\n        }\n      ]\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_caller_url}}/status",
-              "host": [
-                "{{bpp_caller_url}}"
-              ],
-              "path": [
-                "status"
-              ]
-            },
-            "description": "Status request: status-request"
           },
           "response": []
         }

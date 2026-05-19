@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "4854043a-74d2-40c1-970e-56bbb9a92c7e",
+    "_postman_id": "651ebd1e-6a3f-43f2-932c-b464224b8065",
     "name": "data-exchange-uc3-tariff-policy.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc3-tariff-policy APIs based on Beckn Protocol v2"

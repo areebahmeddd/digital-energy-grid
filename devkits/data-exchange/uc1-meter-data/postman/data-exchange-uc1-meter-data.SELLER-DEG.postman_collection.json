@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "2a3df50f-da0d-413a-b9be-35bb36d56e5a",
+    "_postman_id": "d189610a-e78d-4eff-9d7d-b92d242ed9ed",
     "name": "data-exchange-uc1-meter-data.SELLER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc1-meter-data APIs based on Beckn Protocol v2"
@@ -151,38 +151,6 @@
               ]
             },
             "description": "Publish request: publish-catalog"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "status",
-      "item": [
-        {
-          "name": "status-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"660e9500-f30c-52e5-b827-557766551300\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-ami-meter-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-ami-meter-data-blr-zone-a-q1-2026\",\n              \"descriptor\": {\n                \"name\": \"IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026\"\n              },\n              \"quantity\": {\n                \"unitText\": \"report\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-ami-meter-data-inline\",\n            \"descriptor\": {\n              \"name\": \"AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026\"\n            },\n            \"resourceIds\": [\"ds-ami-meter-data-blr-zone-a-q1-2026\"]\n          }\n        }\n      ]\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_caller_url}}/status",
-              "host": [
-                "{{bpp_caller_url}}"
-              ],
-              "path": [
-                "status"
-              ]
-            },
-            "description": "Status request: status-request"
           },
           "response": []
         }

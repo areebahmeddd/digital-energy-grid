@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "4f05636c-322b-4f87-b681-bf55dcdeabbf",
+    "_postman_id": "571cb8c6-7943-4631-9ecb-55b7e4d9cca8",
     "name": "data-exchange-uc1-meter-data.BUYER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Application Platform implementing data-exchange-uc1-meter-data APIs based on Beckn Protocol v2"

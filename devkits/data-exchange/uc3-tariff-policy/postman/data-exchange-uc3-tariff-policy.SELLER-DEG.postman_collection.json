@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "d8654373-908f-45ab-8390-4994c9aa7ced",
+    "_postman_id": "522c4f71-ae07-40e0-8ae5-9c21bb65c4cd",
     "name": "data-exchange-uc3-tariff-policy.SELLER-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Buyer Provider Platform implementing data-exchange-uc3-tariff-policy APIs based on Beckn Protocol v2"
@@ -151,38 +151,6 @@
               ]
             },
             "description": "Publish request: publish-catalog"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "status",
-      "item": [
-        {
-          "name": "status-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"nfh.global/testnet-deg\",\n    \"version\": \"{{version}}\",\n    \"action\": \"status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"770e9500-f30c-52e5-b827-557766551301\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-tariff-policy-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-tariff-policy-mum-res-2024-25\",\n              \"descriptor\": {\n                \"name\": \"Mumbai Residential Telescopic Tariff 2024-25\"\n              },\n              \"quantity\": {\n                \"unitText\": \"policy\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-tariff-policy-inline\",\n            \"descriptor\": {\n              \"name\": \"Inline Tariff Policy Delivery - Mumbai Residential 2024-25\"\n            },\n            \"resourceIds\": [\"ds-tariff-policy-mum-res-2024-25\"]\n          }\n        }\n      ]\n    }\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{bpp_caller_url}}/status",
-              "host": [
-                "{{bpp_caller_url}}"
-              ],
-              "path": [
-                "status"
-              ]
-            },
-            "description": "Status request: status-request"
           },
           "response": []
         }
