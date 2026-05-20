@@ -19,6 +19,8 @@ Part of the [DEG Schema](../../) · [BecknTimeSeries](../README.md)
 | `intervalPeriod` | object | ✓ | Default `{start, duration}` (ISO 8601) for the series. |
 | `payloadDescriptors` | array | ✓ | `{payloadType, units, currency, readingType, …}` per signal. Every type used in `intervals` MUST appear here. |
 | `intervals` | array | ✓ | Series rows; each `{id, [intervalPeriod], payloads[]}`. `payloads[]` is a list of `{type, values[]}` valuesMap rows. |
+| `resourceName` | string | — | Identifies the resource the readings are about (OpenADR `Report.resources[].resourceName`). In energy contexts, the meter id. Omit (or set to `"0"`) for aggregate / unattributed series. |
+| `clientName` | string | — | Identifies the reporting client (OpenADR `Report.clientName`). In energy contexts, the utility / DISCOM / aggregator subscriber id. |
 
 ## `payloadType` is open at this layer
 
