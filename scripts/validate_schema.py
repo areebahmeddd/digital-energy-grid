@@ -160,6 +160,50 @@ def get_attributes_url_from_context_url(context_url):
     """
     return context_url.replace('/context.jsonld', '/attributes.yaml')
 
+def select_context_url(context_url, obj_type):
+    """
+    Normalize the @context value to a single string URL.
+
+    JSON-LD allows @context to be a string or an array of strings. When it is an
+    array, select the URL that best matches the @type. Heuristic:
+    1. Prefer a URL whose path contains "/<TypeName>/" (case-insensitive).
+    2. Otherwise, return the first URL that is not the W3C credentials context
+       or a generic vocabulary (schema.org, beckn Location, etc.).
+    3. As a final fallback, return the first string URL.
+
+    Returns a string URL or None.
+    """
+    if isinstance(context_url, str):
+        return context_url
+    if not isinstance(context_url, list):
+        return None
+
+    string_urls = [u for u in context_url if isinstance(u, str)]
+    if not string_urls:
+        return None
+
+    type_name = (obj_type or "").split(":")[-1].lower() if obj_type else ""
+
+    # 1. Match by @type name in URL path
+    if type_name:
+        for url in string_urls:
+            if f"/{type_name}/" in url.lower():
+                return url
+
+    # 2. Skip generic / vocabulary URLs
+    generic_substrings = (
+        "www.w3.org/ns/credentials",
+        "schema.org",
+        "/Location/",
+    )
+    for url in string_urls:
+        if not any(s in url for s in generic_substrings):
+            return url
+
+    # 3. Fallback
+    return string_urls[0]
+
+
 def is_core_context_url(context_url):
     """
     Check if @context URL points to core schema.
@@ -450,8 +494,13 @@ def validate_payload(payload, registry_list, attributes_schema, attribute_schema
         if isinstance(data, dict):
             # Check for objects with @context and @type
             if "@context" in data and "@type" in data and attribute_schemas_map is not None:
-                context_url = data.get("@context")
                 obj_type = data.get("@type")
+                context_url = select_context_url(data.get("@context"), obj_type)
+                if context_url is None:
+                    # Recurse without attempting validation at this node
+                    for key, value in data.items():
+                        find_and_validate_objects(value, f"{path}/{key}" if path else key)
+                    return
                 
                 # Handle core Beckn objects (e.g., beckn:Order, beckn:Offer)
                 if obj_type and obj_type.startswith("beckn:"):
