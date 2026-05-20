@@ -32,7 +32,10 @@
     "values": { "@id": "oadr:values", "@container": "@list" },
 
     "x": { "@id": "oadr:x", "@type": "xsd:float" },
-    "y": { "@id": "oadr:y", "@type": "xsd:float" }
+    "y": { "@id": "oadr:y", "@type": "xsd:float" },
+
+    "resourceName": "oadr:resourceName",
+    "clientName": "oadr:clientName"
   },
   "@graph": []
 }

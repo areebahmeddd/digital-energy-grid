@@ -89,3 +89,24 @@ components:
             optional and overrides the default.
           items:
             $ref: "https://schema.beckn.io/openadr/v3.1.0#/components/schemas/interval"
+
+        resourceName:
+          type: string
+          description: >
+            Identifies the single resource these readings are about — the
+            data source. Mirrors OpenADR 3.1.0's
+            `Report.resources[].resourceName`. Use when the series captures
+            telemetry from a specific physical device or asset; in energy
+            domains this is typically the meter id. Omit (or set to `"0"`,
+            following OpenADR convention) for aggregate / unattributed
+            series. Optional, so existing payloads continue to validate
+            without change.
+
+        clientName:
+          type: string
+          description: >
+            Identifies the reporting client — the party authoring this
+            time-series and pushing it onto the wire. Mirrors OpenADR
+            3.1.0's `Report.clientName` (VEN name). In energy domains this
+            is typically the utility / DISCOM / aggregator subscriber id.
+            Optional.
