@@ -21,28 +21,16 @@
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-p2p-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "energy-resource-solar-001",
-              "descriptor": {
-                "name": "Solar energy slot \u2014 2026-04-26 10:00\u201312:00 IST"
-              },
-              "quantity": {
-                "@type": "Quantity",
-                "unitCode": "KWH",
-                "unitQuantity": 35.0
-              },
+              "descriptor": {"name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"},
+              "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.0},
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
@@ -53,9 +41,7 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": [
-              "energy-resource-solar-001"
-            ],
+            "resourceIds": ["energy-resource-solar-001"],
             "offerAttributes": {
               "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
@@ -66,10 +52,7 @@
                   "payload": {
                     "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                     "@type": "TimeSeries",
-                    "intervalPeriod": {
-                      "start": "2026-04-26T04:30:00Z",
-                      "duration": "PT1H"
-                    },
+                    "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
                     "payloadDescriptors": [
                       {
                         "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
@@ -86,35 +69,15 @@
                       {
                         "id": 0,
                         "payloads": [
-                          {
-                            "type": "PRICE_PER_KWH",
-                            "values": [
-                              12.5
-                            ]
-                          },
-                          {
-                            "type": "AVAILABLE_QTY",
-                            "values": [
-                              30.5
-                            ]
-                          }
+                          {"type": "PRICE_PER_KWH", "values": [12.5]},
+                          {"type": "AVAILABLE_QTY", "values": [30.5]}
                         ]
                       },
                       {
                         "id": 1,
                         "payloads": [
-                          {
-                            "type": "PRICE_PER_KWH",
-                            "values": [
-                              14.5
-                            ]
-                          },
-                          {
-                            "type": "AVAILABLE_QTY",
-                            "values": [
-                              25.5
-                            ]
-                          }
+                          {"type": "PRICE_PER_KWH", "values": [14.5]},
+                          {"type": "AVAILABLE_QTY", "values": [25.5]}
                         ]
                       }
                     ]
@@ -169,10 +132,7 @@
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
-            "intervalPeriod": {
-              "start": "2026-04-26T04:30:00Z",
-              "duration": "PT1H"
-            },
+            "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
               {
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
@@ -194,47 +154,17 @@
               {
                 "id": 0,
                 "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      12.5
-                    ]
-                  },
-                  {
-                    "type": "AVAILABLE_QTY",
-                    "values": [
-                      30.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      20.5
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": [12.5]},
+                  {"type": "AVAILABLE_QTY", "values": [30.5]},
+                  {"type": "REQUESTED_QTY", "values": [20.5]}
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      14.5
-                    ]
-                  },
-                  {
-                    "type": "AVAILABLE_QTY",
-                    "values": [
-                      25.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      15.5
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": [14.5]},
+                  {"type": "AVAILABLE_QTY", "values": [25.5]},
+                  {"type": "REQUESTED_QTY", "values": [15.5]}
                 ]
               }
             ]
@@ -245,22 +175,10 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "buyerapp.example.com"
-          },
-          {
-            "role": "seller",
-            "participantId": "sellerapp.example.com"
-          },
-          {
-            "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger.example.com"
-          },
-          {
-            "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger.example.com"
-          }
+          {"role": "buyer", "participantId": "buyerapp.example.com"},
+          {"role": "seller", "participantId": "sellerapp.example.com"},
+          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
