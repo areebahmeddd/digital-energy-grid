@@ -34,11 +34,11 @@
                 "schema:identifier": "ds-actuals-001",
                 "schema:name": "Seller-discom meter actuals",
                 "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
-                "dataset:meterId": "TEST_METER_SELLER_001",
-                "dataset:discomId": "TEST_DISCOM_SELLER",
                 "dataPayload": {
                   "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "TimeSeries",
+                  "resourceName": "TEST_METER_SELLER_001",
+                  "clientName": "TEST_DISCOM_SELLER",
                   "intervalPeriod": { "start": "2026-04-26T04:30:00Z", "duration": "PT1H" },
                   "payloadDescriptors": [
                     { "objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ACTUAL_PULLED", "units": "KWH" }
