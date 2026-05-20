@@ -679,11 +679,11 @@ def replace_ledger_uri_macros(
     buyer_var: str = "ledger_host_buyer",
     seller_var: str = "ledger_host_seller",
 ) -> Any:
-    """Replace ledgerUri in participants with {{ledger_host_*}}/<path>.
+    """Replace ledgerUri in participants with the top-level {{ledger_host_*}}.
 
-    Path matches the discom's Beckn role in the cascade:
-      - sellerDiscom is BPP-style (receives /status at /bpp/receiver)
-      - buyerDiscom  is BAP-style (receives /on_status at /bap/receiver)
+    ledgerUri is the *root* of the ledger host; the Beckn cascade path
+    (/bap/receiver or /bpp/receiver) is appended downstream by the
+    degledgerrecorder based on the discom's role, not hard-coded here.
     """
     if isinstance(data, dict):
         result = {}
@@ -697,9 +697,9 @@ def replace_ledger_uri_macros(
                     if isinstance(attrs, dict) and "ledgerUri" in attrs:
                         attrs = dict(attrs)
                         if role == "buyerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}/bap/receiver"
+                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}"
                         elif role == "sellerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}/bpp/receiver"
+                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}"
                         p["participantAttributes"] = attrs
                     new_parts.append(p)
                 result[key] = new_parts

@@ -69,7 +69,7 @@ modules:
         router:
           id: router
           config:
-            routingConfig: ./config/local-p2p-trading-routing-SellerApp-Receiver.yaml
+            routingConfig: ./config/local-p2p-trading-routing-SellerApp-BppReceiver.yaml
         middleware:
           - id: reqpreprocessor
             config:
@@ -231,7 +231,7 @@ modules:
         router:
           id: router
           config:
-            routingConfig: ./config/local-p2p-trading-routing-SellerApp-Caller.yaml
+            routingConfig: ./config/local-p2p-trading-routing-SellerApp-BppCaller.yaml
         signer:
           id: signer
         middleware:

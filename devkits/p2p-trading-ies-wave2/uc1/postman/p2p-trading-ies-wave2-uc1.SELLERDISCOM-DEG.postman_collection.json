@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "2b017a71-0624-401e-b388-6c176a656493",
+    "_postman_id": "220852d2-23be-4d72-9c90-dd9b8e57528f",
     "name": "p2p-trading-ies-wave2-uc1.SELLERDISCOM-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Seller-discom actor (the utility itself; pushes meter actuals as on_status to the ledger TSP) implementing p2p-trading-ies-wave2 APIs based on Beckn Protocol v2"
