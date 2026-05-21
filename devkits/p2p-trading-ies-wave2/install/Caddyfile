@@ -29,7 +29,41 @@ http://sellerdiscom.example.com:9000 {
     reverse_proxy onix-sellerdiscom-actor:8086
 }
 
-# Fallback for the bare beckn-router hostname (used by the health check).
+# Catch-all on :9000 — used by the health check AND by public ingress
+# through an ngrok tunnel. ngrok rewrites the upstream Host header to the
+# ngrok hostname, so the per-participant host blocks above won't match for
+# tunneled traffic. To let a SINGLE ngrok tunnel disambiguate between
+# participants, route here by URL path prefix; the prefix is stripped before
+# proxying so each onix container still sees its standard Beckn paths
+# (/bap/receiver, /bpp/caller, etc.). Configure your Postman/payload host
+# variables as e.g. https://<ngrok>/<participant-slug> (no trailing slash).
 :9000 {
-    respond "beckn-router ok" 200
+    @buyerapp path /buyerapp /buyerapp/*
+    handle @buyerapp {
+        uri strip_prefix /buyerapp
+        reverse_proxy onix-buyerapp:8081
+    }
+    @sellerapp path /sellerapp /sellerapp/*
+    handle @sellerapp {
+        uri strip_prefix /sellerapp
+        reverse_proxy onix-sellerapp:8082
+    }
+    @sellerDiscomLedger path /seller-discom-ledger /seller-discom-ledger/*
+    handle @sellerDiscomLedger {
+        uri strip_prefix /seller-discom-ledger
+        reverse_proxy onix-ledger-sellerdiscom:8083
+    }
+    @buyerDiscomLedger path /buyer-discom-ledger /buyer-discom-ledger/*
+    handle @buyerDiscomLedger {
+        uri strip_prefix /buyer-discom-ledger
+        reverse_proxy onix-ledger-buyerdiscom:8084
+    }
+    @sellerDiscomActor path /sellerdiscom /sellerdiscom/*
+    handle @sellerDiscomActor {
+        uri strip_prefix /sellerdiscom
+        reverse_proxy onix-sellerdiscom-actor:8086
+    }
+    handle {
+        respond "beckn-router ok" 200
+    }
 }
