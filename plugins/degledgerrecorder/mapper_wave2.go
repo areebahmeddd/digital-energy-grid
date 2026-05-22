@@ -679,16 +679,24 @@ func ParticipantEndpointURI(participants []Wave2Participant, role, key string) s
 // SubTxContext describes one Beckn sub-transaction's party identifiers. Used
 // to rewrite context.bapId/bapUri/bppId/bppUri when a cascade leg crosses a
 // transaction boundary (e.g. seller→sellerdiscom is a fresh BAP↔BPP pair).
-// Subscriber IDs (BapID/BppID) follow the convention id = URL hostname.
+//
+// Set BapID/BppID explicitly from participants[role].participantId so that
+// the subscriber IDs are stable Beckn identities regardless of the routing
+// URI used (ngrok tunnel, internal Docker hostname, cloud hostname, etc.).
+// If BapID/BppID are empty the function falls back to the URI hostname
+// convention — acceptable when the URI hostname IS the subscriber ID.
 type SubTxContext struct {
 	BapURI string
 	BppURI string
+	BapID  string // explicit subscriber ID; if set, overrides hostname(BapURI)
+	BppID  string // explicit subscriber ID; if set, overrides hostname(BppURI)
 }
 
 // RewriteContextForSubTx rewrites context.bap*/bpp* fields in `body` to identify
-// the parties of the new sub-transaction. Subscriber IDs are derived from URL
-// hostnames. Returns the rewritten body. Other context fields (action, ids,
-// timestamps, networkId, version, schemaContext) are preserved.
+// the parties of the new sub-transaction. Subscriber IDs come from BapID/BppID
+// when set; otherwise they are derived from the URL hostname (the Beckn
+// convention for production nodes where hostname == subscriberId). Returns the
+// rewritten body. Other context fields are preserved verbatim.
 func RewriteContextForSubTx(body []byte, tx SubTxContext) ([]byte, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(body, &raw); err != nil {
@@ -708,14 +716,22 @@ func RewriteContextForSubTx(body []byte, tx SubTxContext) ([]byte, error) {
 
 	if tx.BapURI != "" {
 		ctxRaw[bapKey] = tx.BapURI
-		if h := hostname(tx.BapURI); h != "" {
-			ctxRaw[bapIDKey] = h
+		id := tx.BapID
+		if id == "" {
+			id = hostname(tx.BapURI)
+		}
+		if id != "" {
+			ctxRaw[bapIDKey] = id
 		}
 	}
 	if tx.BppURI != "" {
 		ctxRaw[bppKey] = tx.BppURI
-		if h := hostname(tx.BppURI); h != "" {
-			ctxRaw[bppIDKey] = h
+		id := tx.BppID
+		if id == "" {
+			id = hostname(tx.BppURI)
+		}
+		if id != "" {
+			ctxRaw[bppIDKey] = id
 		}
 	}
 	raw["context"] = ctxRaw

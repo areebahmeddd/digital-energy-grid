@@ -418,14 +418,22 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	ledgerEndpoint := BppReceiverEndpoint(ledgerHostBase)
 
 	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
-	ownPlatformURI := ParticipantEndpointURI(payload.Message.Contract.Participants, strings.ToLower(r.config.Role), "platformUri")
+	parts := payload.Message.Contract.Participants
+	ownPlatformURI := ParticipantEndpointURI(parts, strings.ToLower(r.config.Role), "platformUri")
 	if ownPlatformURI == "" {
 		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s]; skipping status forward (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
 		return nil
 	}
+	// Use participantId from the participants array for bapId/bppId so they are
+	// stable Beckn identities regardless of whether the routing URIs use ngrok
+	// tunnels, internal Docker hostnames, or production FQDNs.
+	ownParticipantID := participantID(findWave2Participant(parts, strings.ToLower(r.config.Role)))
+	discomParticipantID := participantID(findWave2Participant(parts, string(side)))
 	subTx := SubTxContext{
 		BapURI: BapReceiverEndpoint(ownPlatformURI),
 		BppURI: ledgerEndpoint,
+		BapID:  ownParticipantID,
+		BppID:  discomParticipantID,
 	}
 	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
@@ -496,6 +504,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 
 	var baseURL string
 	var subTx SubTxContext
+	ownParticipantID := participantID(findWave2Participant(parts, strings.ToLower(r.config.Role)))
 	if fromOwnDiscom {
 		// Rule 2a: forward to peer's /bap/receiver.
 		peerRole := "buyer"
@@ -507,9 +516,15 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
 			return nil
 		}
+		peerParticipantID := participantID(findWave2Participant(parts, peerRole))
 		peerBapEndpoint := BapReceiverEndpoint(peerPlatformURI)
 		baseURL = peerBapEndpoint
-		subTx = SubTxContext{BapURI: peerBapEndpoint, BppURI: ownBppEndpoint}
+		subTx = SubTxContext{
+			BapURI: peerBapEndpoint,
+			BppURI: ownBppEndpoint,
+			BapID:  peerParticipantID,
+			BppID:  ownParticipantID,
+		}
 	} else {
 		// Rule 2b: cascade to own discom. Skip if no performance data.
 		if !Wave2OnStatusHasPerformanceData(payload) {
@@ -523,8 +538,14 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		// Discom is the BAP-style sink for this on_status push; this handler's
 		// platform is the BPP-caller initiating it.
 		discomLedgerEndpoint := BapReceiverEndpoint(discomLedgerHost)
+		discomParticipantID := participantID(findWave2Participant(parts, ownDiscomRole))
 		baseURL = discomLedgerEndpoint
-		subTx = SubTxContext{BapURI: discomLedgerEndpoint, BppURI: ownBppEndpoint}
+		subTx = SubTxContext{
+			BapURI: discomLedgerEndpoint,
+			BppURI: ownBppEndpoint,
+			BapID:  discomParticipantID,
+			BppID:  ownParticipantID,
+		}
 	}
 
 	if baseURL == "" {
