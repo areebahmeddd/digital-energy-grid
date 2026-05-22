@@ -18,7 +18,14 @@
     "telemetryProvider":  { "@id": "deg:telemetryProvider",  "@type": "xsd:string"  },
     "resourceAttributes": { "@id": "deg:resourceAttributes", "@container": "@graph" },
     "subResources":       { "@id": "deg:subResources",       "@container": "@list"  },
-    "parentResources":    { "@id": "deg:parentResources",    "@container": "@list"  }
+    "parentResources":    { "@id": "deg:parentResources",    "@container": "@list"  },
+
+    "MeterAttributes":    "deg:MeterAttributes",
+    "meterType":          { "@id": "deg:meterType",          "@type": "xsd:string"  },
+    "meterGps":           { "@id": "deg:meterGps",           "@type": "xsd:string"  },
+    "meterLocation":      { "@id": "deg:meterLocation",      "@type": "@id"         },
+    "feeder":             { "@id": "deg:feeder",             "@type": "xsd:string"  },
+    "bus":                { "@id": "deg:bus",                "@type": "xsd:string"  }
   },
   "@graph": []
 }

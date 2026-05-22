@@ -13,59 +13,89 @@
       "@id": "deg:EnergyResource",
       "@type": "rdfs:Class",
       "rdfs:label": "Energy Resource",
-      "rdfs:comment": "Item attributes for energy resources, attached to Item.itemAttributes."
+      "rdfs:comment": "Canonical energy-asset class. Any asset that produces, consumes, stores, or modulates energy — meters, DERs, storage, controllable loads."
     },
     {
-      "@id": "deg:sourceType",
+      "@id": "deg:resourceId",
       "@type": "rdf:Property",
-      "rdfs:label": "Source type",
-      "rdfs:comment": "Type of energy source (SOLAR, BATTERY, GRID, HYBRID, RENEWABLE).",
-      "rdfs:domain": "deg:EnergyResource",
-      "schema:rangeIncludes": "deg:SourceType"
-    },
-    {
-      "@id": "deg:meterId",
-      "@type": "rdf:Property",
-      "rdfs:label": "Meter ID",
-      "rdfs:comment": "Meter identifier in DER address format (der://meter/{id}).",
-      "rdfs:domain": "deg:EnergyResource",
+      "rdfs:label": "Resource ID",
+      "rdfs:comment": "Stable identifier for this resource. For METER resources, this is the meter serial number (no URI prefix). For DERs, recommended scheme is der://<type>/<id>.",
+      "rdfs:domain": { "@id": "deg:EnergyResource" },
       "rdfs:range": "xsd:string"
     },
     {
-      "@id": "deg:SourceType",
-      "@type": "schema:Enumeration",
-      "schema:name": "Source Type",
-      "rdfs:comment": "Enumeration of energy source types."
+      "@id": "deg:resourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Resource Type",
+      "rdfs:comment": "Open-string asset class. Common values: METER, SOLAR, SOLAR_PV, WIND, HYDRO, BATTERY, BESS, EV_CHARGER, EV_V2G, CONTROLLABLE_LOAD.",
+      "rdfs:domain": { "@id": "deg:EnergyResource" },
+      "rdfs:range": "xsd:string"
     },
     {
-      "@id": "deg:SourceTypeSolar",
-      "@type": "deg:SourceType",
-      "schema:name": "SOLAR",
-      "schema:identifier": "SOLAR"
+      "@id": "deg:resourceAttributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "Resource Attributes",
+      "rdfs:comment": "Type-specific extensible attribute bag. For METER resources, conforms to MeterAttributes.",
+      "rdfs:domain": { "@id": "deg:EnergyResource" }
     },
     {
-      "@id": "deg:SourceTypeBattery",
-      "@type": "deg:SourceType",
-      "schema:name": "BATTERY",
-      "schema:identifier": "BATTERY"
+      "@id": "deg:subResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sub Resources",
+      "rdfs:comment": "Child resources (topology: downward). Each item is a resourceId string or an inline EnergyResource.",
+      "rdfs:domain": { "@id": "deg:EnergyResource" }
     },
     {
-      "@id": "deg:SourceTypeGrid",
-      "@type": "deg:SourceType",
-      "schema:name": "GRID",
-      "schema:identifier": "GRID"
+      "@id": "deg:parentResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Parent Resources",
+      "rdfs:comment": "Parent resource IDs (topology: upward). String references only — the meter or aggregation point this resource sits behind.",
+      "rdfs:domain": { "@id": "deg:EnergyResource" }
     },
     {
-      "@id": "deg:SourceTypeHybrid",
-      "@type": "deg:SourceType",
-      "schema:name": "HYBRID",
-      "schema:identifier": "HYBRID"
+      "@id": "deg:MeterAttributes",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Meter Attributes",
+      "rdfs:comment": "resourceAttributes shape for EnergyResource entries with resourceType = METER. Carries grid topology and physical location of the meter."
     },
     {
-      "@id": "deg:SourceTypeRenewable",
-      "@type": "deg:SourceType",
-      "schema:name": "RENEWABLE",
-      "schema:identifier": "RENEWABLE"
+      "@id": "deg:meterType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter Type",
+      "rdfs:comment": "Meter kind classification (Green Button / ESPI). One of: AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other.",
+      "rdfs:domain": { "@id": "deg:MeterAttributes" },
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:meterGps",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter GPS",
+      "rdfs:comment": "GPS coordinates of the physical meter as 'lat,lng'.",
+      "rdfs:domain": { "@id": "deg:MeterAttributes" },
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:meterLocation",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter Location",
+      "rdfs:comment": "Postal location of the meter (beckn Location shape).",
+      "rdfs:domain": { "@id": "deg:MeterAttributes" }
+    },
+    {
+      "@id": "deg:feeder",
+      "@type": "rdf:Property",
+      "rdfs:label": "Feeder",
+      "rdfs:comment": "Distribution feeder ID or name serving this meter.",
+      "rdfs:domain": { "@id": "deg:MeterAttributes" },
+      "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:bus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Bus",
+      "rdfs:comment": "Substation bus reference (HV/LV bus node) from which the feeder originates.",
+      "rdfs:domain": { "@id": "deg:MeterAttributes" },
+      "rdfs:range": "xsd:string"
     }
   ]
 }

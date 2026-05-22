@@ -20,8 +20,8 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `resourceId` | string | Stable identifier; recommended URI scheme `der://<type>/<id>`. |
-| `resourceType` | string (open) | Open-string asset class — `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`, `GRID`, `GRID_METER`, … |
+| `resourceId` | string | Stable identifier. For `METER` resources: the bare meter serial number (e.g., `"MET001"`). For DERs: recommended scheme `der://<type>/<id>`. |
+| `resourceType` | string (open) | Open-string asset class — `METER`, `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`, … |
 | `make` / `model` | string | Manufacturer info. |
 | `ratedPowerKw` | number ≥0 | Manufacturer-rated peak dispatchable power, kW. |
 | `energyCapacityKwh` | number ≥0 | Rated stored-energy capacity, kWh — populated for storage-class resources, omitted for pure-flow. |
@@ -89,6 +89,32 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
 ```
 
 `subResources` (string or inline) and `parentResources` (string only) together form the directed graph. Inline children may also carry an explicit `parentResources` back-pointer if the consumer needs symmetry.
+
+## MeterAttributes (`resourceType: METER`)
+
+`resourceAttributes` shape for grid connection points. All fields are optional — the bag is open-ended. `resourceId` of the EnergyResource **is** the meter serial number.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
+| `gps` | string | `"lat,lng"` coordinates of the physical meter |
+| `location` | object | Postal location (beckn Location shape) |
+| `feeder` | string | Distribution feeder ID or name |
+| `bus` | string | Substation bus reference |
+
+```jsonc
+{
+  "@type": "EnergyResource",
+  "resourceId": "MET2025789456123",
+  "resourceType": "METER",
+  "resourceAttributes": {
+    "meterType": "AMI",
+    "gps": "12.9716,77.5946",
+    "feeder": "BAN-NR-F22",
+    "bus": "BUS-11kV-001"
+  }
+}
+```
 
 ## Changes from earlier v2.0 (breaking)
 

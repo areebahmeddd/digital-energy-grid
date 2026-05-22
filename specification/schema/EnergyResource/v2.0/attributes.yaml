@@ -87,15 +87,17 @@ components:
         resourceType:
           type: string
           description: >
-            Open-string asset class. Common values include
+            Open-string asset class. Common values include `METER`,
             `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR`,
             `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`,
-            `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`,
-            `GRID`, `GRID_METER`. Consumers SHOULD treat unknown values
-            as informational and skip type-specific handling. Open-
-            ended so new asset classes can be added without a schema
-            bump.
-          example: "EV_CHARGER"
+            `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`.
+            For grid connection points use `METER`; when resourceType
+            is `METER`, resourceId carries the meter serial number
+            directly (no URI prefix), and resourceAttributes SHOULD
+            conform to MeterAttributes. Consumers SHOULD treat unknown
+            values as informational. Open-ended so new asset classes
+            can be added without a schema bump.
+          example: "METER"
           x-jsonld:
             "@id": resourceType
 
@@ -217,3 +219,95 @@ components:
               elsewhere in the same payload.
           x-jsonld:
             "@id": parentResources
+
+    MeterAttributes:
+      type: object
+      description: >
+        resourceAttributes shape for EnergyResource entries with
+        resourceType = "METER". The containing EnergyResource's
+        resourceId IS the meter serial number (utility-assigned;
+        no URI prefix required).
+
+        No field is required — the bag is open-ended
+        (additionalProperties: true). Domains that need specific
+        fields SHOULD declare them in their own profile.
+      additionalProperties: true
+      x-tags:
+        - meter
+        - energy-resource
+        - electricity
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": MeterAttributes
+      properties:
+
+        meterType:
+          type: string
+          enum:
+            - AMR
+            - AMI
+            - Electromechanical
+            - Forward
+            - Reverse
+            - Bidirectional
+            - Prepaid
+            - NetMeter
+            - Other
+          description: >
+            Meter kind classification (Green Button / ESPI). Optional.
+          x-jsonld:
+            "@id": deg:meterType
+
+        gps:
+          type: string
+          pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+          description: GPS coordinates of the physical meter as 'lat,lng'. Optional.
+          x-jsonld:
+            "@id": deg:meterGps
+
+        location:
+          type: object
+          description: >
+            Postal location of the meter (beckn Location shape).
+            Use when the meter's physical location is distinct from
+            the customer's registered installation address. Optional.
+          additionalProperties: true
+          properties:
+            address: { type: string }
+            city:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            district: { type: string }
+            state:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            country:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string, pattern: "^[A-Z]{2}$" }
+            area_code: { type: string }
+            gps: { type: string }
+            openLocationCode: { type: string }
+          x-jsonld:
+            "@id": deg:meterLocation
+
+        feeder:
+          type: string
+          description: >
+            Distribution feeder ID or name serving this meter
+            (e.g., "BAN-NR-F22"). Optional.
+          x-jsonld:
+            "@id": deg:feeder
+
+        bus:
+          type: string
+          description: >
+            Substation bus reference — the HV/LV bus node from which
+            the feeder originates (e.g., "BUS-11kV-001"). Optional.
+          x-jsonld:
+            "@id": deg:bus
