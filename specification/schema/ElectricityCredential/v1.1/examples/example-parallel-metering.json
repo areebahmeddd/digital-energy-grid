@@ -1,5 +1,5 @@
 {
-  "_comment": "Parallel metering topology: two meters installed at the same premises serving distinct measurement purposes. MET-IMPORT-001 (Forward/AMI) measures grid consumption; MET-EXPORT-001 (Reverse) measures gross solar export under a feed-in tariff arrangement. Both meters are siblings — neither is a parent of the other. Solar DER hangs behind the export meter. Consumption profile links to the import meter; export meter carries its own tariff code.",
+  "_comment": "Parallel metering: two meters at the same premises. MET-IMPORT-001 (Forward/AMI) measures grid consumption; MET-EXPORT-001 (Reverse) measures gross solar export under a feed-in tariff. Both meters are siblings. Solar DER hangs behind the export meter. Each meter has its own consumption profile.",
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
@@ -22,30 +22,19 @@
       "customerNumber": "TPDDL-2025-00987654",
       "energyResources": [
         {
-          "resourceId": "MET-IMPORT-001",
-          "resourceType": "METER",
-          "resourceAttributes": {
-            "meterType": "AMI",
-            "gps": "28.6139,77.2090",
-            "feeder": "DEL-SB-F08",
-            "bus": "BUS-33kV-012"
-          }
+          "id": "MET-IMPORT-001",
+          "type": "METER",
+          "attributes": {"meterType": "AMI", "gps": "28.6139,77.2090", "feeder": "DEL-SB-F08", "bus": "BUS-33kV-012"}
         },
         {
-          "resourceId": "MET-EXPORT-001",
-          "resourceType": "METER",
-          "resourceAttributes": {
-            "meterType": "Reverse",
-            "gps": "28.6139,77.2090"
-          }
+          "id": "MET-EXPORT-001",
+          "type": "METER",
+          "attributes": {"meterType": "Reverse", "gps": "28.6139,77.2090"}
         },
         {
-          "resourceId": "der://solar/ROOFTOP-SOLAR-001",
-          "resourceType": "SOLAR",
-          "ratedPowerKw": 5,
-          "make": "Adani Solar",
-          "model": "ASPM-400M",
-          "resourceAttributes": {"commissioningDate": "2025-02-10"},
+          "id": "ROOFTOP-SOLAR-001",
+          "type": "SOLAR",
+          "attributes": {"ratedPowerKw": 5, "make": "Adani Solar", "model": "ASPM-400M", "commissioningDate": "2025-02-10"},
           "parentResources": ["MET-EXPORT-001"]
         }
       ],

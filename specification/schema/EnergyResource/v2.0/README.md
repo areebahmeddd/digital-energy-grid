@@ -1,6 +1,6 @@
 # EnergyResource — v2.0
 
-Canonical, technology-neutral class for any asset that produces, consumes, stores, or modulates energy. Used by **P2P-trading** (`{resourceId, resourceType}` for the asset being sold), **demand-flex** (richer identity + dimensioning + topology to enumerate the assets behind a contract), and reused by every future DEG domain.
+Canonical, technology-neutral class for any asset that produces, consumes, stores, or modulates energy. Used by **P2P-trading** (`{id, type}` for the asset being sold), **demand-flex** (richer identity + dimensioning + topology), and **ElectricityCredential/v1.1** (`customerProfile.energyResources[]`).
 
 Part of the [DEG Schema](../../) · [EnergyResource](../README.md)
 
@@ -8,106 +8,55 @@ Part of the [DEG Schema](../../) · [EnergyResource](../README.md)
 
 | File | Description |
 |------|-------------|
-| [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 `components.schemas.EnergyResource` |
-| [context.jsonld](./context.jsonld) | JSON-LD context — `EnergyResource` → `deg:EnergyResource` |
+| [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 — `EnergyResource` and `CommonResourceAttributes` |
+| [context.jsonld](./context.jsonld) | JSON-LD context |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary |
 
-## Properties
+## Structure
 
-No field is `required` at the schema level — domain profiles (demand-flex's network rego, p2p-trading's item gates) enforce their own cross-field expectations.
-
-### Identity + rated dimensioning
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `resourceId` | string | Stable identifier. For `METER` resources: the bare meter serial number (e.g., `"MET001"`). For DERs: recommended scheme `der://<type>/<id>`. |
-| `resourceType` | string (open) | Open-string asset class — `METER`, `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`, … |
-| `make` / `model` | string | Manufacturer info. |
-| `ratedPowerKw` | number ≥0 | Manufacturer-rated peak dispatchable power, kW. |
-| `energyCapacityKwh` | number ≥0 | Rated stored-energy capacity, kWh — populated for storage-class resources, omitted for pure-flow. |
-| `telemetryProvider` | string | Identifier of the vendor API / data source supplying telemetry (e.g. `tata-evp-telematics`). |
-| `resourceAttributes` | object (open) | Type-specific extensible bag (EV VIN/chargingProtocol; battery chemistry/cycleCount; …). |
-
-### Topology
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `subResources` | array | Child resources. Each item is **either** a bare `resourceId` string (FK to a sibling EnergyResource in the same payload) **or** an inline-nested EnergyResource. |
-| `parentResources` | array of strings | Parent resources — `resourceId`s of EnergyResources this one sits behind (typically a meter or aggregation point). **String form only** — parents are enumerated elsewhere; inlining them inside a child would be a definitional cycle. |
-
-## P2P-trading payload (wave2)
-
-```jsonc
-{
-  "@type": "EnergyResource",
-  "resourceId": "der://meter/TEST_METER_SELLER_001",
-  "resourceType": "SOLAR"
-}
+```
+EnergyResource
+├── id                  — stable identifier (meter serial number for METER resources)
+├── type                — open-string asset class (METER, SOLAR, BATTERY, …)
+├── attributes          — all other properties (open bag)
+│   ├── CommonResourceAttributes: make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider
+│   └── type-specific:  meterType, gps, location, feeder, bus, commissioningDate, storageType, VIN, …
+├── subResources[]      — child resource ids or inline objects (topology)
+└── parentResources[]   — parent resource ids (topology)
 ```
 
-## Demand-flex DR payload (richer identity + parent linkage)
+All fields are optional at the schema level.
 
-```jsonc
-{
-  "@type": "EnergyResource",
-  "resourceId": "der://ev/VIN001",
-  "resourceType": "EV_CHARGER",
-  "parentResources": ["der://meter/001"],
-  "make": "Tata",
-  "model": "Nexon EV",
-  "ratedPowerKw": 7.0,
-  "energyCapacityKwh": 30.0,
-  "telemetryProvider": "tata-evp-telematics",
-  "resourceAttributes": {
-    "vin": "MAT123456789012345",
-    "chargingProtocol": "OCPP_2_0_1"
-  }
-}
-```
+## CommonResourceAttributes
 
-`parentResources: ["der://meter/001"]` declares this EV sits behind grid meter `der://meter/001`, which is enumerated separately in the contract's `participatingMeters[*]`. The schema does not enforce that the FK resolves — domain profiles do.
+Dimensioning fields shared across all resource types. Live inside `attributes`.
 
-## Topology example — microgrid with mixed inline + reference children
+| Field | Type | Description |
+|-------|------|-------------|
+| `make` | string | Manufacturer |
+| `model` | string | Model |
+| `ratedPowerKw` | number ≥0 | Rated peak power, kW |
+| `energyCapacityKwh` | number ≥0 | Stored-energy capacity, kWh (storage-class only) |
+| `telemetryProvider` | string | Vendor API / data source for telemetry |
 
-```jsonc
-{
-  "@type": "EnergyResource",
-  "resourceId": "der://site/MICROGRID01",
-  "resourceType": "MICROGRID",
-  "subResources": [
-    "der://solar/PV001",
-    "der://battery/BAT001",
-    {
-      "@type": "EnergyResource",
-      "resourceId": "der://ev/VIN001",
-      "resourceType": "EV_CHARGER",
-      "parentResources": ["der://site/MICROGRID01"],
-      "ratedPowerKw": 7.0
-    }
-  ]
-}
-```
-
-`subResources` (string or inline) and `parentResources` (string only) together form the directed graph. Inline children may also carry an explicit `parentResources` back-pointer if the consumer needs symmetry.
-
-## MeterAttributes (`resourceType: METER`)
-
-`resourceAttributes` shape for grid connection points. All fields are optional — the bag is open-ended. `resourceId` of the EnergyResource **is** the meter serial number.
+## Meter attributes (`type: METER`, inside `attributes`)
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
-| `gps` | string | `"lat,lng"` coordinates of the physical meter |
+| `gps` | string | `"lat,lng"` coordinates |
 | `location` | object | Postal location (beckn Location shape) |
 | `feeder` | string | Distribution feeder ID or name |
 | `bus` | string | Substation bus reference |
 
-```jsonc
+## Examples
+
+**METER:**
+```json
 {
-  "@type": "EnergyResource",
-  "resourceId": "MET2025789456123",
-  "resourceType": "METER",
-  "resourceAttributes": {
+  "id": "MET2025789456123",
+  "type": "METER",
+  "attributes": {
     "meterType": "AMI",
     "gps": "12.9716,77.5946",
     "feeder": "BAN-NR-F22",
@@ -116,11 +65,64 @@ No field is `required` at the schema level — domain profiles (demand-flex's ne
 }
 ```
 
+**SOLAR DER behind a meter:**
+```json
+{
+  "id": "DER-SOLAR-001",
+  "type": "SOLAR",
+  "attributes": {"ratedPowerKw": 3, "make": "Waaree", "model": "WS-300", "commissioningDate": "2025-01-12"},
+  "parentResources": ["MET2025789456123"]
+}
+```
+
+**P2P-trading (minimal):**
+```json
+{"id": "MET001", "type": "SOLAR"}
+```
+
+**Demand-flex (EV with parent meter):**
+```json
+{
+  "id": "VIN001",
+  "type": "EV_CHARGER",
+  "attributes": {
+    "make": "Tata", "model": "Nexon EV",
+    "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0,
+    "telemetryProvider": "tata-evp-telematics",
+    "vin": "MAT123456789012345",
+    "chargingProtocol": "OCPP_2_0_1"
+  },
+  "parentResources": ["MET001"]
+}
+```
+
+**Topology — microgrid:**
+```json
+{
+  "id": "MICROGRID01",
+  "type": "MICROGRID",
+  "subResources": [
+    "PV001",
+    "BAT001",
+    {
+      "id": "VIN001",
+      "type": "EV_CHARGER",
+      "attributes": {"ratedPowerKw": 7.0},
+      "parentResources": ["MICROGRID01"]
+    }
+  ]
+}
+```
+
+## Topology
+
+`subResources` and `parentResources` reference other EnergyResources by `id`. `subResources` items may also be inline-nested EnergyResource objects. `parentResources` items are always strings (FK references — inlining parents would create a cycle).
+
 ## Changes from earlier v2.0 (breaking)
 
-- **`sourceType` removed** — use `resourceType` (open string, accepts every value the enum did and more).
-- **`meterId` removed** — split into:
-  - `resourceId` for the resource's own identifier (P2P-trading wave2 used `meterId` here),
-  - `parentResources[]` for upward topology (demand-flex used `meterId` for the meter-FK semantic).
-
-Wave2 P2P-trading + demand-flex devkit fixtures migrated alongside this schema revision.
+- **`resourceId` → `id`**, **`resourceType` → `type`** — simpler names.
+- **`resourceAttributes` → `attributes`** — renamed; still the open attribute bag.
+- **`CommonResourceAttributes` added** — named sub-schema for make/model/ratedPowerKw/energyCapacityKwh/telemetryProvider; all live inside `attributes`.
+- **Meter fields absorbed into `attributes`** — meterType, gps, location, feeder, bus are documented properties within the `attributes` bag for METER resources.
+- **`@type` discriminator field removed** — no longer needed.
+- **`sourceType` / `meterId`** — removed in the previous revision; still absent.

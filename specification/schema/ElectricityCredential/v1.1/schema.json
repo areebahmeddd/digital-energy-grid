@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/beckn/DEG/blob/main/specification/schema/ElectricityCredential/v1.1/schema.json",
     "title": "ElectricityCredential v1.1",
-    "description": "Bundled (self-contained) JSON Schema for ElectricityCredential v1.1. consumptionProfiles/generationProfiles/storageProfiles from v1.0 are superseded by customerProfile.energyResources[] and customerProfile.consumptionProfiles[].",
+    "description": "Bundled JSON Schema for ElectricityCredential v1.1. EnergyResource has top-level id/type/subResources/parentResources; all other attributes live in the 'attributes' bag.",
     "type": "object",
     "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
     "properties": {
@@ -95,36 +95,19 @@
         },
         "ConsumptionProfile": {
             "type": "object",
-            "description": "Tariff and load characteristics for one meter connection. meterId matches resourceId of a METER entry in energyResources[].",
+            "description": "Tariff and load characteristics for one meter. meterId matches the id of a METER entry in energyResources[].",
             "required": ["meterId", "sanctionedLoadKW", "tariffCategoryCode"],
             "properties": {
-                "meterId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Meter serial number — matches resourceId of the METER entry in energyResources[]."
-                },
-                "sanctionedLoadKW": {
-                    "type": "number",
-                    "minimum": 0.5,
-                    "maximum": 10000
-                },
-                "tariffCategoryCode": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "premisesType": {
-                    "type": "string",
-                    "enum": ["Residential", "Commercial", "Industrial", "Agricultural"]
-                },
-                "connectionType": {
-                    "type": "string",
-                    "enum": ["Single-phase", "Three-phase"]
-                }
+                "meterId": { "type": "string", "minLength": 1 },
+                "sanctionedLoadKW": { "type": "number", "minimum": 0.5, "maximum": 10000 },
+                "tariffCategoryCode": { "type": "string", "minLength": 1 },
+                "premisesType": { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
+                "connectionType": { "type": "string", "enum": ["Single-phase", "Three-phase"] }
             }
         },
         "CustomerDetails": {
             "type": "object",
-            "description": "PII section. fullName is only here.",
+            "description": "PII — fullName is only here.",
             "required": ["fullName", "installationAddress", "serviceConnectionDate"],
             "properties": {
                 "fullName": { "type": "string", "minLength": 1, "maxLength": 200 },
@@ -134,20 +117,35 @@
         },
         "EnergyResource": {
             "type": "object",
-            "description": "Inlined from EnergyResource/v2.0. For METER resources, resourceId is the meter serial number. When resourceType is METER, resourceAttributes conforms to MeterAttributes.",
+            "description": "Inlined from EnergyResource/v2.0. Top-level: id, type, attributes, subResources, parentResources.",
             "additionalProperties": false,
             "properties": {
-                "@type": { "type": "string", "enum": ["EnergyResource"] },
-                "resourceId": { "type": "string", "description": "Meter serial number (for METER) or der://<type>/<id> (for DERs)." },
-                "resourceType": { "type": "string", "description": "Open-string asset class: METER, SOLAR, WIND, BATTERY, BESS, EV_CHARGER, …" },
-                "make": { "type": "string" },
-                "model": { "type": "string" },
-                "ratedPowerKw": { "type": "number", "minimum": 0 },
-                "energyCapacityKwh": { "type": "number", "minimum": 0 },
-                "telemetryProvider": { "type": "string" },
-                "resourceAttributes": {
+                "id": { "type": "string" },
+                "type": { "type": "string" },
+                "attributes": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": true,
+                    "description": "All non-topological attributes. CommonResourceAttributes (make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider) plus type-specific fields (meterType, gps, location, feeder, bus, commissioningDate, storageType, …).",
+                    "properties": {
+                        "make": { "type": "string" },
+                        "model": { "type": "string" },
+                        "ratedPowerKw": { "type": "number", "minimum": 0 },
+                        "energyCapacityKwh": { "type": "number", "minimum": 0 },
+                        "telemetryProvider": { "type": "string" },
+                        "meterType": {
+                            "type": "string",
+                            "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"]
+                        },
+                        "gps": {
+                            "type": "string",
+                            "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+                        },
+                        "location": { "$ref": "#/$defs/Location" },
+                        "feeder": { "type": "string" },
+                        "bus": { "type": "string" },
+                        "commissioningDate": { "type": "string" },
+                        "storageType": { "type": "string" }
+                    }
                 },
                 "subResources": {
                     "type": "array",
@@ -162,33 +160,6 @@
                     "type": "array",
                     "items": { "type": "string" }
                 }
-            },
-            "if": {
-                "required": ["resourceType"],
-                "properties": { "resourceType": { "const": "METER" } }
-            },
-            "then": {
-                "properties": {
-                    "resourceAttributes": { "$ref": "#/$defs/MeterAttributes" }
-                }
-            }
-        },
-        "MeterAttributes": {
-            "type": "object",
-            "description": "resourceAttributes shape for resourceType = METER. All fields optional. resourceId of the containing EnergyResource is the meter serial number.",
-            "additionalProperties": true,
-            "properties": {
-                "meterType": {
-                    "type": "string",
-                    "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"]
-                },
-                "gps": {
-                    "type": "string",
-                    "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
-                },
-                "location": { "$ref": "#/$defs/Location" },
-                "feeder": { "type": "string" },
-                "bus": { "type": "string" }
             }
         },
         "Location": {
@@ -197,21 +168,9 @@
             "required": ["address", "area_code", "country"],
             "properties": {
                 "address": { "type": "string", "minLength": 1 },
-                "city": {
-                    "type": "object",
-                    "properties": {
-                        "name": { "type": "string" },
-                        "code": { "type": "string" }
-                    }
-                },
+                "city": { "type": "object", "properties": { "name": { "type": "string" }, "code": { "type": "string" } } },
                 "district": { "type": "string" },
-                "state": {
-                    "type": "object",
-                    "properties": {
-                        "name": { "type": "string" },
-                        "code": { "type": "string" }
-                    }
-                },
+                "state": { "type": "object", "properties": { "name": { "type": "string" }, "code": { "type": "string" } } },
                 "country": {
                     "type": "object",
                     "required": ["code"],
@@ -221,23 +180,9 @@
                     }
                 },
                 "area_code": { "type": "string", "minLength": 1 },
-                "gps": {
-                    "type": "string",
-                    "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
-                },
-                "openLocationCode": {
-                    "type": "string",
-                    "pattern": "^[23456789CFGHJMPQRVWX]{4,8}\\+[23456789CFGHJMPQRVWX]{0,4}$"
-                },
-                "descriptor": {
-                    "type": "object",
-                    "properties": {
-                        "name": { "type": "string" },
-                        "code": { "type": "string" },
-                        "short_desc": { "type": "string" },
-                        "long_desc": { "type": "string" }
-                    }
-                },
+                "gps": { "type": "string", "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$" },
+                "openLocationCode": { "type": "string", "pattern": "^[23456789CFGHJMPQRVWX]{4,8}\\+[23456789CFGHJMPQRVWX]{0,4}$" },
+                "descriptor": { "type": "object" },
                 "map_url": { "type": "string", "format": "uri" },
                 "circle": { "type": "object" },
                 "polygon": { "type": "string" },

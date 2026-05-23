@@ -28,9 +28,9 @@
       "idRef": {"issuedBy": "did:web:ssa.gov", "subjectId": "ssa.gov:XXX-XX-1234"},
       "energyResources": [
         {
-          "resourceId": "MET2025789456123",
-          "resourceType": "METER",
-          "resourceAttributes": {
+          "id": "MET2025789456123",
+          "type": "METER",
+          "attributes": {
             "meterType": "AMI",
             "gps": "37.7749,-122.4194",
             "feeder": "FEEDER-A1",
@@ -38,37 +38,27 @@
           }
         },
         {
-          "resourceId": "der://solar/DER-SOLAR-001",
-          "resourceType": "SOLAR",
-          "ratedPowerKw": 3,
-          "make": "SunPower Corporation",
-          "model": "SPR-X22-360",
-          "resourceAttributes": {"commissioningDate": "2025-01-12"},
+          "id": "DER-SOLAR-001",
+          "type": "SOLAR",
+          "attributes": {"ratedPowerKw": 3, "make": "SunPower Corporation", "model": "SPR-X22-360", "commissioningDate": "2025-01-12"},
           "parentResources": ["MET2025789456123"]
         },
         {
-          "resourceId": "der://wind/DER-WIND-001",
-          "resourceType": "WIND",
-          "ratedPowerKw": 1.5,
-          "make": "Windmill Co.",
-          "model": "WM-MICRO-150",
-          "resourceAttributes": {"commissioningDate": "2025-03-01"},
+          "id": "DER-WIND-001",
+          "type": "WIND",
+          "attributes": {"ratedPowerKw": 1.5, "make": "Windmill Co.", "model": "WM-MICRO-150", "commissioningDate": "2025-03-01"},
           "parentResources": ["MET2025789456123"]
         },
         {
-          "resourceId": "der://battery/BESS-001",
-          "resourceType": "BATTERY",
-          "ratedPowerKw": 5,
-          "energyCapacityKwh": 10,
-          "resourceAttributes": {"storageType": "LithiumIon", "commissioningDate": "2025-01-12"},
+          "id": "BESS-001",
+          "type": "BATTERY",
+          "attributes": {"ratedPowerKw": 5, "energyCapacityKwh": 10, "storageType": "LithiumIon", "commissioningDate": "2025-01-12"},
           "parentResources": ["MET2025789456123"]
         },
         {
-          "resourceId": "der://battery/BESS-002",
-          "resourceType": "BATTERY",
-          "ratedPowerKw": 2.5,
-          "energyCapacityKwh": 5,
-          "resourceAttributes": {"storageType": "LithiumIon", "commissioningDate": "2025-06-01"},
+          "id": "BESS-002",
+          "type": "BATTERY",
+          "attributes": {"ratedPowerKw": 2.5, "energyCapacityKwh": 5, "storageType": "LithiumIon", "commissioningDate": "2025-06-01"},
           "parentResources": ["MET2025789456123"]
         }
       ],

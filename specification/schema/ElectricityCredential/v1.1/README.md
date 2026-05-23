@@ -7,47 +7,52 @@ W3C Verifiable Credential (VC Data Model 2.0) issued per meter by electricity di
 ```
 credentialSubject
 ├── id                         (optional — customer DID)
-├── customerProfile            (required — non-PII; shareable without customerDetails)
+├── customerProfile            (required — non-PII)
 │   ├── customerNumber         (required — CA number)
 │   ├── idRef                  (optional — external identity reference)
 │   ├── energyResources[]      (required — all physical assets, min 1)
-│   │   ├── METER              (grid connection point; resourceId = meter serial number)
-│   │   ├── SOLAR / WIND / …   (generation DERs; parentResources → meter)
-│   │   └── BATTERY / BESS / … (storage DERs; parentResources → meter)
+│   │   ├── id                 (meter serial number for METER; any stable id for DERs)
+│   │   ├── type               (METER, SOLAR, WIND, BATTERY, BESS, EV_CHARGER, …)
+│   │   ├── attributes         (open bag — all non-topological properties)
+│   │   │   ├── CommonResourceAttributes: make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider
+│   │   │   └── type-specific: meterType, gps, location, feeder, bus / commissioningDate / storageType / …
+│   │   ├── subResources[]     (child resource ids or inline objects)
+│   │   └── parentResources[]  (parent resource ids — e.g., the meter a DER sits behind)
 │   └── consumptionProfiles[]  (optional — tariff/load per meter, linked via meterId)
 └── customerDetails            (optional — PII)
-    ├── fullName               (PII — only here, never in energyResources)
+    ├── fullName               (PII — only here)
     ├── installationAddress
     └── serviceConnectionDate
 ```
 
 ## Multiple topologies
 
-A single `customerNumber` can span arbitrary asset topologies. Examples:
+A single `customerNumber` can span arbitrary asset topologies.
 
-**Single meter, one DER:**
+**Submetering** — building main meter + tenant sub-meters:
 ```json
 "energyResources": [
-  {"resourceId": "MET001", "resourceType": "METER", ...},
-  {"resourceId": "der://solar/PV001", "resourceType": "SOLAR", "parentResources": ["MET001"]}
+  {"id": "MET-BLDG-001", "type": "METER", "attributes": {"meterType": "AMI", "feeder": "BAN-NR-F22"}},
+  {"id": "MET-UNIT-101", "type": "METER", "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
+  {"id": "MET-UNIT-102", "type": "METER", "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
+  {"id": "ROOFTOP-101",  "type": "SOLAR", "attributes": {"ratedPowerKw": 2},   "parentResources": ["MET-UNIT-101"]}
 ]
 ```
 
-**Two meters at different premises:**
+**Parallel metering** — import meter + export meter for solar FIT:
 ```json
 "energyResources": [
-  {"resourceId": "MET001", "resourceType": "METER", "resourceAttributes": {"meterType": "AMI", ...}},
-  {"resourceId": "MET002", "resourceType": "METER", "resourceAttributes": {"meterType": "NetMeter", ...}},
-  {"resourceId": "der://solar/PV001", "resourceType": "SOLAR", "parentResources": ["MET001"]},
-  {"resourceId": "der://battery/BAT001", "resourceType": "BATTERY", "parentResources": ["MET002"]}
+  {"id": "MET-IMPORT", "type": "METER", "attributes": {"meterType": "AMI", "feeder": "DEL-F08"}},
+  {"id": "MET-EXPORT", "type": "METER", "attributes": {"meterType": "Reverse"}},
+  {"id": "SOLAR-001",  "type": "SOLAR", "attributes": {"ratedPowerKw": 5}, "parentResources": ["MET-EXPORT"]}
 ],
 "consumptionProfiles": [
-  {"meterId": "MET001", "sanctionedLoadKW": 5, "tariffCategoryCode": "RES-01"},
-  {"meterId": "MET002", "sanctionedLoadKW": 20, "tariffCategoryCode": "COM-03"}
+  {"meterId": "MET-IMPORT", "sanctionedLoadKW": 10, "tariffCategoryCode": "DS-I"},
+  {"meterId": "MET-EXPORT", "sanctionedLoadKW": 5,  "tariffCategoryCode": "FIT-SOLAR-01"}
 ]
 ```
 
-## customerProfile fields
+## customerProfile
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -56,28 +61,55 @@ A single `customerNumber` can span arbitrary asset topologies. Examples:
 | `energyResources` | array | Yes | EnergyResource/v2.0 entries (min 1) |
 | `consumptionProfiles` | array | No | Tariff/load profiles, one per meter |
 
-## energyResources entries
+## EnergyResource — top-level fields
 
-Each entry follows [EnergyResource/v2.0](../../EnergyResource/v2.0/attributes.yaml).
+| Field | Description |
+|-------|-------------|
+| `id` | Stable identifier. For METER: meter serial number. For DERs: any stable scheme. |
+| `type` | Open-string asset class: `METER`, `SOLAR`, `WIND`, `BATTERY`, `BESS`, `EV_CHARGER`, … |
+| `attributes` | Open bag — all non-topological properties (see below) |
+| `subResources` | Child resource ids or inline EnergyResource objects |
+| `parentResources` | Parent resource ids — e.g., the meter a DER sits behind |
 
-For **METER** entries:
-- `resourceId` = meter serial number (bare, no URI prefix)
-- `resourceAttributes` conforms to [MeterAttributes](../../EnergyResource/v2.0/attributes.yaml) — all fields optional: `meterType`, `gps`, `location`, `feeder`, `bus`
+## EnergyResource.attributes
 
-For **DER** entries (SOLAR, WIND, BATTERY, …):
-- `parentResources[]` lists the meter serial number(s) this DER sits behind
-- `ratedPowerKw`, `make`, `model` from the EnergyResource base class
-- Type-specific fields in `resourceAttributes` (e.g., `commissioningDate`, `storageType`)
+All non-topological fields go here.
+
+**CommonResourceAttributes** (all resource types):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `make` | string | Manufacturer |
+| `model` | string | Model |
+| `ratedPowerKw` | number | Rated peak power, kW |
+| `energyCapacityKwh` | number | Stored-energy capacity, kWh (storage-class only) |
+| `telemetryProvider` | string | Vendor API / data source for telemetry |
+
+**METER-specific** (`type: METER`):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
+| `gps` | string | `"lat,lng"` coordinates of the meter |
+| `location` | object | Postal location (beckn Location shape) |
+| `feeder` | string | Distribution feeder ID or name |
+| `bus` | string | Substation bus reference |
+
+**DER-specific examples** (open — any field can be added):
+
+| Field | Applies to | Description |
+|-------|-----------|-------------|
+| `commissioningDate` | SOLAR, WIND, BATTERY | Date the asset was commissioned |
+| `storageType` | BATTERY, BESS | LithiumIon, LeadAcid, FlowBattery, … |
+| `vin` | EV_CHARGER, EV_V2G | Vehicle identification number |
 
 ## ConsumptionProfile
 
-Administrative tariff and load data for a meter connection. Kept separate from `MeterAttributes` because tariff data is regulatory and changes independently of physical assets.
-
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `meterId` | string | Yes | Meter serial number — matches `resourceId` of a METER in `energyResources[]` |
+| `meterId` | string | Yes | Matches `id` of a METER entry in `energyResources[]` |
 | `sanctionedLoadKW` | number | Yes | Utility-approved load in kW |
-| `tariffCategoryCode` | string | Yes | Utility billing/tariff category code |
+| `tariffCategoryCode` | string | Yes | Billing/tariff category code |
 | `premisesType` | enum | No | Residential, Commercial, Industrial, Agricultural |
 | `connectionType` | enum | No | Single-phase, Three-phase |
 
@@ -85,7 +117,7 @@ Administrative tariff and load data for a meter connection. Kept separate from `
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `fullName` | string | Yes | Full name as per ID proof — **only here** |
+| `fullName` | string | Yes | Full name — **only here** |
 | `installationAddress` | object | Yes | Beckn Location shape |
 | `serviceConnectionDate` | date-time | Yes | Connection activation date (with timezone) |
 
@@ -102,7 +134,7 @@ Administrative tariff and load data for a meter connection. Kept separate from `
     "customerProfile": {
       "customerNumber": "UTIL-2025-001234567",
       "energyResources": [
-        {"resourceId": "MET2025789456123", "resourceType": "METER"}
+        {"id": "MET2025789456123", "type": "METER", "attributes": {"meterType": "AMI"}}
       ]
     }
   }
@@ -113,22 +145,17 @@ Administrative tariff and load data for a meter connection. Kept separate from `
 
 | v1.0 field | v1.1 location |
 |------------|---------------|
-| `customerProfile.meterNumber` | `energyResources[METER].resourceId` |
-| `customerProfile.meterType` | `energyResources[METER].resourceAttributes.meterType` |
+| `customerProfile.meterNumber` | `energyResources[METER].id` |
+| `customerProfile.meterType` | `energyResources[METER].attributes.meterType` |
 | `consumptionProfiles[].sanctionedLoadKW` | `consumptionProfiles[].sanctionedLoadKW` |
 | `consumptionProfiles[].tariffCategoryCode` | `consumptionProfiles[].tariffCategoryCode` |
-| `consumptionProfiles[].premisesType` | `consumptionProfiles[].premisesType` |
-| `consumptionProfiles[].connectionType` | `consumptionProfiles[].connectionType` |
-| `generationProfiles[].assetId` | `energyResources[DER].resourceId` |
-| `generationProfiles[].generationType` | `energyResources[DER].resourceType` (SOLAR, WIND, …) |
-| `generationProfiles[].capacityKW` | `energyResources[DER].ratedPowerKw` |
-| `generationProfiles[].manufacturer` | `energyResources[DER].make` |
-| `generationProfiles[].modelNumber` | `energyResources[DER].model` |
-| `storageProfiles[].storageCapacityKWh` | `energyResources[DER].energyCapacityKwh` |
-| `storageProfiles[].powerRatingKW` | `energyResources[DER].ratedPowerKw` |
-| `storageProfiles[].storageType` | `energyResources[DER].resourceAttributes.storageType` |
-| `fullName` (in each profile entry) | `customerDetails.fullName` (once, PII section) |
-| `consumerNumber` (in each profile entry) | `customerProfile.customerNumber` |
+| `generationProfiles[].assetId` | `energyResources[DER].id` |
+| `generationProfiles[].capacityKW` | `energyResources[DER].attributes.ratedPowerKw` |
+| `generationProfiles[].manufacturer` | `energyResources[DER].attributes.make` |
+| `generationProfiles[].commissioningDate` | `energyResources[DER].attributes.commissioningDate` |
+| `storageProfiles[].storageCapacityKWh` | `energyResources[DER].attributes.energyCapacityKwh` |
+| `storageProfiles[].storageType` | `energyResources[DER].attributes.storageType` |
+| `fullName` (duplicated per entry) | `customerDetails.fullName` (once) |
 
 ## Files
 
@@ -138,4 +165,6 @@ Administrative tariff and load data for a meter connection. Kept separate from `
 | `schema.json` | Bundled JSON Schema (draft 2020-12) — self-contained |
 | `context.jsonld` | JSON-LD context |
 | `vocab.jsonld` | RDF vocabulary |
-| `examples/example.json` | Full example: 1 meter + 2 generation + 2 storage DERs + 1 consumption profile |
+| `examples/example.json` | Single meter + 2 generation + 2 storage DERs |
+| `examples/example-submetering.json` | Building main meter + 2 tenant sub-meters |
+| `examples/example-parallel-metering.json` | Import meter + export meter (solar FIT) |

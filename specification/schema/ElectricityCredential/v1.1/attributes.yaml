@@ -6,43 +6,39 @@ info:
     Unified W3C Verifiable Credential (VC Data Model 2.0) issued per meter by
     electricity distribution utilities.
 
-    v1.1 design
-    ───────────
     customerProfile holds only non-PII utility identity: customerNumber (CA
     number), optional idRef, energyResources[], and consumptionProfiles[].
 
-    energyResources[] uses EnergyResource/v2.0 as the canonical asset class.
-    Multiple topologies are supported — a single customer number may have
-    multiple meters (different premises, sub-meters at one site) each with
-    their own child DERs linked via parentResources[].
+    energyResources[] uses EnergyResource/v2.0. Each entry has id, type,
+    and all attributes directly on the object — no attribute-bag wrapper.
+    Multiple topologies are supported: a single CA number may span multiple
+    meters (different premises, sub-meters, parallel meters) each with their
+    own child DERs linked via parentResources[].
 
-    consumptionProfiles[] is a lightweight array linking tariff/load
-    characteristics to a specific meter (via meterId = the meter's resourceId).
-
-    MeterAttributes (the resourceAttributes shape for resourceType = "METER")
-    is defined in EnergyResource/v2.0 and referenced here.
+    consumptionProfiles[] links tariff/load characteristics to a specific
+    meter via meterId (= that meter's id in energyResources[]).
 
     PII (fullName) is exclusively in customerDetails.
 
     v1.0 → v1.1 field mapping (nothing lost)
     ─────────────────────────────────────────
-    customerProfile.meterNumber       → EnergyResource.resourceId         (for METER entries)
-    customerProfile.meterType         → MeterAttributes.meterType
-    consumptionProfiles[].premisesType      → ConsumptionProfile.premisesType
-    consumptionProfiles[].connectionType    → ConsumptionProfile.connectionType
-    consumptionProfiles[].sanctionedLoadKW  → ConsumptionProfile.sanctionedLoadKW
-    consumptionProfiles[].tariffCategoryCode → ConsumptionProfile.tariffCategoryCode
-    generationProfiles[].generationType  → EnergyResource.resourceType   (SOLAR, WIND, …)
-    generationProfiles[].capacityKW      → EnergyResource.ratedPowerKw
-    generationProfiles[].manufacturer    → EnergyResource.make
-    generationProfiles[].modelNumber     → EnergyResource.model
-    generationProfiles[].assetId         → EnergyResource.resourceId
-    generationProfiles[].commissioningDate → EnergyResource.resourceAttributes.commissioningDate
-    storageProfiles[].storageCapacityKWh → EnergyResource.energyCapacityKwh
-    storageProfiles[].powerRatingKW      → EnergyResource.ratedPowerKw
-    storageProfiles[].storageType        → EnergyResource.resourceAttributes.storageType
-    storageProfiles[].assetId            → EnergyResource.resourceId
-    storageProfiles[].commissioningDate  → EnergyResource.resourceAttributes.commissioningDate
+    customerProfile.meterNumber        → energyResources[METER].id
+    customerProfile.meterType          → energyResources[METER].meterType
+    consumptionProfiles[].premisesType       → consumptionProfiles[].premisesType
+    consumptionProfiles[].connectionType     → consumptionProfiles[].connectionType
+    consumptionProfiles[].sanctionedLoadKW   → consumptionProfiles[].sanctionedLoadKW
+    consumptionProfiles[].tariffCategoryCode → consumptionProfiles[].tariffCategoryCode
+    generationProfiles[].assetId         → energyResources[DER].id
+    generationProfiles[].generationType  → energyResources[DER].type  (SOLAR, WIND, …)
+    generationProfiles[].capacityKW      → energyResources[DER].ratedPowerKw
+    generationProfiles[].manufacturer    → energyResources[DER].make
+    generationProfiles[].modelNumber     → energyResources[DER].model
+    generationProfiles[].commissioningDate → energyResources[DER].commissioningDate
+    storageProfiles[].assetId            → energyResources[DER].id
+    storageProfiles[].storageCapacityKWh → energyResources[DER].energyCapacityKwh
+    storageProfiles[].powerRatingKW      → energyResources[DER].ratedPowerKw
+    storageProfiles[].storageType        → energyResources[DER].storageType
+    storageProfiles[].commissioningDate  → energyResources[DER].commissioningDate
 
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
@@ -55,11 +51,10 @@ components:
     ElectricityCredential:
       $id: https://schema.beckn.io/ElectricityCredential/v1.1
       title: ElectricityCredential
-      description: >
-        Unified W3C Verifiable Credential issued per meter by electricity
-        distribution utilities. v1.1 consolidates all asset profiles into
-        customerProfile.energyResources[] via EnergyResource/v2.0, and
-        separates tariff characteristics into customerProfile.consumptionProfiles[].
+      type: object
+      additionalProperties: true
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
       x-tags:
         - energy
         - credential
@@ -67,10 +62,6 @@ components:
         - electricity
         - customer
         - deg
-      type: object
-      additionalProperties: true
-      allOf:
-        - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
       x-jsonld:
         "@context": ./context.jsonld
         "@type": ElectricityCredential
@@ -96,16 +87,10 @@ components:
     CustomerProfile:
       type: object
       description: >
-        Non-PII utility customer identity and asset list. Contains only
-        the CA number (customerNumber), optional external identity reference
-        (idRef), all physical assets (energyResources[]), and tariff/load
-        profiles (consumptionProfiles[]). No PII — safe to share without
-        customerDetails.
-
-        Multiple topologies: a single customerNumber may have multiple METER
-        entries (different premises, or sub-meters at one premises). Each DER
-        (SOLAR, WIND, BATTERY, …) declares its parent meter via parentResources[].
-        Each ConsumptionProfile links to its meter via meterId.
+        Non-PII customer identity and asset list. No PII — safe to share
+        without customerDetails. Supports arbitrary topologies: a single
+        customerNumber may have multiple METER entries (different premises,
+        sub-meters, parallel meters) each with their own child DERs.
       required:
         - customerNumber
         - energyResources
@@ -120,7 +105,7 @@ components:
             "@id": deg:customerNumber
         idRef:
           type: object
-          description: External identity reference for the customer (e.g., government-issued ID).
+          description: External identity reference for the customer.
           required:
             - issuedBy
             - subjectId
@@ -144,13 +129,14 @@ components:
           minItems: 1
           description: >
             All physical energy assets for this customer account as
-            EnergyResource/v2.0 entries. For METER entries, resourceId is
-            the meter serial number (utility-assigned; no URI prefix).
+            EnergyResource/v2.0 entries. Each entry has id, type,
+            attributes (open bag), subResources, and parentResources.
+            For METER entries, id is the meter serial number; type-specific
+            fields (meterType, gps, feeder, bus) live in attributes.
             DERs (SOLAR, WIND, BATTERY, …) declare their parent meter via
-            parentResources[].
-
-            Supports arbitrary topologies: multiple meters at one premises,
-            meters across multiple premises, shared DERs, microgrids.
+            parentResources[]; their dimensioning and type-specific fields
+            (ratedPowerKw, commissioningDate, storageType, …) also live in
+            attributes.
           x-jsonld:
             "@id": deg:energyResources
           items:
@@ -159,11 +145,10 @@ components:
           type: array
           minItems: 1
           description: >
-            Tariff and load characteristics per meter connection. Each entry
-            links to a specific meter via meterId (= that meter's resourceId
-            in energyResources[]). Kept separate from MeterAttributes because
-            tariff data is administrative and may change independently of the
-            physical asset.
+            Tariff and load characteristics per meter connection. Each
+            entry links to a specific meter via meterId. Separate from
+            physical asset data because tariff data is administrative and
+            changes independently.
           x-jsonld:
             "@id": deg:consumptionProfiles
           items:
@@ -172,10 +157,8 @@ components:
     ConsumptionProfile:
       type: object
       description: >
-        Tariff and regulatory load profile for one meter connection. meterId
-        links this entry to a METER entry in energyResources[]. sanctionedLoadKW
-        and tariffCategoryCode are required; premisesType and connectionType
-        are optional.
+        Tariff and regulatory load profile for one meter connection.
+        meterId links to a METER entry's id in energyResources[].
       required:
         - meterId
         - sanctionedLoadKW
@@ -187,8 +170,8 @@ components:
           type: string
           minLength: 1
           description: >
-            Meter serial number. Matches the resourceId of a METER entry
-            in customerProfile.energyResources[].
+            Meter identifier — matches the id of a METER entry in
+            customerProfile.energyResources[].
           x-jsonld:
             "@id": deg:meterId
         sanctionedLoadKW:
@@ -211,7 +194,6 @@ components:
             - Commercial
             - Industrial
             - Agricultural
-          description: Type of premises for this connection. Optional.
           x-jsonld:
             "@id": deg:premisesType
         connectionType:
@@ -219,7 +201,6 @@ components:
           enum:
             - Single-phase
             - Three-phase
-          description: Type of electrical connection. Optional.
           x-jsonld:
             "@id": deg:connectionType
 
@@ -227,8 +208,7 @@ components:
       type: object
       description: >
         PII section. fullName appears ONLY here — never in customerProfile
-        or any resource entry. Kept separate from customerProfile to allow
-        PII-stripped presentation of the credential.
+        or any resource entry.
       required:
         - fullName
         - installationAddress
@@ -247,15 +227,13 @@ components:
             - area_code
             - country
           properties:
-            address:
-              type: string
+            address: { type: string }
             city:
               type: object
               properties:
                 name: { type: string }
                 code: { type: string }
-            district:
-              type: string
+            district: { type: string }
             state:
               type: object
               properties:
@@ -269,16 +247,12 @@ components:
                 code:
                   type: string
                   pattern: "^[A-Z]{2}$"
-                  description: ISO 3166-1 alpha-2 country code.
-            area_code:
-              type: string
+            area_code: { type: string }
             gps:
               type: string
-              description: "GPS coordinates as 'lat,lng' string."
-            openLocationCode:
-              type: string
-              description: Open Location Code (OLC) for the installation.
+              description: "GPS coordinates as 'lat,lng'."
+            openLocationCode: { type: string }
         serviceConnectionDate:
           type: string
           format: date-time
-          description: Date and time the electricity connection was activated (with timezone offset).
+          description: Date and time the connection was activated (with timezone offset).
