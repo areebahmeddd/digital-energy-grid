@@ -181,6 +181,12 @@ components:
           description: Sanctioned/approved electrical load in kilowatts (kW).
           x-jsonld:
             "@id": deg:sanctionedLoadKW
+        contractMaxDemandKw:
+          type: number
+          minimum: 0
+          description: Maximum demand contracted with the utility for this connection, in kW.
+          x-jsonld:
+            "@id": deg:contractMaxDemandKw
         tariffCategoryCode:
           type: string
           minLength: 1
