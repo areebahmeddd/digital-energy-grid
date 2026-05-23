@@ -105,11 +105,31 @@ components:
         type:
           type: string
           description: >
-            Open-string asset class. Common values: METER, SOLAR, SOLAR_PV,
-            WIND, HYDRO, BIOGAS, CHP, FUEL_CELL, BATTERY, BESS, EV_CHARGER,
-            EV_V2G, SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD,
-            MICROGRID. Open-ended — new classes can be added without a schema
-            bump. Consumers SHOULD treat unknown values as informational.
+            Asset class. Grid infrastructure: METER, DT (distribution
+            transformer), BUS, FEEDER. Generation DERs: SOLAR, SOLAR_PV,
+            WIND, HYDRO, BIOGAS, CHP, FUEL_CELL. Storage: BATTERY, BESS.
+            Flexible loads: EV_CHARGER, EV_V2G, SMART_HVAC,
+            SMART_WATER_HEATER, CONTROLLABLE_LOAD. System: MICROGRID.
+          enum:
+            - METER
+            - DT
+            - BUS
+            - FEEDER
+            - SOLAR
+            - SOLAR_PV
+            - WIND
+            - HYDRO
+            - BIOGAS
+            - CHP
+            - FUEL_CELL
+            - BATTERY
+            - BESS
+            - EV_CHARGER
+            - EV_V2G
+            - SMART_HVAC
+            - SMART_WATER_HEATER
+            - CONTROLLABLE_LOAD
+            - MICROGRID
           example: "METER"
           x-jsonld:
             "@id": deg:resourceType

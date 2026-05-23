@@ -17,7 +17,7 @@ Part of the [DEG Schema](../../) · [EnergyResource](../README.md)
 ```
 EnergyResource
 ├── id                  — stable identifier (meter serial number for METER resources)
-├── type                — open-string asset class (METER, SOLAR, BATTERY, …)
+├── type                — asset class enum (METER, DT, BUS, FEEDER, SOLAR, BATTERY, …)
 ├── attributes          — all other properties (open bag)
 │   ├── CommonResourceAttributes: make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider
 │   └── type-specific:  meterType, gps, location, feeder, bus, commissioningDate, storageType, VIN, …
@@ -38,6 +38,16 @@ Dimensioning fields shared across all resource types. Live inside `attributes`.
 | `ratedPowerKw` | number ≥0 | Rated peak power, kW |
 | `energyCapacityKwh` | number ≥0 | Stored-energy capacity, kWh (storage-class only) |
 | `telemetryProvider` | string | Vendor API / data source for telemetry |
+
+## `type` enum
+
+| Category | Values |
+|----------|--------|
+| Grid infrastructure | `METER`, `DT`, `BUS`, `FEEDER` |
+| Generation DERs | `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` |
+| Storage | `BATTERY`, `BESS` |
+| Flexible loads | `EV_CHARGER`, `EV_V2G`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` |
+| System | `MICROGRID` |
 
 ## Meter attributes (`type: METER`, inside `attributes`)
 

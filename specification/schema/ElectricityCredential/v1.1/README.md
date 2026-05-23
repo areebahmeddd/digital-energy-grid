@@ -12,7 +12,7 @@ credentialSubject
 │   ├── idRef                  (optional — external identity reference)
 │   ├── energyResources[]      (required — all physical assets, min 1)
 │   │   ├── id                 (meter serial number for METER; any stable id for DERs)
-│   │   ├── type               (METER, SOLAR, WIND, BATTERY, BESS, EV_CHARGER, …)
+│   │   ├── type               (enum: METER, DT, BUS, FEEDER, SOLAR, WIND, BATTERY, BESS, EV_CHARGER, …)
 │   │   ├── attributes         (open bag — all non-topological properties)
 │   │   │   ├── CommonResourceAttributes: make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider
 │   │   │   └── type-specific: meterType, gps, location, feeder, bus / commissioningDate / storageType / …
@@ -66,7 +66,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 | Field | Description |
 |-------|-------------|
 | `id` | Stable identifier. For METER: meter serial number. For DERs: any stable scheme. |
-| `type` | Open-string asset class: `METER`, `SOLAR`, `WIND`, `BATTERY`, `BESS`, `EV_CHARGER`, … |
+| `type` | Enum asset class. Grid: `METER`, `DT`, `BUS`, `FEEDER`. Generation: `SOLAR`, `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`. Storage: `BATTERY`, `BESS`. Loads: `EV_CHARGER`, `EV_V2G`, `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`. System: `MICROGRID`. |
 | `attributes` | Open bag — all non-topological properties (see below) |
 | `subResources` | Child resource ids or inline EnergyResource objects |
 | `parentResources` | Parent resource ids — e.g., the meter a DER sits behind |

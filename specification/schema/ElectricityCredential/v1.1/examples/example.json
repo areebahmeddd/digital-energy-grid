@@ -28,14 +28,15 @@
       "idRef": {"issuedBy": "did:web:ssa.gov", "subjectId": "ssa.gov:XXX-XX-1234"},
       "energyResources": [
         {
+          "id": "DT-FEEDER-A1-001",
+          "type": "DT",
+          "attributes": {"ratedPowerKw": 250, "feeder": "FEEDER-A1", "bus": "BUS-11kV-001"}
+        },
+        {
           "id": "MET2025789456123",
           "type": "METER",
-          "attributes": {
-            "meterType": "AMI",
-            "gps": "37.7749,-122.4194",
-            "feeder": "FEEDER-A1",
-            "bus": "BUS-11kV-001"
-          }
+          "attributes": {"meterType": "AMI", "gps": "37.7749,-122.4194"},
+          "parentResources": ["DT-FEEDER-A1-001"]
         },
         {
           "id": "DER-SOLAR-001",

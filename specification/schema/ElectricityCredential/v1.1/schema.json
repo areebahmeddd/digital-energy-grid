@@ -121,7 +121,10 @@
             "additionalProperties": false,
             "properties": {
                 "id": { "type": "string" },
-                "type": { "type": "string" },
+                "type": {
+                    "type": "string",
+                    "enum": ["METER","DT","BUS","FEEDER","SOLAR","SOLAR_PV","WIND","HYDRO","BIOGAS","CHP","FUEL_CELL","BATTERY","BESS","EV_CHARGER","EV_V2G","SMART_HVAC","SMART_WATER_HEATER","CONTROLLABLE_LOAD","MICROGRID"]
+                },
                 "attributes": {
                     "type": "object",
                     "additionalProperties": true,
