@@ -24,7 +24,8 @@
         {
           "id": "MET-BLDG-001",
           "type": "METER",
-          "attributes": {"meterType": "AMI", "gps": "12.9716,77.5946", "feeder": "BAN-NR-F22", "bus": "BUS-11kV-007"}
+          "attributes": {"meterType": "AMI", "gps": "12.9716,77.5946"},
+          "parentResources": ["BAN-NR-F22"]
         },
         {
           "id": "MET-UNIT-101",

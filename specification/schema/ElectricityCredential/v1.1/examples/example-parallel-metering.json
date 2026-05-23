@@ -24,7 +24,8 @@
         {
           "id": "MET-IMPORT-001",
           "type": "METER",
-          "attributes": {"meterType": "AMI", "gps": "28.6139,77.2090", "feeder": "DEL-SB-F08", "bus": "BUS-33kV-012"}
+          "attributes": {"meterType": "AMI", "gps": "28.6139,77.2090"},
+          "parentResources": ["DEL-SB-F08"]
         },
         {
           "id": "MET-EXPORT-001",

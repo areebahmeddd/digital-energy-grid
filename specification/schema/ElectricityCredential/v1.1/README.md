@@ -15,7 +15,7 @@ credentialSubject
 │   │   ├── type               (enum: METER, DT, BUS, FEEDER, SOLAR, WIND, BATTERY, BESS, EV_CHARGER, …)
 │   │   ├── attributes         (open bag — all non-topological properties)
 │   │   │   ├── CommonResourceAttributes: make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider
-│   │   │   └── type-specific: meterType, gps, location, feeder, bus / commissioningDate / storageType / …
+│   │   │   └── type-specific: meterType, gps, location / commissioningDate / storageType / …
 │   │   ├── subResources[]     (child resource ids or inline objects)
 │   │   └── parentResources[]  (parent resource ids — e.g., the meter a DER sits behind)
 │   └── consumptionProfiles[]  (optional — tariff/load per meter, linked via meterId)
@@ -32,7 +32,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 **Submetering** — building main meter + tenant sub-meters:
 ```json
 "energyResources": [
-  {"id": "MET-BLDG-001", "type": "METER", "attributes": {"meterType": "AMI", "feeder": "BAN-NR-F22"}},
+  {"id": "MET-BLDG-001", "type": "METER", "attributes": {"meterType": "AMI"}, "parentResources": ["BAN-NR-F22"]},
   {"id": "MET-UNIT-101", "type": "METER", "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
   {"id": "MET-UNIT-102", "type": "METER", "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
   {"id": "ROOFTOP-101",  "type": "SOLAR", "attributes": {"ratedPowerKw": 2},   "parentResources": ["MET-UNIT-101"]}
@@ -42,7 +42,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 **Parallel metering** — import meter + export meter for solar FIT:
 ```json
 "energyResources": [
-  {"id": "MET-IMPORT", "type": "METER", "attributes": {"meterType": "AMI", "feeder": "DEL-F08"}},
+  {"id": "MET-IMPORT", "type": "METER", "attributes": {"meterType": "AMI"}, "parentResources": ["DEL-F08"]},
   {"id": "MET-EXPORT", "type": "METER", "attributes": {"meterType": "Reverse"}},
   {"id": "SOLAR-001",  "type": "SOLAR", "attributes": {"ratedPowerKw": 5}, "parentResources": ["MET-EXPORT"]}
 ],
@@ -92,8 +92,8 @@ All non-topological fields go here.
 | `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
 | `gps` | string | `"lat,lng"` coordinates of the meter |
 | `location` | object | Postal location (beckn Location shape) |
-| `feeder` | string | Distribution feeder ID or name |
-| `bus` | string | Substation bus reference |
+
+Grid topology (feeder, bus, DT) is expressed via `parentResources[]` — reference the id of a `FEEDER`, `BUS`, or `DT` resource.
 
 **DER-specific examples** (open — any field can be added):
 

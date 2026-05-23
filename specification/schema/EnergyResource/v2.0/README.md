@@ -56,8 +56,8 @@ Dimensioning fields shared across all resource types. Live inside `attributes`.
 | `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
 | `gps` | string | `"lat,lng"` coordinates |
 | `location` | object | Postal location (beckn Location shape) |
-| `feeder` | string | Distribution feeder ID or name |
-| `bus` | string | Substation bus reference |
+
+Grid topology (feeder, bus, DT) is expressed via `parentResources[]` — reference the id of a `FEEDER`, `BUS`, or `DT` resource.
 
 ## Examples
 
@@ -66,12 +66,8 @@ Dimensioning fields shared across all resource types. Live inside `attributes`.
 {
   "id": "MET2025789456123",
   "type": "METER",
-  "attributes": {
-    "meterType": "AMI",
-    "gps": "12.9716,77.5946",
-    "feeder": "BAN-NR-F22",
-    "bus": "BUS-11kV-001"
-  }
+  "attributes": {"meterType": "AMI", "gps": "12.9716,77.5946"},
+  "parentResources": ["BAN-NR-F22"]
 }
 ```
 

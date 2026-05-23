@@ -232,18 +232,6 @@ components:
               x-jsonld:
                 "@id": deg:meterLocation
 
-            feeder:
-              type: string
-              description: Distribution feeder ID or name serving this meter.
-              x-jsonld:
-                "@id": deg:feeder
-
-            bus:
-              type: string
-              description: Substation bus reference (HV/LV bus node).
-              x-jsonld:
-                "@id": deg:bus
-
           x-jsonld:
             "@id": deg:attributes
 
