@@ -43,6 +43,7 @@
         {
           "meterId": "MET-IMPORT-001",
           "sanctionedLoadKW": 10,
+          "contractMaxDemandKw": 8,
           "tariffCategoryCode": "DS-I",
           "premisesType": "Residential",
           "connectionType": "Single-phase"

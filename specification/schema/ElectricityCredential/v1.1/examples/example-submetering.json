@@ -50,6 +50,7 @@
         {
           "meterId": "MET-UNIT-101",
           "sanctionedLoadKW": 3,
+          "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
           "premisesType": "Residential",
           "connectionType": "Single-phase"
@@ -57,6 +58,7 @@
         {
           "meterId": "MET-UNIT-102",
           "sanctionedLoadKW": 3,
+          "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
           "premisesType": "Residential",
           "connectionType": "Single-phase"

@@ -62,6 +62,7 @@
         {
           "meterId": "MET2025789456123",
           "sanctionedLoadKW": 5,
+          "contractMaxDemandKw": 4,
           "tariffCategoryCode": "RES-01",
           "premisesType": "Residential",
           "connectionType": "Single-phase"
