@@ -135,6 +135,7 @@
                         "ratedPowerKw": { "type": "number", "minimum": 0 },
                         "energyCapacityKwh": { "type": "number", "minimum": 0 },
                         "telemetryProvider": { "type": "string" },
+                        "contractMaxDemandKw": { "type": "number", "minimum": 0 },
                         "meterType": {
                             "type": "string",
                             "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"]

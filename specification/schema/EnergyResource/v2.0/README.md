@@ -54,6 +54,7 @@ Dimensioning fields shared across all resource types. Live inside `attributes`.
 | Field | Type | Description |
 |-------|------|-------------|
 | `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
+| `contractMaxDemandKw` | number ≥0 | Maximum demand contracted with the utility, kW |
 | `gps` | string | `"lat,lng"` coordinates |
 | `location` | object | Postal location (beckn Location shape) |
 

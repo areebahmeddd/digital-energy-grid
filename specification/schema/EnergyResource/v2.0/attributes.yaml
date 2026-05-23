@@ -201,6 +201,15 @@ components:
               x-jsonld:
                 "@id": deg:gps
 
+            contractMaxDemandKw:
+              type: number
+              minimum: 0
+              description: >
+                Maximum demand contracted with the utility for this meter, in kW.
+                Used for demand-charge billing and flex-program eligibility.
+              x-jsonld:
+                "@id": deg:contractMaxDemandKw
+
             location:
               type: object
               description: >
