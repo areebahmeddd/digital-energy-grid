@@ -51,9 +51,7 @@
             "descriptor": {
               "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
             },
-            "resourceIds": [
-              "ds-ami-meter-data-blr-zone-a-q1-2026"
-            ]
+            "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"]
           },
           "commitmentAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
@@ -115,9 +113,7 @@
       "consideration": [
         {
           "id": "consideration-ami-existing-contract",
-          "status": {
-            "code": "ACTIVE"
-          },
+          "status": { "code": "ACTIVE" },
           "considerationAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
             "@type": "PriceSpecification",
@@ -130,9 +126,7 @@
       "participants": [
         {
           "id": "intelligrid-amisp-001",
-          "descriptor": {
-            "name": "IntelliGrid AMI Services"
-          },
+          "descriptor": { "name": "IntelliGrid AMI Services" },
           "participantAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
             "@type": "Organization",
@@ -142,9 +136,7 @@
         },
         {
           "id": "bescom-discom-001",
-          "descriptor": {
-            "name": "BESCOM - Distribution Company"
-          },
+          "descriptor": { "name": "BESCOM - Distribution Company" },
           "participantAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
             "@type": "Organization",

@@ -119,6 +119,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
+      - PERSONA=bpp
     ports:
       - "3002:3002"
     healthcheck:
@@ -127,6 +128,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    volumes:
+      - ${RESPONSES_DIR:-../uc1-meter-data/responses}:/app/dist/webhook/jsons/nfh.global/testnet-deg/response
     networks:
       - bpp_side
 
