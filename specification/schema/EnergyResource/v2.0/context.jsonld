@@ -7,18 +7,33 @@
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.beckn.io/core/v2.0/",
     "deg": "https://schema.beckn.io/deg/EnergyResource/v2.0/",
+
     "EnergyResource": "deg:EnergyResource",
 
-    "resourceId":         { "@id": "deg:resourceId",         "@type": "xsd:string"  },
-    "resourceType":       { "@id": "deg:resourceType",       "@type": "xsd:string"  },
-    "make":               { "@id": "deg:make",               "@type": "xsd:string"  },
-    "model":              { "@id": "deg:model",              "@type": "xsd:string"  },
-    "ratedPowerKw":       { "@id": "deg:ratedPowerKw",       "@type": "xsd:decimal" },
-    "energyCapacityKwh":  { "@id": "deg:energyCapacityKwh",  "@type": "xsd:decimal" },
-    "telemetryProvider":  { "@id": "deg:telemetryProvider",  "@type": "xsd:string"  },
-    "resourceAttributes": { "@id": "deg:resourceAttributes", "@container": "@graph" },
-    "subResources":       { "@id": "deg:subResources",       "@container": "@list"  },
-    "parentResources":    { "@id": "deg:parentResources",    "@container": "@list"  }
+    "id":   "@id",
+    "type": { "@id": "deg:resourceType", "@type": "xsd:string" },
+
+    "attributes": {
+      "@id": "deg:attributes",
+      "@type": "@id",
+      "@context": {
+        "make":              { "@id": "deg:make",              "@type": "xsd:string"  },
+        "model":             { "@id": "deg:model",             "@type": "xsd:string"  },
+        "ratedPowerKw":      { "@id": "deg:ratedPowerKw",      "@type": "xsd:decimal" },
+        "energyCapacityKwh": { "@id": "deg:energyCapacityKwh", "@type": "xsd:decimal" },
+        "telemetryProvider": { "@id": "deg:telemetryProvider", "@type": "xsd:string"  },
+        "meterType":         { "@id": "deg:meterType",         "@type": "xsd:string"  },
+        "gps":               { "@id": "deg:gps",               "@type": "xsd:string"  },
+        "meterLocation":     { "@id": "deg:meterLocation",     "@type": "@id"         },
+        "feeder":            { "@id": "deg:feeder",            "@type": "xsd:string"  },
+        "bus":               { "@id": "deg:bus",               "@type": "xsd:string"  },
+        "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:string"  },
+        "storageType":       { "@id": "deg:storageType",       "@type": "xsd:string"  }
+      }
+    },
+
+    "subResources":    { "@id": "deg:subResources",    "@container": "@list" },
+    "parentResources": { "@id": "deg:parentResources", "@container": "@list" }
   },
   "@graph": []
 }
