@@ -9,45 +9,78 @@ info:
     controllable loads (HVAC, water heaters, …), and the metering
     points / connection points / feeders that anchor them.
 
-    Used today by:
+    Structure
+    ─────────
+    EnergyResource has exactly four top-level fields:
+      id            — stable identifier (meter serial number for METER resources)
+      type          — open-string asset class (METER, SOLAR, BATTERY, …)
+      subResources  — child resource ids or inline objects (topology)
+      parentResources — parent resource ids (topology)
 
-      • P2P-trading: attached to Item.itemAttributes (or
-        Resource.resourceAttributes in inter-DISCOM flows). Wave2
-        payloads carry `{resourceId, resourceType}` to identify the
-        resource being sold.
-
-      • Demand-flex: attached as objects in the seller's
-        `offerAttributes.inputs[seller].inputs.energyResources[]` to
-        enumerate the assets behind a contract. Uses the richer
-        identity + dimensioning fields, plus `parentResources[]` to
-        link DERs back to the grid meter they sit behind.
-
-    This v2.0 revision drops the original two-field `{sourceType,
-    meterId}` surface in favour of a single canonical class
-    (`resourceId` + `resourceType`) that every DEG domain can
-    converge on, per beckn/DEG#119 "DEG Hourglass" architecture.
-    `sourceType`-style enumeration values (`SOLAR`, `BATTERY`,
-    `GRID`, …) live in `resourceType` (open string); the meter
-    linkage formerly carried by `meterId` now rides on
-    `parentResources[]`.
-
-    Breaking change vs. previous v2.0 surface:
-      • `sourceType` removed — use `resourceType` (open-string,
-        accepts every value the enum did).
-      • `meterId` removed — use `resourceId` for the resource's own
-        identifier and `parentResources[]` for upward topology.
+    Everything else — dimensioning, physical location, type-specific data —
+    lives in the `attributes` bag. CommonResourceAttributes defines the
+    sub-schema for the fields shared across all resource types
+    (make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider).
+    The bag is open-ended; any domain may add further fields.
 
 components:
   schemas:
+
+    CommonResourceAttributes:
+      type: object
+      description: >
+        Dimensioning fields common to all EnergyResource types.
+        These live inside EnergyResource.attributes alongside any
+        type-specific fields. No field is required.
+      additionalProperties: true
+      x-tags:
+        - energy-resource
+      properties:
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": deg:make
+
+        model:
+          type: string
+          description: Model (free text).
+          x-jsonld:
+            "@id": deg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: Manufacturer-rated peak dispatchable power, kW.
+          x-jsonld:
+            "@id": deg:ratedPowerKw
+
+        energyCapacityKwh:
+          type: number
+          minimum: 0
+          description: >
+            Rated stored-energy capacity, kWh. Populated for storage-class
+            resources (BATTERY, BESS, EV). Omit for pure-flow resources.
+          x-jsonld:
+            "@id": deg:energyCapacityKwh
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": deg:telemetryProvider
+
     EnergyResource:
       type: object
       additionalProperties: false
       description: >
-        Canonical energy-asset class. NO fields are required at the
-        schema level — domains profile this class via their own
-        cross-field checks (e.g. demand-flex's network rego requires
-        resourceId + resourceType + meterId on every entry in the
-        seller's energyResources[]).
+        Canonical energy-asset class. Exactly four top-level fields:
+        id, type, subResources, parentResources. All other attributes
+        — dimensioning, location, type-specific data — live in `attributes`.
+
+        No field is required at the schema level. Domain profiles enforce
+        their own cross-field rules.
       x-tags:
         - energy-trade
         - p2p-trading
@@ -59,161 +92,173 @@ components:
         "@type": EnergyResource
       properties:
 
-        "@type":
-          type: string
-          enum: ["EnergyResource"]
-          description: >
-            Optional JSON-LD type discriminator. Present when the
-            embedder wants to surface the type in the payload; the
-            parent schema's `$ref` to EnergyResource is what drives
-            validation.
-
-        # ─── Core identity + dimensioning ───
-
-        resourceId:
+        id:
           type: string
           description: >
-            Stable identifier for this resource. Recommended URI
-            scheme `der://<type>/<id>` — type-discriminated and
-            distinct from `meterId`. Required by domain profiles that
-            enumerate multiple resources per contract (demand-flex's
-            seller-side `energyResources[]`); optional in single-
-            resource P2P-trading payloads where the meter URI alone
-            is sufficient.
-          example: "der://ev/VIN001"
+            Stable identifier for this resource. For METER resources the
+            meter serial number is conventional. Any stable scheme that
+            is locally unique within the payload works.
+          example: "MET2025789456123"
           x-jsonld:
-            "@id": resourceId
+            "@id": "@id"
 
-        resourceType:
+        type:
           type: string
           description: >
-            Open-string asset class. Common values include
-            `EV_CHARGER`, `EV_V2G`, `BATTERY`, `BESS`, `SOLAR`,
-            `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL`,
-            `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD`,
-            `GRID`, `GRID_METER`. Consumers SHOULD treat unknown values
-            as informational and skip type-specific handling. Open-
-            ended so new asset classes can be added without a schema
-            bump.
-          example: "EV_CHARGER"
+            Asset class. Grid infrastructure: METER, DT (distribution
+            transformer), BUS, FEEDER. Generation DERs: SOLAR, SOLAR_PV,
+            WIND, HYDRO, BIOGAS, CHP, FUEL_CELL. Storage: BATTERY, BESS.
+            Flexible loads: EV_CHARGER, EV_V2G, SMART_HVAC,
+            SMART_WATER_HEATER, CONTROLLABLE_LOAD. System: MICROGRID.
+          enum:
+            - METER
+            - DT
+            - BUS
+            - FEEDER
+            - SOLAR
+            - SOLAR_PV
+            - WIND
+            - HYDRO
+            - BIOGAS
+            - CHP
+            - FUEL_CELL
+            - BATTERY
+            - BESS
+            - EV_CHARGER
+            - EV_V2G
+            - SMART_HVAC
+            - SMART_WATER_HEATER
+            - CONTROLLABLE_LOAD
+            - MICROGRID
+          example: "METER"
           x-jsonld:
-            "@id": resourceType
+            "@id": deg:resourceType
 
-        make:
-          type: string
-          description: Manufacturer (free text).
-          example: "Tata"
-          x-jsonld:
-            "@id": make
-
-        model:
-          type: string
-          description: Model (free text).
-          example: "Nexon EV"
-          x-jsonld:
-            "@id": model
-
-        ratedPowerKw:
-          type: number
-          minimum: 0
+        attributes:
           description: >
-            Manufacturer-rated peak dispatchable power, kW. For
-            chargers / inverters this is the device's rated AC power;
-            for thermal loads it's the rated electrical draw.
-          x-jsonld:
-            "@id": ratedPowerKw
+            Attribute bag containing all non-topological properties of this
+            resource. CommonResourceAttributes (make, model, ratedPowerKw,
+            energyCapacityKwh, telemetryProvider) are the common fields
+            present across all resource types. Additional type-specific
+            fields (meterType, feeder, commissioningDate, storageType, VIN,
+            …) are placed here alongside them.
 
-        energyCapacityKwh:
-          type: number
-          minimum: 0
-          description: >
-            Rated stored-energy capacity, kWh. Populated for
-            storage-class resources (BATTERY, BESS, EV with onboard
-            battery). Omit for pure-flow resources (SOLAR_PV,
-            SMART_HVAC). Used by reconciliation/proof-of-performance
-            consumers to interpret SOC_END telemetry values as a
-            fraction of capacity.
-          x-jsonld:
-            "@id": energyCapacityKwh
-
-        telemetryProvider:
-          type: string
-          description: >
-            Identifier of the vendor API / data source that supplies
-            telemetry for this resource (e.g. `tata-evp-telematics`,
-            `mg-imotion`, `tesla-fleet-api`). Free text; consumers MAY
-            use it to route data-quality complaints. Not a Beckn
-            participant ID.
-          x-jsonld:
-            "@id": telemetryProvider
-
-        resourceAttributes:
+            For METER resources: meterType, gps, location, feeder, bus.
+            For generation DERs: commissioningDate, and generation-type info.
+            For storage DERs: storageType, commissioningDate.
+            For EV resources: vin, chargingProtocol.
           type: object
           additionalProperties: true
-          description: >
-            Type-specific attribute bag. The core EnergyResource
-            class fixes the shape common to all energy assets;
-            type-specific fields ride here. Examples: EV → VIN,
-            chargingProtocol; battery → chemistry, cycleCount;
-            solar → panelCount, inverterMake. Consumers that don't
-            recognise the `resourceType` SHOULD pass this bag through
-            unchanged.
-          example:
-            vin: "MAT123456789012345"
-            chargingProtocol: "OCPP_2_0_1"
+          allOf:
+            - $ref: "#/components/schemas/CommonResourceAttributes"
+          properties:
+
+            # ── Common (from CommonResourceAttributes) ────────────────
+            make:
+              type: string
+              x-jsonld:
+                "@id": deg:make
+            model:
+              type: string
+              x-jsonld:
+                "@id": deg:model
+            ratedPowerKw:
+              type: number
+              minimum: 0
+              x-jsonld:
+                "@id": deg:ratedPowerKw
+            energyCapacityKwh:
+              type: number
+              minimum: 0
+              x-jsonld:
+                "@id": deg:energyCapacityKwh
+            telemetryProvider:
+              type: string
+              x-jsonld:
+                "@id": deg:telemetryProvider
+
+            # ── Meter-specific (type = METER) ─────────────────────────
+            meterType:
+              type: string
+              enum:
+                - AMR
+                - AMI
+                - Electromechanical
+                - Forward
+                - Reverse
+                - Bidirectional
+                - Prepaid
+                - NetMeter
+                - Other
+              description: Meter kind classification (Green Button / ESPI).
+              x-jsonld:
+                "@id": deg:meterType
+
+            gps:
+              type: string
+              pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+              description: GPS coordinates of the asset as 'lat,lng'.
+              x-jsonld:
+                "@id": deg:gps
+
+            location:
+              type: object
+              description: >
+                Postal location of the meter (beckn Location shape).
+                Use when the physical location differs from the customer's
+                registered installation address.
+              additionalProperties: true
+              properties:
+                address: { type: string }
+                city:
+                  type: object
+                  properties:
+                    name: { type: string }
+                    code: { type: string }
+                district: { type: string }
+                state:
+                  type: object
+                  properties:
+                    name: { type: string }
+                    code: { type: string }
+                country:
+                  type: object
+                  properties:
+                    name: { type: string }
+                    code: { type: string, pattern: "^[A-Z]{2}$" }
+                area_code: { type: string }
+                gps: { type: string }
+                openLocationCode: { type: string }
+              x-jsonld:
+                "@id": deg:meterLocation
+
           x-jsonld:
-            "@id": resourceAttributes
+            "@id": deg:attributes
 
         subResources:
           type: array
           description: >
-            Topology — child resources of this one. Each item is
-            EITHER a bare `resourceId` (foreign-key reference to an
-            EnergyResource defined elsewhere in the same offer /
-            contract) OR an inline-nested EnergyResource object.
-
-              • String form (resourceId) — prefer when the child is
-                already enumerated as a peer of this resource in the
-                same payload; avoids duplication.
-              • Inline form — prefer when the child only exists in
-                this topological context (e.g. a virtual aggregation
-                of leaf devices that aren't independently addressable).
-
-            Schema does NOT enforce cycle-detection or recursion
-            depth — left to implementations. The settlement rego does
-            not traverse this tree.
+            Topology — child resources. Each item is EITHER a bare `id`
+            string (reference to a sibling EnergyResource in the same
+            payload) OR an inline-nested EnergyResource object.
           items:
             oneOf:
               - type: string
-                description: >
-                  resourceId of a sibling EnergyResource. Resolution
-                  is local to the enclosing offer/contract payload.
+                description: id of a sibling EnergyResource.
               - $ref: "#/components/schemas/EnergyResource"
                 description: Inline-nested EnergyResource.
           x-jsonld:
-            "@id": subResources
+            "@id": deg:subResources
 
         parentResources:
           type: array
           description: >
-            Upward topology — `resourceId`s of parent resources (e.g.
-            a meter, an aggregation point, a virtual plant) that this
-            resource sits behind. Each item is a string (resourceId
-            reference) — NOT an inline EnergyResource. Parents are
-            always enumerated elsewhere in the same payload
-            (`participatingMeters[*]` for demand-flex; a peer entry
-            in `energyResources[*]` for general topology); inlining
-            them inside a child would be a definitional cycle.
-
-            Inverse of `subResources` for the reference form.
-            Permits many-to-many: a DER may sit behind multiple
-            meters (rare — dual-feed setups), and a meter typically
-            has many child resources expressed via the inverse
-            relationship.
+            Upward topology — `id`s of parent resources (e.g. the meter
+            this DER sits behind). String references only — parents are
+            always enumerated elsewhere in the same payload; inlining
+            them here would create a definitional cycle.
           items:
             type: string
-            description: >
-              `resourceId` of a parent EnergyResource defined
-              elsewhere in the same payload.
+            description: id of a parent EnergyResource.
           x-jsonld:
-            "@id": parentResources
+            "@id": deg:parentResources
