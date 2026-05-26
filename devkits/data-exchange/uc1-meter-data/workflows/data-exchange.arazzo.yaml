@@ -86,7 +86,8 @@ workflows:
       - stepId: on-status-ready-inline
         description: >
           Alternative: BPP delivers AMI data inline via dataPayload
-          (IES_Report embedded in on_status performanceAttributes).
+          (IES MeterData v0.6 profile array — CustomerProfile + IntervalProfile
+          per meter — embedded in on_status performanceAttributes).
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json

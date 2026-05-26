@@ -9,7 +9,10 @@
     "messageId": "1a2b3c4d-5e6f-7890-abcd-ef0987654321",
     "timestamp": "2026-04-01T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"
+      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
+      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.5/context.jsonld",
+      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
     ]
   },
   "message": {
@@ -45,7 +48,26 @@
               "dataset:sensitivityLevel": "INTERNAL",
               "dataset:refreshType": "RECURRING",
               "dataset:refreshFrequency": "PT15M",
-              "dataset:accessMethod": "INLINE"
+              "dataset:accessMethod": "INLINE",
+              "ies:dataSchema": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/schema.json",
+              "ies:capabilityProfile": {
+                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.5/context.jsonld",
+                "@type": "MeterDataRequest",
+                "resources": ["did:dedi:ies:feeder:IN-KA-BLR-ZONE-A"],
+                "scope": "ResourceAndChildren",
+                "from": "2024-01-01T00:00:00Z",
+                "duration": "P3Y",
+                "includeDetails": [
+                  { "profileType": "CustomerProfile" },
+                  { "profileType": "IntervalProfile" },
+                  { "profileType": "DailyProfile" },
+                  { "profileType": "MonthlyProfile" },
+                  { "profileType": "BillDetails" },
+                  { "profileType": "InstantaneousProfile" },
+                  { "profileType": "EventProfile" },
+                  { "profileType": "AlarmProfile" }
+                ]
+              }
             }
           }
         ],
@@ -75,7 +97,23 @@
                   "description": "Covered under existing AMI services contract (BESCOM-AMISP-2025-001)"
                 }
               }
-            ]
+            ],
+            "offerAttributes": {
+              "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
+              "@type": "MeterDataRequestCredential",
+              "policy": {
+                "requiredCredentials": [
+                  {
+                    "type": "MeterDataRequestCredential",
+                    "schemaUrl": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/schema.json",
+                    "validationRequired": true,
+                    "attachAt": "confirm",
+                    "attachIn": "commitmentAttributes.ies:meterDataRequest",
+                    "description": "Seeker must attach a valid, signed MeterDataRequestCredential scoping the requested meters, profiles, and time window. Provider will verify signature, expiry, and revocation status before fulfilling delivery."
+                  }
+                ]
+              }
+            }
           }
         ]
       }

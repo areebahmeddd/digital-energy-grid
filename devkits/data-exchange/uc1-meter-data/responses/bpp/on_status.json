@@ -51,9 +51,7 @@
             "descriptor": {
               "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
             },
-            "resourceIds": [
-              "ds-ami-meter-data-blr-zone-a-q1-2026"
-            ]
+            "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"]
           }
         }
       ],
@@ -64,9 +62,7 @@
             "code": "DELIVERY_COMPLETE",
             "name": "AMI meter data delivered inline via dataPayload"
           },
-          "commitmentIds": [
-            "commitment-ami-meter-001"
-          ],
+          "commitmentIds": ["commitment-ami-meter-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
             "@type": "DatasetItem",
@@ -188,15 +184,11 @@
       "participants": [
         {
           "id": "intelligrid-amisp-001",
-          "descriptor": {
-            "name": "IntelliGrid AMI Services"
-          }
+          "descriptor": { "name": "IntelliGrid AMI Services" }
         },
         {
           "id": "bescom-discom-001",
-          "descriptor": {
-            "name": "BESCOM - Distribution Company"
-          }
+          "descriptor": { "name": "BESCOM - Distribution Company" }
         }
       ],
       "settlements": [
@@ -208,10 +200,7 @@
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": {
-              "currency": "INR",
-              "value": 0
-            }
+            "beckn:amount": { "currency": "INR", "value": 0 }
           }
         }
       ]
