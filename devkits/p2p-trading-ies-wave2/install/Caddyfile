@@ -29,15 +29,23 @@ http://sellerdiscom.example.com:9000 {
     reverse_proxy onix-sellerdiscom-actor:8086
 }
 
-# Catch-all on :9000 — used by the health check AND by public ingress
-# through an ngrok tunnel. ngrok rewrites the upstream Host header to the
-# ngrok hostname, so the per-participant host blocks above won't match for
-# tunneled traffic. To let a SINGLE ngrok tunnel disambiguate between
-# participants, route here by URL path prefix; the prefix is stripped before
-# proxying so each onix container still sees its standard Beckn paths
-# (/bap/receiver, /bpp/caller, etc.). Configure your Postman/payload host
-# variables as e.g. https://<ngrok>/<participant-slug> (no trailing slash).
+# Catch-all on :9000 — handles two routing modes:
+#
+# 1. Participant-slug mode (single ngrok tunnel, multi-participant devkit):
+#    Prefix the path with a participant slug so Caddy can disambiguate.
+#    The slug is stripped before proxying, so each onix still sees standard
+#    Beckn paths (/bap/receiver, /bpp/caller, etc.).
+#    e.g. https://<ngrok>/sellerapp/bpp/receiver/status
+#
+# 2. Direct-path mode (single-participant local or cloud deployment,
+#    or multi-tunnel ngrok where each participant has its own URL):
+#    Standard Beckn paths (/bap/* → buyerapp, /bpp/* → sellerapp) are
+#    forwarded as-is — no slug required.
+#    e.g. https://<ngrok>/bpp/receiver/status
+#
+# Slug routes are matched first; /bap/* and /bpp/* are the fallback.
 :9000 {
+    # --- Participant-slug routes (multi-participant devkit) ---
     @buyerapp path /buyerapp /buyerapp/*
     handle @buyerapp {
         uri strip_prefix /buyerapp
@@ -63,6 +71,20 @@ http://sellerdiscom.example.com:9000 {
         uri strip_prefix /sellerdiscom
         reverse_proxy onix-sellerdiscom-actor:8086
     }
+
+    # --- Standard Beckn paths (single-participant / direct-path mode) ---
+    # /bap/* → buyerapp onix; /bpp/* → sellerapp onix.
+    # In devkit: ledger participants need a slug above to avoid ambiguity
+    # since they also expose /bpp/* endpoints.
+    @bap path /bap /bap/*
+    handle @bap {
+        reverse_proxy onix-buyerapp:8081
+    }
+    @bpp path /bpp /bpp/*
+    handle @bpp {
+        reverse_proxy onix-sellerapp:8082
+    }
+
     handle {
         respond "beckn-router ok" 200
     }
