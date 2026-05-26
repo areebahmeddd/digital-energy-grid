@@ -13,10 +13,11 @@
     ]
   },
   "message": {
-    "searchExpression": {
-      "op": "in",
-      "attribute": "dataset:accessMethod",
-      "values": ["MQTT", "KAFKA", "API", "DATA_LAKE"]
+    "intent": {
+      "filters": {
+        "type": "jsonpath",
+        "expression": "$.catalogs[*].resources[*]"
+      }
     }
   }
 }
