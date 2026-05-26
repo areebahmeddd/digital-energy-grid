@@ -1,0 +1,88 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "on_confirm",
+    "bapId": "bap.example.com",
+    "bapUri": "http://beckn-router:9000/bap/receiver",
+    "bppId": "bpp.example.com",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "transactionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "messageId": "8b9c0d1e-2f3a-4567-1234-567890123456",
+    "timestamp": "2026-04-01T09:15:05Z"
+  },
+  "message": {
+    "contract": {
+      "id": "660e9500-f30c-52e5-b827-557766551300",
+      "descriptor": { "name": "Data Exchange Contract", "shortDesc": "Data exchange under DEG network" },
+      "status": { "code": "ACTIVE" },
+      "commitments": [
+        {
+          "id": "commitment-001",
+          "status": { "descriptor": { "code": "ACTIVE" } },
+          "resources": [
+            {
+              "id": "ds-resource-001",
+              "descriptor": { "name": "Dataset Resource" },
+              "quantity": { "unitText": "dataset", "unitCode": "EA", "value": "1" }
+            }
+          ],
+          "offer": {
+            "id": "offer-001",
+            "descriptor": { "name": "Dataset Offer" },
+            "resourceIds": ["ds-resource-001"]
+          }
+        }
+      ],
+      "consideration": [
+        {
+          "id": "consideration-001",
+          "status": { "code": "ACTIVE" },
+          "considerationAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
+            "@type": "PriceSpecification",
+            "currency": "INR",
+            "value": 0,
+            "description": "No commercial consideration"
+          }
+        }
+      ],
+      "participants": [
+        {
+          "id": "provider-001",
+          "descriptor": { "name": "Data Provider" },
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
+            "@type": "Organization",
+            "id": "provider-001",
+            "name": "Data Provider"
+          }
+        },
+        {
+          "id": "consumer-001",
+          "descriptor": { "name": "Data Consumer" },
+          "participantAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
+            "@type": "Organization",
+            "id": "consumer-001",
+            "name": "Data Consumer"
+          }
+        }
+      ],
+      "performance": [],
+      "settlements": [
+        {
+          "id": "settlement-001",
+          "considerationId": "consideration-001",
+          "status": "COMPLETE",
+          "settlementAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
+            "@type": "Payment",
+            "beckn:paymentStatus": "COMPLETED",
+            "beckn:amount": { "currency": "INR", "value": 0 }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -42,9 +42,8 @@ services:
       retries: 5
 
   onix-bap:
-    image: fidedocker/onix-adapter:1.5.1
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-bap
-    platform: linux/amd64
     ports:
       - "8081:8081"
     environment:
@@ -70,6 +69,8 @@ services:
       - PORT=3001
     ports:
       - "3001:3001"
+    volumes:
+      - ./sandbox-fixtures/nfh.global/testnet-deg:/app/dist/webhook/jsons/nfh.global/testnet-deg
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
       interval: 10s
@@ -93,9 +94,8 @@ services:
       retries: 5
 
   onix-bpp:
-    image: fidedocker/onix-adapter:1.5.1
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
     container_name: onix-bpp
-    platform: linux/amd64
     ports:
       - "8082:8082"
     environment:
@@ -122,6 +122,8 @@ services:
       - PERSONA=bpp
     ports:
       - "3002:3002"
+    volumes:
+      - ./sandbox-fixtures/nfh.global/testnet-deg:/app/dist/webhook/jsons/nfh.global/testnet-deg
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3002/api/health"]
       interval: 10s
