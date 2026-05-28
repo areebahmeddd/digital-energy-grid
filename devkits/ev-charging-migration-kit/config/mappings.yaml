@@ -1,0 +1,1813 @@
+mappings:
+  discover:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $msg := $.message;
+        $ltsSchemaContext := "https://raw.githubusercontent.com/bhim/ubc-tsd/main/beckn-schemas/UBCExtensions/v1/context.jsonld";
+
+        $rewriteExpr := function($expr) {(
+          $s := $replace($expr, "beckn:itemAttributes.", "resourceAttributes.");
+          $s := $replace($s, "beckn:provider.beckn:id", "itemProvider.id");
+          $s := $contains($s, " && @.beckn:availabilityWindow")
+            ? $substringBefore($s, " && @.beckn:availabilityWindow") & ")]"
+            : $s;
+          $s
+        )};
+
+        $rewriteTarget := function($target) {(
+          $t := $replace(
+            $target,
+            "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']",
+            "$['resourceAttributes']['chargingStation']['serviceLocation']['geo']"
+          );
+          $replace(
+            $t,
+            "$['beckn:availableAt'][*]['geo']",
+            "$['resourceAttributes']['chargingStation']['serviceLocation']['geo']"
+          )
+        )};
+
+        $mapSpatial := function($entry) {{
+          "op": $entry.op = "s_dwithin" ? "S_WITHIN" : $entry.op,
+          "targets": $rewriteTarget($entry.targets),
+          "geometry": $entry.geometry,
+          "distanceMeters": $entry.distanceMeters
+        }};
+
+        $ensureArray := function($value) {
+          $type($value) = "array" ? $value : [$value]
+        };
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "schemaContext": [$ltsSchemaContext],
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl
+          },
+          "message": {
+            "intent": $merge([
+              $msg.filters ? {
+                "filters": {
+                  "type": $msg.filters.type,
+                  "expression": $rewriteExpr($msg.filters.expression)
+                }
+              } : {},
+              $msg.spatial ? {
+                "spatial": $ensureArray($map($msg.spatial, function($s) { $mapSpatial($s) }))
+              } : {}
+            ])
+          }
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $intent := $.message.intent;
+        $rcSchemaContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingService/v1/context.jsonld";
+
+        $rewriteExpr := function($expr) {(
+          $s := $replace($expr, "resourceAttributes.", "beckn:itemAttributes.");
+          $replace($s, "itemProvider.id", "beckn:provider.beckn:id")
+        )};
+
+        $rewriteTarget := function($target) {
+          $replace(
+            $target,
+            "$['resourceAttributes']['chargingStation']['serviceLocation']['geo']",
+            "$['beckn:itemAttributes.chargingStation.serviceLocation.geo']"
+          )
+        };
+
+        $mapSpatial := function($entry) {{
+          "op": $entry.op = "S_WITHIN" ? "s_dwithin" : $entry.op,
+          "targets": $rewriteTarget($entry.targets),
+          "geometry": $entry.geometry,
+          "distanceMeters": $entry.distanceMeters
+        }};
+
+        $ensureArray := function($value) {
+          $type($value) = "array" ? $value : [$value]
+        };
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "schema_context": [$rcSchemaContext],
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl
+          },
+          "message": $merge([
+            $intent.filters ? {
+              "filters": {
+                "type": $intent.filters.type,
+                "expression": $rewriteExpr($intent.filters.expression)
+              }
+            } : {},
+            $intent.spatial ? {
+              "spatial": $ensureArray($map($intent.spatial, function($s) { $mapSpatial($s) }))
+            } : {}
+          ]),
+          "error": {}
+        }
+      )
+
+  on_discover:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $rcServiceContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingService/v1/context.jsonld";
+        $rcOfferContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingOffer/v1/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapItem := function($resource) {{
+          "@context": $rcContext,
+          "@type": "beckn:Item",
+          "beckn:id": $resource.id,
+          "beckn:descriptor": {
+            "@type": "beckn:Descriptor",
+            "schema:name": $resource.descriptor.name,
+            "beckn:shortDesc": $resource.descriptor.shortDesc,
+            "beckn:longDesc": $resource.descriptor.longDesc
+          },
+          "beckn:category": {
+            "@type": "schema:CategoryCode",
+            "schema:codeValue": $resource.category.codeValue,
+            "schema:name": $resource.category.name
+          },
+          "beckn:availabilityWindow": $resource.availabilityWindow ? $ensureArray($map($resource.availabilityWindow, function($window) {{
+            "@type": "beckn:TimePeriod",
+            "schema:startTime": $window.startTime,
+            "schema:endTime": $window.endTime
+          }})) : undefined,
+          "beckn:rateable": $resource.rateable,
+          "beckn:rating": $resource.rating ? {
+            "@type": "beckn:Rating",
+            "beckn:ratingValue": $resource.rating.ratingValue,
+            "beckn:ratingCount": $resource.rating.ratingCount
+          } : undefined,
+          "beckn:isActive": $resource.isActive,
+          "beckn:provider": {
+            "beckn:id": $resource.itemProvider.id,
+            "beckn:descriptor": {
+              "@type": "beckn:Descriptor",
+              "schema:name": $resource.itemProvider.name
+            }
+          },
+          "beckn:itemAttributes": $merge([
+            $resource.resourceAttributes,
+            {
+              "@context": $rcServiceContext,
+              "@type": "ChargingService"
+            },
+            $resource.resourceAttributes.chargingStation ? {
+              "chargingStation": $merge([
+                $resource.resourceAttributes.chargingStation,
+                $resource.resourceAttributes.chargingStation.serviceLocation ? {
+                  "serviceLocation": $merge([
+                    $resource.resourceAttributes.chargingStation.serviceLocation,
+                    { "@type": "beckn:Location" }
+                  ])
+                } : {}
+              ])
+            } : {},
+            $resource.descriptor.docs[0].url ? {
+              "qrIdentifier": $resource.descriptor.docs[0].url
+            } : {}
+          ])
+        }};
+
+        $mapOffer := function($offer) {{
+          "@context": $rcContext,
+          "@type": "beckn:Offer",
+          "beckn:id": $offer.id,
+          "beckn:descriptor": {
+            "@type": "beckn:Descriptor",
+            "schema:name": $offer.descriptor.name
+          },
+          "beckn:items": $offer.resourceIds,
+          "beckn:price": $offer.price,
+          "beckn:validity": $offer.validity ? {
+            "@type": "beckn:TimePeriod",
+            "schema:startDate": $offer.validity.startDate,
+            "schema:endDate": $offer.validity.endDate
+          } : undefined,
+          "beckn:acceptedPaymentMethod": $offer.acceptedPaymentMethod,
+          "beckn:offerAttributes": $offer.offerAttributes ? $merge([
+            $offer.offerAttributes,
+            {
+              "@context": $rcOfferContext,
+              "@type": "ChargingOffer"
+            }
+          ]) : undefined,
+          "beckn:provider": $offer.provider.id
+        }};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "timestamp": $ctx.timestamp,
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "ttl": $ctx.ttl,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri
+          },
+          "message": {
+            "catalogs": $ensureArray($map($.message.catalogs, function($catalog) {{
+              "@context": $rcContext,
+              "@type": "beckn:Catalog",
+              "beckn:id": $catalog.id,
+              "beckn:descriptor": {
+                "@type": "beckn:Descriptor",
+                "schema:name": $catalog.descriptor.name,
+                "beckn:shortDesc": $catalog.descriptor.shortDesc
+              },
+              "beckn:bppId": $catalog.provider.id,
+              "beckn:bppUri": $ctx.bppUri,
+              "beckn:items": $ensureArray($map($catalog.resources, function($resource) { $mapItem($resource) })),
+              "beckn:offers": $ensureArray($map($catalog.offers, function($offer) { $mapOffer($offer) }))
+            }}))
+          },
+          "error": {}
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $ltsServiceContext := "https://schema.beckn.io/EvChargingService/2.0/context.jsonld";
+        $ltsOfferContext := "https://schema.beckn.io/EvChargingOffer/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $findProviderName := function($catalog, $offer) {(
+          $item := $catalog."beckn:items"[$."beckn:id" = $offer."beckn:items"[0]][0];
+          $item."beckn:provider"."beckn:descriptor"."schema:name"
+        )};
+
+        $mapResource := function($item) {{
+          "id": $item."beckn:id",
+          "descriptor": $merge([
+            {
+              "name": $item."beckn:descriptor"."schema:name",
+              "shortDesc": $item."beckn:descriptor"."beckn:shortDesc",
+              "longDesc": $item."beckn:descriptor"."beckn:longDesc"
+            },
+            $item."beckn:itemAttributes".qrIdentifier ? {
+              "docs": [
+                {
+                  "label": "QR Identifier",
+                  "url": $item."beckn:itemAttributes".qrIdentifier,
+                  "mimeType": "text/html"
+                }
+              ]
+            } : {}
+          ]),
+          "category": {
+            "codeValue": $item."beckn:category"."schema:codeValue",
+            "name": $item."beckn:category"."schema:name"
+          },
+          "availabilityWindow": $item."beckn:availabilityWindow" ? $ensureArray($map($item."beckn:availabilityWindow", function($window) {{
+            "startTime": $window."schema:startTime",
+            "endTime": $window."schema:endTime"
+          }})) : undefined,
+          "rateable": $item."beckn:rateable",
+          "rating": $item."beckn:rating" ? {
+            "ratingValue": $item."beckn:rating"."beckn:ratingValue",
+            "ratingCount": $item."beckn:rating"."beckn:ratingCount"
+          } : undefined,
+          "isActive": $item."beckn:isActive",
+          "itemProvider": {
+            "id": $item."beckn:provider"."beckn:id",
+            "name": $item."beckn:provider"."beckn:descriptor"."schema:name"
+          },
+          "resourceAttributes": $merge([
+            {
+              "@context": $ltsServiceContext,
+              "@type": "ChargingService",
+              "connectorType": $item."beckn:itemAttributes".connectorType,
+              "maxPowerKW": $item."beckn:itemAttributes".maxPowerKW,
+              "minPowerKW": $item."beckn:itemAttributes".minPowerKW,
+              "reservationSupported": $item."beckn:itemAttributes".reservationSupported,
+              "evseId": $item."beckn:itemAttributes".evseId,
+              "parkingType": $item."beckn:itemAttributes".parkingType,
+              "powerType": $item."beckn:itemAttributes".powerType,
+              "connectorFormat": $item."beckn:itemAttributes".connectorFormat,
+              "chargingSpeed": $item."beckn:itemAttributes".chargingSpeed,
+              "vehicleType": $item."beckn:itemAttributes".vehicleType,
+              "roamingNetwork": $item."beckn:itemAttributes".roamingNetwork,
+              "amenityFeature": $item."beckn:itemAttributes".amenityFeature
+            },
+            $item."beckn:itemAttributes".chargingStation ? {
+              "chargingStation": $merge([
+                $item."beckn:itemAttributes".chargingStation,
+                $item."beckn:itemAttributes".chargingStation.serviceLocation ? {
+                  "serviceLocation": $merge([
+                    $item."beckn:itemAttributes".chargingStation.serviceLocation
+                  ])
+                } : {}
+              ])
+            } : {}
+          ])
+        }};
+
+        $mapOffer := function($catalog, $offer) {{
+          "id": $offer."beckn:id",
+          "descriptor": {
+            "name": $offer."beckn:descriptor"."schema:name"
+          },
+          "resourceIds": $offer."beckn:items",
+          "provider": {
+            "id": $offer."beckn:provider",
+            "descriptor": {
+              "name": $findProviderName($catalog, $offer)
+            }
+          },
+          "validity": $offer."beckn:validity" ? {
+            "startDate": $offer."beckn:validity"."schema:startDate",
+            "endDate": $offer."beckn:validity"."schema:endDate"
+          } : undefined,
+          "price": $offer."beckn:price",
+          "acceptedPaymentMethod": $offer."beckn:acceptedPaymentMethod",
+          "offerAttributes": $offer."beckn:offerAttributes" ? $merge([
+            $offer."beckn:offerAttributes",
+            {
+              "@context": $ltsOfferContext,
+              "@type": "ChargingOffer"
+            }
+          ]) : undefined
+        }};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "timestamp": $ctx.timestamp,
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "ttl": $ctx.ttl,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri
+          },
+          "message": {
+            "catalogs": $ensureArray($map($.message.catalogs, function($catalog) {{
+              "id": $catalog."beckn:id",
+              "descriptor": {
+                "name": $catalog."beckn:descriptor"."schema:name",
+                "shortDesc": $catalog."beckn:descriptor"."beckn:shortDesc"
+              },
+              "provider": {
+                "id": $catalog."beckn:bppId",
+                "descriptor": {
+                  "name": $catalog."beckn:descriptor"."schema:name"
+                }
+              },
+              "resources": $ensureArray($map($catalog."beckn:items", function($item) { $mapResource($item) })),
+              "offers": $ensureArray($map($catalog."beckn:offers", function($offer) { $mapOffer($catalog, $offer) }))
+            }}))
+          }
+        }
+      )
+
+  select:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapOffer := function($acceptedOffer) {
+          $acceptedOffer ? {
+            "id": $acceptedOffer."beckn:id",
+            "descriptor": {
+              "name": $acceptedOffer."beckn:descriptor"."schema:name"
+            },
+            "resourceIds": $acceptedOffer."beckn:items",
+            "provider": {
+              "id": $acceptedOffer."beckn:provider",
+              "descriptor": {
+                "name": $acceptedOffer."beckn:provider"
+              }
+            },
+            "price": $acceptedOffer."beckn:price"
+          } : undefined
+        };
+
+        $mapCommitment := function($item) {{
+          "status": {
+            "descriptor": {
+              "code": "DRAFT"
+            }
+          },
+          "resources": [
+            {
+              "id": $item."beckn:orderedItem",
+              "quantity": $item."beckn:quantity"
+            }
+          ],
+          "offer": $mapOffer($item."beckn:acceptedOffer")
+        }};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "timestamp": $ctx.timestamp,
+            "messageId": $ctx.message_id,
+            "transactionId": $ctx.transaction_id,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri,
+            "ttl": $ctx.ttl
+          },
+          "message": {
+            "contract": {
+              "status": {
+                "code": "DRAFT"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                {
+                  "id": $order."beckn:buyer"."beckn:id",
+                  "descriptor": {
+                    "name": $order."beckn:buyer"."beckn:displayName"
+                  },
+                  "taxID": $order."beckn:buyer"."beckn:taxID",
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                    "@type": "Consumer",
+                    "role": "buyer",
+                    "person": {
+                      "name": $order."beckn:buyer"."beckn:displayName",
+                      "telephone": $order."beckn:buyer"."beckn:telephone",
+                      "email": $order."beckn:buyer"."beckn:email",
+                      "id": $order."beckn:buyer"."beckn:id"
+                    }
+                  }
+                }
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) { $mapCommitment($item) })),
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $rcSessionContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapAcceptedOffer := function($offer) {
+          $offer ? {
+            "@context": $rcContext,
+            "@type": "beckn:Offer",
+            "beckn:id": $offer.id,
+            "beckn:descriptor": {
+              "@type": "beckn:Descriptor",
+              "schema:name": $offer.descriptor.name
+            },
+            "beckn:items": $offer.resourceIds,
+            "beckn:provider": $offer.provider.id,
+            "beckn:price": $offer.price
+          } : undefined
+        };
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "timestamp": $ctx.timestamp,
+            "message_id": $ctx.messageId,
+            "transaction_id": $ctx.transactionId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri,
+            "ttl": $ctx.ttl
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:orderStatus": "CREATED",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": {
+                "@context": $rcContext,
+                "@type": "beckn:Buyer",
+                "beckn:id": $buyer.id,
+                "beckn:role": "BUYER",
+                "beckn:displayName": $buyer.descriptor.name,
+                "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                "beckn:email": $buyer.participantAttributes.person.email,
+                "beckn:taxID": $buyer.taxID
+              },
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:acceptedOffer": $mapAcceptedOffer($commitment.offer)
+              }})),
+              "beckn:orderAttributes": $contract.contractAttributes ? $merge([
+                $contract.contractAttributes,
+                {
+                  "@context": $rcSessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+  on_select:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $rcSessionContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "BASE_PRICE" ? "UNIT" : $kind
+        };
+
+        $mapAcceptedOffer := function($offer) {
+          $offer ? {
+            "@context": $rcContext,
+            "@type": "beckn:Offer",
+            "beckn:id": $offer.id,
+            "beckn:descriptor": {
+              "@type": "beckn:Descriptor",
+              "schema:name": $offer.descriptor.name
+            },
+            "beckn:items": $offer.resourceIds,
+            "beckn:provider": $offer.provider.id,
+            "beckn:price": $offer.price
+          } : undefined
+        };
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "timestamp": $ctx.timestamp,
+            "message_id": $ctx.messageId,
+            "transaction_id": $ctx.transactionId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri,
+            "ttl": $ctx.ttl
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:orderStatus": "CREATED",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": {
+                "@context": $rcContext,
+                "@type": "beckn:Buyer",
+                "beckn:id": $buyer.id,
+                "beckn:role": "BUYER",
+                "beckn:displayName": $buyer.descriptor.name,
+                "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                "beckn:email": $buyer.participantAttributes.person.email,
+                "beckn:taxID": $buyer.taxID
+              },
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:acceptedOffer": $mapAcceptedOffer($commitment.offer),
+                "beckn:price": $commitment.offer.price
+              }})),
+              "beckn:orderValue": {
+                "currency": $contract.consideration[0].considerationAttributes.currency,
+                "value": $contract.consideration[0].considerationAttributes.totalAmount,
+                "components": $map($contract.consideration[0].considerationAttributes.breakup, function($component) {{
+                  "type": $mapType($component.type),
+                  "value": $component.amount,
+                  "currency": $component.currency ? $component.currency : $contract.consideration[0].considerationAttributes.currency,
+                  "description": $component.title
+                }})
+              },
+              "beckn:orderAttributes": $contract.contractAttributes ? $merge([
+                $contract.contractAttributes,
+                {
+                  "@context": $rcSessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "UNIT" ? "BASE_PRICE" : $kind
+        };
+
+        $mapOffer := function($acceptedOffer) {
+          $acceptedOffer ? {
+            "id": $acceptedOffer."beckn:id",
+            "descriptor": {
+              "name": $acceptedOffer."beckn:descriptor"."schema:name"
+            },
+            "resourceIds": $acceptedOffer."beckn:items",
+            "provider": {
+              "id": $acceptedOffer."beckn:provider",
+              "descriptor": {
+                "name": $acceptedOffer."beckn:provider"
+              }
+            },
+            "price": $acceptedOffer."beckn:price"
+          } : undefined
+        };
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "timestamp": $ctx.timestamp,
+            "messageId": $ctx.message_id,
+            "transactionId": $ctx.transaction_id,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri,
+            "ttl": $ctx.ttl
+          },
+          "message": {
+            "contract": {
+              "status": {
+                "code": "DRAFT"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                {
+                  "id": $order."beckn:buyer"."beckn:id",
+                  "descriptor": {
+                    "name": $order."beckn:buyer"."beckn:displayName"
+                  },
+                  "taxID": $order."beckn:buyer"."beckn:taxID",
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                    "@type": "Consumer",
+                    "role": "buyer",
+                    "person": {
+                      "name": $order."beckn:buyer"."beckn:displayName",
+                      "telephone": $order."beckn:buyer"."beckn:telephone",
+                      "email": $order."beckn:buyer"."beckn:email",
+                      "id": $order."beckn:buyer"."beckn:id"
+                    }
+                  }
+                }
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) {{
+                "status": {
+                  "descriptor": {
+                    "code": "DRAFT"
+                  }
+                },
+                "resources": [
+                  {
+                    "id": $item."beckn:orderedItem",
+                    "quantity": $item."beckn:quantity"
+                  }
+                ],
+                "offer": $mapOffer($item."beckn:acceptedOffer")
+              }})),
+              "consideration": [
+                {
+                  "id": "consideration-001",
+                  "status": {
+                    "code": "QUOTED"
+                  },
+                  "considerationAttributes": {
+                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@type": "PriceSpecification",
+                    "currency": $order."beckn:orderValue".currency,
+                    "totalAmount": $order."beckn:orderValue".value,
+                    "breakup": $map($order."beckn:orderValue".components, function($component) {{
+                      "title": $component.description,
+                      "amount": $component.value,
+                      "type": $mapType($component.type)
+                    }})
+                  }
+                }
+              ],
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
+
+  init:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+        $payment := $order."beckn:payment";
+        $paymentAttrs := $payment."beckn:paymentAttributes";
+
+        $mapType := function($kind) {
+          $kind = "UNIT" ? "BASE_PRICE" : $kind
+        };
+
+        $mapOffer := function($item) {(
+          $acceptedOffer := $item."beckn:acceptedOffer";
+          $merge([
+            {
+              "id": $acceptedOffer."beckn:id" ? $acceptedOffer."beckn:id" : $item."beckn:orderedItem",
+              "resourceIds": $acceptedOffer."beckn:items" ? $acceptedOffer."beckn:items" : [$item."beckn:orderedItem"],
+              "provider": {
+                "id": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller",
+                "descriptor": {
+                  "name": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller"
+                }
+              },
+              "price": $acceptedOffer."beckn:price" ? $acceptedOffer."beckn:price" : $item."beckn:price"
+            },
+            $acceptedOffer."beckn:descriptor"."schema:name" ? {
+              "descriptor": {
+                "name": $acceptedOffer."beckn:descriptor"."schema:name"
+              }
+            } : {}
+          ])
+        )};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri,
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri
+          },
+          "message": {
+            "contract": {
+              "id": $order."beckn:id",
+              "status": {
+                "code": "DRAFT"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                $merge([
+                  {
+                    "id": $order."beckn:buyer"."beckn:id",
+                    "descriptor": {
+                      "name": $order."beckn:buyer"."beckn:displayName"
+                    },
+                    "participantAttributes": {
+                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@type": "Consumer",
+                      "role": "buyer",
+                      "person": {
+                        "name": $order."beckn:buyer"."beckn:displayName",
+                        "telephone": $order."beckn:buyer"."beckn:telephone",
+                        "email": $order."beckn:buyer"."beckn:email",
+                        "id": $order."beckn:buyer"."beckn:id"
+                      }
+                    }
+                  },
+                  $order."beckn:buyer"."beckn:taxID" ? {
+                    "taxID": $order."beckn:buyer"."beckn:taxID"
+                  } : {},
+                  $order."beckn:buyer"."beckn:buyerAttributes" ? {
+                    "buyerAttributes": $order."beckn:buyer"."beckn:buyerAttributes"
+                  } : {}
+                ])
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) {{
+                "status": {
+                  "descriptor": {
+                    "code": "DRAFT"
+                  }
+                },
+                "resources": [
+                  {
+                    "id": $item."beckn:orderedItem",
+                    "quantity": $item."beckn:quantity"
+                  }
+                ],
+                "offer": $mapOffer($item)
+              }})),
+              "consideration": [
+                {
+                  "id": "consideration-001",
+                  "status": {
+                    "code": "QUOTED"
+                  },
+                  "considerationAttributes": {
+                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@type": "PriceSpecification",
+                    "currency": $order."beckn:orderValue".currency,
+                    "totalAmount": $order."beckn:orderValue".value,
+                    "breakup": $map($order."beckn:orderValue".components, function($component) {{
+                      "title": $component.description,
+                      "amount": $component.value,
+                      "type": $mapType($component.type)
+                    }})
+                  }
+                }
+              ],
+              "settlements": $payment ? [
+                {
+                  "id": $payment."beckn:id",
+                  "considerationId": "consideration-001",
+                  "status": "DRAFT",
+                  "beneficiary": $payment."beckn:beneficiary",
+                  "paymentStatus": $payment."beckn:paymentStatus",
+                  "price": $payment."beckn:amount".value,
+                  "priceCurrency": $payment."beckn:amount".currency,
+                  "settlementAttributes": $paymentAttrs
+                }
+              ] : undefined,
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "BASE_PRICE" ? "UNIT" : $kind
+        };
+
+        $settlement := $contract.settlements[0];
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri,
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:id": $contract.id,
+              "beckn:orderStatus": "CREATED",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": $merge([
+                {
+                  "@context": $rcContext,
+                  "@type": "beckn:Buyer",
+                  "beckn:id": $buyer.id,
+                  "beckn:role": "BUYER",
+                  "beckn:displayName": $buyer.descriptor.name,
+                  "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                  "beckn:email": $buyer.participantAttributes.person.email
+                },
+                $buyer.taxID ? {
+                  "beckn:taxID": $buyer.taxID
+                } : {},
+                $buyer.buyerAttributes ? {
+                  "beckn:buyerAttributes": $buyer.buyerAttributes
+                } : {}
+              ]),
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:price": $commitment.offer.price
+              }})),
+              "beckn:orderValue": {
+                "currency": $contract.consideration[0].considerationAttributes.currency,
+                "value": $contract.consideration[0].considerationAttributes.totalAmount,
+                "components": $map($contract.consideration[0].considerationAttributes.breakup, function($component) {{
+                  "type": $mapType($component.type),
+                  "value": $component.amount,
+                  "currency": $component.currency ? $component.currency : $contract.consideration[0].considerationAttributes.currency,
+                  "description": $component.title
+                }})
+              },
+              "beckn:payment": $settlement ? {
+                "@context": $rcContext,
+                "@type": "beckn:Payment",
+                "beckn:id": $settlement.id,
+                "beckn:amount": {
+                  "currency": $settlement.priceCurrency,
+                  "value": $settlement.price
+                },
+                "beckn:beneficiary": $settlement.beneficiary,
+                "beckn:paymentStatus": $settlement.paymentStatus,
+                "beckn:paymentAttributes": $settlement.settlementAttributes
+              } : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+  on_init:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "BASE_PRICE" ? "UNIT" : $kind
+        };
+
+        $settlement := $contract.settlements[0];
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:id": $contract.id,
+              "beckn:orderStatus": "CREATED",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": $merge([
+                {
+                  "@context": $rcContext,
+                  "@type": "beckn:Buyer",
+                  "beckn:id": $buyer.id,
+                  "beckn:role": "BUYER",
+                  "beckn:displayName": $buyer.descriptor.name,
+                  "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                  "beckn:email": $buyer.participantAttributes.person.email
+                },
+                $buyer.taxID ? {
+                  "beckn:taxID": $buyer.taxID
+                } : {},
+                $buyer.buyerAttributes ? {
+                  "beckn:buyerAttributes": $buyer.buyerAttributes
+                } : {}
+              ]),
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:price": $commitment.offer.price
+              }})),
+              "beckn:orderValue": {
+                "currency": $contract.consideration[0].considerationAttributes.currency,
+                "value": $contract.consideration[0].considerationAttributes.totalAmount,
+                "components": $map($contract.consideration[0].considerationAttributes.breakup, function($component) {{
+                  "type": $mapType($component.type),
+                  "value": $component.amount,
+                  "currency": $component.currency ? $component.currency : $contract.consideration[0].considerationAttributes.currency,
+                  "description": $component.title
+                }})
+              },
+              "beckn:payment": $settlement ? $merge([
+                {
+                  "@context": $rcContext,
+                  "@type": "beckn:Payment",
+                  "beckn:id": $settlement.id,
+                  "beckn:amount": {
+                    "currency": $settlement.priceCurrency,
+                    "value": $settlement.price
+                  },
+                  "beckn:paymentURL": $settlement.paymentUrl,
+                  "beckn:txnRef": $settlement.txnRef,
+                  "beckn:beneficiary": $settlement.beneficiary,
+                  "beckn:paymentStatus": $settlement.paymentStatus,
+                  "beckn:paymentAttributes": $settlement.settlementAttributes
+                },
+                $settlement.acceptedPaymentMethod ? {
+                  "beckn:acceptedPaymentMethod": $settlement.acceptedPaymentMethod
+                } : {}
+              ]) : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+        $payment := $order."beckn:payment";
+        $paymentAttrs := $payment."beckn:paymentAttributes";
+
+        $mapType := function($kind) {
+          $kind = "UNIT" ? "BASE_PRICE" : $kind
+        };
+
+        $mapOffer := function($item) {(
+          $acceptedOffer := $item."beckn:acceptedOffer";
+          $merge([
+            {
+              "id": $acceptedOffer."beckn:id" ? $acceptedOffer."beckn:id" : $item."beckn:orderedItem",
+              "resourceIds": $acceptedOffer."beckn:items" ? $acceptedOffer."beckn:items" : [$item."beckn:orderedItem"],
+              "provider": {
+                "id": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller",
+                "descriptor": {
+                  "name": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller"
+                }
+              },
+              "price": $acceptedOffer."beckn:price" ? $acceptedOffer."beckn:price" : $item."beckn:price"
+            },
+            $acceptedOffer."beckn:descriptor"."schema:name" ? {
+              "descriptor": {
+                "name": $acceptedOffer."beckn:descriptor"."schema:name"
+              }
+            } : {}
+          ])
+        )};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri
+          },
+          "message": {
+            "contract": {
+              "id": $order."beckn:id",
+              "status": {
+                "code": "DRAFT"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                $merge([
+                  {
+                    "id": $order."beckn:buyer"."beckn:id",
+                    "descriptor": {
+                      "name": $order."beckn:buyer"."beckn:displayName"
+                    },
+                    "participantAttributes": {
+                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@type": "Consumer",
+                      "role": "buyer",
+                      "person": {
+                        "name": $order."beckn:buyer"."beckn:displayName",
+                        "telephone": $order."beckn:buyer"."beckn:telephone",
+                        "email": $order."beckn:buyer"."beckn:email",
+                        "id": $order."beckn:buyer"."beckn:id"
+                      }
+                    }
+                  },
+                  $order."beckn:buyer"."beckn:taxID" ? {
+                    "taxID": $order."beckn:buyer"."beckn:taxID"
+                  } : {},
+                  $order."beckn:buyer"."beckn:buyerAttributes" ? {
+                    "buyerAttributes": $order."beckn:buyer"."beckn:buyerAttributes"
+                  } : {}
+                ])
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) {{
+                "status": {
+                  "descriptor": {
+                    "code": "DRAFT"
+                  }
+                },
+                "resources": [
+                  {
+                    "id": $item."beckn:orderedItem",
+                    "quantity": $item."beckn:quantity"
+                  }
+                ],
+                "offer": $mapOffer($item)
+              }})),
+              "consideration": [
+                {
+                  "id": "consideration-001",
+                  "status": {
+                    "code": "QUOTED"
+                  },
+                  "considerationAttributes": {
+                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@type": "PriceSpecification",
+                    "currency": $order."beckn:orderValue".currency,
+                    "totalAmount": $order."beckn:orderValue".value,
+                    "breakup": $map($order."beckn:orderValue".components, function($component) {{
+                      "title": $component.description,
+                      "amount": $component.value,
+                      "currency": $component.currency,
+                      "type": $mapType($component.type)
+                    }})
+                  }
+                }
+              ],
+              "settlements": $payment ? [
+                $merge([
+                  {
+                    "id": $payment."beckn:id",
+                    "considerationId": "consideration-001",
+                    "status": "DRAFT",
+                    "beneficiary": $payment."beckn:beneficiary",
+                    "paymentUrl": $payment."beckn:paymentURL",
+                    "txnRef": $payment."beckn:txnRef",
+                    "paymentStatus": $payment."beckn:paymentStatus",
+                    "price": $payment."beckn:amount".value,
+                    "priceCurrency": $payment."beckn:amount".currency,
+                    "settlementAttributes": $paymentAttrs
+                  },
+                  $payment."beckn:acceptedPaymentMethod" ? {
+                    "acceptedPaymentMethod": $payment."beckn:acceptedPaymentMethod"
+                  } : {}
+                ])
+              ] : undefined,
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
+
+  confirm:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+        $payment := $order."beckn:payment";
+
+        $mapType := function($kind) {
+          $kind = "UNIT" ? "BASE_PRICE" : $kind
+        };
+
+        $mapOffer := function($item) {(
+          $acceptedOffer := $item."beckn:acceptedOffer";
+          $merge([
+            {
+              "id": $acceptedOffer."beckn:id" ? $acceptedOffer."beckn:id" : $item."beckn:orderedItem",
+              "resourceIds": $acceptedOffer."beckn:items" ? $acceptedOffer."beckn:items" : [$item."beckn:orderedItem"],
+              "provider": {
+                "id": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller",
+                "descriptor": {
+                  "name": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller"
+                }
+              },
+              "price": $acceptedOffer."beckn:price" ? $acceptedOffer."beckn:price" : $item."beckn:price"
+            },
+            $acceptedOffer."beckn:descriptor"."schema:name" ? {
+              "descriptor": {
+                "name": $acceptedOffer."beckn:descriptor"."schema:name"
+              }
+            } : {}
+          ])
+        )};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri,
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri
+          },
+          "message": {
+            "contract": {
+              "id": $order."beckn:id",
+              "status": {
+                "code": "DRAFT"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                $merge([
+                  {
+                    "id": $order."beckn:buyer"."beckn:id",
+                    "descriptor": {
+                      "name": $order."beckn:buyer"."beckn:displayName"
+                    },
+                    "participantAttributes": {
+                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@type": "Consumer",
+                      "role": "buyer",
+                      "person": {
+                        "name": $order."beckn:buyer"."beckn:displayName",
+                        "telephone": $order."beckn:buyer"."beckn:telephone",
+                        "email": $order."beckn:buyer"."beckn:email",
+                        "id": $order."beckn:buyer"."beckn:id"
+                      }
+                    }
+                  },
+                  $order."beckn:buyer"."beckn:taxID" ? {
+                    "taxID": $order."beckn:buyer"."beckn:taxID"
+                  } : {},
+                  $order."beckn:buyer"."beckn:buyerAttributes" ? {
+                    "buyerAttributes": $order."beckn:buyer"."beckn:buyerAttributes"
+                  } : {}
+                ])
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) {{
+                "status": {
+                  "descriptor": {
+                    "code": "DRAFT"
+                  }
+                },
+                "resources": [
+                  {
+                    "id": $item."beckn:orderedItem",
+                    "quantity": $item."beckn:quantity"
+                  }
+                ],
+                "offer": $mapOffer($item)
+              }})),
+              "consideration": [
+                {
+                  "id": "consideration-001",
+                  "status": {
+                    "code": "QUOTED"
+                  },
+                  "considerationAttributes": {
+                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@type": "PriceSpecification",
+                    "currency": $order."beckn:orderValue".currency,
+                    "totalAmount": $order."beckn:orderValue".value,
+                    "breakup": $map($order."beckn:orderValue".components, function($component) {{
+                      "title": $component.description,
+                      "amount": $component.value,
+                      "currency": $component.currency,
+                      "type": $mapType($component.type)
+                    }})
+                  }
+                }
+              ],
+              "settlements": $payment ? [
+                {
+                  "id": $payment."beckn:id",
+                  "considerationId": "consideration-001",
+                  "status": "DRAFT",
+                  "beneficiary": $payment."beckn:beneficiary",
+                  "paymentUrl": $payment."beckn:paymentURL",
+                  "txnRef": $payment."beckn:txnRef",
+                  "paidAt": $payment."beckn:paidAt",
+                  "paymentStatus": $payment."beckn:paymentStatus",
+                  "price": $payment."beckn:amount".value,
+                  "priceCurrency": $payment."beckn:amount".currency,
+                  "settlementAttributes": $payment."beckn:paymentAttributes"
+                }
+              ] : undefined,
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "BASE_PRICE" ? "UNIT" : $kind
+        };
+
+        $settlement := $contract.settlements[0];
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri,
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:id": $contract.id,
+              "beckn:orderStatus": "PENDING",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": $merge([
+                {
+                  "@context": $rcContext,
+                  "@type": "beckn:Buyer",
+                  "beckn:id": $buyer.id,
+                  "beckn:role": "BUYER",
+                  "beckn:displayName": $buyer.descriptor.name,
+                  "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                  "beckn:email": $buyer.participantAttributes.person.email
+                },
+                $buyer.taxID ? {
+                  "beckn:taxID": $buyer.taxID
+                } : {},
+                $buyer.buyerAttributes ? {
+                  "beckn:buyerAttributes": $buyer.buyerAttributes
+                } : {}
+              ]),
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:price": $commitment.offer.price
+              }})),
+              "beckn:orderValue": {
+                "currency": $contract.consideration[0].considerationAttributes.currency,
+                "value": $contract.consideration[0].considerationAttributes.totalAmount,
+                "components": $map($contract.consideration[0].considerationAttributes.breakup, function($component) {{
+                  "type": $mapType($component.type),
+                  "value": $component.amount,
+                  "currency": $component.currency ? $component.currency : $contract.consideration[0].considerationAttributes.currency,
+                  "description": $component.title
+                }})
+              },
+              "beckn:payment": $settlement ? {
+                "@context": $rcContext,
+                "@type": "beckn:Payment",
+                "beckn:id": $settlement.id,
+                "beckn:amount": {
+                  "currency": $settlement.priceCurrency,
+                  "value": $settlement.price
+                },
+                "beckn:paymentURL": $settlement.paymentUrl,
+                "beckn:txnRef": $settlement.txnRef,
+                "beckn:paidAt": $settlement.paidAt,
+                "beckn:beneficiary": $settlement.beneficiary,
+                "beckn:paymentStatus": $settlement.paymentStatus,
+                "beckn:paymentAttributes": $settlement.settlementAttributes
+              } : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+  on_confirm:
+    bapMappings: |
+      (
+        $ctx := $.context;
+        $contract := $.message.contract;
+        $rcContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/core/v2/context.jsonld";
+        $rcSessionContext := "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/core-v2.0.0-rc/schema/EvChargingSession/v1/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+
+        $mapType := function($kind) {
+          $kind = "BASE_PRICE" ? "UNIT" : $kind
+        };
+
+        $settlement := $contract.settlements[0];
+        $performance := $contract.performance[0];
+        $participants := $ensureArray($contract.participants);
+        $sellerMatches := $participants[participantAttributes."@type" = "Provider" or participantAttributes.role = "seller"];
+        $buyerMatches := $participants[participantAttributes."@type" = "Consumer" or participantAttributes.role = "buyer"];
+        $seller := $count($sellerMatches) > 0 ? $sellerMatches[0] : $participants[0];
+        $buyer := $count($buyerMatches) > 0 ? $buyerMatches[0] : $participants[1];
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "domain": $ctx.networkId,
+            "bap_id": $ctx.bapId,
+            "bap_uri": $ctx.bapUri,
+            "transaction_id": $ctx.transactionId,
+            "message_id": $ctx.messageId,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bpp_id": $ctx.bppId,
+            "bpp_uri": $ctx.bppUri
+          },
+          "message": {
+            "order": {
+              "@context": $rcContext,
+              "@type": "beckn:Order",
+              "beckn:id": $contract.id,
+              "beckn:orderStatus": "CONFIRMED",
+              "beckn:seller": $seller.id,
+              "beckn:buyer": $merge([
+                {
+                  "@context": $rcContext,
+                  "@type": "beckn:Buyer",
+                  "beckn:id": $buyer.id,
+                  "beckn:role": "BUYER",
+                  "beckn:displayName": $buyer.descriptor.name,
+                  "beckn:telephone": $buyer.participantAttributes.person.telephone,
+                  "beckn:email": $buyer.participantAttributes.person.email
+                },
+                $buyer.taxID ? {
+                  "beckn:taxID": $buyer.taxID
+                } : {},
+                $buyer.buyerAttributes ? {
+                  "beckn:buyerAttributes": $buyer.buyerAttributes
+                } : {}
+              ]),
+              "beckn:orderItems": $ensureArray($map($contract.commitments, function($commitment) {{
+                "beckn:orderedItem": $commitment.resources[0].id,
+                "beckn:quantity": $commitment.resources[0].quantity,
+                "beckn:price": $commitment.offer.price
+              }})),
+              "beckn:orderValue": {
+                "currency": $contract.consideration[0].considerationAttributes.currency,
+                "value": $contract.consideration[0].considerationAttributes.totalAmount,
+                "components": $map($contract.consideration[0].considerationAttributes.breakup, function($component) {{
+                  "type": $mapType($component.type),
+                  "value": $component.amount,
+                  "currency": $component.currency ? $component.currency : $contract.consideration[0].considerationAttributes.currency,
+                  "description": $component.title
+                }})
+              },
+              "beckn:fulfillment": $performance ? {
+                "@context": $rcContext,
+                "@type": "beckn:Fulfillment",
+                "beckn:id": $performance.id,
+                "beckn:mode": "RESERVATION",
+                "beckn:deliveryAttributes": $merge([
+                  $performance.performanceAttributes,
+                  {
+                    "@context": $rcSessionContext,
+                    "@type": "ChargingSession"
+                  }
+                ])
+              } : undefined,
+              "beckn:payment": $settlement ? {
+                "@context": $rcContext,
+                "@type": "beckn:Payment",
+                "beckn:id": $settlement.id,
+                "beckn:amount": {
+                  "currency": $settlement.priceCurrency,
+                  "value": $settlement.price
+                },
+                "beckn:paymentURL": $settlement.paymentUrl,
+                "beckn:txnRef": $settlement.txnRef,
+                "beckn:paidAt": $settlement.paidAt,
+                "beckn:beneficiary": $settlement.beneficiary,
+                "beckn:paymentStatus": $settlement.paymentStatus,
+                "beckn:paymentAttributes": $settlement.settlementAttributes
+              } : undefined
+            }
+          },
+          "error": {}
+        }
+      )
+
+    bppMappings: |
+      (
+        $ctx := $.context;
+        $order := $.message.order;
+        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
+        $payment := $order."beckn:payment";
+        $performance := $order."beckn:fulfillment";
+
+        $mapType := function($kind) {
+          $kind = "UNIT" ? "BASE_PRICE" : $kind
+        };
+
+        $mapOffer := function($item) {(
+          $acceptedOffer := $item."beckn:acceptedOffer";
+          $merge([
+            {
+              "id": $acceptedOffer."beckn:id" ? $acceptedOffer."beckn:id" : $item."beckn:orderedItem",
+              "resourceIds": $acceptedOffer."beckn:items" ? $acceptedOffer."beckn:items" : [$item."beckn:orderedItem"],
+              "provider": {
+                "id": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller",
+                "descriptor": {
+                  "name": $acceptedOffer."beckn:provider" ? $acceptedOffer."beckn:provider" : $order."beckn:seller"
+                }
+              },
+              "price": $acceptedOffer."beckn:price" ? $acceptedOffer."beckn:price" : $item."beckn:price"
+            },
+            $acceptedOffer."beckn:descriptor"."schema:name" ? {
+              "descriptor": {
+                "name": $acceptedOffer."beckn:descriptor"."schema:name"
+              }
+            } : {}
+          ])
+        )};
+
+        {
+          "context": {
+            "version": $ctx.version,
+            "action": $ctx.action,
+            "networkId": $ctx.domain,
+            "bapId": $ctx.bap_id,
+            "bapUri": $ctx.bap_uri,
+            "transactionId": $ctx.transaction_id,
+            "messageId": $ctx.message_id,
+            "timestamp": $ctx.timestamp,
+            "ttl": $ctx.ttl,
+            "bppId": $ctx.bpp_id,
+            "bppUri": $ctx.bpp_uri
+          },
+          "message": {
+            "contract": {
+              "id": $order."beckn:id",
+              "status": {
+                "code": "ACTIVE"
+              },
+              "participants": [
+                {
+                  "id": $order."beckn:seller",
+                  "descriptor": {
+                    "name": $order."beckn:seller"
+                  },
+                  "participantAttributes": {
+                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@type": "Provider",
+                    "id": $order."beckn:seller",
+                    "descriptor": {
+                      "name": $order."beckn:seller"
+                    }
+                  }
+                },
+                $merge([
+                  {
+                    "id": $order."beckn:buyer"."beckn:id",
+                    "descriptor": {
+                      "name": $order."beckn:buyer"."beckn:displayName"
+                    },
+                    "participantAttributes": {
+                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@type": "Consumer",
+                      "role": "buyer",
+                      "person": {
+                        "name": $order."beckn:buyer"."beckn:displayName",
+                        "telephone": $order."beckn:buyer"."beckn:telephone",
+                        "email": $order."beckn:buyer"."beckn:email",
+                        "id": $order."beckn:buyer"."beckn:id"
+                      }
+                    }
+                  },
+                  $order."beckn:buyer"."beckn:taxID" ? {
+                    "taxID": $order."beckn:buyer"."beckn:taxID"
+                  } : {},
+                  $order."beckn:buyer"."beckn:buyerAttributes" ? {
+                    "buyerAttributes": $order."beckn:buyer"."beckn:buyerAttributes"
+                  } : {}
+                ])
+              ],
+              "commitments": $ensureArray($map($order."beckn:orderItems", function($item) {{
+                "status": {
+                  "descriptor": {
+                    "code": "ACTIVE"
+                  }
+                },
+                "resources": [
+                  {
+                    "id": $item."beckn:orderedItem",
+                    "quantity": $item."beckn:quantity"
+                  }
+                ],
+                "offer": $mapOffer($item)
+              }})),
+              "consideration": [
+                {
+                  "id": "consideration-001",
+                  "status": {
+                    "code": "QUOTED"
+                  },
+                  "considerationAttributes": {
+                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@type": "PriceSpecification",
+                    "currency": $order."beckn:orderValue".currency,
+                    "totalAmount": $order."beckn:orderValue".value,
+                    "breakup": $map($order."beckn:orderValue".components, function($component) {{
+                      "title": $component.description,
+                      "amount": $component.value,
+                      "currency": $component.currency,
+                      "type": $mapType($component.type)
+                    }})
+                  }
+                }
+              ],
+              "performance": $performance ? [
+                {
+                  "id": $performance."beckn:id",
+                  "performanceAttributes": $performance."beckn:deliveryAttributes"
+                }
+              ] : undefined,
+              "settlements": $payment ? [
+                {
+                  "id": $payment."beckn:id",
+                  "considerationId": "consideration-001",
+                  "status": "COMMITTED",
+                  "beneficiary": $payment."beckn:beneficiary",
+                  "paymentUrl": $payment."beckn:paymentURL",
+                  "txnRef": $payment."beckn:txnRef",
+                  "paidAt": $payment."beckn:paidAt",
+                  "paymentStatus": $payment."beckn:paymentStatus",
+                  "price": $payment."beckn:amount".value,
+                  "priceCurrency": $payment."beckn:amount".currency,
+                  "settlementAttributes": $payment."beckn:paymentAttributes"
+                }
+              ] : undefined,
+              "contractAttributes": $order."beckn:orderAttributes" ? $merge([
+                $order."beckn:orderAttributes",
+                {
+                  "@context": $sessionContext,
+                  "@type": "ChargingSession"
+                }
+              ]) : undefined
+            }
+          }
+        }
+      )
