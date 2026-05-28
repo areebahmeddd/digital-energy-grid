@@ -162,8 +162,8 @@ DEVKIT_CONFIGS = {
         # status to buyer or to seller-discom). New in this devkit; mirrors
         # buyerapp's /bap/caller but on port 8082.
         "seller_bap_caller_url": "http://localhost:8082/bap/caller",
-        "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
-        "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
+        "ledger_host_buyer": "https://ies-p2p-energy-ledger.beckn.io",
+        "ledger_host_seller": "https://ies-p2p-energy-ledger.beckn.io",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
         # Source dirs for the discom-ledger TSP collections. The on_status.json
         # response fixtures here ARE the canonical outbound on_status payloads
@@ -861,17 +861,17 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
     bpp_host_root_value = config.get("bpp_host_root")
     if role == "BUYERDISCOMLEDGER":
         bpp_id_value = "buyer-discom-ledger.example.com"
-        bpp_host_root_value = config.get("ledger_host_buyer", "http://buyer-discom-ledger.example.com:9000")
+        bpp_host_root_value = config.get("ledger_host_buyer", "https://ies-p2p-energy-ledger.beckn.io")
     elif role == "SELLERDISCOMLEDGER":
         bpp_id_value = "seller-discom-ledger.example.com"
-        bpp_host_root_value = config.get("ledger_host_seller", "http://seller-discom-ledger.example.com:9000")
+        bpp_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
     elif role == "SELLERDISCOM":
         # Sellerdiscom actor pushes on_status TO the sellerdiscomledger TSP:
         # bpp = the actor, bap = the ledger.
         bpp_id_value = "sellerdiscom.example.com"
         bpp_host_root_value = config.get("sellerdiscom_actor_host_root", "http://sellerdiscom.example.com:9000")
         bap_id_value = "seller-discom-ledger.example.com"
-        bap_host_root_value = config.get("ledger_host_seller", "http://seller-discom-ledger.example.com:9000")
+        bap_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
 
     variables = [
         {"key": "domain", "value": config["domain"]},
