@@ -173,7 +173,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://buyer-discom-ledger.example.com:9000"
           }
         },
         {
@@ -183,7 +183,7 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUri": "http://seller-discom-ledger.example.com:9000"
           }
         }
       ]

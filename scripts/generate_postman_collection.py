@@ -48,6 +48,8 @@ Writes a Postman collection JSON with environment macros for IDs/URIs, suitable 
 importing into Postman or running via newman with environment files.
 """
 
+import copy
+import fnmatch
 import json
 import os
 import re
@@ -56,6 +58,11 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
+
+try:
+    import yaml as _yaml
+except ImportError:
+    _yaml = None
 
 # Import validation functions from validate_schema
 try:
@@ -182,8 +189,36 @@ DEVKIT_CONFIGS = {
         # shared examples dir; the SELLERDISCOM filter discriminates it.
         "sellerdiscom_actor_host_root": "http://sellerdiscom.example.com:9000",
         "sellerdiscom_actor_bpp_caller_url": "http://localhost:8086/bpp/caller",
+        # Subscriber IDs for the discom-ledger TSPs. Emitted as Postman variables
+        # in all wave2 collections so participantId fields in the contract body can
+        # reference them. seller_discom_ledger_id is also used in substitutions.yaml
+        # for context.bppId in seller-initiated-status-to-seller-discom flows.
+        "ledger_buyer_discom_id": "buyer-discom-ledger.example.com",
+        "ledger_seller_discom_id": "seller-discom-ledger.example.com",
+        "seller_discom_ledger_id": "seller-discom-ledger.example.com",
         "usecase": "uc1",
         "structure": "flat",
+        # Rename the generic bap/bpp_* Postman variables to domain-specific names
+        # so testers immediately understand what each variable represents, and so
+        # seller-initiated requests read naturally (e.g. "bapId": {{sellerplatform_id}}
+        # instead of the confusing "bapId": {{bpp_id}}).
+        # Only applied to BAP/BPP (buyer/seller) collections; ledger/discom
+        # collections keep the generic names to avoid ambiguity.
+        "var_names": {
+            "bap_id":         "buyerplatform_id",
+            "bpp_id":         "sellerplatform_id",
+            "bap_host_root":  "buyerplatform_host_root",
+            "bpp_host_root":  "sellerplatform_host_root",
+        },
+        # Participant-attribute substitutions: for each participant role, map
+        # attribute names to Postman variable names. Applied during collection
+        # generation; example JSONs on disk stay with their hardcoded values.
+        "participant_attr_vars": {
+            "buyer":        {"platformUri": "buyerplatform_host_root"},
+            "seller":       {"platformUri": "sellerplatform_host_root"},
+            "buyerDiscom":  {"ledgerUri": "ledger_host_buyer"},
+            "sellerDiscom": {"ledgerUri": "ledger_host_seller"},
+        },
     },
     "data-exchange-uc1-meter-data": {
         "domain": "nfh.global/testnet-deg",
@@ -591,16 +626,162 @@ def load_example_json(filepath: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, role: Optional[str] = None, preserve_party_ids: bool = False) -> Dict[str, Any]:
+# ---------------------------------------------------------------------------
+# Declarative substitution engine — reads substitutions.yaml if present in the
+# collection output directory and applies path-based replacements instead of
+# the role-inference logic in replace_context_macros / replace_participant_attr_macros.
+# ---------------------------------------------------------------------------
+
+def _load_substitutions(yaml_path: Path) -> Optional[Dict]:
+    """Load substitutions.yaml. Returns None if the file doesn't exist or yaml unavailable."""
+    if not yaml_path.exists():
+        return None
+    if _yaml is None:
+        print(f"  Warning: pyyaml not installed; substitutions.yaml ignored ({yaml_path})")
+        return None
+    with yaml_path.open() as f:
+        return _yaml.safe_load(f)
+
+
+def _parse_path(path_str: str) -> List[tuple]:
+    """
+    Parse a dot-notation path with optional array filters into segments.
+
+    'context.bapId'
+      → [('key','context'), ('key','bapId')]
+
+    'message.contract.participants[role=buyer].participantAttributes.platformUri'
+      → [('key','message'), ('key','contract'),
+         ('key','participants'), ('filter','role','buyer'),
+         ('key','participantAttributes'), ('key','platformUri')]
+    """
+    segments: List[tuple] = []
+    for part in path_str.split("."):
+        if "[" in part:
+            arr_key, rest = part.split("[", 1)
+            if arr_key:
+                segments.append(("key", arr_key))
+            field, value = rest.rstrip("]").split("=", 1)
+            segments.append(("filter", field.strip(), value.strip()))
+        else:
+            segments.append(("key", part))
+    return segments
+
+
+def _navigate_to_parent(obj: Any, segments: List[tuple], path_str: str, filename: str):
+    """
+    Walk obj following all but the last segment.
+    Returns (parent_container, final_key_or_filter) so the caller can set a value.
+    Raises ValueError with a diagnostic message if any step fails.
+    """
+    current = obj
+    for seg in segments[:-1]:
+        kind = seg[0]
+        if kind == "key":
+            key = seg[1]
+            if not isinstance(current, dict) or key not in current:
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: key {key!r} not found"
+                )
+            current = current[key]
+        elif kind == "filter":
+            _, field, value = seg
+            if not isinstance(current, list):
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: expected list for filter [{field}={value}]"
+                )
+            match = next(
+                (item for item in current if isinstance(item, dict) and item.get(field) == value),
+                None,
+            )
+            if match is None:
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: no array item with {field}={value!r}"
+                )
+            current = match
+
+    last = segments[-1]
+    if last[0] != "key":
+        raise ValueError(
+            f"{filename!r}: path {path_str!r}: path must end with a key, not an array filter"
+        )
+    return current, last[1]
+
+
+def _apply_substitutions(
+    data: Dict[str, Any],
+    filename: str,
+    role: str,
+    substitutions: Dict,
+) -> Dict[str, Any]:
+    """
+    Apply declarative substitutions from substitutions.yaml to a single payload.
+
+    Rules in `common` are applied first; role-specific rules follow.
+    Within each list, later patterns that match the same file override earlier ones
+    for the same path (last-writer-wins per path key).
+
+    Each rule entry:
+        - match: glob pattern or list of patterns (matched against filename basename)
+        - paths: dict mapping path_str → {var, suffix?, required?}
+    """
+    data = copy.deepcopy(data)
+
+    all_patterns: List[Dict] = list(substitutions.get("common", []))
+    all_patterns.extend(substitutions.get("roles", {}).get(role, []))
+
+    # Accumulate effective rules (path → rule), later patterns win
+    effective: Dict[str, Dict] = {}
+    for entry in all_patterns:
+        raw_match = entry.get("match", "*.json")
+        patterns = [raw_match] if isinstance(raw_match, str) else list(raw_match)
+        if any(fnmatch.fnmatch(filename, p) for p in patterns):
+            for path_str, rule in entry.get("paths", {}).items():
+                effective[path_str] = rule
+
+    for path_str, rule in effective.items():
+        var = rule.get("var", "")
+        suffix = rule.get("suffix", "")
+        required = rule.get("required", True)
+        new_value = f"{{{{{var}}}}}{suffix}"
+
+        segments = _parse_path(path_str)
+        try:
+            container, key = _navigate_to_parent(data, segments, path_str, filename)
+            if not isinstance(container, dict) or key not in container:
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: final key {key!r} not found"
+                )
+            container[key] = new_value
+        except ValueError as exc:
+            if required:
+                raise
+            # optional path — skip silently
+
+    return data
+
+
+def replace_context_macros(
+    data: Dict[str, Any],
+    host_root_style: bool = False,
+    role: Optional[str] = None,
+    preserve_party_ids: bool = False,
+    var_names: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
     """
     Replace hardcoded context values with Postman macros.
 
     Preserves message payload as-is, only modifies context.
 
     When host_root_style is True, bapUri/bppUri are templated as
-    "{{bap_host_root}}/bap/receiver" / "{{bpp_host_root}}/bpp/receiver" so a
+    "{{<bap_var>}}/bap/receiver" / "{{<bpp_var>}}/bpp/receiver" so a
     single host variable (e.g., http://beckn-router:9000 or an ngrok URL)
     drives both request targeting and callback routing.
+
+    var_names optionally overrides the canonical variable names:
+        {"bap_host_root": "buyerplatform_host_root",
+         "bpp_host_root": "sellerplatform_host_root"}
+    Devkits that don't declare var_names use the defaults.
 
     For discom-ledger roles (BUYERDISCOMLEDGER, SELLERDISCOMLEDGER), the BPP
     in the outbound on_status is the LEDGER acting as BPP-caller, so bppUri
@@ -615,6 +796,10 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
     """
     if not isinstance(data, dict):
         return data
+
+    vn = var_names or {}
+    bap_host_var = vn.get("bap_host_root", "bap_host_root")
+    bpp_host_var = vn.get("bpp_host_root", "bpp_host_root")
 
     # Pick the Beckn path the BPP advertises in this collection's outbound
     # call. Default = "/bpp/receiver" (request-direction; e.g. a status
@@ -639,14 +824,14 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
                     if preserve_party_ids:
                         new_context[ctx_key] = ctx_value
                     else:
-                        new_context[ctx_key] = "{{bap_host_root}}/bap/receiver" if host_root_style else "{{bap_uri}}"
+                        new_context[ctx_key] = f"{{{{{bap_host_var}}}}}/bap/receiver" if host_root_style else "{{bap_uri}}"
                 elif ctx_key in ("bpp_id", "bppId"):
                     new_context[ctx_key] = ctx_value if preserve_party_ids else "{{bpp_id}}"
                 elif ctx_key in ("bpp_uri", "bppUri"):
                     if preserve_party_ids:
                         new_context[ctx_key] = ctx_value
                     else:
-                        new_context[ctx_key] = f"{{{{bpp_host_root}}}}{bpp_path}" if host_root_style else "{{bpp_uri}}"
+                        new_context[ctx_key] = f"{{{{{bpp_host_var}}}}}{bpp_path}" if host_root_style else "{{bpp_uri}}"
                 elif ctx_key in ("transaction_id", "transactionId"):
                     new_context[ctx_key] = "{{transaction_id}}"
                 elif ctx_key in ("message_id", "messageId"):
@@ -661,12 +846,12 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
                     new_context[ctx_key] = ctx_value
                 else:
                     # Preserve other context fields (e.g., location)
-                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style, role, preserve_party_ids) if isinstance(ctx_value, (dict, list)) else ctx_value
+                    new_context[ctx_key] = replace_context_macros(ctx_value, host_root_style, role, preserve_party_ids, var_names) if isinstance(ctx_value, (dict, list)) else ctx_value
 
             result[key] = new_context
         elif isinstance(value, (dict, list)):
             # Recursively process nested structures in message
-            result[key] = replace_context_macros(value, host_root_style, role, preserve_party_ids)
+            result[key] = replace_context_macros(value, host_root_style, role, preserve_party_ids, var_names)
         else:
             # Preserve other fields as-is
             result[key] = value
@@ -674,17 +859,24 @@ def replace_context_macros(data: Dict[str, Any], host_root_style: bool = False, 
     return result
 
 
-def replace_ledger_uri_macros(
+def replace_participant_attr_macros(
     data: Any,
-    buyer_var: str = "ledger_host_buyer",
-    seller_var: str = "ledger_host_seller",
+    attr_vars: Dict[str, Dict[str, str]],
 ) -> Any:
-    """Replace ledgerUri in participants with the top-level {{ledger_host_*}}.
+    """Replace participant attribute values with Postman variable references.
 
-    ledgerUri is the *root* of the ledger host; the Beckn cascade path
-    (/bap/receiver or /bpp/receiver) is appended downstream by the
-    degledgerrecorder based on the discom's role, not hard-coded here.
+    attr_vars maps participant role → {attribute_name → postman_variable_name}.
+    Only attributes present in attr_vars are replaced; all other fields are
+    passed through unchanged. Example:
+        {
+            "buyer":        {"platformUri": "buyerplatform_host_root"},
+            "seller":       {"platformUri": "sellerplatform_host_root"},
+            "buyerDiscom":  {"ledgerUri":   "ledger_host_buyer"},
+            "sellerDiscom": {"ledgerUri":   "ledger_host_seller"},
+        }
     """
+    if not attr_vars:
+        return data
     if isinstance(data, dict):
         result = {}
         for key, value in data.items():
@@ -693,22 +885,33 @@ def replace_ledger_uri_macros(
                 for participant in value:
                     p = dict(participant)
                     role = p.get("role", "")
-                    attrs = p.get("participantAttributes")
-                    if isinstance(attrs, dict) and "ledgerUri" in attrs:
-                        attrs = dict(attrs)
-                        if role == "buyerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{buyer_var}}}}}"
-                        elif role == "sellerDiscom":
-                            attrs["ledgerUri"] = f"{{{{{seller_var}}}}}"
+                    role_attrs = attr_vars.get(role)
+                    if role_attrs and isinstance(p.get("participantAttributes"), dict):
+                        attrs = dict(p["participantAttributes"])
+                        for attr_name, var_name in role_attrs.items():
+                            if attr_name in attrs:
+                                attrs[attr_name] = f"{{{{{var_name}}}}}"
                         p["participantAttributes"] = attrs
                     new_parts.append(p)
                 result[key] = new_parts
             else:
-                result[key] = replace_ledger_uri_macros(value, buyer_var, seller_var)
+                result[key] = replace_participant_attr_macros(value, attr_vars)
         return result
     elif isinstance(data, list):
-        return [replace_ledger_uri_macros(item, buyer_var, seller_var) for item in data]
+        return [replace_participant_attr_macros(item, attr_vars) for item in data]
     return data
+
+
+def replace_ledger_uri_macros(
+    data: Any,
+    buyer_var: str = "ledger_host_buyer",
+    seller_var: str = "ledger_host_seller",
+) -> Any:
+    """Backward-compat wrapper. Prefer replace_participant_attr_macros for new devkits."""
+    return replace_participant_attr_macros(data, {
+        "buyerDiscom":  {"ledgerUri": buyer_var},
+        "sellerDiscom": {"ledgerUri": seller_var},
+    })
 
 
 def create_postman_request(
@@ -722,25 +925,43 @@ def create_postman_request(
     ledger_host_buyer: Optional[str] = None,
     ledger_host_seller: Optional[str] = None,
     preserve_party_ids: bool = False,
+    var_names: Optional[Dict[str, str]] = None,
+    participant_attr_vars: Optional[Dict[str, Dict[str, str]]] = None,
+    filename: Optional[str] = None,
+    substitutions: Optional[Dict] = None,
 ) -> Dict[str, Any]:
     """
     Create a Postman request object from JSON data.
+
+    When `substitutions` (loaded from substitutions.yaml) and `filename` are
+    both provided, all variable replacement is driven by the YAML rules and the
+    legacy role-inference path is skipped entirely. For devkits without a
+    substitutions.yaml the legacy path continues to work unchanged.
 
     Args:
         json_data: The JSON payload
         action: Action name (e.g., "discover", "on_discover")
         endpoint: API endpoint path
         request_name: Name for the request
-        role: Role (BAP, BPP, UtilityBPP)
+        role: Role (BAP, BPP, UtilityBPP, ...)
         adapter_url_var: Variable name for adapter URL (e.g., "bap_caller_url")
-        host_root_style: Template bapUri/bppUri as {{bap_host_root}}/bap/receiver
+        host_root_style: Template bapUri/bppUri as {{<bap_var>}}/bap/receiver
         ledger_host_buyer: Override for buyer ledger host (uses config default if None)
         ledger_host_seller: Override for seller ledger host (uses config default if None)
+        var_names: Optional rename map for canonical variable names
+        participant_attr_vars: Optional per-role attribute substitution map
+        filename: Basename of the source example file (required when substitutions is set)
+        substitutions: Parsed substitutions.yaml content; drives all replacements when set
     """
-    # Replace macros in the JSON
-    request_body = replace_context_macros(json_data, host_root_style, role, preserve_party_ids)
-    if ledger_host_buyer is not None or ledger_host_seller is not None:
-        request_body = replace_ledger_uri_macros(request_body)
+    if substitutions and filename:
+        request_body = _apply_substitutions(json_data, filename, role, substitutions)
+    else:
+        # Legacy path — used for all devkits without substitutions.yaml
+        request_body = replace_context_macros(json_data, host_root_style, role, preserve_party_ids, var_names)
+        if participant_attr_vars:
+            request_body = replace_participant_attr_macros(request_body, participant_attr_vars)
+        elif ledger_host_buyer is not None or ledger_host_seller is not None:
+            request_body = replace_ledger_uri_macros(request_body)
 
     # Format JSON, preserving the same compact-array formatting used in the
     # example payloads on disk: each item of a small repetitive array (intervals,
@@ -846,7 +1067,7 @@ def scan_examples_directory(examples_dir: Path, structure: str, role: str) -> Di
     return actions_map
 
 
-def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
+def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[str, str]] = None) -> List[Dict[str, str]]:
     """Get collection variables based on devkit and role."""
     config = DEVKIT_CONFIGS[devkit]
 
@@ -873,19 +1094,38 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
         bap_id_value = "seller-discom-ledger.example.com"
         bap_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
 
+    # var_names renames apply to BAP/BPP collections only; ledger/discom roles
+    # keep generic names to avoid ambiguity (their bpp_id is the ledger, not seller).
+    vn = var_names or {}
+    if role in ("BAP", "BPP"):
+        bap_id_key = vn.get("bap_id", "bap_id")
+        bpp_id_key = vn.get("bpp_id", "bpp_id")
+    else:
+        bap_id_key = "bap_id"
+        bpp_id_key = "bpp_id"
+
     variables = [
         {"key": "domain", "value": config["domain"]},
         {"key": "version", "value": "2.0.0"},
-        {"key": "bap_id", "value": bap_id_value},
-        {"key": "bpp_id", "value": bpp_id_value},
+        {"key": bap_id_key, "value": bap_id_value},
+        {"key": bpp_id_key, "value": bpp_id_value},
         {"key": "transaction_id", "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"},
         {"key": "iso_date", "value": ""}
     ]
 
-    # Presence of bap_host_root switches templating to {{bap_host_root}}/bap/receiver
+    # Presence of bap_host_root switches templating to {{<bap_var>}}/bap/receiver.
+    # For BAP/BPP roles, var_names can rename these to domain-specific names
+    # (e.g. buyerplatform_host_root / sellerplatform_host_root). Ledger/discom
+    # roles keep the generic names to avoid ambiguity.
     if "bap_host_root" in config:
-        variables.append({"key": "bap_host_root", "value": bap_host_root_value or config["bap_host_root"]})
-        variables.append({"key": "bpp_host_root", "value": bpp_host_root_value or config["bpp_host_root"]})
+        if role in ("BAP", "BPP"):
+            bap_key = vn.get("bap_host_root", "bap_host_root")
+            bpp_key = vn.get("bpp_host_root", "bpp_host_root")
+        else:
+            bap_key = "bap_host_root"
+            bpp_key = "bpp_host_root"
+        variables.append({"key": bap_key, "value": bap_host_root_value or config["bap_host_root"]})
+        variables.append({"key": bpp_key, "value": bpp_host_root_value or config["bpp_host_root"]})
     else:
         variables.append({"key": "bap_uri", "value": config["bap_uri"]})
         variables.append({"key": "bpp_uri", "value": config["bpp_uri"]})
@@ -909,11 +1149,12 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
         if "ledger_host_seller" in config:
             variables.append({"key": "sellerdiscom_ledger_host_root", "value": config["ledger_host_seller"]})
 
-    # Seller-initiated /bap/caller URL — present when the SELLER (BPP-role)
-    # collection includes seller-initiated requests (e.g. wave2: seller asking
-    # buyer or seller-discom-ledger for status).
+    # Seller-initiated /bap/caller URL and discom-ledger IDs — present when the
+    # SELLER (BPP-role) collection includes seller-initiated requests.
     if "seller_bap_caller_url" in config and role == "BPP":
         variables.append({"key": "seller_bap_caller_url", "value": config["seller_bap_caller_url"]})
+    if "seller_discom_ledger_id" in config and role == "BPP":
+        variables.append({"key": "seller_discom_ledger_id", "value": config["seller_discom_ledger_id"]})
 
     # Ledger host variables (wave2 and other devkits that route through a separate ledger)
     if "ledger_host_buyer" in config:
@@ -922,6 +1163,12 @@ def get_collection_variables(devkit: str, role: str) -> List[Dict[str, str]]:
         variables.append({"key": "ledger_host_seller", "value": config["ledger_host_seller"]})
     if "ledger_adapter_url" in config:
         variables.append({"key": "ledger_adapter_url", "value": config["ledger_adapter_url"]})
+    # Discom-ledger subscriber IDs — emitted for all roles so contract body
+    # participantId fields can reference them in every collection.
+    if "ledger_buyer_discom_id" in config:
+        variables.append({"key": "ledger_buyer_discom_id", "value": config["ledger_buyer_discom_id"]})
+    if "ledger_seller_discom_id" in config:
+        variables.append({"key": "ledger_seller_discom_id", "value": config["ledger_seller_discom_id"]})
 
     return variables
 
@@ -956,6 +1203,8 @@ def generate_collection(
         config["ledger_host_seller"] = ledger_host_seller
     structure = config["structure"]
     host_root_style = "bap_host_root" in config
+    var_names: Dict[str, str] = config.get("var_names", {})
+    participant_attr_vars: Dict[str, Dict[str, str]] = config.get("participant_attr_vars", {})
 
     # Determine action mapping and adapter URL based on canonical role
     if role == "BAP":
@@ -1008,13 +1257,20 @@ def generate_collection(
     
     print(f"Scanning examples directory: {examples_dir}")
     print(f"Devkit: {devkit}, Role: {role}, Structure: {structure}")
-    
+
+    # Load declarative substitutions from the output directory (opt-in per collection).
+    # When present, all variable replacement is driven by the YAML; legacy
+    # role-inference is skipped. When absent, legacy path runs unchanged.
+    substitutions = _load_substitutions(output_path.parent / "substitutions.yaml")
+    if substitutions:
+        print(f"  Loaded substitutions.yaml from {output_path.parent}")
+
     actions_map = scan_examples_directory(examples_dir, structure, role)
-    
+
     if not actions_map:
         print("No valid examples found. Exiting.")
         return
-    
+
     # Build collection items (folders, one per action). Per-file the URL var
     # may differ — e.g. SELLER's status has two seller-initiated requests
     # going to {{seller_bap_caller_url}}.
@@ -1061,6 +1317,10 @@ def generate_collection(
                 ledger_host_buyer=config.get("ledger_host_buyer"),
                 ledger_host_seller=config.get("ledger_host_seller"),
                 preserve_party_ids=is_seller_initiated,
+                var_names=var_names or None,
+                participant_attr_vars=participant_attr_vars or None,
+                filename=json_file.name,
+                substitutions=substitutions,
             )
             action_items.append(request)
 
@@ -1086,7 +1346,7 @@ def generate_collection(
                 }
             }
         ],
-        "variable": get_collection_variables(devkit, role)
+        "variable": get_collection_variables(devkit, role, var_names=var_names or None)
     }
     
     # Write output
