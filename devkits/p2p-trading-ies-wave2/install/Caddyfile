@@ -28,6 +28,9 @@ http://buyer-discom-ledger.example.com:9000 {
 http://sellerdiscom.example.com:9000 {
     reverse_proxy onix-sellerdiscom:8086
 }
+http://buyerdiscom.example.com:9000 {
+    reverse_proxy onix-buyerdiscom:8085
+}
 
 # Catch-all on :9000 — handles two routing modes:
 #
@@ -70,6 +73,11 @@ http://sellerdiscom.example.com:9000 {
     handle @sellerDiscomActor {
         uri strip_prefix /sellerdiscom
         reverse_proxy onix-sellerdiscom:8086
+    }
+    @buyerDiscomActor path /buyerdiscom /buyerdiscom/*
+    handle @buyerDiscomActor {
+        uri strip_prefix /buyerdiscom
+        reverse_proxy onix-buyerdiscom:8085
     }
 
     # --- Standard Beckn paths (single-participant / direct-path mode) ---

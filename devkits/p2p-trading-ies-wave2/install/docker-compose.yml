@@ -224,6 +224,40 @@ services:
     networks:
       - bap_side
 
+  # ---------- Buyer Discom Actor (the utility itself, distinct from the
+  #            buyer-discom-ledger TSP). Symmetric counterpart to the seller
+  #            discom actor. Lives on the BAP side so it can reach
+  #            buyer-discom-ledger directly via docker DNS / network alias. ----------
+  redis-buyerdiscom:
+    image: redis:alpine
+    hostname: redis-buyerdiscom
+    container_name: redis-buyerdiscom
+    networks:
+      - bap_side
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  onix-buyerdiscom:
+    image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
+    container_name: onix-buyerdiscom
+    ports:
+      - "8085:8085"
+    environment:
+      CONFIG_FILE: "/app/config/local-p2p-trading-buyerdiscom.yaml"
+    volumes:
+      - ../config:/app/config
+      - ../schemas:/app/schemas
+      - ../policies:/app/policies
+    command: ["./server", "--config=/app/config/local-p2p-trading-buyerdiscom.yaml"]
+    networks:
+      - bap_side
+    depends_on:
+      redis-buyerdiscom:
+        condition: service_healthy
+
   # ---------- Seller Discom Actor (the utility itself, distinct from the
   #            seller-discom-ledger TSP). New Beckn-native replacement for
   #            the bespoke /ledger/allocate REST push. Lives on the BPP
@@ -279,6 +313,7 @@ services:
           - seller-discom-ledger.example.com
           - buyer-discom-ledger.example.com
           - sellerdiscom.example.com
+          - buyerdiscom.example.com
       bpp_side:
         aliases:
           - buyerapp.example.com
@@ -286,6 +321,7 @@ services:
           - seller-discom-ledger.example.com
           - buyer-discom-ledger.example.com
           - sellerdiscom.example.com
+          - buyerdiscom.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 
