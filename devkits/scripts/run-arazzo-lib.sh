@@ -6,8 +6,9 @@
 # beckn-router (or an ngrok tunnel), and post-processes respect's JSON log
 # to fail the run on any NACK. Native successCriteria still crashes respect
 # with "Maximum call stack size exceeded" (verified on 2.14, 2.29, 2.30.5
-# — even a literal "1 == 1" condition triggers the bug), so the NACK check
-# and the sandbox-callback check are done out-of-band here.
+# — even a literal "1 == 1" condition triggers the bug). Pinned to 2.13.0
+# (last version before the regression); NACK and sandbox-callback checks
+# are done out-of-band below.
 #
 # Usage from a wrapper:
 #   set -euo pipefail
@@ -141,12 +142,12 @@ for f in sorted(src.rglob("*.json")):
   respect_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   set +e
   if [ "$public_url" = "http://beckn-router:9000" ]; then
-    npx --yes @redocly/cli respect \
+    npx --yes @redocly/cli@2.13.0 respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       "${respect_args[@]}"
   else
-    npx --yes @redocly/cli respect \
+    npx --yes @redocly/cli@2.13.0 respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       -S "beckn-bap-caller=$public_url/bap/caller" \
