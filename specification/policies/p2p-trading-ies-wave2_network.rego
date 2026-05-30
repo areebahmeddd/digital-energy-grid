@@ -18,15 +18,17 @@
 # N3.  Inter-discom: buyer and seller must have different utilityIds.
 # N4.  commitmentAttributes type: when commitmentAttributes is present it must
 #      be @type: TimeSeries.
-# N5.  commitmentAttributes payloadTypes: must declare PRICE_PER_KWH and
-#      AVAILABLE_QTY when offer interval data is present.
+# N5.  commitmentAttributes payloadTypes: must declare PRICE_PER_KWH when
+#      seller offer intervals are present; seller offer payload must declare
+#      AVAILABLE_QTY.
 # N6.  Offer currency: PRICE_PER_KWH descriptor must carry currency: INR.
-# N7.  Offer qty units: AVAILABLE_QTY descriptor must carry units: KWH.
+# N7.  Offer qty units: AVAILABLE_QTY in the seller offer payload must carry
+#      units: KWH.
 # N8.  Bid payloadTypes: must declare REQUESTED_QTY when bid interval data is
 #      present (i.e. buyer has written at least one REQUESTED_QTY interval).
 # N9.  Bid qty units: REQUESTED_QTY descriptor must carry units: KWH.
 # N10. Interval id alignment: REQUESTED_QTY interval ids must be a subset of
-#      AVAILABLE_QTY interval ids.
+#      seller offer interval ids.
 # N11. Quantity cap: REQUESTED_QTY ≤ AVAILABLE_QTY per matched interval.
 # N12. No self-trade: buyer and seller meter ids must differ.
 # N13. Seller source type must be a generation source (not GRID).
@@ -43,7 +45,7 @@
 # P1.  payloadTypes declared: BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC, FINAL_ALLOC.
 # P2.  Performance qty units: all three types must carry units: KWH.
 # P3.  Interval coverage: BUYER_DISCOM_ALLOC interval ids must be a subset of
-#      AVAILABLE_QTY interval ids.
+#      seller offer interval ids.
 # P4.  Settlement consistency: FINAL_ALLOC ≤ min(BUYER_DISCOM_ALLOC,
 #      SELLER_DISCOM_ALLOC) per interval.
 #
@@ -129,7 +131,9 @@ _commit_ts_types := _ts_types(_commit_ts) if {
 	is_object(_commit_ts)
 }
 
-_offer_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "AVAILABLE_QTY"}
+_offer_interval_ids := {i.id | some i in _seller_role_inputs.payload.intervals}
+
+_seller_avail_by_id := {i.id: _payload_val(i, "AVAILABLE_QTY") | some i in _seller_role_inputs.payload.intervals}
 
 _bid_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "REQUESTED_QTY"}
 
@@ -200,20 +204,14 @@ _contract_violations contains "commitmentAttributes must have @type: TimeSeries"
 }
 
 # ---------------------------------------------------------------------------
-# N5-N7 — commitmentAttributes offer-side payloadType and unit validation
-#          (only when offer interval data is present)
+# N5-N7 — Offer-side payloadType and unit validation
+#          (N5/N6 check commitmentAttributes; N7 checks seller offer payload)
 # ---------------------------------------------------------------------------
 
 _contract_violations contains "commitmentAttributes payloadDescriptors must include PRICE_PER_KWH" if {
 	is_object(_commit_ts)
 	count(_offer_interval_ids) > 0
 	not "PRICE_PER_KWH" in _commit_ts_types
-}
-
-_contract_violations contains "commitmentAttributes payloadDescriptors must include AVAILABLE_QTY" if {
-	is_object(_commit_ts)
-	count(_offer_interval_ids) > 0
-	not "AVAILABLE_QTY" in _commit_ts_types
 }
 
 _contract_violations contains msg if {
@@ -225,11 +223,10 @@ _contract_violations contains msg if {
 }
 
 _contract_violations contains msg if {
-	is_object(_commit_ts)
-	"AVAILABLE_QTY" in _commit_ts_types
-	u := _ts_units(_commit_ts, "AVAILABLE_QTY")
+	count(_offer_interval_ids) > 0
+	u := _ts_units(_seller_role_inputs.payload, "AVAILABLE_QTY")
 	u != "KWH"
-	msg := sprintf("commitmentAttributes AVAILABLE_QTY units is %q; must be KWH", [u])
+	msg := sprintf("seller offer payload AVAILABLE_QTY units is %q; must be KWH", [u])
 }
 
 # ---------------------------------------------------------------------------
@@ -252,7 +249,7 @@ _contract_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# N10 — Interval id alignment: REQUESTED_QTY ids ⊆ AVAILABLE_QTY ids
+# N10 — Interval id alignment: REQUESTED_QTY ids ⊆ seller offer interval ids
 # ---------------------------------------------------------------------------
 
 _contract_violations contains msg if {
@@ -262,7 +259,7 @@ _contract_violations contains msg if {
 	extra := _bid_interval_ids - _offer_interval_ids
 	count(extra) > 0
 	msg := sprintf(
-		"commitmentAttributes REQUESTED_QTY interval ids %v not present in AVAILABLE_QTY interval ids %v",
+		"commitmentAttributes REQUESTED_QTY interval ids %v not present in seller offer interval ids %v",
 		[extra, _offer_interval_ids],
 	)
 }
@@ -277,7 +274,7 @@ _contract_violations contains msg if {
 	interval.id in _offer_interval_ids
 	interval.id in _bid_interval_ids
 	req := _payload_val(interval, "REQUESTED_QTY")
-	avail := _payload_val(interval, "AVAILABLE_QTY")
+	avail := _seller_avail_by_id[interval.id]
 	req > avail
 	msg := sprintf(
 		"commitmentAttributes interval %v: REQUESTED_QTY %v kWh > AVAILABLE_QTY %v kWh",
@@ -388,7 +385,7 @@ _performance_violations contains msg if {
 	extra := _perf_interval_ids - _offer_interval_ids
 	count(extra) > 0
 	msg := sprintf(
-		"commitmentAttributes BUYER_DISCOM_ALLOC interval ids %v not present in AVAILABLE_QTY interval ids %v",
+		"commitmentAttributes BUYER_DISCOM_ALLOC interval ids %v not present in seller offer interval ids %v",
 		[extra, _offer_interval_ids],
 	)
 }
