@@ -1328,10 +1328,21 @@ def generate_collection(
             collection_items.append({"name": action, "item": action_items})
             print(f"  Created folder '{action}' with {len(action_items)} request(s)")
     
+    # Preserve the existing _postman_id so regeneration doesn't produce a spurious
+    # diff. Only generate a new UUID when the output file doesn't exist yet.
+    existing_id = None
+    if output_path.exists():
+        try:
+            with output_path.open() as f:
+                existing_id = json.load(f).get("info", {}).get("_postman_id")
+        except Exception:
+            pass
+    postman_id = existing_id or str(uuid.uuid4())
+
     # Build collection
     collection = {
         "info": {
-            "_postman_id": str(uuid.uuid4()),
+            "_postman_id": postman_id,
             "name": collection_name,
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
             "description": collection_description
