@@ -378,6 +378,7 @@ _performance_violations contains msg if {
 _performance_violations contains msg if {
 	is_object(_commit_ts)
 	count(_perf_interval_ids) > 0
+	count(_offer_interval_ids) > 0
 	extra := _perf_interval_ids - _offer_interval_ids
 	count(extra) > 0
 	msg := sprintf(

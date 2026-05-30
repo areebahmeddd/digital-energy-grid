@@ -47,6 +47,7 @@ info:
         status-roundtrip-via-seller-discom, buyer-discom-emits-on-status,
         seller-status-to-buyer, seller-status-to-seller-discom,
         sellerdiscom-pushes-allocation, buyerdiscom-pushes-allocation,
+        sellerdiscom-pushes-settled-on-status, buyerdiscom-pushes-settled-on-status,
         sellerdiscom-ledger-requests-meter-data,
         buyerdiscom-ledger-requests-meter-data
 
@@ -318,6 +319,54 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/buyerdiscom-on-status.json"
+
+  # ── Settled on_status via sellerDiscom cascade (full offer context + real FINAL_ALLOC) ──
+
+  - workflowId: sellerdiscom-pushes-settled-on-status
+    summary: >
+      SellerDiscom emits a fully-settled /on_status carrying the complete offer
+      context (offerAttributes.inputs including AVAILABLE_QTY intervals) and all
+      seven commitmentAttributes payload types with real values, including
+      FINAL_ALLOC. Exercises OPA rules P3 (FINAL_ALLOC ids subset of seller offer
+      ids) and P4 (FINAL_ALLOC <= min(BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC)).
+      bppId=seller-discom-ledger.example.com triggers Rule 2a cascade at
+      seller/bap/receiver → buyer/bap/receiver → buyerDiscom (Rule 2b).
+    steps:
+      - stepId: sellerdiscom-emits-settled-on-status
+        description: >
+          POST to sellerdiscom-ledger/bpp/caller (port 8083). The settled payload
+          includes offerAttributes so the network-policy P3 interval-coverage check
+          can fire. All seven commitmentAttributes payload types are populated with
+          real values: PRICE_PER_KWH, REQUESTED_QTY, BUYER_DISCOM_ALLOC,
+          BUYER_DISCOM_STATUS, SELLER_DISCOM_ALLOC, SELLER_DISCOM_STATUS,
+          FINAL_ALLOC. FINAL_ALLOC=min(BUYER,SELLER) so P4 passes.
+        operationId: beckn-sellerdiscom-ledger-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../../responses/sellerdiscom/on_status_settled.json"
+
+  # ── Settled on_status via buyerDiscom callback (full offer context + real FINAL_ALLOC) ──
+
+  - workflowId: buyerdiscom-pushes-settled-on-status
+    summary: >
+      BuyerDiscom emits a fully-settled /on_status carrying the complete offer
+      context and all seven commitmentAttributes payload types with real values.
+      Symmetric counterpart to sellerdiscom-pushes-settled-on-status.
+      bppId=buyer-discom-ledger.example.com triggers Rule 2a at buyer/bap/receiver
+      → seller/bap/receiver → sellerDiscom (Rule 2b).
+    steps:
+      - stepId: buyerdiscom-emits-settled-on-status
+        description: >
+          POST to buyerdiscom-ledger/bpp/caller (port 8084). The settled payload
+          includes offerAttributes so the network-policy P3 interval-coverage check
+          can fire. All seven commitmentAttributes payload types are populated with
+          real values. FINAL_ALLOC=min(BUYER,SELLER) so P4 passes.
+        operationId: beckn-buyerdiscom-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../../responses/buyerdiscom/on_status_settled.json"
 
   # ── Meter-data request: seller-discom-ledger → sellerdiscom utility ──
 
