@@ -54,29 +54,29 @@ info:
 sourceDescriptions:
   - name: beckn-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8081/bap/caller
 
   - name: beckn-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bpp/caller
 
   - name: beckn-sellerdiscom-ledger-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bpp/caller
 
   - name: beckn-buyerdiscom-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8084/bpp/caller
 
   # Sellerapp's /bap/caller — used for seller-initiated requests (status to
   # buyer for buyer-discom alloc, or status to seller-discom for settlement).
   - name: beckn-seller-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bap/caller
 
   # Sellerdiscom — the seller-side distribution utility (distinct
@@ -84,28 +84,28 @@ sourceDescriptions:
   # meter actuals (DatasetItem-wrapped BecknTimeSeries) as on_status.
   - name: beckn-sellerdiscom-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8086/bpp/caller
 
   # Buyerdiscom — the buyer-side distribution utility (distinct from the
   # buyer-discom-ledger TSP). Symmetric counterpart to beckn-sellerdiscom-bpp-caller.
   - name: beckn-buyerdiscom-actor-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8085/bpp/caller
 
   # SellerDiscom Ledger /bap/caller — outbound status requests to the
   # sellerdiscom utility (ledger acting as BAP for meter-data sub-tx).
   - name: beckn-sellerdiscom-ledger-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bap/caller
 
   # BuyerDiscom Ledger /bap/caller — outbound status requests to the
   # buyerdiscom utility (ledger acting as BAP for meter-data sub-tx).
   - name: beckn-buyerdiscom-ledger-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8084/bap/caller
 
 workflows:

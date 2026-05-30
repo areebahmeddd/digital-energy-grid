@@ -4,11 +4,11 @@
 # Sourced by per-usecase run-arazzo.sh wrappers; drives Redocly Respect,
 # rewrites payload BAP/BPP URIs so BAP↔BPP traffic flows through the local
 # beckn-router (or an ngrok tunnel), and post-processes respect's JSON log
-# to fail the run on any NACK. Native successCriteria still crashes respect
-# with "Maximum call stack size exceeded" (verified on 2.14, 2.29, 2.30.5
-# — even a literal "1 == 1" condition triggers the bug). Pinned to 2.13.0
-# (last version before the regression); NACK and sandbox-callback checks
-# are done out-of-band below.
+# to fail the run on any NACK. Redocly Respect crashes with "Maximum call
+# stack size exceeded" in 2.14+ (successCriteria evaluator bug) and requires
+# --stack-size=65536 for its spec dereferencer on the beckn OpenAPI spec.
+# Pinned to 2.13.0 via a cached npm install; NACK and sandbox-callback
+# checks are done out-of-band below.
 #
 # Usage from a wrapper:
 #   set -euo pipefail
@@ -51,7 +51,10 @@ run_arazzo() {
   #   ../../responses/  → $work/responses/
   mkdir -p "$work/$uc_name/workflows" "$work/$uc_name/examples"
 
-  cp "$usecase_root/workflows/$arazzo" "$work/$uc_name/workflows/"
+  # Copy the Arazzo file and all sibling YAML/JSON files (local OpenAPI stubs,
+  # substitution files, etc.) so relative $ref paths resolve in the tmpdir.
+  find "$usecase_root/workflows" -maxdepth 1 \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
+    -exec cp {} "$work/$uc_name/workflows/" \;
 
   # Shared URI-patching helper — rewrites context.bapUri/bppUri and
   # participant ledgerUris so each participant lives on its own hostname
@@ -134,6 +137,19 @@ for f in sorted(src.rglob("*.json")):
     respect_args+=("${RUN_ARAZZO_ARGS[@]}")
   fi
 
+  # Install a pinned Redocly into a local cache so we can invoke it via node
+  # with enlarged stack and heap — necessary because beckn.yaml has intentional
+  # circular $ref chains (Offer→AddOn→Offer, GeoJSONGeometry self-ref, etc.)
+  # that exhaust Node.js default stack during Redocly's spec dereferencer pass.
+  local redocly_cache="/tmp/redocly-cli-2.13.0"
+  local redocly_bin="$redocly_cache/node_modules/.bin/redocly"
+  if [ ! -x "$redocly_bin" ]; then
+    echo "Installing @redocly/cli@2.13.0 into $redocly_cache ..."
+    mkdir -p "$redocly_cache"
+    npm install --prefix "$redocly_cache" "@redocly/cli@2.13.0" \
+      --no-save --no-audit --no-fund --silent
+  fi
+
   local json_out="$work/respect-output.json"
   local respect_exit
   # Capture an RFC3339 timestamp BEFORE the run so the sandbox-callback log
@@ -142,12 +158,12 @@ for f in sorted(src.rglob("*.json")):
   respect_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   set +e
   if [ "$public_url" = "http://beckn-router:9000" ]; then
-    npx --yes @redocly/cli@2.13.0 respect \
+    node --stack-size=65536 --max-old-space-size=8192 "$redocly_bin" respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       "${respect_args[@]}"
   else
-    npx --yes @redocly/cli@2.13.0 respect \
+    node --stack-size=65536 --max-old-space-size=8192 "$redocly_bin" respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       -S "beckn-bap-caller=$public_url/bap/caller" \
