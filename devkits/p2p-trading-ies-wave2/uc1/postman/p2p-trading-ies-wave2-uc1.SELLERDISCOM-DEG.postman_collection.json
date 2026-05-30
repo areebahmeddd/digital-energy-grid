@@ -10,13 +10,13 @@
       "name": "on_status",
       "item": [
         {
-          "name": "sellerdiscom-actor-on-status",
+          "name": "sellerdiscom-on-status",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"on_status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/caller\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n      \"https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-p2p-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-actuals-001\",\n              \"descriptor\": {\n                \"name\": \"Seller-discom meter actuals\"\n              },\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitText\": \"report\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n                \"@type\": \"DatasetItem\",\n                \"schema:identifier\": \"ds-actuals-001\",\n                \"schema:name\": \"Seller-discom meter actuals\",\n                \"schema:temporalCoverage\": \"2026-04-26T04:30:00Z/2026-04-26T05:30:00Z\",\n                \"dataPayload\": {\n                  \"@context\": \"https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld\",\n                  \"@type\": \"TimeSeries\",\n                  \"resourceName\": \"TEST_METER_SELLER_001\",\n                  \"clientName\": \"TEST_DISCOM_SELLER\",\n                  \"intervalPeriod\": {\n                    \"start\": \"2026-04-26T04:30:00Z\",\n                    \"duration\": \"PT1H\"\n                  },\n                  \"payloadDescriptors\": [\n                    {\"objectType\": \"REPORT_PAYLOAD_DESCRIPTOR\", \"payloadType\": \"ACTUAL_PULLED\", \"units\": \"KWH\"}\n                  ],\n                  \"intervals\": [\n                    {\"id\": 0, \"payloads\": [{\"type\": \"ACTUAL_PULLED\", \"values\": [19.2]}]}\n                  ]\n                }\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-001\",\n            \"resourceIds\": [\"ds-actuals-001\"]\n          }\n        }\n      ]\n    }\n  }\n}",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"on_status\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"bppId\": \"{{bpp_id}}\",\n    \"bppUri\": \"{{bpp_host_root}}/bpp/caller\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n      \"https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\n    \"contract\": {\n      \"id\": \"contract-p2p-001\",\n      \"status\": {\n        \"code\": \"ACTIVE\"\n      },\n      \"commitments\": [\n        {\n          \"id\": \"commitment-p2p-001\",\n          \"status\": {\n            \"descriptor\": {\n              \"code\": \"ACTIVE\"\n            }\n          },\n          \"resources\": [\n            {\n              \"id\": \"ds-actuals-001\",\n              \"descriptor\": {\n                \"name\": \"Seller-discom meter actuals\"\n              },\n              \"quantity\": {\n                \"@type\": \"Quantity\",\n                \"unitText\": \"report\",\n                \"unitCode\": \"EA\",\n                \"value\": \"1\"\n              },\n              \"resourceAttributes\": {\n                \"@context\": \"https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld\",\n                \"@type\": \"DatasetItem\",\n                \"schema:identifier\": \"ds-actuals-001\",\n                \"schema:name\": \"Seller-discom meter actuals\",\n                \"schema:temporalCoverage\": \"2026-04-26T04:30:00Z/2026-04-26T05:30:00Z\",\n                \"dataPayload\": {\n                  \"@context\": \"https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld\",\n                  \"@type\": \"TimeSeries\",\n                  \"resourceName\": \"TEST_METER_SELLER_001\",\n                  \"clientName\": \"TEST_DISCOM_SELLER\",\n                  \"intervalPeriod\": {\n                    \"start\": \"2026-04-26T04:30:00Z\",\n                    \"duration\": \"PT1H\"\n                  },\n                  \"payloadDescriptors\": [\n                    {\"objectType\": \"REPORT_PAYLOAD_DESCRIPTOR\", \"payloadType\": \"ENERGY_CONSUMPTION\", \"units\": \"KWH\"}\n                  ],\n                  \"intervals\": [\n                    {\"id\": 0, \"payloads\": [{\"type\": \"ENERGY_CONSUMPTION\", \"values\": [-19.2]}]}\n                  ]\n                }\n              }\n            }\n          ],\n          \"offer\": {\n            \"id\": \"offer-001\",\n            \"resourceIds\": [\"ds-actuals-001\"]\n          }\n        }\n      ]\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -24,15 +24,15 @@
               }
             },
             "url": {
-              "raw": "{{sellerdiscom_actor_bpp_caller_url}}/on_status",
+              "raw": "{{sellerdiscom_bpp_caller_url}}/on_status",
               "host": [
-                "{{sellerdiscom_actor_bpp_caller_url}}"
+                "{{sellerdiscom_bpp_caller_url}}"
               ],
               "path": [
                 "on_status"
               ]
             },
-            "description": "On_status request: sellerdiscom-actor-on-status"
+            "description": "On_status request: sellerdiscom-on-status"
           },
           "response": []
         }
@@ -73,7 +73,7 @@
     },
     {
       "key": "transaction_id",
-      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2026"
     },
     {
       "key": "iso_date",
@@ -88,7 +88,7 @@
       "value": "http://sellerdiscom.example.com:9000"
     },
     {
-      "key": "sellerdiscom_actor_bpp_caller_url",
+      "key": "sellerdiscom_bpp_caller_url",
       "value": "http://localhost:8086/bpp/caller"
     },
     {
@@ -105,11 +105,11 @@
     },
     {
       "key": "ledger_buyer_discom_id",
-      "value": "buyer-discom-ledger.example.com"
+      "value": "ies-p2p-energy-ledger.beckn.io"
     },
     {
       "key": "ledger_seller_discom_id",
-      "value": "seller-discom-ledger.example.com"
+      "value": "ies-p2p-energy-ledger.beckn.io"
     }
   ]
 }

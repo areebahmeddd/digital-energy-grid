@@ -185,16 +185,17 @@ DEVKIT_CONFIGS = {
         # Sellerdiscom *actor* (the utility itself, distinct from the ledger
         # TSP). New Beckn-native channel for pushing meter actuals as
         # on_status — DatasetItem-wrapped BecknTimeSeries — to the ledger.
-        # Source fixture (sellerdiscom-actor-on-status*.json) lives in the
+        # Source fixture (sellerdiscom-on-status*.json) lives in the
         # shared examples dir; the SELLERDISCOM filter discriminates it.
-        "sellerdiscom_actor_host_root": "http://sellerdiscom.example.com:9000",
-        "sellerdiscom_actor_bpp_caller_url": "http://localhost:8086/bpp/caller",
+        "sellerdiscom_host_root": "http://sellerdiscom.example.com:9000",
+        "sellerdiscom_bpp_caller_url": "http://localhost:8086/bpp/caller",
         # Subscriber IDs for the discom-ledger TSPs. Emitted as Postman variables
         # in all wave2 collections so participantId fields in the contract body can
         # reference them. seller_discom_ledger_id is also used in substitutions.yaml
         # for context.bppId in seller-initiated-status-to-seller-discom flows.
-        "ledger_buyer_discom_id": "buyer-discom-ledger.example.com",
-        "ledger_seller_discom_id": "seller-discom-ledger.example.com",
+        "ledger_buyer_discom_id": "ies-p2p-energy-ledger.beckn.io",
+        "ledger_seller_discom_id": "ies-p2p-energy-ledger.beckn.io",
+        "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2026",
         "seller_discom_ledger_id": "seller-discom-ledger.example.com",
         "usecase": "uc1",
         "structure": "flat",
@@ -330,7 +331,7 @@ ROLE_FILTERS = {
     # Source fixture is named distinctly so it doesn't collide with the
     # SELLER (BPP) collection's on_status callbacks.
     "SELLERDISCOM": [
-        r"^sellerdiscom-actor-on[-_]status.*\.json$",
+        r"^sellerdiscom-on[-_]status.*\.json$",
     ],
 }
 
@@ -550,9 +551,9 @@ def extract_action_from_filename(filename: str, role: str) -> Optional[str]:
     elif role == "SELLERDISCOM":
         # Sellerdiscom actor collection: outbound on_status push of
         # DatasetItem-wrapped meter actuals. File prefix
-        # `sellerdiscom-actor-on-status` discriminates the actor's push
+        # `sellerdiscom-on-status` discriminates the actor's push
         # fixture from any other on_status emitter sharing the examples dir.
-        if re.match(r'^sellerdiscom-actor-on[-_]status', name, re.IGNORECASE):
+        if re.match(r'^sellerdiscom-on[-_]status', name, re.IGNORECASE):
             return "on_status"
 
     return None
@@ -1090,7 +1091,7 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         # Sellerdiscom actor pushes on_status TO the sellerdiscomledger TSP:
         # bpp = the actor, bap = the ledger.
         bpp_id_value = "sellerdiscom.example.com"
-        bpp_host_root_value = config.get("sellerdiscom_actor_host_root", "http://sellerdiscom.example.com:9000")
+        bpp_host_root_value = config.get("sellerdiscom_host_root", "http://sellerdiscom.example.com:9000")
         bap_id_value = "seller-discom-ledger.example.com"
         bap_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
 
@@ -1109,7 +1110,7 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         {"key": "version", "value": "2.0.0"},
         {"key": bap_id_key, "value": bap_id_value},
         {"key": bpp_id_key, "value": bpp_id_value},
-        {"key": "transaction_id", "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"},
+        {"key": "transaction_id", "value": config.get("transaction_id", "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002")},
         {"key": "iso_date", "value": ""}
     ]
 
@@ -1143,7 +1144,7 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
     elif role == "SELLERDISCOMLEDGER":
         variables.append({"key": "seller_ledger_bpp_caller_url", "value": config["seller_ledger_bpp_caller_url"]})
     elif role == "SELLERDISCOM":
-        variables.append({"key": "sellerdiscom_actor_bpp_caller_url", "value": config["sellerdiscom_actor_bpp_caller_url"]})
+        variables.append({"key": "sellerdiscom_bpp_caller_url", "value": config["sellerdiscom_bpp_caller_url"]})
         # Also surface the recipient ledger's host root so testers can swap to
         # a different ledger instance via the variable rather than editing the body.
         if "ledger_host_seller" in config:
@@ -1234,7 +1235,7 @@ def generate_collection(
         # Seller-discom actor: outbound on_status push of meter actuals from
         # the actor's /bpp/caller to the ledger TSP's /bap/receiver.
         action_mapping = {"on_status": "on_status"}
-        adapter_url_var = "sellerdiscom_actor_bpp_caller_url"
+        adapter_url_var = "sellerdiscom_bpp_caller_url"
     else:
         raise ValueError(f"Unknown role: {role}")
 

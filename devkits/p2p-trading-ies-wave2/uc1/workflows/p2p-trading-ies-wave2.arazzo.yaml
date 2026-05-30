@@ -40,7 +40,7 @@ info:
       Available workflows: publish-catalog, discover, select-through-settlement,
         status-roundtrip-via-seller-discom, buyer-discom-emits-on-status,
         seller-status-to-buyer, seller-status-to-seller-discom,
-        sellerdiscom-actor-pushes-allocation
+        sellerdiscom-pushes-allocation
 
 sourceDescriptions:
   - name: beckn-bap-caller
@@ -53,7 +53,7 @@ sourceDescriptions:
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bpp/caller
 
-  - name: beckn-sellerdiscom-bpp-caller
+  - name: beckn-sellerdiscom-ledger-bpp-caller
     type: openapi
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bpp/caller
@@ -70,10 +70,10 @@ sourceDescriptions:
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bap/caller
 
-  # Sellerdiscom *actor* — the seller-side distribution utility (distinct
-  # from the seller-discom-ledger TSP). New Beckn-native channel for pushing
+  # Sellerdiscom — the seller-side distribution utility (distinct
+  # from the seller-discom-ledger TSP). Beckn-native channel for pushing
   # meter actuals (DatasetItem-wrapped BecknTimeSeries) as on_status.
-  - name: beckn-sellerdiscom-actor-bpp-caller
+  - name: beckn-sellerdiscom-bpp-caller
     type: openapi
     url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8086/bpp/caller
@@ -181,7 +181,7 @@ workflows:
           seller/bap/receiver. The recorder there detects context.bppId
           matches sellerDiscom.participantId (Rule 2a) → forwards to
           buyer/bap/receiver → cascades to buyerDiscom (Rule 2b).
-        operationId: beckn-sellerdiscom-bpp-caller.onStatus
+        operationId: beckn-sellerdiscom-ledger-bpp-caller.onStatus
         requestBody:
           contentType: application/json
           payload:
@@ -227,7 +227,7 @@ workflows:
 
   # ── SellerDiscom *actor* pushes allocation via on_status ──
 
-  - workflowId: sellerdiscom-actor-pushes-allocation
+  - workflowId: sellerdiscom-pushes-allocation
     summary: >
       Sellerdiscom (the discom utility itself, distinct from the
       seller-discom-ledger TSP) pushes meter actuals to the ledger as a
@@ -237,16 +237,16 @@ workflows:
     steps:
       - stepId: sellerdiscom-emits-allocation-on-status
         description: >
-          POSTs to sellerdiscom-actor /bpp/caller; the actor's onix routes
+          POSTs to sellerdiscom /bpp/caller; the onix routes
           via context.bapUri (= seller-discom-ledger /bap/receiver). The
           ledger reads resources[].resourceAttributes.@type=DatasetItem,
           matches dataset:targetTransactionId / targetOrderItemId, and
           allocates. Returns ACK.
-        operationId: beckn-sellerdiscom-actor-bpp-caller.onStatus
+        operationId: beckn-sellerdiscom-bpp-caller.onStatus
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/sellerdiscom-actor-on-status.json"
+            $ref: "../examples/sellerdiscom-on-status.json"
 
   # ── BuyerDiscom-emitted on_status (direct callback path) ──
 

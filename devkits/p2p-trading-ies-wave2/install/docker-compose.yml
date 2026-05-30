@@ -229,10 +229,10 @@ services:
   #            the bespoke /ledger/allocate REST push. Lives on the BPP
   #            side so it can reach seller-discom-ledger directly via
   #            docker DNS / network alias. ----------
-  redis-sellerdiscom-actor:
+  redis-sellerdiscom:
     image: redis:alpine
-    hostname: redis-sellerdiscom-actor
-    container_name: redis-sellerdiscom-actor
+    hostname: redis-sellerdiscom
+    container_name: redis-sellerdiscom
     networks:
       - bpp_side
     healthcheck:
@@ -241,22 +241,22 @@ services:
       timeout: 3s
       retries: 5
 
-  onix-sellerdiscom-actor:
+  onix-sellerdiscom:
     image: fidedocker/onix-adapter-deg:w-deg-plugins-v1
-    container_name: onix-sellerdiscom-actor
+    container_name: onix-sellerdiscom
     ports:
       - "8086:8086"
     environment:
-      CONFIG_FILE: "/app/config/local-p2p-trading-sellerdiscom-actor.yaml"
+      CONFIG_FILE: "/app/config/local-p2p-trading-sellerdiscom.yaml"
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
       - ../policies:/app/policies
-    command: ["./server", "--config=/app/config/local-p2p-trading-sellerdiscom-actor.yaml"]
+    command: ["./server", "--config=/app/config/local-p2p-trading-sellerdiscom.yaml"]
     networks:
       - bpp_side
     depends_on:
-      redis-sellerdiscom-actor:
+      redis-sellerdiscom:
         condition: service_healthy
 
   # ---------- Host router (only container on both sides) ----------

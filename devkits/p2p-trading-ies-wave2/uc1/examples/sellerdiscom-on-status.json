@@ -43,11 +43,11 @@
                   "payloadDescriptors": [
                     {
                       "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "ACTUAL_PULLED",
+                      "payloadType": "ENERGY_CONSUMPTION",
                       "units": "KWH"
                     }
                   ],
-                  "intervals": [{"id": 0, "payloads": [{"type": "ACTUAL_PULLED", "values": [19.2]}]}]
+                  "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": [-19.2]}]}]
                 }
               }
             }

@@ -172,7 +172,7 @@
     },
     {
       "key": "transaction_id",
-      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2002"
+      "value": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2026"
     },
     {
       "key": "iso_date",
@@ -200,11 +200,11 @@
     },
     {
       "key": "ledger_buyer_discom_id",
-      "value": "buyer-discom-ledger.example.com"
+      "value": "ies-p2p-energy-ledger.beckn.io"
     },
     {
       "key": "ledger_seller_discom_id",
-      "value": "seller-discom-ledger.example.com"
+      "value": "ies-p2p-energy-ledger.beckn.io"
     }
   ]
 }

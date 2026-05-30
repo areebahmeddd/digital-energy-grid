@@ -1,4 +1,4 @@
-appName: "onix-sellerdiscom-actor-local"
+appName: "onix-sellerdiscom-local"
 log:
   level: debug
   destinations:
@@ -74,7 +74,7 @@ modules:
         cache:
           id: cache
           config:
-            addr: redis-sellerdiscom-actor:6379
+            addr: redis-sellerdiscom:6379
         router:
           id: router
           config:
