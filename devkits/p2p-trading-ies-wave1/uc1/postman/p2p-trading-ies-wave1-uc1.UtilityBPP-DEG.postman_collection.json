@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "36348af9-5344-42c6-aa09-6c1c58b28d84",
+    "_postman_id": "3fbeab9a-3fa0-4f06-b9d7-db4935cc3dc3",
     "name": "p2p-trading-ies-wave1-uc1.UtilityBPP-DEG",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Postman collection for Utility BPP (Transmission/Grid Provider Platform) implementing p2p-trading-ies-wave1 APIs based on Beckn Protocol v2"

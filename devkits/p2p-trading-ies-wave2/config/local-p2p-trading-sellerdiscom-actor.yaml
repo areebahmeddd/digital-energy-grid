@@ -44,6 +44,22 @@ modules:
         idleConnTimeout: 300s
         responseHeaderTimeout: 30s
       plugins:
+        registry:
+          id: dediregistry
+          config:
+            url: https://fabric.nfh.global/registry/dedi
+            registryName: subscribers.beckn.one
+            allowedNetworkIDs: "indiaenergystack.in/test-p2p-trading-ies-wave2"
+            timeout: 10
+        keyManager:
+          id: simplekeymanager
+          config:
+            networkParticipant: sellerdiscom.example.com
+            keyId: 76EU93x8Ua4gzQPXFkc83ochbgvB8uTJJRAKaHqQpYYpzatTbMmULg
+            signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
+            encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
+            encrPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
         schemaValidator:
           id: schemav2validator
           config:
@@ -63,6 +79,8 @@ modules:
           id: router
           config:
             routingConfig: ./config/local-p2p-trading-routing-SellerDiscomActor-Caller.yaml
+        signer:
+          id: signer
         middleware:
           - id: reqpreprocessor
             config:
@@ -71,3 +89,4 @@ modules:
       steps:
         - validateSchema
         - addRoute
+        - sign
