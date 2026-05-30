@@ -211,3 +211,26 @@ violations contains msg if {
 	not net_zero_ok
 	msg := sprintf("net-zero failed: revenue sum = %g (expected 0)", [_revenue_sum])
 }
+
+# ---------------------------------------------------------------------------
+# on_status commitmentAttributes completeness
+# ---------------------------------------------------------------------------
+
+_required_commitment_payload_types := {
+	"PRICE_PER_KWH", "REQUESTED_QTY",
+	"BUYER_DISCOM_ALLOC", "SELLER_DISCOM_ALLOC",
+	"BUYER_DISCOM_STATUS", "SELLER_DISCOM_STATUS",
+	"FINAL_ALLOC",
+}
+
+violations contains msg if {
+	input.context.action == "on_status"
+	some c in _contract.commitments
+	_present := {pd.payloadType | some pd in c.commitmentAttributes.payloadDescriptors}
+	some ptype in _required_commitment_payload_types
+	not ptype in _present
+	msg := sprintf(
+		"on_status commitment %q commitmentAttributes is missing required payload type %q",
+		[c.id, ptype],
+	)
+}

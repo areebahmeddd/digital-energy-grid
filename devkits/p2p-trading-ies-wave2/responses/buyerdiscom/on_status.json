@@ -65,50 +65,37 @@
               "duration": "PT1H"
             },
             "payloadDescriptors": [
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "BUYER_DISCOM_ALLOC",
-                "units": "KWH"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "BUYER_DISCOM_STATUS",
-                "units": "STRING"
-              }
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"},
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_ALLOC", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_STATUS", "units": "STRING"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_ALLOC", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_STATUS", "units": "STRING"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "FINAL_ALLOC", "units": "KWH"}
             ],
             "intervals": [
               {
                 "id": 0,
                 "payloads": [
-                  {
-                    "type": "BUYER_DISCOM_ALLOC",
-                    "values": [
-                      18.5
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": []},
+                  {"type": "REQUESTED_QTY", "values": []},
+                  {"type": "BUYER_DISCOM_ALLOC", "values": [18.5]},
+                  {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "SELLER_DISCOM_ALLOC", "values": []},
+                  {"type": "SELLER_DISCOM_STATUS", "values": []},
+                  {"type": "FINAL_ALLOC", "values": []}
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
-                  {
-                    "type": "BUYER_DISCOM_ALLOC",
-                    "values": [
-                      14.2
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  }
+                  {"type": "PRICE_PER_KWH", "values": []},
+                  {"type": "REQUESTED_QTY", "values": []},
+                  {"type": "BUYER_DISCOM_ALLOC", "values": [14.2]},
+                  {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "SELLER_DISCOM_ALLOC", "values": []},
+                  {"type": "SELLER_DISCOM_STATUS", "values": []},
+                  {"type": "FINAL_ALLOC", "values": []}
                 ]
               }
             ]
