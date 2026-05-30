@@ -15,5 +15,5 @@ routingRules:
     target:
       url: "https://fabric.nfh.global/beckn/catalog"
     endpoints:
-      - publish
-      - subscribe
+      - catalog/publish
+      - catalog/subscribe

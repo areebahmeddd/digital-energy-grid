@@ -56,6 +56,26 @@ run_arazzo() {
   find "$usecase_root/workflows" -maxdepth 1 \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
     -exec cp {} "$work/$uc_name/workflows/" \;
 
+  # Patch the tmpdir Arazzo copy to use beckn-minimal.yaml instead of the
+  # remote beckn.yaml URL. The upstream spec has intentional circular $ref
+  # chains (Offer→AddOn→Offer, GeoJSONGeometry self-ref, Error.cause→Error)
+  # that exhaust Node.js heap in Redocly's dereferencer regardless of --max-old-space-size.
+  # The original Arazzo file keeps the authoritative URL; this substitution
+  # only affects the tmpdir copy used at runtime. beckn-minimal.yaml provides
+  # all needed operationIds; schema validation is disabled via SCHEMA_CHECK=off.
+  python3 -c "
+import re, pathlib, sys
+f = pathlib.Path(sys.argv[1])
+txt = f.read_text()
+patched = re.sub(
+    r'url: https://raw\.githubusercontent\.com/beckn/[^\n]*/beckn\.yaml',
+    'url: ./beckn-minimal.yaml',
+    txt,
+)
+f.write_text(patched)
+print(f'Patched {txt.count(\"beckn.yaml\")} sourceDescription URL(s) → beckn-minimal.yaml')
+" "$work/$uc_name/workflows/$arazzo"
+
   # Shared URI-patching helper — rewrites context.bapUri/bppUri and
   # participant ledgerUris so each participant lives on its own hostname
   # (matching its Beckn subscriberId). Each payload's own context.bapId /
