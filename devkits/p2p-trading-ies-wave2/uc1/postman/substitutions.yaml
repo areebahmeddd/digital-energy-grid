@@ -154,3 +154,15 @@ roles:
         context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
         context.bppId:  {var: bpp_id}
         context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
+
+  # ── BUYERDISCOM ──────────────────────────────────────────────────────────
+  # Buyer-discom actor (the utility itself) pushing meter actuals as on_status
+  # to the ledger TSP's /bap/receiver. Symmetric to SELLERDISCOM.
+  # bap_id / bap_host_root point at the ledger; bpp_id / bpp_host_root at the actor.
+  BUYERDISCOM:
+    - match: "*.json"
+      paths:
+        context.bapId:  {var: bap_id}
+        context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
+        context.bppId:  {var: bpp_id}
+        context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
