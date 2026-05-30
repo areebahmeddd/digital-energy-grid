@@ -30,7 +30,7 @@
           "resources": [
             {
               "id": "energy-resource-solar-001",
-              "descriptor": {"name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"},
+              "descriptor": {"name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"},
               "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.0},
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",

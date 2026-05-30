@@ -418,7 +418,7 @@ def _format_payload(doc: Any) -> str:
 
     def add(item: Any) -> str:
         ph = f"__PMPH_{len(placeholders)}__"
-        placeholders[ph] = json.dumps(item, separators=(", ", ": "))
+        placeholders[ph] = json.dumps(item, separators=(", ", ": "), ensure_ascii=False)
         return ph
 
     def visit(node: Any) -> None:
@@ -431,7 +431,7 @@ def _format_payload(doc: Any) -> str:
                 elif isinstance(value, list) and value and all(
                     isinstance(x, (str, int, float, bool, type(None))) for x in value
                 ):
-                    inline = json.dumps(value, separators=(", ", ": "))
+                    inline = json.dumps(value, separators=(", ", ": "), ensure_ascii=False)
                     if len(inline) <= _SCALAR_INLINE_LIMIT:
                         node[key] = add(value)
                 else:
@@ -443,7 +443,7 @@ def _format_payload(doc: Any) -> str:
     # We mutate `doc` in place; callers pass a freshly produced
     # request_body so that's fine.
     visit(doc)
-    out = json.dumps(doc, indent=2)
+    out = json.dumps(doc, indent=2, ensure_ascii=False)
     for ph, oneline in placeholders.items():
         out = out.replace(f'"{ph}"', oneline)
     return out

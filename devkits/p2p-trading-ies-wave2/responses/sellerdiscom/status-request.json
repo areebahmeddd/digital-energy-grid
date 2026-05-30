@@ -26,13 +26,13 @@
           "resources": [
             {
               "id": "ds-meter-request-seller-001",
-              "descriptor": {"name": "Meter energy consumption request — seller discom"},
+              "descriptor": {"name": "Meter energy consumption request - seller discom"},
               "quantity": {"@type": "Quantity", "unitText": "request", "unitCode": "EA", "value": "1"},
               "resourceAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
                 "@type": "DatasetItem",
                 "schema:identifier": "ds-meter-request-seller-001",
-                "schema:name": "Meter energy consumption request — seller discom",
+                "schema:name": "Meter energy consumption request - seller discom",
                 "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
                 "dataPayload": [
                   {
