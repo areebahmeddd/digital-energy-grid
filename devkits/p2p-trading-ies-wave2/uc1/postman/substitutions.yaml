@@ -103,9 +103,9 @@ roles:
         context.bppUri: {var: ledger_host_seller, suffix: /bpp/receiver}
 
   # ── BUYERDISCOMLEDGER ────────────────────────────────────────────────────
-  # Buyer-discom ledger TSP emitting on_status callbacks.
-  # bap_host_root = buyerapp host; bpp_host_root = ledger host (cloud or Docker).
-  # seller.platformUri has no matching variable in this collection — omitted.
+  # Buyer-discom ledger TSP. Two outbound flows:
+  #   1. on_status callbacks  — ledger as BPP-caller → buyerapp bap/receiver
+  #   2. status-request       — ledger as BAP-caller → buyerdiscom bpp/receiver
   BUYERDISCOMLEDGER:
     - match: "*.json"
       paths:
@@ -113,6 +113,17 @@ roles:
         context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
         context.bppId:  {var: bpp_id}
         context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
+
+    # Ledger-initiated status request to the discom utility (ledger = BAP).
+    # bapId/bapUri = the ledger itself; bppId/bppUri = the discom utility.
+    # transactionId is a separate sub-tx from the main trade.
+    - match: "status-request.json"
+      paths:
+        context.transactionId: {var: meter_request_tx_id}
+        context.bapId:  {var: bpp_id}
+        context.bapUri: {var: bpp_host_root, suffix: /bap/receiver}
+        context.bppId:  {var: discom_actor_id}
+        context.bppUri: {var: discom_actor_host_root, suffix: /bpp/receiver}
         message.contract.contractAttributes.roles[role=buyer].participantId:              {var: bap_id, required: false}
         message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
         message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
@@ -124,8 +135,9 @@ roles:
         message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUri: {var: ledger_host_seller, required: false}
 
   # ── SELLERDISCOMLEDGER ───────────────────────────────────────────────────
-  # Seller-discom ledger TSP emitting on_status callbacks.
-  # Same variable layout as BUYERDISCOMLEDGER; bpp_host_root = seller ledger host.
+  # Seller-discom ledger TSP. Two outbound flows:
+  #   1. on_status callbacks  — ledger as BPP-caller → sellerapp bap/receiver
+  #   2. status-request       — ledger as BAP-caller → sellerdiscom bpp/receiver
   SELLERDISCOMLEDGER:
     - match: "*.json"
       paths:
@@ -133,6 +145,15 @@ roles:
         context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
         context.bppId:  {var: bpp_id}
         context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
+
+    # Ledger-initiated status request to the discom utility (ledger = BAP).
+    - match: "status-request.json"
+      paths:
+        context.transactionId: {var: meter_request_tx_id}
+        context.bapId:  {var: bpp_id}
+        context.bapUri: {var: bpp_host_root, suffix: /bap/receiver}
+        context.bppId:  {var: discom_actor_id}
+        context.bppUri: {var: discom_actor_host_root, suffix: /bpp/receiver}
         message.contract.contractAttributes.roles[role=buyer].participantId:              {var: bap_id, required: false}
         message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
         message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
@@ -148,6 +169,18 @@ roles:
   # to the ledger TSP's /bap/receiver. No participants block in this fixture.
   # bap_id / bap_host_root point at the ledger; bpp_id / bpp_host_root at the actor.
   SELLERDISCOM:
+    - match: "*.json"
+      paths:
+        context.bapId:  {var: bap_id}
+        context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
+        context.bppId:  {var: bpp_id}
+        context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
+
+  # ── BUYERDISCOM ──────────────────────────────────────────────────────────
+  # Buyer-discom actor (the utility itself) pushing meter actuals as on_status
+  # to the ledger TSP's /bap/receiver. Symmetric to SELLERDISCOM.
+  # bap_id / bap_host_root point at the ledger; bpp_id / bpp_host_root at the actor.
+  BUYERDISCOM:
     - match: "*.json"
       paths:
         context.bapId:  {var: bap_id}

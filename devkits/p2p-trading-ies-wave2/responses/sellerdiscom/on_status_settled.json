@@ -2,25 +2,26 @@
   "context": {
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
-    "action": "on_confirm",
+    "action": "on_status",
     "bapId": "buyerapp.example.com",
     "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
-    "bppId": "sellerapp.example.com",
-    "bppUri": "http://sellerapp.example.com:9000/bpp/receiver",
+    "bppId": "seller-discom-ledger.example.com",
+    "bppUri": "http://seller-discom-ledger.example.com:9000/bpp/caller",
     "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
-    "messageId": "42306920-2f41-44b4-bd0a-bb1b969b9b6b",
-    "timestamp": "2026-04-25T10:10:05Z",
+    "messageId": "b82f4c19-3a1d-4e72-9d45-fc871a230087",
+    "timestamp": "2026-04-26T07:00:00Z",
     "schemaContext": [
       "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
       "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
+      "id": "contract-p2p-001",
       "status": {"code": "ACTIVE"},
       "commitments": [
         {
@@ -54,76 +55,34 @@
                     "@type": "TimeSeries",
                     "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
                     "payloadDescriptors": [
-                      {
-                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "PRICE_PER_KWH",
-                        "currency": "INR"
-                      },
-                      {
-                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "AVAILABLE_QTY",
-                        "units": "KWH"
-                      }
+                      {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"},
+                      {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "AVAILABLE_QTY", "units": "KWH"}
                     ],
                     "intervals": [
-                      {
-                        "id": 0,
-                        "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [12.5]},
-                          {"type": "AVAILABLE_QTY", "values": [30.5]}
-                        ]
-                      },
-                      {
-                        "id": 1,
-                        "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [14.5]},
-                          {"type": "AVAILABLE_QTY", "values": [25.5]}
-                        ]
-                      }
+                      {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "AVAILABLE_QTY", "values": [30.5]}]},
+                      {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "AVAILABLE_QTY", "values": [25.5]}]}
                     ]
                   }
                 },
                 {
                   "role": "buyer",
                   "participantId": "buyerapp.example.com",
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "REQUESTED_QTY",
-                      "units": "KWH"
-                    }
-                  ]
+                  "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"}]
                 },
                 {
                   "role": "buyerDiscom",
                   "participantId": "buyer-discom-ledger.example.com",
                   "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BUYER_DISCOM_ALLOC",
-                      "units": "KWH"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BUYER_DISCOM_STATUS",
-                      "units": "STRING"
-                    }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_ALLOC", "units": "KWH"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_STATUS", "units": "STRING"}
                   ]
                 },
                 {
                   "role": "sellerDiscom",
                   "participantId": "seller-discom-ledger.example.com",
                   "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "SELLER_DISCOM_ALLOC",
-                      "units": "KWH"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "SELLER_DISCOM_STATUS",
-                      "units": "STRING"
-                    }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_ALLOC", "units": "KWH"},
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_STATUS", "units": "STRING"}
                   ]
                 }
               ]
@@ -134,30 +93,37 @@
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "PRICE_PER_KWH",
-                "currency": "INR"
-              },
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "REQUESTED_QTY",
-                "units": "KWH"
-              }
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR"},
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_ALLOC", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_STATUS", "units": "STRING"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_ALLOC", "units": "KWH"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_STATUS", "units": "STRING"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "FINAL_ALLOC", "units": "KWH"}
             ],
             "intervals": [
               {
                 "id": 0,
                 "payloads": [
                   {"type": "PRICE_PER_KWH", "values": [12.5]},
-                  {"type": "REQUESTED_QTY", "values": [20.5]}
+                  {"type": "REQUESTED_QTY", "values": [20.5]},
+                  {"type": "BUYER_DISCOM_ALLOC", "values": [18.5]},
+                  {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "SELLER_DISCOM_ALLOC", "values": [19.2]},
+                  {"type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "FINAL_ALLOC", "values": [18.5]}
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
                   {"type": "PRICE_PER_KWH", "values": [14.5]},
-                  {"type": "REQUESTED_QTY", "values": [15.5]}
+                  {"type": "REQUESTED_QTY", "values": [15.5]},
+                  {"type": "BUYER_DISCOM_ALLOC", "values": [14.2]},
+                  {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "SELLER_DISCOM_ALLOC", "values": [14.7]},
+                  {"type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"]},
+                  {"type": "FINAL_ALLOC", "values": [14.2]}
                 ]
               }
             ]
@@ -223,8 +189,7 @@
             "ledgerUri": "http://seller-discom-ledger.example.com:9000"
           }
         }
-      ],
-      "id": "contract-p2p-001"
+      ]
     }
   }
 }

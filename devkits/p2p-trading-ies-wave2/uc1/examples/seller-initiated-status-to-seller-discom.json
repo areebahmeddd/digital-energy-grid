@@ -30,7 +30,7 @@
           "resources": [
             {
               "id": "energy-resource-solar-001",
-              "descriptor": {"name": "Solar energy slot — 2026-04-26 10:00–12:00 IST"},
+              "descriptor": {"name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"},
               "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.5},
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
@@ -142,11 +142,6 @@
               },
               {
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "AVAILABLE_QTY",
-                "units": "KWH"
-              },
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                 "payloadType": "REQUESTED_QTY",
                 "units": "KWH"
               }
@@ -156,7 +151,6 @@
                 "id": 0,
                 "payloads": [
                   {"type": "PRICE_PER_KWH", "values": [12.5]},
-                  {"type": "AVAILABLE_QTY", "values": [30.5]},
                   {"type": "REQUESTED_QTY", "values": [20.5]}
                 ]
               },
@@ -164,7 +158,6 @@
                 "id": 1,
                 "payloads": [
                   {"type": "PRICE_PER_KWH", "values": [14.5]},
-                  {"type": "AVAILABLE_QTY", "values": [25.5]},
                   {"type": "REQUESTED_QTY", "values": [15.5]}
                 ]
               }

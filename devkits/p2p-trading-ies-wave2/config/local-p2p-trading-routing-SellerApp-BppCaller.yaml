@@ -13,7 +13,7 @@ routingRules:
   - version: "2.0.0"
     targetType: "url"
     target:
-      url: "https://fabric.nfh.global/beckn/catalog"
+      url: "https://fabric.nfh.global/beckn"
     endpoints:
-      - publish
-      - subscribe
+      - catalog/publish
+      - catalog/subscribe

@@ -4,10 +4,11 @@
 # Sourced by per-usecase run-arazzo.sh wrappers; drives Redocly Respect,
 # rewrites payload BAP/BPP URIs so BAP↔BPP traffic flows through the local
 # beckn-router (or an ngrok tunnel), and post-processes respect's JSON log
-# to fail the run on any NACK. Native successCriteria still crashes respect
-# with "Maximum call stack size exceeded" (verified on 2.14, 2.29, 2.30.5
-# — even a literal "1 == 1" condition triggers the bug), so the NACK check
-# and the sandbox-callback check are done out-of-band here.
+# to fail the run on any NACK. Redocly Respect crashes with "Maximum call
+# stack size exceeded" in 2.14+ (successCriteria evaluator bug) and requires
+# --stack-size=65536 for its spec dereferencer on the beckn OpenAPI spec.
+# Pinned to 2.13.0 via a cached npm install; NACK and sandbox-callback
+# checks are done out-of-band below.
 #
 # Usage from a wrapper:
 #   set -euo pipefail
@@ -50,7 +51,106 @@ run_arazzo() {
   #   ../../responses/  → $work/responses/
   mkdir -p "$work/$uc_name/workflows" "$work/$uc_name/examples"
 
-  cp "$usecase_root/workflows/$arazzo" "$work/$uc_name/workflows/"
+  # Copy the Arazzo file and all sibling YAML/JSON files (local OpenAPI stubs,
+  # substitution files, etc.) so relative $ref paths resolve in the tmpdir.
+  find "$usecase_root/workflows" -maxdepth 1 \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
+    -exec cp {} "$work/$uc_name/workflows/" \;
+
+  # Shared cache directory for both the pinned Redocly install and the
+  # processed beckn.yaml (both persist across runs in /tmp).
+  local redocly_cache="/tmp/redocly-cli-2.13.0"
+  local redocly_bin="$redocly_cache/node_modules/.bin/redocly"
+
+  # Prepare a circular-ref-free copy of beckn.yaml for Redocly's dereferencer.
+  # The upstream spec has intentional circular $ref chains (Offer→AddOn→Offer,
+  # GeoJSONGeometry self-ref, Error.cause→Error) that cause infinite recursion
+  # and OOM in Redocly's spec dereferencer. We download the spec once, run a
+  # DFS back-edge detector that replaces only the cycling $ref entries with {},
+  # and cache the result at $redocly_cache/beckn-processed.yaml. All non-circular
+  # $ref entries are left intact so Redocly can still validate real schemas.
+  # The original Arazzo file keeps the authoritative URL; only the tmpdir copy
+  # is patched to point at the processed local file.
+  local beckn_processed="$redocly_cache/beckn-processed.yaml"
+  if [ ! -f "$beckn_processed" ]; then
+    echo "Downloading beckn.yaml and breaking circular \$refs (first run only) ..."
+    python3 - "$beckn_processed" <<'BREAK_CYCLES_PY'
+import sys, yaml
+from urllib.request import urlopen
+sys.setrecursionlimit(5000)
+
+BECKN_URL = (
+    "https://raw.githubusercontent.com/beckn/protocol-specifications-v2"
+    "/refs/heads/main/api/v2.0.0/beckn.yaml"
+)
+print(f"  Fetching {BECKN_URL} ...", flush=True)
+doc = yaml.safe_load(urlopen(BECKN_URL, timeout=30).read().decode())
+schemas = (doc.get("components") or {}).get("schemas") or {}
+
+def collect_refs(obj, out=None):
+    """Return list of (dict_obj, target_schema_name) for every local $ref."""
+    if out is None:
+        out = []
+    if isinstance(obj, dict):
+        ref = obj.get("$ref", "")
+        if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
+            out.append((obj, ref[len("#/components/schemas/"):]))
+        else:
+            for v in obj.values():
+                collect_refs(v, out)
+    elif isinstance(obj, list):
+        for v in obj:
+            collect_refs(v, out)
+    return out
+
+# Build per-schema adjacency once (list of (ref_dict, target_name) tuples).
+adj = {name: collect_refs(schema) for name, schema in schemas.items()}
+
+# DFS with 3-colour marking; back edges (GRAY→GRAY) are the cycle closures.
+WHITE, GRAY, BLACK = 0, 1, 2
+colour = {n: WHITE for n in schemas}
+broken = 0
+
+def dfs(name):
+    global broken
+    if colour.get(name) != WHITE:
+        return
+    colour[name] = GRAY
+    for ref_dict, target in adj.get(name, []):
+        if colour.get(target) == GRAY:
+            ref_dict.clear()   # replace {$ref: ...} with {} in-place
+            broken += 1
+        else:
+            dfs(target)
+    colour[name] = BLACK
+
+for name in list(schemas):
+    dfs(name)
+
+print(f"  Broke {broken} circular $ref(s).", flush=True)
+out_path = sys.argv[1]
+with open(out_path, "w", encoding="utf-8") as fh:
+    yaml.dump(doc, fh, default_flow_style=False, allow_unicode=True, sort_keys=False)
+print(f"  Cached → {out_path}", flush=True)
+BREAK_CYCLES_PY
+  fi
+
+  # Copy the processed spec into the tmpdir so the patched Arazzo can $ref it.
+  cp "$beckn_processed" "$work/$uc_name/workflows/beckn-processed.yaml"
+
+  # Patch the tmpdir Arazzo copy to use the local processed spec.
+  python3 -c "
+import re, pathlib, sys
+f = pathlib.Path(sys.argv[1])
+txt = f.read_text()
+patched = re.sub(
+    r'url: https://raw\.githubusercontent\.com/beckn/[^\n]*/beckn\.yaml',
+    'url: ./beckn-processed.yaml',
+    txt,
+)
+f.write_text(patched)
+n = txt.count('beckn.yaml')
+print(f'Patched {n} sourceDescription URL(s) → beckn-processed.yaml (schema validation enabled)')
+" "$work/$uc_name/workflows/$arazzo"
 
   # Shared URI-patching helper — rewrites context.bapUri/bppUri and
   # participant ledgerUris so each participant lives on its own hostname
@@ -128,9 +228,18 @@ for f in sorted(src.rglob("*.json")):
     cp -R "$devkit_root/responses" "$work/responses"
   fi
 
-  local respect_args=(--severity 'SCHEMA_CHECK=off')
+  local respect_args=()
   if [ "${#RUN_ARAZZO_ARGS[@]}" -gt 0 ]; then
     respect_args+=("${RUN_ARAZZO_ARGS[@]}")
+  fi
+
+  # Install a pinned Redocly into the shared cache (also used for beckn-processed.yaml).
+  # Redocly 2.14+ has a successCriteria evaluator bug ("Maximum call stack size exceeded").
+  if [ ! -x "$redocly_bin" ]; then
+    echo "Installing @redocly/cli@2.13.0 into $redocly_cache ..."
+    mkdir -p "$redocly_cache"
+    npm install --prefix "$redocly_cache" "@redocly/cli@2.13.0" \
+      --no-save --no-audit --no-fund --silent
   fi
 
   local json_out="$work/respect-output.json"
@@ -141,17 +250,17 @@ for f in sorted(src.rglob("*.json")):
   respect_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   set +e
   if [ "$public_url" = "http://beckn-router:9000" ]; then
-    npx --yes @redocly/cli respect \
+    node --stack-size=65536 --max-old-space-size=8192 "$redocly_bin" respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
-      "${respect_args[@]}"
+      ${respect_args[@]+"${respect_args[@]}"}
   else
-    npx --yes @redocly/cli respect \
+    node --stack-size=65536 --max-old-space-size=8192 "$redocly_bin" respect \
       "$work/$uc_name/workflows/$arazzo" \
       -J "$json_out" \
       -S "beckn-bap-caller=$public_url/bap/caller" \
       -S "beckn-bpp-caller=$public_url/bpp/caller" \
-      "${respect_args[@]}"
+      ${respect_args[@]+"${respect_args[@]}"}
   fi
   respect_exit=$?
   set -e

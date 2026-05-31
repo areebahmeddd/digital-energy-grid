@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 GENERATOR="$REPO_ROOT/scripts/generate_postman_collection.py"
 OUTPUT_DIR="devkits/p2p-trading-ies-wave2/uc1/postman"
 
-for ROLE in BUYER SELLER BUYERDISCOMLEDGER SELLERDISCOMLEDGER SELLERDISCOM; do
+for ROLE in BUYER SELLER BUYERDISCOMLEDGER SELLERDISCOMLEDGER SELLERDISCOM BUYERDISCOM; do
   echo "Generating $ROLE..."
   python3 "$GENERATOR" \
     --devkit p2p-trading-ies-wave2 \
