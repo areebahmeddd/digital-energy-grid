@@ -444,25 +444,76 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	log.Infof(ctx, "DEGLedgerRecorder: forwarding status (transaction_id=%s, contract_id=%s) -> %s/status (sub-tx bap=%s, bpp=%s)",
 		payload.Context.TransactionID, payload.Message.Contract.ID, ledgerEndpoint, subTx.BapURI, subTx.BppURI)
 	r.sendBecknStatusAsync(ctx, ledgerEndpoint, rewritten, payload.Context.TransactionID)
+
+	// Prosumer check: in a single-platform topology (buyer and seller are the
+	// same app) this node is the only one that will ever call handleStatus, so it
+	// must kick off the sub-transaction to the PEER's discom as well. In a normal
+	// 2-platform setup peerPlatformURI != ownPlatformURI and none of this runs.
+	peerRole := "buyer"
+	if r.config.Role == "BUYER" {
+		peerRole = "seller"
+	}
+	if ParticipantEndpointURI(parts, peerRole, "platformUri") != ownPlatformURI {
+		return nil // 2-platform topology — peer will handle its own discom
+	}
+
+	// Determine the peer's discom role and ledger side.
+	peerDiscomRole, peerDiscomSide := "buyerDiscom", SideBuyer
+	if r.config.Role == "BUYER" {
+		peerDiscomRole, peerDiscomSide = "sellerDiscom", SideSeller
+	}
+
+	peerDiscomID := participantID(findWave2Participant(parts, peerDiscomRole))
+	if peerDiscomID == discomParticipantID {
+		return nil // both roles share one discom — already sent above
+	}
+
+	peerLedgerHost := ExtractWave2StatusDiscomLedgerUri(payload, peerDiscomSide)
+	if peerLedgerHost == "" {
+		log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledger URI not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
+		return nil
+	}
+
+	peerLedgerEndpoint := BppReceiverEndpoint(peerLedgerHost)
+	peerSubTx := SubTxContext{
+		BapURI: BapReceiverEndpoint(ownPlatformURI),
+		BppURI: peerLedgerEndpoint,
+		BapID:  ownParticipantID,
+		BppID:  peerDiscomID,
+	}
+	peerRewritten, err := RewriteContextForSubTx(ctx.Body, peerSubTx)
+	if err != nil {
+		log.Warnf(ctx, "DEGLedgerRecorder: prosumer: status rewrite failed for peer discom: %v", err)
+		return nil
+	}
+	log.Infof(ctx, "DEGLedgerRecorder: prosumer: forwarding status to peer discom (transaction_id=%s) -> %s/status (sub-tx bap=%s, bpp=%s)",
+		payload.Context.TransactionID, peerLedgerEndpoint, peerSubTx.BapURI, peerSubTx.BppURI)
+	r.sendBecknStatusAsync(ctx, peerLedgerEndpoint, peerRewritten, payload.Context.TransactionID)
 	return nil
 }
 
-// handleOnStatusWave2 implements Rule 2: a sender-aware fork at /bap/receiver.
+// handleOnStatusWave2 propagates on_status through the cascade chain so every
+// party in the trade receives updated performance data as soon as it is available.
 //
-// On every incoming on_status, look up "own discom" participantId (sellerDiscom
-// for role=SELLER, buyerDiscom for role=BUYER) and compare to context.bppId:
+// The chain has two rules, decided by who sent the on_status (context.bppId):
 //
-//   - if equal: the on_status came from our own discom → forward to the peer's
-//     /bap/receiver (Rule 2a). For role=SELLER the peer is buyer (context.bapUri);
-//     for role=BUYER the peer is seller (derived from context.bppUri by swapping
-//     the path from /bpp/receiver to /bap/receiver).
+//   Rule 2a — own discom sent it (bppId == ownDiscomPid):
+//     The discom has just computed its allocation. Pass the payload to the peer
+//     platform so the peer can record it and trigger its own discom cascade.
 //
-//   - otherwise: the on_status came from the peer (or any other party) →
-//     cascade to our own discom (Rule 2b). Only fires when the payload carries
-//     performance data; bare ACK-only on_status responses are skipped.
+//     Prosumer variant (buyer and seller share one platform): there is no
+//     separate peer to forward to, so skip the self-loop and cascade directly
+//     to the peer's discom instead. If both roles also share one discom, the
+//     single discom was already notified via handleStatus — terminate here.
 //
-// This asymmetric forward kills the loop the old symmetric fanOutMode=peer
-// produced: every chain terminates at a discom (which never re-cascades).
+//   Rule 2b — peer (or any other party) sent it (bppId != ownDiscomPid):
+//     We received the peer's allocation data. Push it to our own discom so it
+//     can record the full bilateral settlement. Skipped when the payload has
+//     no performance data (e.g. a bare status-check ACK).
+//
+// The asymmetry (discom → platform → discom, never discom → discom) is what
+// prevents infinite loops: discoms receive on_status at /bap/receiver, which
+// routes to the bap-webhook (ACK only) and never re-cascades.
 func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	payload, err := ParseOnStatusWave2(ctx.Body)
 	if err != nil {
@@ -504,9 +555,12 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 
 	var baseURL string
 	var subTx SubTxContext
+	var branch string
 	ownParticipantID := participantID(findWave2Participant(parts, strings.ToLower(r.config.Role)))
+
 	if fromOwnDiscom {
-		// Rule 2a: forward to peer's /bap/receiver.
+		// Rule 2a: our discom just computed its allocation — pass the on_status to
+		// the peer so the peer can in turn cascade to its own discom (Rule 2b).
 		peerRole := "buyer"
 		if r.config.Role == "BUYER" {
 			peerRole = "seller"
@@ -516,17 +570,55 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
 			return nil
 		}
-		peerParticipantID := participantID(findWave2Participant(parts, peerRole))
-		peerBapEndpoint := BapReceiverEndpoint(peerPlatformURI)
-		baseURL = peerBapEndpoint
-		subTx = SubTxContext{
-			BapURI: peerBapEndpoint,
-			BppURI: ownBppEndpoint,
-			BapID:  peerParticipantID,
-			BppID:  ownParticipantID,
+
+		if peerPlatformURI == ownPlatformURI {
+			// Prosumer topology: buyer and seller are the same platform, so there
+			// is no separate peer node to forward to. Act on behalf of the peer and
+			// cascade directly to the peer's discom.
+			peerDiscomRole, peerDiscomSide := "buyerDiscom", SideBuyer
+			if r.config.Role == "BUYER" {
+				peerDiscomRole, peerDiscomSide = "sellerDiscom", SideSeller
+			}
+
+			peerDiscomID := participantIDForRole(payload, peerDiscomRole)
+			if peerDiscomID == ownDiscomPid {
+				// Both roles share one discom — already notified via handleStatus; done.
+				log.Debugf(ctx, "DEGLedgerRecorder: prosumer: single discom for both roles, already notified (transaction_id=%s)", payload.Context.TransactionID)
+				return nil
+			}
+			if !Wave2OnStatusHasPerformanceData(payload) {
+				log.Debugf(ctx, "DEGLedgerRecorder: prosumer: no performance data; skipping peer discom cascade (transaction_id=%s)", payload.Context.TransactionID)
+				return nil
+			}
+			peerDiscomHost := ExtractWave2OnStatusDiscomLedgerUri(payload, peerDiscomSide)
+			if peerDiscomHost == "" {
+				log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledger URI not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
+				return nil
+			}
+			peerDiscomEndpoint := BapReceiverEndpoint(peerDiscomHost)
+			branch = "prosumer-peer-discom"
+			baseURL = peerDiscomEndpoint
+			subTx = SubTxContext{
+				BapURI: peerDiscomEndpoint,
+				BppURI: ownBppEndpoint,
+				BapID:  participantID(findWave2Participant(parts, peerDiscomRole)),
+				BppID:  ownParticipantID,
+			}
+		} else {
+			// Normal 2-platform topology: forward to peer's /bap/receiver.
+			peerBapEndpoint := BapReceiverEndpoint(peerPlatformURI)
+			branch = "peer"
+			baseURL = peerBapEndpoint
+			subTx = SubTxContext{
+				BapURI: peerBapEndpoint,
+				BppURI: ownBppEndpoint,
+				BapID:  participantID(findWave2Participant(parts, peerRole)),
+				BppID:  ownParticipantID,
+			}
 		}
 	} else {
-		// Rule 2b: cascade to own discom. Skip if no performance data.
+		// Rule 2b: we received the peer's allocation data. Push it to our own
+		// discom so it can record the full bilateral settlement.
 		if !Wave2OnStatusHasPerformanceData(payload) {
 			log.Debugf(ctx, "DEGLedgerRecorder: on_status has no performance data; skipping discom cascade (transaction_id=%s)", payload.Context.TransactionID)
 			return nil
@@ -535,15 +627,13 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		if r.config.LedgerUriSource == LedgerUriSourcePayload {
 			discomLedgerHost = ExtractWave2OnStatusDiscomLedgerUri(payload, ownDiscomSide)
 		}
-		// Discom is the BAP-style sink for this on_status push; this handler's
-		// platform is the BPP-caller initiating it.
 		discomLedgerEndpoint := BapReceiverEndpoint(discomLedgerHost)
-		discomParticipantID := participantID(findWave2Participant(parts, ownDiscomRole))
+		branch = "discom"
 		baseURL = discomLedgerEndpoint
 		subTx = SubTxContext{
 			BapURI: discomLedgerEndpoint,
 			BppURI: ownBppEndpoint,
-			BapID:  discomParticipantID,
+			BapID:  participantID(findWave2Participant(parts, ownDiscomRole)),
 			BppID:  ownParticipantID,
 		}
 	}
@@ -559,10 +649,6 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		return nil
 	}
 
-	branch := "discom"
-	if fromOwnDiscom {
-		branch = "peer"
-	}
 	log.Infof(ctx, "DEGLedgerRecorder: forwarding on_status (transaction_id=%s, role=%s, branch=%s) -> %s/on_status (sub-tx bap=%s, bpp=%s)",
 		payload.Context.TransactionID, r.config.Role, branch, baseURL, subTx.BapURI, subTx.BppURI)
 	r.sendBecknOnStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
