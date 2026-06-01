@@ -297,7 +297,11 @@ _contract_violations contains "offer.offerAttributes must be absent in contract 
 
 _participant_ids := {p.participantId | some p in _contract.participants}
 
+# N15 only applies when the contract carries a participants list. Discom-internal
+# meter-data messages (e.g. buyerDiscom → buyerDiscom-ledger) omit participants
+# and use domain-local bppId values that are not trade participants.
 _contract_violations contains msg if {
+	count(_participant_ids) > 0
 	bpp_id := object.get(input.context, "bppId", "")
 	bpp_id != ""
 	not bpp_id in _participant_ids
@@ -308,6 +312,7 @@ _contract_violations contains msg if {
 }
 
 _contract_violations contains msg if {
+	count(_participant_ids) > 0
 	bap_id := object.get(input.context, "bapId", "")
 	bap_id != ""
 	not bap_id in _participant_ids
