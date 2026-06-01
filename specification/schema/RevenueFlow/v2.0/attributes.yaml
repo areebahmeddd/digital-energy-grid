@@ -41,7 +41,6 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               value:
                 type: number
                 description: >
