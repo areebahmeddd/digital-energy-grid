@@ -41,7 +41,7 @@ components:
 
         validityWindow:
           allOf:
-            - $ref: "https://schema.beckn.io/TimePeriod"
+            - $ref: "https://schema.beckn.io/TimePeriod/2.0/attributes.yaml#/components/schemas/TimePeriod"
           description: >
             Time window during which this offer can be selected/accepted.
             Typically set to expire before the earliest delivery starts.
