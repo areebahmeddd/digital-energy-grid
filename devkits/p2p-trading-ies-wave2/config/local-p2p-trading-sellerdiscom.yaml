@@ -102,7 +102,7 @@ modules:
           config:
             url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
-            allowedNetworkIDs: "indiaenergystack.in/test-p2p-trading-ies-wave2"
+            allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network"
             timeout: 10
         keyManager:
           id: simplekeymanager
