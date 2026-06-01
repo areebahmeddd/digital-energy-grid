@@ -36,12 +36,11 @@ info:
     Run with Redocly respect (from p2p-trading-ies-wave2/):
 
       Run all workflows:
-        npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml \
-          --severity 'SCHEMA_CHECK=off' -v
+        npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml -v
 
       Run a single workflow:
         npx @redocly/cli respect workflows/p2p-trading-ies-wave2.arazzo.yaml \
-          -w status-roundtrip-via-seller-discom --severity 'SCHEMA_CHECK=off' -v
+          -w status-roundtrip-via-seller-discom -v
 
       Available workflows: publish-catalog, discover, select-through-settlement,
         status-roundtrip-via-seller-discom, buyer-discom-emits-on-status,
