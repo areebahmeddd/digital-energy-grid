@@ -9,24 +9,24 @@
 #   sellerDiscom (regulated LP for seller's discom)   → receives → positive (wheeling + penalty)
 #
 # Multi-window: a single contract spans multiple delivery slots, each
-# represented as an interval in two BecknTimeSeries:
+# represented as an interval in Commitment.commitmentAttributes (a shared
+# BecknTimeSeries that grows across the lifecycle):
 #
-#   commitments[0].offer.offerAttributes.inputs[seller].inputs.offerTimeseries
-#       — PRICE_PER_KWH (currency: INR) and AVAILABLE_QTY (units: KWH)
-#         one interval per slot; interval id is the slot key
+#   commitments[0].commitmentAttributes
+#       — PRICE_PER_KWH  (currency: INR)      inserted by seller at init
+#       — REQUESTED_QTY  (units: KWH)          inserted by buyer at init
+#       — BUYER_DISCOM_ALLOC  (units: KWH)     inserted by buyerDiscom post-delivery
+#       — SELLER_DISCOM_ALLOC (units: KWH)     inserted by sellerDiscom post-delivery
+#       — FINAL_ALLOC    (units: KWH)           inserted by sellerDiscom at settlement
 #
-#   contract.performance[0].performanceAttributes.performanceTimeseries
-#       — BUYER_ALLOCATION, SELLER_INJECTION, SETTLED_QTY (all KWH)
-#         interval ids match the offerTimeseries ids
-#
-# Per-slot trade value = SETTLED_QTY × PRICE_PER_KWH (matched by interval id).
-# Total trade value = sum across all performance intervals.
+# Per-slot trade value = FINAL_ALLOC × PRICE_PER_KWH (matched by interval id).
+# Total trade value    = sum across all FINAL_ALLOC intervals.
 #
 # Wheeling and penalty placeholders are 0 today.
 #
 # Exported rules:
 #   revenue_flows          — [{role, value, currency, description}]
-#   trade_value            — total INR value across all intervals
+#   trade_value            — total INR value across all settled intervals
 #   total_settled_kwh      — total kWh settled across all intervals
 #   wheeling_charge_buyer  — 0 placeholder
 #   wheeling_charge_seller — 0 placeholder
@@ -44,17 +44,13 @@ import rego.v1
 
 _contract := input.message.contract
 
-_offer_attrs := _contract.commitments[0].offer.offerAttributes
+_commit_ts := _contract.commitments[0].commitmentAttributes
 
-_inputs := _offer_attrs.inputs
-
-_seller_inputs := [i.inputs | some i in _inputs; i.role == "seller"][0]
-
-_offer_ts := _seller_inputs.offerTimeseries
-
-_currency := _seller_inputs.currency
-
-_perf_ts := _contract.performance[0].performanceAttributes.performanceTimeseries
+_currency := c if {
+	some d in _commit_ts.payloadDescriptors
+	d.payloadType == "PRICE_PER_KWH"
+	c := d.currency
+}
 
 # ---------------------------------------------------------------------------
 # Timeseries helpers
@@ -67,37 +63,38 @@ _payload_val(interval, ptype) := v if {
 	v := p.values[0]
 }
 
-# Seller offer interval id → price per kWh.
-_price_by_id := {i.id: _payload_val(i, "PRICE_PER_KWH") | some i in _offer_ts.intervals}
+# Interval id → price per kWh.
+_price_by_id := {i.id: _payload_val(i, "PRICE_PER_KWH") | some i in _commit_ts.intervals}
 
-# Set of offer interval ids (used for subset validation in violations).
-_offer_interval_ids := {i.id | some i in _offer_ts.intervals}
+# Set of settled interval ids (those that carry FINAL_ALLOC).
+_settled_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "FINAL_ALLOC"}
 
 # ---------------------------------------------------------------------------
 # Per-interval value
 # ---------------------------------------------------------------------------
 
-_interval_value(pi) := v if {
-	settled := _payload_val(pi, "SETTLED_QTY")
-	price := _price_by_id[pi.id]
-	v := settled * price
+_interval_value(i) := v if {
+	alloc := _payload_val(i, "FINAL_ALLOC")
+	price := _price_by_id[i.id]
+	v := alloc * price
 }
 
 # ---------------------------------------------------------------------------
-# Aggregate trade value across intervals
+# Aggregate trade value across settled intervals
 # ---------------------------------------------------------------------------
 
-trade_value := sum([_interval_value(pi) | some pi in _perf_ts.intervals])
+trade_value := sum([_interval_value(i) | some i in _commit_ts.intervals; i.id in _settled_interval_ids])
 
-total_settled_kwh := sum([_payload_val(pi, "SETTLED_QTY") | some pi in _perf_ts.intervals])
+total_settled_kwh := sum([_payload_val(i, "FINAL_ALLOC") | some i in _commit_ts.intervals; i.id in _settled_interval_ids])
 
 _window_breakdown := concat("; ", [s |
-	some pi in _perf_ts.intervals
-	settled := _payload_val(pi, "SETTLED_QTY")
-	price := _price_by_id[pi.id]
-	value := settled * price
+	some i in _commit_ts.intervals
+	i.id in _settled_interval_ids
+	alloc := _payload_val(i, "FINAL_ALLOC")
+	price := _price_by_id[i.id]
+	value := alloc * price
 	s := sprintf("%v kWh @ %v %s = %v %s [interval %v]", [
-		settled, price, _currency, value, _currency, pi.id,
+		alloc, price, _currency, value, _currency, i.id,
 	])
 ])
 
@@ -126,8 +123,8 @@ _buyer_flow := {
 	"value": _buyer_payable * -1,
 	"currency": _currency,
 	"description": sprintf(
-		"Pays %v %s across %v interval(s): [%s]; buyer-side wheeling %v",
-		[_buyer_payable, _currency, count(_perf_ts.intervals), _window_breakdown, wheeling_charge_buyer],
+		"Pays %v %s across %v settled interval(s): [%s]; buyer-side wheeling %v",
+		[_buyer_payable, _currency, count(_settled_interval_ids), _window_breakdown, wheeling_charge_buyer],
 	),
 }
 
@@ -136,8 +133,8 @@ _seller_flow := {
 	"value": _seller_receivable,
 	"currency": _currency,
 	"description": sprintf(
-		"Receives %v %s across %v interval(s): [%s]; seller-side wheeling %v, penalty %v",
-		[_seller_receivable, _currency, count(_perf_ts.intervals), _window_breakdown, wheeling_charge_seller, penalty_charge],
+		"Receives %v %s across %v settled interval(s): [%s]; seller-side wheeling %v, penalty %v",
+		[_seller_receivable, _currency, count(_settled_interval_ids), _window_breakdown, wheeling_charge_seller, penalty_charge],
 	),
 }
 
@@ -181,30 +178,16 @@ violations contains msg if {
 	msg := sprintf("missing required role %q in contractAttributes.roles", [role])
 }
 
-violations contains msg if {
-	count(_contract.performance) == 0
-	msg := "no performance entries — cannot compute revenue flows"
+violations contains "no FINAL_ALLOC intervals in commitmentAttributes — cannot compute revenue flows" if {
+	is_object(_commit_ts)
+	count(_settled_interval_ids) == 0
 }
 
 violations contains msg if {
-	count(_contract.performance) > 0
-	not _contract.performance[0].performanceAttributes.performanceTimeseries
-	msg := "performance[0].performanceAttributes.performanceTimeseries is missing"
-}
-
-violations contains msg if {
-	some pi in _perf_ts.intervals
-	not _payload_val(pi, "SETTLED_QTY")
-	msg := sprintf("performance interval %v is missing SETTLED_QTY payload", [pi.id])
-}
-
-violations contains msg if {
-	some pi in _perf_ts.intervals
-	not pi.id in _offer_interval_ids
-	msg := sprintf(
-		"performance interval %v has no matching seller offer interval (available ids: %v)",
-		[pi.id, _offer_interval_ids],
-	)
+	some i in _commit_ts.intervals
+	i.id in _settled_interval_ids
+	not _price_by_id[i.id]
+	msg := sprintf("settled interval %v has no matching PRICE_PER_KWH interval", [i.id])
 }
 
 violations contains msg if {

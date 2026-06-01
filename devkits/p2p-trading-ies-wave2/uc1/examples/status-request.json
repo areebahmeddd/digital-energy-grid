@@ -22,16 +22,28 @@
   "message": {
     "contract": {
       "id": "contract-p2p-001",
-      "status": {"code": "ACTIVE"},
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-p2p-001",
-          "status": {"descriptor": {"code": "ACTIVE"}},
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "energy-resource-solar-001",
-              "descriptor": {"name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"},
-              "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.5},
+              "descriptor": {
+                "name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"
+              },
+              "quantity": {
+                "@type": "Quantity",
+                "unitCode": "KWH",
+                "unitQuantity": 35.5
+              },
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
@@ -42,123 +54,64 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": ["energy-resource-solar-001"],
-            "offerAttributes": {
-              "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-              "@type": "EnergyTradeOffer",
-              "inputs": [
-                {
-                  "role": "seller",
-                  "participantId": "sellerapp.example.com",
-                  "payload": {
-                    "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-                    "@type": "TimeSeries",
-                    "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
-                    "payloadDescriptors": [
-                      {
-                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "PRICE_PER_KWH",
-                        "currency": "INR"
-                      },
-                      {
-                        "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "AVAILABLE_QTY",
-                        "units": "KWH"
-                      }
-                    ],
-                    "intervals": [
-                      {
-                        "id": 0,
-                        "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [12.5]},
-                          {"type": "AVAILABLE_QTY", "values": [30.5]}
-                        ]
-                      },
-                      {
-                        "id": 1,
-                        "payloads": [
-                          {"type": "PRICE_PER_KWH", "values": [14.5]},
-                          {"type": "AVAILABLE_QTY", "values": [25.5]}
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "role": "buyer",
-                  "participantId": "buyerapp.example.com",
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "REQUESTED_QTY",
-                      "units": "KWH"
-                    }
-                  ]
-                },
-                {
-                  "role": "buyerDiscom",
-                  "participantId": "buyer-discom-ledger.example.com",
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BUYER_DISCOM_ALLOC",
-                      "units": "KWH"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BUYER_DISCOM_STATUS",
-                      "units": "STRING"
-                    }
-                  ]
-                },
-                {
-                  "role": "sellerDiscom",
-                  "participantId": "seller-discom-ledger.example.com",
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "SELLER_DISCOM_ALLOC",
-                      "units": "KWH"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "SELLER_DISCOM_STATUS",
-                      "units": "STRING"
-                    }
-                  ]
-                }
-              ]
-            }
+            "resourceIds": [
+              "energy-resource-solar-001"
+            ]
           },
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
-            "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+            "intervalPeriod": {
+              "start": "2026-04-26T04:30:00Z",
+              "duration": "PT1H"
+            },
             "payloadDescriptors": [
               {
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                 "payloadType": "PRICE_PER_KWH",
-                "currency": "INR"
+                "currency": "INR",
+                "insertedBy": "seller"
               },
               {
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                 "payloadType": "REQUESTED_QTY",
-                "units": "KWH"
+                "units": "KWH",
+                "insertedBy": "buyer"
               }
             ],
             "intervals": [
               {
                 "id": 0,
                 "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [12.5]},
-                  {"type": "REQUESTED_QTY", "values": [20.5]}
+                  {
+                    "type": "PRICE_PER_KWH",
+                    "values": [
+                      12.5
+                    ]
+                  },
+                  {
+                    "type": "REQUESTED_QTY",
+                    "values": [
+                      20.5
+                    ]
+                  }
                 ]
               },
               {
                 "id": 1,
                 "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [14.5]},
-                  {"type": "REQUESTED_QTY", "values": [15.5]}
+                  {
+                    "type": "PRICE_PER_KWH",
+                    "values": [
+                      14.5
+                    ]
+                  },
+                  {
+                    "type": "REQUESTED_QTY",
+                    "values": [
+                      15.5
+                    ]
+                  }
                 ]
               }
             ]
@@ -169,10 +122,22 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {"role": "buyer", "participantId": "buyerapp.example.com"},
-          {"role": "seller", "participantId": "sellerapp.example.com"},
-          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
-          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
+          {
+            "role": "buyer",
+            "participantId": "buyerapp.example.com"
+          },
+          {
+            "role": "seller",
+            "participantId": "sellerapp.example.com"
+          },
+          {
+            "role": "buyerDiscom",
+            "participantId": "buyer-discom-ledger.example.com"
+          },
+          {
+            "role": "sellerDiscom",
+            "participantId": "seller-discom-ledger.example.com"
+          }
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",

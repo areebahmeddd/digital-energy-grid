@@ -20,5 +20,5 @@ Offer attributes for demand-flex contracts.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `contractTerms` | `object` |  | Portable DEGContract template. Present only in catalog/discover. Promoted to Contract.c... |
+| `contractAttributes` | `object` |  | Portable DEGContract template. Present only in catalog/discover. Promoted to Contract.c... |
 | `inputs` | `array` | ✅ | One entry per role. participantId is null until the role is bound (e.g. seller is null ... |

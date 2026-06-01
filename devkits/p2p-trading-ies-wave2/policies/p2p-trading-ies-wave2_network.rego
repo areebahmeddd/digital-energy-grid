@@ -18,27 +18,28 @@
 # N3.  Inter-discom: buyer and seller must have different utilityIds.
 # N4.  commitmentAttributes type: when commitmentAttributes is present it must
 #      be @type: TimeSeries.
-# N5.  commitmentAttributes payloadTypes: must declare PRICE_PER_KWH when
-#      seller offer intervals are present; seller offer payload must declare
-#      AVAILABLE_QTY.
+# N5.  commitmentAttributes payloadTypes: PRICE_PER_KWH must be declared
+#      when interval data is present. When action is "init", AVAILABLE_QTY
+#      must also be declared (buyer echoes seller offer capacity alongside bid).
 # N6.  Offer currency: PRICE_PER_KWH descriptor must carry currency: INR.
-# N7.  Offer qty units: AVAILABLE_QTY in the seller offer payload must carry
-#      units: KWH.
+# N7.  Offer qty units: AVAILABLE_QTY must carry units: KWH when declared.
+#      (AVAILABLE_QTY is required only at init; optional in later messages.)
 # N8.  Bid payloadTypes: must declare REQUESTED_QTY when bid interval data is
 #      present (i.e. buyer has written at least one REQUESTED_QTY interval).
 # N9.  Bid qty units: REQUESTED_QTY descriptor must carry units: KWH.
-# N10. Interval id alignment: REQUESTED_QTY interval ids must be a subset of
-#      seller offer interval ids.
-# N11. Quantity cap: REQUESTED_QTY ≤ AVAILABLE_QTY per matched interval.
 # N12. No self-trade: buyer and seller meter ids must differ.
 # N13. Seller source type must be a generation source (not GRID).
-# N14. Seller payload: the seller offerAttributes.inputs entry must carry a
-#      payload (BecknTimeSeries) — payloadDescriptors alone is not sufficient.
+# N14. No offerAttributes in contract messages: offer.offerAttributes must be
+#      absent; all data lives in Commitment.commitmentAttributes.
 # N15. Beckn semantic alignment: context.bppId and context.bapId must each
 #      match a participantId in contract.participants[]. Enforces that the
 #      current leg's caller/receiver (BPP/BAP) are declared trade-scope
 #      participants — catches cascade legs that rewrite bap/bppUri but leak
 #      original trade identifiers into the ID fields.
+# N16. BecknTimeSeries type-coverage: every payloadType used in
+#      commitmentAttributes.intervals[*].payloads[*].type must be declared
+#      in commitmentAttributes.payloadDescriptors. Catches typos like
+#      "REQUESTED_QT" or undocumented signal names on the wire.
 #
 # ── performance validation (fires only on final-settlement on_status, i.e.
 #    when FINAL_ALLOC is present in commitmentAttributes) ──
@@ -46,7 +47,7 @@
 # P1.  payloadTypes declared: BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC, FINAL_ALLOC.
 # P2.  Performance qty units: all three types must carry units: KWH.
 # P3.  Interval coverage: FINAL_ALLOC interval ids must be a subset of
-#      seller offer interval ids.
+#      REQUESTED_QTY interval ids.
 # P4.  Settlement consistency: FINAL_ALLOC ≤ min(BUYER_DISCOM_ALLOC,
 #      SELLER_DISCOM_ALLOC) per interval.
 #
@@ -122,19 +123,11 @@ _contract := input.message.contract
 
 _commitment := _contract.commitments[0]
 
-_seller_role_inputs := [i | some i in _commitment.offer.offerAttributes.inputs; i.role == "seller"][0]
-
-_buyer_role_inputs := [i | some i in _commitment.offer.offerAttributes.inputs; i.role == "buyer"][0]
-
 _commit_ts := _commitment.commitmentAttributes
 
 _commit_ts_types := _ts_types(_commit_ts) if {
 	is_object(_commit_ts)
 }
-
-_offer_interval_ids := {i.id | some i in _seller_role_inputs.payload.intervals}
-
-_seller_avail_by_id := {i.id: _payload_val(i, "AVAILABLE_QTY") | some i in _seller_role_inputs.payload.intervals}
 
 _bid_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "REQUESTED_QTY"}
 
@@ -206,15 +199,23 @@ _contract_violations contains "commitmentAttributes must have @type: TimeSeries"
 
 # ---------------------------------------------------------------------------
 # N5-N7 — Offer-side payloadType and unit validation
-#          (N5/N6 check commitmentAttributes; N7 checks seller offer payload)
 # ---------------------------------------------------------------------------
 
+# N5a — PRICE_PER_KWH must be declared when interval data is present
 _contract_violations contains "commitmentAttributes payloadDescriptors must include PRICE_PER_KWH" if {
 	is_object(_commit_ts)
-	count(_offer_interval_ids) > 0
+	count(_commit_ts.intervals) > 0
 	not "PRICE_PER_KWH" in _commit_ts_types
 }
 
+# N5b — init messages must include AVAILABLE_QTY (buyer echoes offer capacity alongside bid)
+_contract_violations contains "commitmentAttributes payloadDescriptors must include AVAILABLE_QTY in init messages" if {
+	is_object(_commit_ts)
+	input.context.action == "init"
+	not "AVAILABLE_QTY" in _commit_ts_types
+}
+
+# N6 — PRICE_PER_KWH currency must be INR
 _contract_violations contains msg if {
 	is_object(_commit_ts)
 	"PRICE_PER_KWH" in _commit_ts_types
@@ -223,11 +224,13 @@ _contract_violations contains msg if {
 	msg := sprintf("commitmentAttributes PRICE_PER_KWH currency is %q; must be INR", [c])
 }
 
+# N7 — AVAILABLE_QTY units must be KWH when declared (required at init, optional afterwards)
 _contract_violations contains msg if {
-	count(_offer_interval_ids) > 0
-	u := _ts_units(_seller_role_inputs.payload, "AVAILABLE_QTY")
+	is_object(_commit_ts)
+	"AVAILABLE_QTY" in _commit_ts_types
+	u := _ts_units(_commit_ts, "AVAILABLE_QTY")
 	u != "KWH"
-	msg := sprintf("seller offer payload AVAILABLE_QTY units is %q; must be KWH", [u])
+	msg := sprintf("commitmentAttributes AVAILABLE_QTY units is %q; must be KWH", [u])
 }
 
 # ---------------------------------------------------------------------------
@@ -247,40 +250,6 @@ _contract_violations contains msg if {
 	u := _ts_units(_commit_ts, "REQUESTED_QTY")
 	u != "KWH"
 	msg := sprintf("commitmentAttributes REQUESTED_QTY units is %q; must be KWH", [u])
-}
-
-# ---------------------------------------------------------------------------
-# N10 — Interval id alignment: REQUESTED_QTY ids ⊆ seller offer interval ids
-# ---------------------------------------------------------------------------
-
-_contract_violations contains msg if {
-	is_object(_commit_ts)
-	count(_bid_interval_ids) > 0
-	count(_offer_interval_ids) > 0
-	extra := _bid_interval_ids - _offer_interval_ids
-	count(extra) > 0
-	msg := sprintf(
-		"commitmentAttributes REQUESTED_QTY interval ids %v not present in seller offer interval ids %v",
-		[extra, _offer_interval_ids],
-	)
-}
-
-# ---------------------------------------------------------------------------
-# N11 — REQUESTED_QTY ≤ AVAILABLE_QTY per interval
-# ---------------------------------------------------------------------------
-
-_contract_violations contains msg if {
-	is_object(_commit_ts)
-	some interval in _commit_ts.intervals
-	interval.id in _offer_interval_ids
-	interval.id in _bid_interval_ids
-	req := _payload_val(interval, "REQUESTED_QTY")
-	avail := _seller_avail_by_id[interval.id]
-	req > avail
-	msg := sprintf(
-		"commitmentAttributes interval %v: REQUESTED_QTY %v kWh > AVAILABLE_QTY %v kWh",
-		[interval.id, req, avail],
-	)
 }
 
 # ---------------------------------------------------------------------------
@@ -310,12 +279,11 @@ _contract_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# N14 — Seller role input must carry a payload (BecknTimeSeries with offer data)
+# N14 — offer.offerAttributes must be absent in contract messages
 # ---------------------------------------------------------------------------
 
-_contract_violations contains "seller offerAttributes.inputs entry must carry a payload (BecknTimeSeries)" if {
-	_seller_role_inputs
-	not _seller_role_inputs.payload
+_contract_violations contains "offer.offerAttributes must be absent in contract messages; all data must be in Commitment.commitmentAttributes" if {
+	_commitment.offer.offerAttributes
 }
 
 # ---------------------------------------------------------------------------
@@ -350,6 +318,25 @@ _contract_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
+# N16 — BecknTimeSeries type-coverage: every payloadType used in
+#        commitmentAttributes.intervals must be declared in payloadDescriptors.
+#        Catches typos and undocumented signal names on the wire.
+# ---------------------------------------------------------------------------
+
+_contract_violations contains msg if {
+	is_object(_commit_ts)
+	is_array(_commit_ts.intervals)
+	declared_types := {d.payloadType | some d in _commit_ts.payloadDescriptors}
+	some interval in _commit_ts.intervals
+	some payload in interval.payloads
+	not payload.type in declared_types
+	msg := sprintf(
+		"commitmentAttributes interval %v: payload type %q used in intervals but not declared in payloadDescriptors",
+		[interval.id, payload.type],
+	)
+}
+
+# ---------------------------------------------------------------------------
 # Performance validation (fires only when FINAL_ALLOC is present, signalling
 # a final-settlement report; partial single-discom reports are exempt).
 # ---------------------------------------------------------------------------
@@ -378,12 +365,12 @@ _performance_violations contains msg if {
 _performance_violations contains msg if {
 	is_object(_commit_ts)
 	count(_perf_interval_ids) > 0
-	count(_offer_interval_ids) > 0
-	extra := _perf_interval_ids - _offer_interval_ids
+	count(_bid_interval_ids) > 0
+	extra := _perf_interval_ids - _bid_interval_ids
 	count(extra) > 0
 	msg := sprintf(
-		"commitmentAttributes FINAL_ALLOC interval ids %v not present in seller offer interval ids %v",
-		[extra, _offer_interval_ids],
+		"commitmentAttributes FINAL_ALLOC interval ids %v not present in REQUESTED_QTY interval ids %v",
+		[extra, _bid_interval_ids],
 	)
 }
 

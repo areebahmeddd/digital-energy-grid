@@ -10,15 +10,10 @@
     "startTime": "schema:startTime",
     "endTime": "schema:endTime",
     "EnergyTradeOffer": "deg:EnergyTradeOffer",
-    "RoleInputs": "deg:RoleInputs",
     "validityWindow": "deg:validityWindow",
-    "contractTerms": "deg:contractTerms",
+    "contractAttributes": "deg:contractAttributes",
     "commitmentAttributes": "deg:commitmentAttributes",
-    "inputs": "deg:inputs",
-    "role": "deg:role",
-    "participantId": "deg:participantId",
-    "payload": "deg:payload",
-    "payloadDescriptors": "deg:payloadDescriptors"
+    "insertedBy": "deg:insertedBy"
   },
   "@graph": []
 }
