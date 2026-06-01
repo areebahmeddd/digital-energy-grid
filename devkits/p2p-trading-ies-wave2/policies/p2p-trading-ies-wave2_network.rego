@@ -11,8 +11,8 @@
 #
 # ── contract validation (when message.contract exists) ──
 #
-# N1.  Required roles: buyer, seller, buyerDiscom, sellerDiscom must all be
-#      present in contractAttributes.roles.
+# N1.  Required roles: buyerPlatform, sellerPlatform, buyerDiscom, sellerDiscom
+#      must all be present in contractAttributes.roles; no unknown values allowed.
 # N2.  Participant utilityIds: seller and buyer participants must each have a
 #      non-empty utilityId.
 # N3.  Inter-discom: buyer and seller must have different utilityIds.
@@ -138,20 +138,27 @@ _participant_by_role(role) := p if {
 	p.role == role
 }
 
-_seller_p := _participant_by_role("seller")
+_seller_p := _participant_by_role("sellerPlatform")
 
-_buyer_p := _participant_by_role("buyer")
+_buyer_p := _participant_by_role("buyerPlatform")
 
 # ---------------------------------------------------------------------------
-# N1 — Required roles
+# N1 — Required roles present + no unknown role values
 # ---------------------------------------------------------------------------
+
+_allowed_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 
 _contract_violations contains msg if {
-	required := {"buyer", "seller", "buyerDiscom", "sellerDiscom"}
 	roles_present := {r.role | some r in _contract.contractAttributes.roles}
-	missing := required - roles_present
+	missing := _allowed_roles - roles_present
 	count(missing) > 0
 	msg := sprintf("missing required role(s) in contractAttributes.roles: %v", [missing])
+}
+
+_contract_violations contains msg if {
+	some r in _contract.contractAttributes.roles
+	not r.role in _allowed_roles
+	msg := sprintf("unknown role %q in contractAttributes.roles; allowed: %v", [r.role, _allowed_roles])
 }
 
 # ---------------------------------------------------------------------------
@@ -404,7 +411,7 @@ _is_production if input.context.networkId in _production_network_ids
 _prod_violations contains msg if {
 	_is_production
 	some p in _contract.participants
-	p.role in {"buyer", "seller"}
+	p.role in {"buyerPlatform", "sellerPlatform"}
 	uid := p.participantAttributes.utilityId
 	not uid in _allowed_utility_ids
 	msg := sprintf(
@@ -416,20 +423,20 @@ _prod_violations contains msg if {
 # T2 — Test consistency: if any buyer/seller uses TEST_ prefix, all must
 _any_is_test if {
 	some p in _contract.participants
-	p.role in {"buyer", "seller"}
+	p.role in {"buyerPlatform", "sellerPlatform"}
 	startswith(p.participantAttributes.utilityId, "TEST_")
 }
 
 _any_is_test if {
 	some p in _contract.participants
-	p.role in {"buyer", "seller"}
+	p.role in {"buyerPlatform", "sellerPlatform"}
 	startswith(p.participantAttributes.meterId, "TEST_")
 }
 
 _test_violations contains msg if {
 	_any_is_test
 	some p in _contract.participants
-	p.role in {"buyer", "seller"}
+	p.role in {"buyerPlatform", "sellerPlatform"}
 	not startswith(p.participantAttributes.utilityId, "TEST_")
 	msg := sprintf(
 		"test consistency: participant %q (role: %s) utilityId %q must start with TEST_",
@@ -440,7 +447,7 @@ _test_violations contains msg if {
 _test_violations contains msg if {
 	_any_is_test
 	some p in _contract.participants
-	p.role in {"buyer", "seller"}
+	p.role in {"buyerPlatform", "sellerPlatform"}
 	not startswith(p.participantAttributes.meterId, "TEST_")
 	msg := sprintf(
 		"test consistency: participant %q (role: %s) meterId %q must start with TEST_",

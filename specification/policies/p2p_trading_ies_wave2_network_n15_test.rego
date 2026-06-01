@@ -10,12 +10,12 @@ import rego.v1
 
 _base_participants := [
 	{
-		"role": "seller",
+		"role": "sellerPlatform",
 		"participantId": "sellerapp.example.com",
 		"participantAttributes": {"meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER"},
 	},
 	{
-		"role": "buyer",
+		"role": "buyerPlatform",
 		"participantId": "buyerapp.example.com",
 		"participantAttributes": {"meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER"},
 	},
@@ -34,10 +34,10 @@ _base_participants := [
 # Minimal contract so the rest of the contract rules don't fire on these
 # fixtures. We're only exercising N15 here.
 _min_contract := {
-	"contractAttributes": {"roles": [{"role": "buyer"}, {"role": "seller"}, {"role": "buyerDiscom"}, {"role": "sellerDiscom"}]},
+	"contractAttributes": {"roles": [{"role": "buyerPlatform"}, {"role": "sellerPlatform"}, {"role": "buyerDiscom"}, {"role": "sellerDiscom"}]},
 	"commitments": [{
 		"resources": [{"resourceAttributes": {"sourceType": "SOLAR"}}],
-		"offer": {"offerAttributes": {"inputs": [{"role": "seller", "payload": {}}]}},
+		"offer": {"offerAttributes": {"inputs": [{"role": "sellerPlatform", "payload": {}}]}},
 	}],
 	"participants": _base_participants,
 }

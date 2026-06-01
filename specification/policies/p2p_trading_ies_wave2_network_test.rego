@@ -21,7 +21,7 @@ _base_context := {
 
 _base_participants := [
 	{
-		"role": "seller",
+		"role": "sellerPlatform",
 		"participantId": "TEST_SELLER_001",
 		"participantAttributes": {
 			"@type": "EnergyCustomer",
@@ -31,7 +31,7 @@ _base_participants := [
 		},
 	},
 	{
-		"role": "buyer",
+		"role": "buyerPlatform",
 		"participantId": "TEST_BUYER_001",
 		"participantAttributes": {
 			"@type": "EnergyCustomer",
@@ -63,8 +63,8 @@ _base_participants := [
 _base_contract_attributes := {
 	"@type": "DEGContract",
 	"roles": [
-		{"role": "buyer", "participantId": "TEST_BUYER_001"},
-		{"role": "seller", "participantId": "TEST_SELLER_001"},
+		{"role": "buyerPlatform", "participantId": "TEST_BUYER_001"},
+		{"role": "sellerPlatform", "participantId": "TEST_SELLER_001"},
 		{"role": "buyerDiscom", "participantId": "buyer-discom-ledger"},
 		{"role": "sellerDiscom", "participantId": "seller-discom-ledger"},
 	],
@@ -158,8 +158,8 @@ test_n1_missing_role_fail if {
 		"op": "replace",
 		"path": "/message/contract/contractAttributes/roles",
 		"value": [
-			{"role": "buyer", "participantId": "BRPL-buyer-001"},
-			{"role": "seller", "participantId": "TPDDL-seller-001"},
+			{"role": "buyerPlatform", "participantId": "BRPL-buyer-001"},
+			{"role": "sellerPlatform", "participantId": "TPDDL-seller-001"},
 		],
 	}])
 	msgs := violations with input as patched
@@ -175,7 +175,7 @@ test_n2_empty_seller_utility_fail if {
 	patched := json.patch(_valid_on_status_input, [{"op": "replace", "path": "/message/contract/participants/0/participantAttributes/utilityId", "value": ""}])
 	msgs := violations with input as patched
 	some msg in msgs
-	contains(msg, "seller")
+	contains(msg, "sellerPlatform")
 	contains(msg, "utilityId")
 }
 

@@ -70,13 +70,13 @@
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                 "payloadType": "PRICE_PER_KWH",
                 "currency": "INR",
-                "insertedBy": "seller"
+                "insertedBy": "sellerPlatform"
               },
               {
                 "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                 "payloadType": "REQUESTED_QTY",
                 "units": "KWH",
-                "insertedBy": "buyer"
+                "insertedBy": "buyerPlatform"
               }
             ],
             "intervals": [
@@ -123,11 +123,11 @@
         "@type": "DEGContract",
         "roles": [
           {
-            "role": "buyer",
+            "role": "buyerPlatform",
             "participantId": "buyerapp.example.com"
           },
           {
-            "role": "seller",
+            "role": "sellerPlatform",
             "participantId": "sellerapp.example.com"
           },
           {
@@ -146,7 +146,7 @@
       },
       "participants": [
         {
-          "role": "seller",
+          "role": "sellerPlatform",
           "participantId": "sellerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
@@ -158,7 +158,7 @@
           }
         },
         {
-          "role": "buyer",
+          "role": "buyerPlatform",
           "participantId": "buyerapp.example.com",
           "participantAttributes": {
             "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",

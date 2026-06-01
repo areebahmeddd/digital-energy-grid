@@ -45,14 +45,13 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               participantId:
                 type:
                   - string
                   - "null"
                 description: >
-                  Concrete participant id once bound (buyer/seller use the
-                  utilityId-meter compound id, e.g. "TPDDL-DL-seller-001";
+                  Concrete participant id once bound (buyerPlatform/sellerPlatform
+                  use the utilityId-meter compound id, e.g. "TPDDL-DL-seller-001";
                   discom roles use the discom-ledger participant id).
                   Null at catalog publish for sides not yet bound.
 
@@ -84,7 +83,6 @@ components:
             properties:
               role:
                 type: string
-                enum: [buyer, seller, buyerDiscom, sellerDiscom]
               value:
                 type: number
               currency:
