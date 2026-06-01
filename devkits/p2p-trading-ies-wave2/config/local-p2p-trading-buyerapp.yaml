@@ -89,6 +89,8 @@ modules:
               actions: on_confirm,on_status
               enabled: "true"
               asyncTimeout: "30000"
+              retryCount: "3"
+              retryMaxTTL: "10m"
               signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: buyerapp.example.com
               keyId: 76EU8w8ynnqbhderWtVE5KpCmgAoVEXtM8JTCuW3PzUSGdMxtFjzyZ
@@ -237,6 +239,8 @@ modules:
               actions: status
               enabled: "true"
               asyncTimeout: "30000"
+              retryCount: "3"
+              retryMaxTTL: "10m"
               signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: buyerapp.example.com
               keyId: 76EU8w8ynnqbhderWtVE5KpCmgAoVEXtM8JTCuW3PzUSGdMxtFjzyZ

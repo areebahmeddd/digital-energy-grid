@@ -52,14 +52,30 @@ type BecknAckEnvelope struct {
 	} `json:"message"`
 }
 
+func parseBecknAckEnvelope(respBody []byte, action string) (*LedgerPutResponse, error) {
+	var envelope BecknAckEnvelope
+	if err := json.Unmarshal(respBody, &envelope); err != nil {
+		return nil, fmt.Errorf("%s: failed to parse beckn %s ack envelope: %w", degLedgerAckInvalid, action, err)
+	}
+	if !strings.EqualFold(envelope.Message.Ack.Status, "ACK") {
+		status := envelope.Message.Ack.Status
+		if status == "" {
+			status = "<missing>"
+		}
+		return nil, fmt.Errorf("%s: beckn %s was not ACKed: ack.status=%s", degLedgerAckInvalid, action, status)
+	}
+	ledger := envelope.Message.Ledger
+	return &ledger, nil
+}
+
 // RequestLog captures details of an HTTP request for logging.
 type RequestLog struct {
-	RequestID   string            `json:"request_id"`
-	Method      string            `json:"method"`
-	URL         string            `json:"url"`
-	Headers     map[string]string `json:"headers"`
-	Body        interface{}       `json:"body"`
-	Timestamp   string            `json:"timestamp"`
+	RequestID string            `json:"request_id"`
+	Method    string            `json:"method"`
+	URL       string            `json:"url"`
+	Headers   map[string]string `json:"headers"`
+	Body      interface{}       `json:"body"`
+	Timestamp string            `json:"timestamp"`
 }
 
 // ResponseLog captures details of an HTTP response for logging.
@@ -135,26 +151,14 @@ func (c *LedgerClient) PostBecknOnConfirm(ctx context.Context, baseURL string, b
 	if baseURL == "" {
 		return nil, fmt.Errorf("baseURL is required for PostBecknOnConfirm")
 	}
-	var lastErr error
-	for attempt := 0; attempt <= c.retryCount; attempt++ {
-		if attempt > 0 {
-			fmt.Printf("[DEGLedgerRecorder] Retry attempt %d/%d for beckn on_confirm\n",
-				attempt, c.retryCount)
-		}
-		resp, err := c.doBecknOnConfirmRequest(ctx, baseURL, body, attempt)
-		if err == nil {
-			return resp, nil
-		}
-		lastErr = err
-		if ctx.Err() != nil {
-			return nil, fmt.Errorf("context cancelled: %w", ctx.Err())
-		}
-		if attempt < c.retryCount {
-			backoff := time.Duration(attempt+1) * 100 * time.Millisecond
-			time.Sleep(backoff)
-		}
+	return c.PostBecknOnConfirmAttempt(ctx, baseURL, body, 0)
+}
+
+func (c *LedgerClient) PostBecknOnConfirmAttempt(ctx context.Context, baseURL string, body []byte, attempt int) (*LedgerPutResponse, error) {
+	if baseURL == "" {
+		return nil, fmt.Errorf("baseURL is required for PostBecknOnConfirm")
 	}
-	return nil, lastErr
+	return c.doBecknOnConfirmRequest(ctx, baseURL, body, attempt)
 }
 
 // PostBecknStatus forwards a beckn status body to <baseURL>/status. The ledger
@@ -163,24 +167,14 @@ func (c *LedgerClient) PostBecknStatus(ctx context.Context, baseURL string, body
 	if baseURL == "" {
 		return fmt.Errorf("baseURL is required for PostBecknStatus")
 	}
-	var lastErr error
-	for attempt := 0; attempt <= c.retryCount; attempt++ {
-		if attempt > 0 {
-			fmt.Printf("[DEGLedgerRecorder] Retry attempt %d/%d for beckn status\n", attempt, c.retryCount)
-		}
-		if err := c.doBecknStatusRequest(ctx, baseURL, body, attempt); err == nil {
-			return nil
-		} else {
-			lastErr = err
-		}
-		if ctx.Err() != nil {
-			return fmt.Errorf("context cancelled: %w", ctx.Err())
-		}
-		if attempt < c.retryCount {
-			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
-		}
+	return c.PostBecknStatusAttempt(ctx, baseURL, body, 0)
+}
+
+func (c *LedgerClient) PostBecknStatusAttempt(ctx context.Context, baseURL string, body []byte, attempt int) error {
+	if baseURL == "" {
+		return fmt.Errorf("baseURL is required for PostBecknStatus")
 	}
-	return lastErr
+	return c.doBecknStatusRequest(ctx, baseURL, body, attempt)
 }
 
 // PostBecknOnStatus forwards a beckn on_status body to <baseURL>/on_status.
@@ -189,24 +183,14 @@ func (c *LedgerClient) PostBecknOnStatus(ctx context.Context, baseURL string, bo
 	if baseURL == "" {
 		return nil, fmt.Errorf("baseURL is required for PostBecknOnStatus")
 	}
-	var lastErr error
-	for attempt := 0; attempt <= c.retryCount; attempt++ {
-		if attempt > 0 {
-			fmt.Printf("[DEGLedgerRecorder] Retry attempt %d/%d for beckn on_status\n", attempt, c.retryCount)
-		}
-		resp, err := c.doBecknOnStatusRequest(ctx, baseURL, body, attempt)
-		if err == nil {
-			return resp, nil
-		}
-		lastErr = err
-		if ctx.Err() != nil {
-			return nil, fmt.Errorf("context cancelled: %w", ctx.Err())
-		}
-		if attempt < c.retryCount {
-			time.Sleep(time.Duration(attempt+1) * 100 * time.Millisecond)
-		}
+	return c.PostBecknOnStatusAttempt(ctx, baseURL, body, 0)
+}
+
+func (c *LedgerClient) PostBecknOnStatusAttempt(ctx context.Context, baseURL string, body []byte, attempt int) (*LedgerPutResponse, error) {
+	if baseURL == "" {
+		return nil, fmt.Errorf("baseURL is required for PostBecknOnStatus")
 	}
-	return nil, lastErr
+	return c.doBecknOnStatusRequest(ctx, baseURL, body, attempt)
 }
 
 // doBecknStatusRequest performs a single beckn status POST and expects ACK.
@@ -235,10 +219,11 @@ func (c *LedgerClient) doBecknStatusRequest(ctx context.Context, baseURL string,
 	respBody, _ := io.ReadAll(resp.Body)
 	c.logResponse(requestID, resp, respBody, duration)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	return nil
+	_, err = parseBecknAckEnvelope(respBody, "status")
+	return err
 }
 
 // doBecknOnStatusRequest performs a single beckn on_status POST.
@@ -267,16 +252,10 @@ func (c *LedgerClient) doBecknOnStatusRequest(ctx context.Context, baseURL strin
 	respBody, _ := io.ReadAll(resp.Body)
 	c.logResponse(requestID, resp, respBody, duration)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	var envelope BecknAckEnvelope
-	if err := json.Unmarshal(respBody, &envelope); err != nil {
-		// Non-fatal: ledger ACK'd but response shape unknown; return empty record.
-		return &LedgerPutResponse{}, nil
-	}
-	ledger := envelope.Message.Ledger
-	return &ledger, nil
+	return parseBecknAckEnvelope(respBody, "on_status")
 }
 
 // setAuthHeader applies signing or API-key auth to req, factored out so all
@@ -346,15 +325,10 @@ func (c *LedgerClient) doBecknOnConfirmRequest(ctx context.Context, baseURL stri
 	}
 	c.logResponse(requestID, resp, respBody, duration)
 
+	if resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices {
+		return parseBecknAckEnvelope(respBody, "on_confirm")
+	}
 	switch resp.StatusCode {
-	case http.StatusOK:
-		var envelope BecknAckEnvelope
-		if err := json.Unmarshal(respBody, &envelope); err != nil {
-			return nil, fmt.Errorf("failed to parse beckn ack envelope: %w", err)
-		}
-		// Surface the inner ledger response so call sites are uniform.
-		ledger := envelope.Message.Ledger
-		return &ledger, nil
 	case http.StatusBadRequest, http.StatusUnauthorized, http.StatusForbidden, http.StatusConflict:
 		var errResp LedgerErrorResponse
 		if err := json.Unmarshal(respBody, &errResp); err != nil {

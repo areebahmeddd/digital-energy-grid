@@ -6,7 +6,7 @@ import (
 
 // Trimmed wave2 on_confirm body covering all the fields the mapper reads:
 // context (transactionId, bapId, bppId, timestamp), participants
-// (buyer/seller with utilityId+meterId, buyerDiscom/sellerDiscom with
+// (buyerPlatform/sellerPlatform with utilityId+meterId, buyerDiscom/sellerDiscom with
 // ledgerUri), and a single commitment with a seller-side delivery window.
 const sampleWave2OnConfirm = `{
   "context": {
@@ -43,7 +43,7 @@ const sampleWave2OnConfirm = `{
               "@type": "EnergyTradeOffer",
               "inputs": [
                 {
-                  "role": "seller",
+                  "role": "sellerPlatform",
                   "participantId": "TPDDL-DL-seller-001",
                   "inputs": {
                     "offers": [
@@ -59,7 +59,7 @@ const sampleWave2OnConfirm = `{
                   }
                 },
                 {
-                  "role": "buyer",
+                  "role": "buyerPlatform",
                   "participantId": "BRPL-DL-buyer-001",
                   "inputs": {}
                 }
@@ -70,7 +70,7 @@ const sampleWave2OnConfirm = `{
       ],
       "participants": [
         {
-          "role": "seller",
+          "role": "sellerPlatform",
           "participantId": "TPDDL-DL-seller-001",
           "participantAttributes": {
             "@type": "EnergyCustomer",
@@ -80,7 +80,7 @@ const sampleWave2OnConfirm = `{
           }
         },
         {
-          "role": "buyer",
+          "role": "buyerPlatform",
           "participantId": "BRPL-DL-buyer-001",
           "participantAttributes": {
             "@type": "EnergyCustomer",
@@ -142,7 +142,7 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	}
 	rec := records[0]
 
-	// Platform ids are now sourced from participants[role=buyer|seller].participantId
+	// Platform ids are now sourced from participants[role=buyerPlatform|sellerPlatform].participantId
 	// (trade identity), not from context.bapId/bppId (transport identity).
 	checks := []struct{ name, got, want string }{
 		{"role", rec.Role, "BUYER"},
@@ -172,12 +172,12 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	}
 }
 
-// When participants[role=buyer|seller].participantId is missing, the mapper
+// When participants[role=buyerPlatform|sellerPlatform].participantId is missing, the mapper
 // falls back to context.bapId/bppId so older payloads don't immediately fail.
 func TestMapWave2ToLedgerRecord_FallsBackToContextWhenParticipantIDEmpty(t *testing.T) {
 	const noParticipantIDs = `{
 	  "context": {"transactionId":"t1","bapId":"bap.fallback.com","bppId":"bpp.fallback.com","timestamp":"2026-04-25T10:10:05Z"},
-	  "message": {"contract": {"id":"c1","commitments":[{"id":"co1","resources":[{"quantity":{"unitCode":"KWH","unitQuantity":1}}],"offer":{"id":"o1","offerAttributes":{"inputs":[{"role":"seller","inputs":{"offers":[{"deliveryWindow":{"schema:startTime":"2026-04-26T04:30:00Z","schema:endTime":"2026-04-26T05:30:00Z"}}]}}]}}}],"participants":[{"role":"buyer"},{"role":"seller"}]}}
+	  "message": {"contract": {"id":"c1","commitments":[{"id":"co1","resources":[{"quantity":{"unitCode":"KWH","unitQuantity":1}}],"offer":{"id":"o1","offerAttributes":{"inputs":[{"role":"sellerPlatform","inputs":{"offers":[{"deliveryWindow":{"schema:startTime":"2026-04-26T04:30:00Z","schema:endTime":"2026-04-26T05:30:00Z"}}]}}]}}}],"participants":[{"role":"buyerPlatform"},{"role":"sellerPlatform"}]}}
 	}`
 	p, err := ParseOnConfirmWave2([]byte(noParticipantIDs))
 	if err != nil {

@@ -87,6 +87,8 @@ modules:
               actions: status
               enabled: "true"
               asyncTimeout: "30000"
+              retryCount: "3"
+              retryMaxTTL: "10m"
               signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
@@ -171,6 +173,8 @@ modules:
               actions: on_status
               enabled: "true"
               asyncTimeout: "30000"
+              retryCount: "3"
+              retryMaxTTL: "10m"
               signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
@@ -262,6 +266,8 @@ modules:
               actions: on_confirm
               enabled: "true"
               asyncTimeout: "30000"
+              retryCount: "3"
+              retryMaxTTL: "10m"
               signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz

@@ -14,7 +14,34 @@ type Side string
 const (
 	SideBuyer  Side = "buyerDiscom"
 	SideSeller Side = "sellerDiscom"
+
+	Wave2RoleBuyerPlatform  = "buyerPlatform"
+	Wave2RoleSellerPlatform = "sellerPlatform"
+	Wave2RoleBuyerDiscom    = "buyerDiscom"
+	Wave2RoleSellerDiscom   = "sellerDiscom"
 )
+
+func wave2PlatformRole(configRole string) string {
+	switch configRole {
+	case "BUYER":
+		return Wave2RoleBuyerPlatform
+	case "SELLER":
+		return Wave2RoleSellerPlatform
+	default:
+		return ""
+	}
+}
+
+func wave2PeerPlatformRole(configRole string) string {
+	switch configRole {
+	case "BUYER":
+		return Wave2RoleSellerPlatform
+	case "SELLER":
+		return Wave2RoleBuyerPlatform
+	default:
+		return ""
+	}
+}
 
 // Wave2OnConfirmPayload is the wave2 (P2PTrade/v2.0) on_confirm body.
 // Wave2 uses camelCase context keys and a `message.contract.commitments` shape.
@@ -141,10 +168,10 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 			len(payload.Message.Contract.Commitments), payload.Context.TransactionID)
 	}
 
-	buyerPart := findWave2Participant(payload.Message.Contract.Participants, "buyer")
-	sellerPart := findWave2Participant(payload.Message.Contract.Participants, "seller")
+	buyerPart := findWave2Participant(payload.Message.Contract.Participants, Wave2RoleBuyerPlatform)
+	sellerPart := findWave2Participant(payload.Message.Contract.Participants, Wave2RoleSellerPlatform)
 
-	// Platform identity is trade-scoped: read from participants[role=buyer|seller].participantId
+	// Platform identity is trade-scoped: read from participants[role=buyerPlatform|sellerPlatform].participantId
 	// rather than from transport-level context.bapId/bppId. context.bapId/bppId reflect the
 	// current message leg's BAP/BPP (and get rewritten on cascade), while participantId
 	// stays put across the chain — this is what we want to record on the ledger as the
@@ -152,11 +179,11 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 	platformIDBuyer := participantID(buyerPart)
 	platformIDSeller := participantID(sellerPart)
 	if platformIDBuyer == "" {
-		log.Printf("WARNING: participants[role=buyer].participantId is empty; falling back to context.bapId (txn: %s)", payload.Context.TransactionID)
+		log.Printf("WARNING: participants[role=buyerPlatform].participantId is empty; falling back to context.bapId (txn: %s)", payload.Context.TransactionID)
 		platformIDBuyer = payload.Context.BapID
 	}
 	if platformIDSeller == "" {
-		log.Printf("WARNING: participants[role=seller].participantId is empty; falling back to context.bppId (txn: %s)", payload.Context.TransactionID)
+		log.Printf("WARNING: participants[role=sellerPlatform].participantId is empty; falling back to context.bppId (txn: %s)", payload.Context.TransactionID)
 		platformIDSeller = payload.Context.BppID
 	}
 
@@ -249,7 +276,7 @@ func wave2StringAttr(p *Wave2Participant, key string) string {
 }
 
 // extractWave2DeliveryWindow walks
-// offerAttributes.inputs[role=seller].inputs.offers[0].deliveryWindow.{schema:startTime, schema:endTime}.
+// offerAttributes.inputs[role=sellerPlatform].inputs.offers[0].deliveryWindow.{schema:startTime, schema:endTime}.
 // Returns ("", "") if any hop is missing.
 func extractWave2DeliveryWindow(offerAttrs map[string]interface{}) (string, string) {
 	if offerAttrs == nil {
@@ -264,7 +291,7 @@ func extractWave2DeliveryWindow(offerAttrs map[string]interface{}) (string, stri
 		if !ok {
 			continue
 		}
-		if entry["role"] != "seller" {
+		if entry["role"] != Wave2RoleSellerPlatform {
 			continue
 		}
 		inner, ok := entry["inputs"].(map[string]interface{})
@@ -305,7 +332,7 @@ func extractWave2QuantityAndUnit(resources []Wave2Resource) (float64, string) {
 // i.e. the (bppId, bppUri) pair identifies the *current* leg's caller (this
 // platform), and (bapId, bapUri) identifies the *current* leg's receiver (the
 // ledger TSP). The original trade-level platform identities live in
-// message.contract.participants[role=buyer|seller].participantId and are NOT
+// message.contract.participants[role=buyerPlatform|sellerPlatform].participantId and are NOT
 // touched here.
 //
 // senderEndpointURI / ledgerEndpointURI are the FULL endpoint URLs (host base
@@ -401,7 +428,7 @@ func hostBase(rawURI string) string {
 	return u.Scheme + "://" + u.Host
 }
 
-// extractWave2IntervalIDs walks offerAttributes.inputs[role=seller].inputs.offerTimeseries.intervals
+// extractWave2IntervalIDs walks offerAttributes.inputs[role=sellerPlatform].inputs.offerTimeseries.intervals
 // and returns each interval's numeric id. Returns nil if the path is missing.
 func extractWave2IntervalIDs(offerAttrs map[string]interface{}) []int {
 	if offerAttrs == nil {
@@ -413,7 +440,7 @@ func extractWave2IntervalIDs(offerAttrs map[string]interface{}) []int {
 	}
 	for _, raw := range inputs {
 		entry, ok := raw.(map[string]interface{})
-		if !ok || entry["role"] != "seller" {
+		if !ok || entry["role"] != Wave2RoleSellerPlatform {
 			continue
 		}
 		inner, ok := entry["inputs"].(map[string]interface{})
