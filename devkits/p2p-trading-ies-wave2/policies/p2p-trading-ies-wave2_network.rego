@@ -11,8 +11,8 @@
 #
 # ── contract validation (when message.contract exists) ──
 #
-# N1.  Required roles: buyer, seller, buyerDiscom, sellerDiscom must all be
-#      present in contractAttributes.roles.
+# N1.  Required roles: buyerPlatform, sellerPlatform, buyerDiscom, sellerDiscom
+#      must all be present in contractAttributes.roles; no unknown values allowed.
 # N2.  Participant utilityIds: seller and buyer participants must each have a
 #      non-empty utilityId.
 # N3.  Inter-discom: buyer and seller must have different utilityIds.
@@ -143,15 +143,22 @@ _seller_p := _participant_by_role("sellerPlatform")
 _buyer_p := _participant_by_role("buyerPlatform")
 
 # ---------------------------------------------------------------------------
-# N1 — Required roles
+# N1 — Required roles present + no unknown role values
 # ---------------------------------------------------------------------------
 
+_allowed_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
+
 _contract_violations contains msg if {
-	required := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 	roles_present := {r.role | some r in _contract.contractAttributes.roles}
-	missing := required - roles_present
+	missing := _allowed_roles - roles_present
 	count(missing) > 0
 	msg := sprintf("missing required role(s) in contractAttributes.roles: %v", [missing])
+}
+
+_contract_violations contains msg if {
+	some r in _contract.contractAttributes.roles
+	not r.role in _allowed_roles
+	msg := sprintf("unknown role %q in contractAttributes.roles; allowed: %v", [r.role, _allowed_roles])
 }
 
 # ---------------------------------------------------------------------------
