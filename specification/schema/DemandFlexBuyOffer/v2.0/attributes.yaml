@@ -19,7 +19,7 @@ components:
         "@type": DemandFlexBuyOffer
       properties:
 
-        contractTerms:
+        contractAttributes:
           description: >
             Portable DEGContract template. Present only in catalog/discover.
             Promoted to Contract.contractAttributes at select/init.

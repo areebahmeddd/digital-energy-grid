@@ -13,27 +13,21 @@
       "@id": "deg:EnergyTradeOffer",
       "@type": "rdfs:Class",
       "rdfs:label": "Energy Trade Offer",
-      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes."
-    },
-    {
-      "@id": "deg:RoleInputs",
-      "@type": "rdfs:Class",
-      "rdfs:label": "Role Inputs",
-      "rdfs:comment": "Per-role declaration within an EnergyTradeOffer. Carries either payloadDescriptors (intent-only) or payload (actual BecknTimeSeries contribution). Mutually exclusive: seller MUST use payload from catalog publish onwards."
+      "rdfs:comment": "Offer attributes for P2P energy trading, attached to Offer.offerAttributes. Declares the contract table schema via commitmentAttributes.payloadDescriptors (each with insertedBy) and seeds the seller's initial offer data."
     },
     {
       "@id": "deg:validityWindow",
       "@type": "rdf:Property",
       "rdfs:label": "Validity window",
-      "rdfs:comment": "Time window when the offer can be selected/accepted.",
+      "rdfs:comment": "Time window when the offer can be selected/accepted. Present at catalog publish time.",
       "rdfs:domain": "deg:EnergyTradeOffer",
       "schema:rangeIncludes": "schema:TimePeriod"
     },
     {
-      "@id": "deg:contractTerms",
+      "@id": "deg:contractAttributes",
       "@type": "rdf:Property",
       "rdfs:label": "Contract terms",
-      "rdfs:comment": "JSON-LD container for contract terms (DEGContract) published at catalog time.",
+      "rdfs:comment": "JSON-LD container for contract terms (DEGContract) published at catalog time. Includes only roles with known participantIds; null/unknown parties are omitted.",
       "rdfs:domain": "deg:EnergyTradeOffer",
       "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/DEGContract/v2.0/DEGContract" }
     },
@@ -41,46 +35,16 @@
       "@id": "deg:commitmentAttributes",
       "@type": "rdf:Property",
       "rdfs:label": "Commitment attributes",
-      "rdfs:comment": "Seller's initial BecknTimeSeries at catalog time (PRICE_PER_KWH + AVAILABLE_QTY intervals). Seed of Commitment.commitmentAttributes; other roles append as lifecycle progresses.",
+      "rdfs:comment": "Seller's BecknTimeSeries at catalog time. Declares the full contract table schema via payloadDescriptors (each annotated with insertedBy). Carries PRICE_PER_KWH + AVAILABLE_QTY intervals as the seller's initial offer data. Immutable after publish.",
       "rdfs:domain": "deg:EnergyTradeOffer",
       "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/TimeSeries" }
     },
     {
-      "@id": "deg:inputs",
+      "@id": "deg:insertedBy",
       "@type": "rdf:Property",
-      "rdfs:label": "Inputs",
-      "rdfs:comment": "Per-role declarations (seller, buyer, buyerDiscom, sellerDiscom). Each entry carries either payload or payloadDescriptors.",
-      "rdfs:domain": "deg:EnergyTradeOffer",
-      "schema:rangeIncludes": "deg:RoleInputs"
-    },
-    {
-      "@id": "deg:role",
-      "@type": "rdf:Property",
-      "rdfs:label": "Role",
-      "rdfs:comment": "Role this entry applies to: buyer, seller, buyerDiscom, or sellerDiscom.",
-      "rdfs:domain": "deg:RoleInputs"
-    },
-    {
-      "@id": "deg:participantId",
-      "@type": "rdf:Property",
-      "rdfs:label": "Participant ID",
-      "rdfs:comment": "Beckn participant ID of the role-holder once bound. Null at catalog publish for buyer and discom roles.",
-      "rdfs:domain": "deg:RoleInputs"
-    },
-    {
-      "@id": "deg:payload",
-      "@type": "rdf:Property",
-      "rdfs:label": "Payload",
-      "rdfs:comment": "The role's actual BecknTimeSeries contribution to Commitment.commitmentAttributes. Mutually exclusive with payloadDescriptors (oneOf). Seller MUST use this form.",
-      "rdfs:domain": "deg:RoleInputs",
-      "schema:rangeIncludes": { "@id": "https://schema.beckn.io/deg/BecknTimeSeries/v1.0/TimeSeries" }
-    },
-    {
-      "@id": "deg:payloadDescriptors",
-      "@type": "rdf:Property",
-      "rdfs:label": "Payload descriptors",
-      "rdfs:comment": "Metadata-only declaration of signal types this role will contribute. Mutually exclusive with payload (oneOf). Used by roles that have not yet written interval data.",
-      "rdfs:domain": "deg:RoleInputs"
+      "rdfs:label": "Inserted by",
+      "rdfs:comment": "Role name (buyer, seller, buyerDiscom, sellerDiscom) of the party responsible for populating this payloadDescriptor column in the commitment table.",
+      "rdfs:domain": "deg:commitmentAttributes"
     }
   ]
 }

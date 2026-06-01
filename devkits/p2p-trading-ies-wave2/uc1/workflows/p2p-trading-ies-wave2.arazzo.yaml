@@ -54,29 +54,29 @@ info:
 sourceDescriptions:
   - name: beckn-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8081/bap/caller
 
   - name: beckn-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bpp/caller
 
   - name: beckn-sellerdiscom-ledger-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bpp/caller
 
   - name: beckn-buyerdiscom-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8084/bpp/caller
 
   # Sellerapp's /bap/caller — used for seller-initiated requests (status to
   # buyer for buyer-discom alloc, or status to seller-discom for settlement).
   - name: beckn-seller-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8082/bap/caller
 
   # Sellerdiscom — the seller-side distribution utility (distinct
@@ -84,28 +84,28 @@ sourceDescriptions:
   # meter actuals (DatasetItem-wrapped BecknTimeSeries) as on_status.
   - name: beckn-sellerdiscom-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8086/bpp/caller
 
   # Buyerdiscom — the buyer-side distribution utility (distinct from the
   # buyer-discom-ledger TSP). Symmetric counterpart to beckn-sellerdiscom-bpp-caller.
   - name: beckn-buyerdiscom-actor-bpp-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8085/bpp/caller
 
   # SellerDiscom Ledger /bap/caller — outbound status requests to the
   # sellerdiscom utility (ledger acting as BAP for meter-data sub-tx).
   - name: beckn-sellerdiscom-ledger-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8083/bap/caller
 
   # BuyerDiscom Ledger /bap/caller — outbound status requests to the
   # buyerdiscom utility (ledger acting as BAP for meter-data sub-tx).
   - name: beckn-buyerdiscom-ledger-bap-caller
     type: openapi
-    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/api/v2.0.0/beckn.yaml
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
     x-serverUrl: http://localhost:8084/bap/caller
 
 workflows:
@@ -325,8 +325,8 @@ workflows:
   - workflowId: sellerdiscom-pushes-settled-on-status
     summary: >
       SellerDiscom emits a fully-settled /on_status carrying the complete offer
-      context (offerAttributes.inputs including AVAILABLE_QTY intervals) and all
-      seven commitmentAttributes payload types with real values, including
+      context (offerAttributes.commitmentAttributes with AVAILABLE_QTY intervals)
+      and all seven commitmentAttributes payload types with real values, including
       FINAL_ALLOC. Exercises OPA rules P3 (FINAL_ALLOC ids subset of seller offer
       ids) and P4 (FINAL_ALLOC <= min(BUYER_DISCOM_ALLOC, SELLER_DISCOM_ALLOC)).
       bppId=seller-discom-ledger.example.com triggers Rule 2a cascade at
@@ -335,9 +335,10 @@ workflows:
       - stepId: sellerdiscom-emits-settled-on-status
         description: >
           POST to sellerdiscom-ledger/bpp/caller (port 8083). The settled payload
-          includes offerAttributes so the network-policy P3 interval-coverage check
-          can fire. All seven commitmentAttributes payload types are populated with
-          real values: PRICE_PER_KWH, REQUESTED_QTY, BUYER_DISCOM_ALLOC,
+          includes offerAttributes.commitmentAttributes (AVAILABLE_QTY offer
+          intervals) so the network-policy P3 interval-coverage check can fire.
+          All seven commitmentAttributes payload types are populated with real
+          values: PRICE_PER_KWH, REQUESTED_QTY, BUYER_DISCOM_ALLOC,
           BUYER_DISCOM_STATUS, SELLER_DISCOM_ALLOC, SELLER_DISCOM_STATUS,
           FINAL_ALLOC. FINAL_ALLOC=min(BUYER,SELLER) so P4 passes.
         operationId: beckn-sellerdiscom-ledger-bpp-caller.onStatus
@@ -359,9 +360,10 @@ workflows:
       - stepId: buyerdiscom-emits-settled-on-status
         description: >
           POST to buyerdiscom-ledger/bpp/caller (port 8084). The settled payload
-          includes offerAttributes so the network-policy P3 interval-coverage check
-          can fire. All seven commitmentAttributes payload types are populated with
-          real values. FINAL_ALLOC=min(BUYER,SELLER) so P4 passes.
+          includes offerAttributes.commitmentAttributes (AVAILABLE_QTY offer
+          intervals) so the network-policy P3 interval-coverage check can fire.
+          All seven commitmentAttributes payload types are populated with real
+          values. FINAL_ALLOC=min(BUYER,SELLER) so P4 passes.
         operationId: beckn-buyerdiscom-bpp-caller.onStatus
         requestBody:
           contentType: application/json
