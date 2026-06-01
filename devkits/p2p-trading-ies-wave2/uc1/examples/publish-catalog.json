@@ -75,11 +75,11 @@
                 "@type": "DEGContract",
                 "roles": [
                   {
-                    "role": "buyer",
+                    "role": "buyerPlatform",
                     "participantId": "buyerapp.example.com"
                   },
                   {
-                    "role": "seller",
+                    "role": "sellerPlatform",
                     "participantId": "sellerapp.example.com"
                   },
                   {
@@ -104,19 +104,19 @@
                     "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                     "payloadType": "PRICE_PER_KWH",
                     "currency": "INR",
-                    "insertedBy": "seller"
+                    "insertedBy": "sellerPlatform"
                   },
                   {
                     "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                     "payloadType": "AVAILABLE_QTY",
                     "units": "KWH",
-                    "insertedBy": "seller"
+                    "insertedBy": "sellerPlatform"
                   },
                   {
                     "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
                     "payloadType": "REQUESTED_QTY",
                     "units": "KWH",
-                    "insertedBy": "buyer"
+                    "insertedBy": "buyerPlatform"
                   },
                   {
                     "objectType": "REPORT_PAYLOAD_DESCRIPTOR",

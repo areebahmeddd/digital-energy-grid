@@ -119,7 +119,7 @@ _seller_receivable := (trade_value - wheeling_charge_seller) - penalty_charge
 _seller_discom_value := wheeling_charge_seller + penalty_charge
 
 _buyer_flow := {
-	"role": "buyer",
+	"role": "buyerPlatform",
 	"value": _buyer_payable * -1,
 	"currency": _currency,
 	"description": sprintf(
@@ -129,7 +129,7 @@ _buyer_flow := {
 }
 
 _seller_flow := {
-	"role": "seller",
+	"role": "sellerPlatform",
 	"value": _seller_receivable,
 	"currency": _currency,
 	"description": sprintf(
@@ -170,7 +170,7 @@ _roles := {r.role | some r in _contract_attrs.roles}
 # Violations
 # ---------------------------------------------------------------------------
 
-_required_roles := {"buyer", "seller", "buyerDiscom", "sellerDiscom"}
+_required_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 
 violations contains msg if {
 	some role in _required_roles
