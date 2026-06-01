@@ -47,8 +47,8 @@
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
-                "resourceType": "SOLAR",
-                "resourceId": "TEST_METER_SELLER_001"
+                "type": "SOLAR",
+                "id": "TEST_METER_SELLER_001"
               }
             }
           ],
