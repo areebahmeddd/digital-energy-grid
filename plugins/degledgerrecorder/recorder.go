@@ -338,7 +338,7 @@ func (r *DEGLedgerRecorder) sendBecknWithRetry(ctx context.Context, action, base
 		if attempt == maxAttempts-1 {
 			break
 		}
-		backoff := becknRetryBackoff(attempt)
+		backoff := becknRetryBackoff(r.config.RetryBackoff)
 		if backoff > time.Until(deadline) {
 			backoff = time.Until(deadline)
 		}
@@ -363,13 +363,9 @@ func (r *DEGLedgerRecorder) sendBecknWithRetry(ctx context.Context, action, base
 		action, maxAttempts, r.config.RetryMaxTTL, lastErr)
 }
 
-func becknRetryBackoff(failedAttempt int) time.Duration {
-	backoff := 250 * time.Millisecond
-	for i := 0; i < failedAttempt; i++ {
-		backoff *= 2
-		if backoff >= 5*time.Second {
-			return 5 * time.Second
-		}
+func becknRetryBackoff(backoff time.Duration) time.Duration {
+	if backoff <= 0 {
+		return 5 * time.Second
 	}
 	return backoff
 }

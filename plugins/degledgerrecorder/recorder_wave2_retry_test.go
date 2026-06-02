@@ -18,6 +18,7 @@ func TestParseConfig_RetryMaxTTL(t *testing.T) {
 	cfg := baseValidCfg()
 	cfg["retryCount"] = "3"
 	cfg["retryMaxTTL"] = "10m"
+	cfg["retryBackoff"] = "5s"
 
 	got, err := ParseConfig(cfg)
 	if err != nil {
@@ -28,6 +29,9 @@ func TestParseConfig_RetryMaxTTL(t *testing.T) {
 	}
 	if got.RetryMaxTTL != 10*time.Minute {
 		t.Fatalf("RetryMaxTTL: got %s", got.RetryMaxTTL)
+	}
+	if got.RetryBackoff != 5*time.Second {
+		t.Fatalf("RetryBackoff: got %s", got.RetryBackoff)
 	}
 }
 
@@ -40,6 +44,23 @@ func TestParseConfig_InvalidRetryMaxTTL(t *testing.T) {
 	}
 }
 
+func TestParseConfig_InvalidRetryBackoff(t *testing.T) {
+	cfg := baseValidCfg()
+	cfg["retryBackoff"] = "soon"
+
+	if _, err := ParseConfig(cfg); err == nil {
+		t.Fatal("expected invalid retryBackoff to fail")
+	}
+}
+
+func TestBecknRetryBackoffUsesConfiguredFixedDelay(t *testing.T) {
+	for attempt := 0; attempt < 5; attempt++ {
+		if got := becknRetryBackoff(5 * time.Second); got != 5*time.Second {
+			t.Fatalf("attempt %d: got %s, want 5s", attempt, got)
+		}
+	}
+}
+
 func TestWave2BecknOnConfirmRetriesNACKThenACK(t *testing.T) {
 	var calls atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,10 +69,10 @@ func TestWave2BecknOnConfirmRetriesNACKThenACK(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if calls.Add(1) == 1 {
-			_, _ = w.Write([]byte(`{"message":{"ack":{"status":"NACK"}}}`))
+			_, _ = w.Write([]byte(`{"message":{"status":"NACK","messageId":"ack-1"}}`))
 			return
 		}
-		_, _ = w.Write([]byte(`{"message":{"ack":{"status":"ACK"},"ledger":{"success":true,"recordId":"rec-1"}}}`))
+		_, _ = w.Write([]byte(`{"message":{"status":"ACK","messageId":"ack-2","ledger":{"success":true,"recordId":"rec-1"}}}`))
 	}))
 	defer server.Close()
 
@@ -77,7 +98,7 @@ func TestWave2StatusAsyncRetriesMissingACKThenACK(t *testing.T) {
 			_, _ = w.Write([]byte(`{"message":{}}`))
 			return
 		}
-		_, _ = w.Write([]byte(`{"message":{"ack":{"status":"ACK"}}}`))
+		_, _ = w.Write([]byte(`{"message":{"status":"ACK","messageId":"ack-status"}}`))
 	}))
 	defer server.Close()
 
@@ -104,10 +125,10 @@ func TestWave2OnStatusAsyncRetriesNACKThenACK(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if calls.Add(1) == 1 {
-			_, _ = w.Write([]byte(`{"message":{"ack":{"status":"NACK"}}}`))
+			_, _ = w.Write([]byte(`{"message":{"status":"NACK","messageId":"ack-1"}}`))
 			return
 		}
-		_, _ = w.Write([]byte(`{"message":{"ack":{"status":"ACK"},"ledger":{"success":true,"recordId":"rec-2"}}}`))
+		_, _ = w.Write([]byte(`{"message":{"status":"ACK","messageId":"ack-2","ledger":{"success":true,"recordId":"rec-2"}}}`))
 	}))
 	defer server.Close()
 
@@ -138,7 +159,7 @@ func TestWave2OnStatusRetryExhaustionSendsFailureCallback(t *testing.T) {
 		}
 		failureReceived <- body
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"message":{"ack":{"status":"ACK"}}}`))
+		_, _ = w.Write([]byte(`{"message":{"status":"ACK","messageId":"failure-ack"}}`))
 	}))
 	defer failureServer.Close()
 
@@ -147,7 +168,7 @@ func TestWave2OnStatusRetryExhaustionSendsFailureCallback(t *testing.T) {
 			t.Errorf("target path: got %q", r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"message":{"ack":{"status":"NACK"}}}`))
+		_, _ = w.Write([]byte(`{"message":{"status":"NACK","messageId":"target-nack"}}`))
 	}))
 	defer targetServer.Close()
 
@@ -180,6 +201,7 @@ func newWave2RetryRecorder(t *testing.T, actions string, retryCount int) *DEGLed
 		"asyncTimeout":    "1000",
 		"retryCount":      strconv.Itoa(retryCount),
 		"retryMaxTTL":     "2s",
+		"retryBackoff":    "50ms",
 	})
 	if err != nil {
 		t.Fatalf("New recorder: %v", err)

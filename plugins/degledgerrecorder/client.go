@@ -41,14 +41,13 @@ type LedgerErrorResponse struct {
 }
 
 // BecknAckEnvelope is the response shape the ledger TSP returns when called
-// over beckn `on_confirm`. The legacy ledger record metadata is wrapped inside
+// over Beckn. The legacy ledger record metadata is wrapped inside
 // `message.ledger` so callers can unwrap it back into a `LedgerPutResponse`.
 type BecknAckEnvelope struct {
 	Message struct {
-		Ack struct {
-			Status string `json:"status"`
-		} `json:"ack"`
-		Ledger LedgerPutResponse `json:"ledger"`
+		Status    string            `json:"status"`
+		MessageID string            `json:"messageId,omitempty"`
+		Ledger    LedgerPutResponse `json:"ledger,omitempty"`
 	} `json:"message"`
 }
 
@@ -57,12 +56,12 @@ func parseBecknAckEnvelope(respBody []byte, action string) (*LedgerPutResponse, 
 	if err := json.Unmarshal(respBody, &envelope); err != nil {
 		return nil, fmt.Errorf("%s: failed to parse beckn %s ack envelope: %w", degLedgerAckInvalid, action, err)
 	}
-	if !strings.EqualFold(envelope.Message.Ack.Status, "ACK") {
-		status := envelope.Message.Ack.Status
+	if !strings.EqualFold(envelope.Message.Status, "ACK") {
+		status := envelope.Message.Status
 		if status == "" {
 			status = "<missing>"
 		}
-		return nil, fmt.Errorf("%s: beckn %s was not ACKed: ack.status=%s", degLedgerAckInvalid, action, status)
+		return nil, fmt.Errorf("%s: beckn %s was not ACKed: message.status=%s", degLedgerAckInvalid, action, status)
 	}
 	ledger := envelope.Message.Ledger
 	return &ledger, nil
