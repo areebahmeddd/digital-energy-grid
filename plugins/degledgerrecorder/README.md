@@ -109,13 +109,23 @@ The plugin then POSTs the rewritten body to `<discomLedgerUri>/bap/receiver/on_c
     "status":    "ACK",
     "messageId": "8153a419-35b1-4ec8-bd23-16fcff1b7964",
     "ledger":    { "success": true, "recordId": "rec-...", "creationTime": "...", "rowDigest": "sha256:..." }
+  },
+  "details": {
+    "message": "Records already exist; skipped duplicate on_confirm"
   }
 }
 ```
 
-The inner `message.ledger` block carries the same fields the legacy `/ledger/put` API used to return; the plugin surfaces it identically so call-site logging stays uniform across the two modes.
+The `status` field lives directly under `message` — there is no nested `ack`
+object. The inner `message.ledger` block carries the same fields the legacy
+`/ledger/put` API used to return; the plugin surfaces it identically so
+call-site logging stays uniform across the two modes.
 
-For Wave 2 `ledgerApi: beckn`, every Beckn send must receive HTTP 2xx with `message.status = "ACK"`. Network errors, timeouts, non-2xx responses, malformed bodies, missing ACK, and NACK are retried using `retryCount` and `retryMaxTTL`.
+If `message.ledger.message` is empty (e.g. when the ledger skips a duplicate
+write), the plugin copies `details.message` into the ledger response so the
+success log always includes a human-readable reason.
+
+For Wave 2 `ledgerApi: beckn`, every Beckn send must receive HTTP 2xx with `message.status = "ACK"` (flat — no nested `ack` object). Network errors, timeouts, non-2xx responses, malformed bodies, missing ACK, and NACK are retried using `retryCount` and `retryMaxTTL`.
 
 Each send attempt waits up to `asyncTimeout` for ACK. `asyncTimeout` defaults to `5000` ms and is configurable in the plugin YAML. `retryBackoff` is only the wait between failed attempts and defaults to `5s`.
 
@@ -123,14 +133,14 @@ Each send attempt waits up to `asyncTimeout` for ACK. `asyncTimeout` defaults to
 retryBackoff: "5s"
 ```
 
-Wave 2 `on_confirm` is synchronous. The ONIX step returns `nil` only after the DISCOM ledger returns ACK. If the ledger write is still not ACKed after retry exhaustion, or the target `ledgerUri` cannot be resolved from the contract participants, the step returns an error and ONIX does not forward the original `on_confirm` to the next trading platform.
+Wave 2 `on_confirm` is synchronous. The ONIX step returns `nil` only after the DISCOM ledger returns ACK. If the ledger write is still not ACKed after retry exhaustion, or the target `ledgerUri` cannot be resolved from the contract participants, the step returns an error and ONIX does not forward the original `on_confirm` to the next trading platform. On success, the log line includes the `message` field from the ledger response (or `details.message` when the ledger skips a duplicate).
 
 Wave 2 `status` and `on_status` cascades remain asynchronous. The plugin keeps the pending payload in memory only while retrying and removes it after ACK or final failure. If an async `on_status` cascade exhausts retries, the plugin sends a best-effort error `on_status` callback back to the original sender with `error.code = "DEG_ASYNC_ACK_TIMEOUT"`.
 
 Stable failure prefixes:
 - `DEG_LEDGER_URI_MISSING`: the target DISCOM ledger URI could not be resolved.
 - `DEG_LEDGER_CONTEXT_REWRITE_FAILED`: the Beckn context could not be rewritten for the DISCOM ledger leg.
-- `DEG_LEDGER_ACK_INVALID`: the DISCOM ledger returned HTTP 200 without `message.status = "ACK"`.
+- `DEG_LEDGER_ACK_INVALID`: the DISCOM ledger returned HTTP 200 without `message.status = "ACK"` (flat check).
 - `DEG_LEDGER_WRITE_FAILED`: the DISCOM ledger request failed or returned a non-2xx response.
 
 | Option | Required | Default | Description |

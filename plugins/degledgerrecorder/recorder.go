@@ -301,8 +301,8 @@ func (r *DEGLedgerRecorder) sendBecknOnConfirmBlocking(parentCtx *model.StepCont
 	}
 
 	log.Infof(parentCtx,
-		"DEGLedgerRecorder: successfully forwarded beckn on_confirm (transaction_id=%s, record_id=%s, base_url=%s)",
-		transactionID, resp.RecordID, baseURL)
+		"DEGLedgerRecorder: successfully forwarded beckn on_confirm (transaction_id=%s, record_id=%s, base_url=%s, message=%s)",
+		transactionID, resp.RecordID, baseURL, resp.Message)
 	return nil
 }
 
@@ -836,8 +836,8 @@ func (r *DEGLedgerRecorder) sendBecknOnStatusAsync(parentCtx *model.StepContext,
 			return
 		}
 		log.Infof(parentCtx,
-			"DEGLedgerRecorder: successfully forwarded beckn on_status (transaction_id=%s, record_id=%s, base_url=%s)",
-			transactionID, resp.RecordID, baseURL)
+			"DEGLedgerRecorder: successfully forwarded beckn on_status (transaction_id=%s, record_id=%s, base_url=%s, message=%s)",
+			transactionID, resp.RecordID, baseURL, resp.Message)
 	}()
 }
 

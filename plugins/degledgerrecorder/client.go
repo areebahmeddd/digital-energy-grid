@@ -49,6 +49,9 @@ type BecknAckEnvelope struct {
 		MessageID string            `json:"messageId,omitempty"`
 		Ledger    LedgerPutResponse `json:"ledger,omitempty"`
 	} `json:"message"`
+	Details struct {
+		Message string `json:"message,omitempty"`
+	} `json:"details,omitempty"`
 }
 
 func parseBecknAckEnvelope(respBody []byte, action string) (*LedgerPutResponse, error) {
@@ -64,6 +67,9 @@ func parseBecknAckEnvelope(respBody []byte, action string) (*LedgerPutResponse, 
 		return nil, fmt.Errorf("%s: beckn %s was not ACKed: message.status=%s", degLedgerAckInvalid, action, status)
 	}
 	ledger := envelope.Message.Ledger
+	if ledger.Message == "" {
+		ledger.Message = envelope.Details.Message
+	}
 	return &ledger, nil
 }
 

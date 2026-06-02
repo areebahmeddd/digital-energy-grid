@@ -117,6 +117,19 @@ func TestWave2StatusAsyncRetriesMissingACKThenACK(t *testing.T) {
 	}
 }
 
+func TestParseBecknAckEnvelopeCopiesDetailsMessage(t *testing.T) {
+	resp, err := parseBecknAckEnvelope(
+		[]byte(`{"message":{"status":"ACK","messageId":"ack-duplicate"},"details":{"message":"Records already exist; skipped duplicate on_confirm"}}`),
+		"on_confirm",
+	)
+	if err != nil {
+		t.Fatalf("parseBecknAckEnvelope: %v", err)
+	}
+	if resp.Message != "Records already exist; skipped duplicate on_confirm" {
+		t.Fatalf("Message: got %q", resp.Message)
+	}
+}
+
 func TestWave2OnStatusAsyncRetriesNACKThenACK(t *testing.T) {
 	var calls atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
