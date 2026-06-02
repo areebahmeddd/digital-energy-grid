@@ -51,7 +51,7 @@ modules:
           id: simplekeymanager
           config:
             networkParticipant: buyerdiscom.example.com
-            keyId: 76EU93x8Ua4gzQPXFkc83ochbgvB8uTJJRAKaHqQpYYpzatTbMmULg
+            keyId: 76EU9EFnUgC32qnMhzM6RPqDXA73xfSbFmfgtpnPgNsGR9cSN7ZGUk
             signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
             signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
             encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
@@ -112,7 +112,7 @@ modules:
           id: simplekeymanager
           config:
             networkParticipant: buyerdiscom.example.com
-            keyId: 76EU93x8Ua4gzQPXFkc83ochbgvB8uTJJRAKaHqQpYYpzatTbMmULg
+            keyId: 76EU9EFnUgC32qnMhzM6RPqDXA73xfSbFmfgtpnPgNsGR9cSN7ZGUk
             signingPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
             signingPublicKey: g/3swjI93IhZ0SScrVZapeLjU+W0AeiSid3LViYZJFo=
             encrPrivateKey: TTQMAEy0xJcoRXRNofZAwZq1c3VH6j98UUaHP7budQQ=
