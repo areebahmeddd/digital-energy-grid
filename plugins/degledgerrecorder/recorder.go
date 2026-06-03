@@ -2,13 +2,16 @@ package degledgerrecorder
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/beckn-one/beckn-onix/pkg/log"
 	"github.com/beckn-one/beckn-onix/pkg/model"
+	"github.com/google/uuid"
 )
 
 // DEGLedgerRecorder is a Step plugin that records trade data to the DEG Ledger
@@ -19,6 +22,27 @@ type DEGLedgerRecorder struct {
 
 	// wg tracks in-flight async requests for graceful shutdown
 	wg sync.WaitGroup
+
+	pendingMu      sync.Mutex
+	pendingRetries map[string]pendingBecknPayload
+}
+
+const (
+	degLedgerWriteFailed          = "DEG_LEDGER_WRITE_FAILED"
+	degLedgerURIMissing           = "DEG_LEDGER_URI_MISSING"
+	degLedgerContextRewriteFailed = "DEG_LEDGER_CONTEXT_REWRITE_FAILED"
+	degLedgerAckInvalid           = "DEG_LEDGER_ACK_INVALID"
+	degAsyncAckTimeout            = "DEG_ASYNC_ACK_TIMEOUT"
+)
+
+type pendingBecknPayload struct {
+	Action        string
+	TransactionID string
+	TargetURL     string
+	CreatedAt     time.Time
+	ExpiresAt     time.Time
+	Attempts      int
+	Body          []byte
 }
 
 // New creates a new DEGLedgerRecorder instance.
@@ -71,8 +95,9 @@ func New(cfg map[string]string) (*DEGLedgerRecorder, error) {
 	)
 
 	return &DEGLedgerRecorder{
-		config: config,
-		client: client,
+		config:         config,
+		client:         client,
+		pendingRetries: make(map[string]pendingBecknPayload),
 	}, nil
 }
 
@@ -193,6 +218,9 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 	if err != nil {
 		log.Warnf(ctx, "DEGLedgerRecorder: wave2 base URL resolution failed (transaction_id=%s): %v",
 			payload.Context.TransactionID, err)
+		if r.config.LedgerApi == LedgerApiBeckn {
+			return model.NewBadReqErr(fmt.Errorf("%s: %w", degLedgerURIMissing, err))
+		}
 		return nil
 	}
 
@@ -215,7 +243,7 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 		if senderHost == "" {
 			log.Warnf(ctx, "DEGLedgerRecorder: beckn mode requires a sender host (config.senderHost or context.bapUri/bppUri); skipping (transaction_id=%s)",
 				payload.Context.TransactionID)
-			return nil
+			return model.NewBadReqErr(fmt.Errorf("%s: senderHost or context sender URI is required", degLedgerContextRewriteFailed))
 		}
 		// Sender (BPP-side on this cascade leg) signs as this plugin's configured
 		// subscriber id; the receiver (BAP-side) is the discom ledger TSP whose
@@ -240,16 +268,106 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 		rewritten, err := RewriteContextForBeckn(ctx.Body, senderEndpoint, ledgerEndpoint, senderSubscriberID, ledgerSubscriberID)
 		if err != nil {
 			log.Warnf(ctx, "DEGLedgerRecorder: beckn context rewrite failed: %v", err)
-			return nil
+			return model.NewBadReqErr(fmt.Errorf("%s: %w", degLedgerContextRewriteFailed, err))
 		}
-		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm (transaction_id=%s) -> %s/on_confirm (sender=%s bppId=%s bapId=%s)",
+		log.Infof(ctx, "DEGLedgerRecorder: wave2 (beckn) forwarding on_confirm synchronously (transaction_id=%s) -> %s/on_confirm (sender=%s bppId=%s bapId=%s)",
 			payload.Context.TransactionID, ledgerEndpoint, senderEndpoint, senderSubscriberID, ledgerSubscriberID)
-		r.sendBecknOnConfirmAsync(ctx, ledgerEndpoint, rewritten, payload.Context.TransactionID)
+		if err := r.sendBecknOnConfirmBlocking(ctx, ledgerEndpoint, rewritten, payload.Context.TransactionID); err != nil {
+			return err
+		}
 
 	default:
 		log.Warnf(ctx, "DEGLedgerRecorder: unsupported ledgerApi=%s", r.config.LedgerApi)
 	}
 	return nil
+}
+
+// sendBecknOnConfirmBlocking forwards a beckn on_confirm body and blocks the
+// ONIX pipeline until the ledger TSP ACKs it. Caller routing continues only
+// after this returns nil.
+func (r *DEGLedgerRecorder) sendBecknOnConfirmBlocking(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) error {
+	resp, err := r.sendBecknWithRetry(parentCtx.Context, "on_confirm", baseURL, transactionID, body, func(ctx context.Context, attempt int) (*LedgerPutResponse, error) {
+		return r.client.PostBecknOnConfirmAttempt(ctx, baseURL, body, attempt)
+	})
+	if err != nil {
+		log.Errorf(parentCtx, err,
+			"DEGLedgerRecorder: failed to forward beckn on_confirm (transaction_id=%s, base_url=%s): %v",
+			transactionID, baseURL, err)
+		if strings.Contains(err.Error(), degLedgerAckInvalid) {
+			return model.NewBadReqErr(err)
+		}
+		return model.NewBadReqErr(fmt.Errorf("%s: transaction_id=%s base_url=%s: %w",
+			degLedgerWriteFailed, transactionID, baseURL, err))
+	}
+
+	log.Infof(parentCtx,
+		"DEGLedgerRecorder: successfully forwarded beckn on_confirm (transaction_id=%s, record_id=%s, base_url=%s, message=%s)",
+		transactionID, resp.RecordID, baseURL, resp.Message)
+	return nil
+}
+
+type becknAttemptFunc func(context.Context, int) (*LedgerPutResponse, error)
+
+func (r *DEGLedgerRecorder) sendBecknWithRetry(ctx context.Context, action, baseURL, transactionID string, body []byte, send becknAttemptFunc) (*LedgerPutResponse, error) {
+	deadline := time.Now().Add(r.config.RetryMaxTTL)
+	maxAttempts := r.config.RetryCount + 1
+	if maxAttempts < 1 {
+		maxAttempts = 1
+	}
+
+	var lastErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			break
+		}
+		timeout := r.config.AsyncTimeout
+		if timeout <= 0 || timeout > remaining {
+			timeout = remaining
+		}
+		attemptCtx, cancel := context.WithTimeout(ctx, timeout)
+		resp, err := send(attemptCtx, attempt)
+		cancel()
+		if err == nil {
+			return resp, nil
+		}
+		lastErr = err
+		if ctx.Err() != nil {
+			return nil, fmt.Errorf("context cancelled: %w", ctx.Err())
+		}
+		if attempt == maxAttempts-1 {
+			break
+		}
+		backoff := becknRetryBackoff(r.config.RetryBackoff)
+		if backoff > time.Until(deadline) {
+			backoff = time.Until(deadline)
+		}
+		if backoff <= 0 {
+			break
+		}
+		fmt.Printf("[DEGLedgerRecorder] retrying beckn %s after %s (attempt %d/%d, transaction_id=%s, base_url=%s): %v\n",
+			action, backoff, attempt+1, maxAttempts, transactionID, baseURL, err)
+		timer := time.NewTimer(backoff)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, fmt.Errorf("context cancelled: %w", ctx.Err())
+		case <-timer.C:
+		}
+	}
+
+	if lastErr == nil {
+		lastErr = fmt.Errorf("retry TTL expired after %s", r.config.RetryMaxTTL)
+	}
+	return nil, fmt.Errorf("beckn %s did not receive ACK after %d attempt(s) within %s: %w",
+		action, maxAttempts, r.config.RetryMaxTTL, lastErr)
+}
+
+func becknRetryBackoff(backoff time.Duration) time.Duration {
+	if backoff <= 0 {
+		return 5 * time.Second
+	}
+	return backoff
 }
 
 // sendBecknOnConfirmAsync forwards a beckn on_confirm body in the background.
@@ -419,15 +537,16 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 
 	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
 	parts := payload.Message.Contract.Participants
-	ownPlatformURI := ParticipantEndpointURI(parts, strings.ToLower(r.config.Role), "platformUri")
+	ownPlatformRole := wave2PlatformRole(r.config.Role)
+	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUri")
 	if ownPlatformURI == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s]; skipping status forward (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s]; skipping status forward (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
 	}
 	// Use participantId from the participants array for bapId/bppId so they are
 	// stable Beckn identities regardless of whether the routing URIs use ngrok
 	// tunnels, internal Docker hostnames, or production FQDNs.
-	ownParticipantID := participantID(findWave2Participant(parts, strings.ToLower(r.config.Role)))
+	ownParticipantID := participantID(findWave2Participant(parts, ownPlatformRole))
 	discomParticipantID := participantID(findWave2Participant(parts, string(side)))
 	subTx := SubTxContext{
 		BapURI: BapReceiverEndpoint(ownPlatformURI),
@@ -449,10 +568,7 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	// same app) this node is the only one that will ever call handleStatus, so it
 	// must kick off the sub-transaction to the PEER's discom as well. In a normal
 	// 2-platform setup peerPlatformURI != ownPlatformURI and none of this runs.
-	peerRole := "buyer"
-	if r.config.Role == "BUYER" {
-		peerRole = "seller"
-	}
+	peerRole := wave2PeerPlatformRole(r.config.Role)
 	if ParticipantEndpointURI(parts, peerRole, "platformUri") != ownPlatformURI {
 		return nil // 2-platform topology — peer will handle its own discom
 	}
@@ -497,19 +613,19 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 //
 // The chain has two rules, decided by who sent the on_status (context.bppId):
 //
-//   Rule 2a — own discom sent it (bppId == ownDiscomPid):
-//     The discom has just computed its allocation. Pass the payload to the peer
-//     platform so the peer can record it and trigger its own discom cascade.
+//	Rule 2a — own discom sent it (bppId == ownDiscomPid):
+//	  The discom has just computed its allocation. Pass the payload to the peer
+//	  platform so the peer can record it and trigger its own discom cascade.
 //
-//     Prosumer variant (buyer and seller share one platform): there is no
-//     separate peer to forward to, so skip the self-loop and cascade directly
-//     to the peer's discom instead. If both roles also share one discom, the
-//     single discom was already notified via handleStatus — terminate here.
+//	  Prosumer variant (buyer and seller share one platform): there is no
+//	  separate peer to forward to, so skip the self-loop and cascade directly
+//	  to the peer's discom instead. If both roles also share one discom, the
+//	  single discom was already notified via handleStatus — terminate here.
 //
-//   Rule 2b — peer (or any other party) sent it (bppId != ownDiscomPid):
-//     We received the peer's allocation data. Push it to our own discom so it
-//     can record the full bilateral settlement. Skipped when the payload has
-//     no performance data (e.g. a bare status-check ACK).
+//	Rule 2b — peer (or any other party) sent it (bppId != ownDiscomPid):
+//	  We received the peer's allocation data. Push it to our own discom so it
+//	  can record the full bilateral settlement. Skipped when the payload has
+//	  no performance data (e.g. a bare status-check ACK).
 //
 // The asymmetry (discom → platform → discom, never discom → discom) is what
 // prevents infinite loops: discoms receive on_status at /bap/receiver, which
@@ -546,9 +662,10 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	// the next leg needs it for both Rule 2a (BPP-side of leg 4) and Rule 2b
 	// (BPP-side of leg 5). The platform plays BPP-caller on both forwards.
 	parts := payload.Message.Contract.Participants
-	ownPlatformURI := ParticipantEndpointURI(parts, strings.ToLower(r.config.Role), "platformUri")
+	ownPlatformRole := wave2PlatformRole(r.config.Role)
+	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUri")
 	if ownPlatformURI == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s] (transaction_id=%s)", r.config.Role, payload.Context.TransactionID)
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s] (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
 	}
 	ownBppEndpoint := BppCallerEndpoint(ownPlatformURI)
@@ -556,15 +673,12 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	var baseURL string
 	var subTx SubTxContext
 	var branch string
-	ownParticipantID := participantID(findWave2Participant(parts, strings.ToLower(r.config.Role)))
+	ownParticipantID := participantID(findWave2Participant(parts, ownPlatformRole))
 
 	if fromOwnDiscom {
 		// Rule 2a: our discom just computed its allocation — pass the on_status to
 		// the peer so the peer can in turn cascade to its own discom (Rule 2b).
-		peerRole := "buyer"
-		if r.config.Role == "BUYER" {
-			peerRole = "seller"
-		}
+		peerRole := wave2PeerPlatformRole(r.config.Role)
 		peerPlatformURI := ParticipantEndpointURI(parts, peerRole, "platformUri")
 		if peerPlatformURI == "" {
 			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
@@ -651,7 +765,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 
 	log.Infof(ctx, "DEGLedgerRecorder: forwarding on_status (transaction_id=%s, role=%s, branch=%s) -> %s/on_status (sub-tx bap=%s, bpp=%s)",
 		payload.Context.TransactionID, r.config.Role, branch, baseURL, subTx.BapURI, subTx.BppURI)
-	r.sendBecknOnStatusAsync(ctx, baseURL, rewritten, payload.Context.TransactionID)
+	r.sendBecknOnStatusAsync(ctx, baseURL, rewritten, ctx.Body, payload.Context.TransactionID)
 	return nil
 }
 
@@ -680,12 +794,17 @@ func swapURLPath(rawURL, newPath string) string {
 
 // sendBecknStatusAsync forwards a beckn status body in the background.
 func (r *DEGLedgerRecorder) sendBecknStatusAsync(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) {
+	pendingID := r.addPendingRetry("status", transactionID, baseURL, body)
 	r.wg.Add(1)
 	go func() {
 		defer r.wg.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
-		defer cancel()
-		if err := r.client.PostBecknStatus(ctx, baseURL, body); err != nil {
+		defer r.removePendingRetry(pendingID)
+
+		_, err := r.sendBecknWithRetry(context.Background(), "status", baseURL, transactionID, body, func(ctx context.Context, attempt int) (*LedgerPutResponse, error) {
+			r.updatePendingAttempt(pendingID, attempt+1)
+			return nil, r.client.PostBecknStatusAttempt(ctx, baseURL, body, attempt)
+		})
+		if err != nil {
 			log.Errorf(parentCtx, err,
 				"DEGLedgerRecorder: failed to forward beckn status (transaction_id=%s, base_url=%s): %v",
 				transactionID, baseURL, err)
@@ -698,23 +817,164 @@ func (r *DEGLedgerRecorder) sendBecknStatusAsync(parentCtx *model.StepContext, b
 }
 
 // sendBecknOnStatusAsync forwards a beckn on_status body in the background.
-func (r *DEGLedgerRecorder) sendBecknOnStatusAsync(parentCtx *model.StepContext, baseURL string, body []byte, transactionID string) {
+func (r *DEGLedgerRecorder) sendBecknOnStatusAsync(parentCtx *model.StepContext, baseURL string, body []byte, originalBody []byte, transactionID string) {
+	pendingID := r.addPendingRetry("on_status", transactionID, baseURL, body)
 	r.wg.Add(1)
 	go func() {
 		defer r.wg.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
-		defer cancel()
-		resp, err := r.client.PostBecknOnStatus(ctx, baseURL, body)
+		defer r.removePendingRetry(pendingID)
+
+		resp, err := r.sendBecknWithRetry(context.Background(), "on_status", baseURL, transactionID, body, func(ctx context.Context, attempt int) (*LedgerPutResponse, error) {
+			r.updatePendingAttempt(pendingID, attempt+1)
+			return r.client.PostBecknOnStatusAttempt(ctx, baseURL, body, attempt)
+		})
 		if err != nil {
 			log.Errorf(parentCtx, err,
 				"DEGLedgerRecorder: failed to forward beckn on_status (transaction_id=%s, base_url=%s): %v",
 				transactionID, baseURL, err)
+			r.sendOnStatusRetryFailure(parentCtx, originalBody, baseURL, transactionID, r.pendingAttemptCount(pendingID), err)
 			return
 		}
 		log.Infof(parentCtx,
-			"DEGLedgerRecorder: successfully forwarded beckn on_status (transaction_id=%s, record_id=%s, base_url=%s)",
-			transactionID, resp.RecordID, baseURL)
+			"DEGLedgerRecorder: successfully forwarded beckn on_status (transaction_id=%s, record_id=%s, base_url=%s, message=%s)",
+			transactionID, resp.RecordID, baseURL, resp.Message)
 	}()
+}
+
+func (r *DEGLedgerRecorder) addPendingRetry(action, transactionID, targetURL string, body []byte) string {
+	id := uuid.NewString()
+	now := time.Now()
+	bodyCopy := append([]byte(nil), body...)
+	r.pendingMu.Lock()
+	r.pendingRetries[id] = pendingBecknPayload{
+		Action:        action,
+		TransactionID: transactionID,
+		TargetURL:     targetURL,
+		CreatedAt:     now,
+		ExpiresAt:     now.Add(r.config.RetryMaxTTL),
+		Body:          bodyCopy,
+	}
+	r.pendingMu.Unlock()
+	return id
+}
+
+func (r *DEGLedgerRecorder) updatePendingAttempt(id string, attempts int) {
+	r.pendingMu.Lock()
+	if pending, ok := r.pendingRetries[id]; ok {
+		pending.Attempts = attempts
+		r.pendingRetries[id] = pending
+	}
+	r.pendingMu.Unlock()
+}
+
+func (r *DEGLedgerRecorder) pendingAttemptCount(id string) int {
+	r.pendingMu.Lock()
+	defer r.pendingMu.Unlock()
+	if pending, ok := r.pendingRetries[id]; ok {
+		return pending.Attempts
+	}
+	return 0
+}
+
+func (r *DEGLedgerRecorder) removePendingRetry(id string) {
+	r.pendingMu.Lock()
+	delete(r.pendingRetries, id)
+	r.pendingMu.Unlock()
+}
+
+func (r *DEGLedgerRecorder) pendingRetryCount() int {
+	r.pendingMu.Lock()
+	defer r.pendingMu.Unlock()
+	return len(r.pendingRetries)
+}
+
+func (r *DEGLedgerRecorder) sendOnStatusRetryFailure(parentCtx *model.StepContext, originalBody []byte, failedTargetURL, transactionID string, attempts int, lastErr error) {
+	targetURL, failureBody, err := buildOnStatusRetryFailure(originalBody, failedTargetURL, attempts, r.config.RetryMaxTTL, lastErr)
+	if err != nil {
+		log.Errorf(parentCtx, err,
+			"DEGLedgerRecorder: failed to build on_status retry failure callback (transaction_id=%s): %v",
+			transactionID, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), r.config.AsyncTimeout)
+	defer cancel()
+	if _, err := r.client.PostBecknOnStatusAttempt(ctx, targetURL, failureBody, 0); err != nil {
+		log.Errorf(parentCtx, err,
+			"DEGLedgerRecorder: failed to send on_status retry failure callback (transaction_id=%s, target_url=%s): %v",
+			transactionID, targetURL, err)
+		return
+	}
+	log.Infof(parentCtx,
+		"DEGLedgerRecorder: sent on_status retry failure callback (transaction_id=%s, target_url=%s)",
+		transactionID, targetURL)
+}
+
+func buildOnStatusRetryFailure(originalBody []byte, failedTargetURL string, attempts int, ttl time.Duration, lastErr error) (string, []byte, error) {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(originalBody, &raw); err != nil {
+		return "", nil, fmt.Errorf("parse original on_status: %w", err)
+	}
+	ctxRaw, ok := raw["context"].(map[string]interface{})
+	if !ok {
+		return "", nil, fmt.Errorf("missing or invalid context")
+	}
+
+	originalBapURI := stringValue(ctxRaw["bapUri"])
+	originalBppURI := stringValue(ctxRaw["bppUri"])
+	originalBapID := stringValue(ctxRaw["bapId"])
+	originalBppID := stringValue(ctxRaw["bppId"])
+	targetHost := hostBase(originalBppURI)
+	senderHost := hostBase(originalBapURI)
+	if targetHost == "" {
+		return "", nil, fmt.Errorf("cannot derive failure callback target from context.bppUri")
+	}
+	targetURL := BapReceiverEndpoint(targetHost)
+	if originalBppID == "" {
+		originalBppID = hostname(targetURL)
+	}
+	if originalBapID == "" {
+		originalBapID = hostname(originalBapURI)
+	}
+
+	ctxRaw["action"] = ActionOnStatus
+	ctxRaw["messageId"] = uuid.NewString()
+	ctxRaw["timestamp"] = time.Now().UTC().Format(time.RFC3339Nano)
+	ctxRaw["bapUri"] = targetURL
+	ctxRaw["bapId"] = originalBppID
+	if senderHost != "" {
+		ctxRaw["bppUri"] = BppCallerEndpoint(senderHost)
+	}
+	ctxRaw["bppId"] = originalBapID
+	raw["context"] = ctxRaw
+	raw["error"] = map[string]interface{}{
+		"code":    degAsyncAckTimeout,
+		"message": "on_status forwarding did not receive ACK before retry limit",
+		"details": map[string]interface{}{
+			"targetAction":  ActionOnStatus,
+			"targetUrl":     failedTargetURL,
+			"attempts":      attempts,
+			"retryMaxTTL":   ttl.String(),
+			"lastError":     lastErr.Error(),
+			"transactionId": ctxRaw["transactionId"],
+		},
+	}
+
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", nil, fmt.Errorf("marshal retry failure on_status: %w", err)
+	}
+	return targetURL, body, nil
+}
+
+func stringValue(value interface{}) string {
+	if value == nil {
+		return ""
+	}
+	if str, ok := value.(string); ok {
+		return str
+	}
+	return ""
 }
 
 // sendPutRecordsAsync sends ledger PUT records in the background without blocking the main flow.

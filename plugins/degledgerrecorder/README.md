@@ -4,14 +4,15 @@ A Beckn-ONIX Step plugin that records trade data to the DEG Ledger after `on_con
 
 ## Overview
 
-This plugin intercepts `on_confirm` beckn protocol messages and creates corresponding records in the DEG Ledger service by calling the `/ledger/put` API. It operates asynchronously (fire-and-forget) to avoid blocking the main request flow.
+This plugin intercepts Beckn protocol messages and records or cascades them to the DEG Ledger service. Legacy ledger writes remain asynchronous. Wave 2 `ledgerApi: beckn` `on_confirm` writes are blocking by default, so ONIX forwards the original `on_confirm` only after the DISCOM ledger has ACKed the ledger entry.
 
 ## Features
 
 - Automatically detects `on_confirm` actions
 - Maps beckn protocol fields to DEG Ledger format
 - Creates one ledger record per order item
-- Asynchronous operation (non-blocking)
+- Asynchronous operation for legacy writes and status/on_status cascades
+- Blocking Wave 2 Beckn `on_confirm` ledger writes before onward forwarding
 - Configurable role (BUYER, SELLER, BUYER_DISCOM, SELLER_DISCOM)
 - Idempotent requests using client reference
 - **Beckn-style signature authentication** (same as beckn-onix outgoing messages)
@@ -43,7 +44,9 @@ plugins:
         role: "BUYER"        # BUYER, SELLER, BUYER_DISCOM, or SELLER_DISCOM
         enabled: "true"      # Enable/disable the plugin
         asyncTimeout: "5000" # Timeout in milliseconds
-        retryCount: "0"      # Number of retries (0 = no retry)
+        retryCount: "0"      # Retries after the first attempt (0 = no retry)
+        retryMaxTTL: "10m"   # Maximum lifetime for one Beckn retry sequence
+        retryBackoff: "5s"   # Fixed delay between failed attempts
 steps:
   - validateSign
   - addRoute
@@ -70,7 +73,9 @@ steps:
 | `actions` | No | `on_confirm` | Comma-separated list of actions to trigger recording |
 | `enabled` | No | `true` | Enable/disable plugin |
 | `asyncTimeout` | No | `5000` | API call timeout (ms) |
-| `retryCount` | No | `0` | Retry count for failed calls |
+| `retryCount` | No | `0` | Retries after the first attempt |
+| `retryMaxTTL` | No | `10m` | Maximum total lifetime for one Beckn ACK retry sequence |
+| `retryBackoff` | No | `5s` | Fixed delay between failed Beckn ACK attempts |
 | `debugLogging` | No | `false` | Enable verbose request/response logging |
 
 #### Per-call ledger URI from payload
@@ -96,18 +101,47 @@ In beckn mode the plugin forwards the original `on_confirm` body verbatim — ex
 1. `senderHost` config option (e.g., `https://bap.example.com`).
 2. Falls back to the host portion of `context.bapUri` (BUYER role) or `context.bppUri` (SELLER role) from the incoming payload.
 
-The plugin then POSTs the rewritten body to `<discomLedgerUri>/on_confirm` and expects a beckn ACK envelope back:
+The plugin then POSTs the rewritten body to `<discomLedgerUri>/bap/receiver/on_confirm` and expects a Beckn ACK envelope back:
 
 ```json
 {
   "message": {
-    "ack":    { "status": "ACK" },
-    "ledger": { "success": true, "recordId": "rec-...", "creationTime": "...", "rowDigest": "sha256:..." }
+    "status":    "ACK",
+    "messageId": "8153a419-35b1-4ec8-bd23-16fcff1b7964",
+    "ledger":    { "success": true, "recordId": "rec-...", "creationTime": "...", "rowDigest": "sha256:..." }
+  },
+  "details": {
+    "message": "Records already exist; skipped duplicate on_confirm"
   }
 }
 ```
 
-The inner `message.ledger` block carries the same fields the legacy `/ledger/put` API used to return; the plugin surfaces it identically so call-site logging stays uniform across the two modes.
+The `status` field lives directly under `message` — there is no nested `ack`
+object. The inner `message.ledger` block carries the same fields the legacy
+`/ledger/put` API used to return; the plugin surfaces it identically so
+call-site logging stays uniform across the two modes.
+
+If `message.ledger.message` is empty (e.g. when the ledger skips a duplicate
+write), the plugin copies `details.message` into the ledger response so the
+success log always includes a human-readable reason.
+
+For Wave 2 `ledgerApi: beckn`, every Beckn send must receive HTTP 2xx with `message.status = "ACK"` (flat — no nested `ack` object). Network errors, timeouts, non-2xx responses, malformed bodies, missing ACK, and NACK are retried using `retryCount` and `retryMaxTTL`.
+
+Each send attempt waits up to `asyncTimeout` for ACK. `asyncTimeout` defaults to `5000` ms and is configurable in the plugin YAML. `retryBackoff` is only the wait between failed attempts and defaults to `5s`.
+
+```yaml
+retryBackoff: "5s"
+```
+
+Wave 2 `on_confirm` is synchronous. The ONIX step returns `nil` only after the DISCOM ledger returns ACK. If the ledger write is still not ACKed after retry exhaustion, or the target `ledgerUri` cannot be resolved from the contract participants, the step returns an error and ONIX does not forward the original `on_confirm` to the next trading platform. On success, the log line includes the `message` field from the ledger response (or `details.message` when the ledger skips a duplicate).
+
+Wave 2 `status` and `on_status` cascades remain asynchronous. The plugin keeps the pending payload in memory only while retrying and removes it after ACK or final failure. If an async `on_status` cascade exhausts retries, the plugin sends a best-effort error `on_status` callback back to the original sender with `error.code = "DEG_ASYNC_ACK_TIMEOUT"`.
+
+Stable failure prefixes:
+- `DEG_LEDGER_URI_MISSING`: the target DISCOM ledger URI could not be resolved.
+- `DEG_LEDGER_CONTEXT_REWRITE_FAILED`: the Beckn context could not be rewritten for the DISCOM ledger leg.
+- `DEG_LEDGER_ACK_INVALID`: the DISCOM ledger returned HTTP 200 without `message.status = "ACK"` (flat check).
+- `DEG_LEDGER_WRITE_FAILED`: the DISCOM ledger request failed or returned a non-2xx response.
 
 | Option | Required | Default | Description |
 |--------|----------|---------|-------------|
@@ -117,7 +151,7 @@ The inner `message.ledger` block carries the same fields the legacy `/ledger/put
 
 | Action | Ledger Endpoint | Supported Roles | Description |
 |--------|-----------------|-----------------|-------------|
-| `on_confirm` | `/ledger/put` | BUYER, SELLER | Records trade agreement |
+| `on_confirm` | `/ledger/put` or Beckn `/bap/receiver/on_confirm` | BUYER, SELLER | Records trade agreement |
 | `on_status` | `/ledger/record` | BUYER_DISCOM, SELLER_DISCOM | Records meter readings/validation metrics |
 
 **Role behavior:**

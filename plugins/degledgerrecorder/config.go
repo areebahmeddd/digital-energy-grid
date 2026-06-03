@@ -87,6 +87,12 @@ type Config struct {
 	// RetryCount is the number of retries for failed ledger calls (0 = no retry)
 	RetryCount int
 
+	// RetryMaxTTL is the maximum total lifetime for one retry sequence.
+	RetryMaxTTL time.Duration
+
+	// RetryBackoff is the fixed delay between failed Beckn ACK attempts.
+	RetryBackoff time.Duration
+
 	// APIKey is an optional API key for ledger service authentication (simple auth)
 	APIKey string
 
@@ -135,6 +141,8 @@ func DefaultConfig() *Config {
 		Enabled:                  true,
 		AsyncTimeout:             5 * time.Second,
 		RetryCount:               0,
+		RetryMaxTTL:              10 * time.Minute,
+		RetryBackoff:             5 * time.Second,
 		APIKey:                   "",
 		AuthHeader:               "X-API-Key",
 		DebugLogging:             false,
@@ -231,7 +239,26 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid retryCount: %s", retry)
 		}
+		if count < 0 {
+			return nil, fmt.Errorf("invalid retryCount: %s", retry)
+		}
 		config.RetryCount = count
+	}
+
+	if retryMaxTTL, ok := cfg["retryMaxTTL"]; ok && retryMaxTTL != "" {
+		ttl, err := time.ParseDuration(retryMaxTTL)
+		if err != nil || ttl <= 0 {
+			return nil, fmt.Errorf("invalid retryMaxTTL: %s", retryMaxTTL)
+		}
+		config.RetryMaxTTL = ttl
+	}
+
+	if retryBackoff, ok := cfg["retryBackoff"]; ok && retryBackoff != "" {
+		backoff, err := time.ParseDuration(retryBackoff)
+		if err != nil || backoff <= 0 {
+			return nil, fmt.Errorf("invalid retryBackoff: %s", retryBackoff)
+		}
+		config.RetryBackoff = backoff
 	}
 
 	if apiKey, ok := cfg["apiKey"]; ok {
