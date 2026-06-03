@@ -208,15 +208,16 @@
           }
         }
       ],
-      "paymentTerms": [
+      "consideration": [
         {
-          "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
-          "@type": "SettlementTerm",
           "id": "payment-term-p2p-001",
-          "settlementFor": "sellerPlatform",
-          "amount": {"currency": "INR", "value": 481.0},
-          "settlementStatus": "PENDING",
-          "acceptedPaymentMethods": ["BANK_TRANSFER"]
+          "considerationAttributes": {
+            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "amount": {"currency": "INR", "value": 481.0},
+            "settlementStatus": "PENDING",
+            "acceptedPaymentMethods": ["BANK_TRANSFER"]
+          }
         }
       ]
     }
