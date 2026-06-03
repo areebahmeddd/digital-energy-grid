@@ -1,248 +1,252 @@
 """
 Beckn Protocol Schema Validator
+================================
+Validates JSON / JSON-LD payloads against Beckn protocol schemas.
 
-This script validates JSON payloads against Beckn protocol schemas (core and domain-specific).
-It automatically discovers and loads schemas from @context URLs embedded in JSON-LD objects,
-supports both core Beckn objects (beckn:Order, beckn:Offer, etc.) and domain-specific attribute
-objects (ChargingOffer, ChargingSession, etc.), and handles schema references across multiple
-schema files.
+Schema discovery
+----------------
+The validator walks the payload recursively. At every dict node it looks for
+a *type discriminator* and a *context*:
 
-HOW IT WORKS:
--------------
-1. Schema Discovery: The validator scans JSON payloads for objects with @context and @type fields.
-   These fields indicate which schema should be used for validation.
+  - Type discriminator  → "@type" (JSON-LD) or "type" (W3C VC Data Model).
+                          Both plain strings and arrays are accepted.
+  - Context             → "@context" on the *same* object (inline context), or
+                          the nearest "@context" inherited from an ancestor
+                          (in-header context — common in W3C VCs where @context
+                          sits at the document root).
 
-2. On-Demand Loading: Schemas are loaded on-demand from GitHub URLs when first encountered.
-   The @context URL (e.g., .../EvChargingOffer/v1.0/context.jsonld) is converted to the
-   corresponding attributes.yaml URL for schema loading.
+For every URL in the active @context array the validator loads the sibling
+attributes.yaml and collects all declared schema components into a flat lookup
+table.  Each type in @type is looked up in that table by name (case-insensitive).
+This means type names do NOT need to match context file names — the validator
+finds the right schema by content, not by URL path heuristics.
 
-3. Schema Caching: Loaded schemas are cached in a Registry and attribute_schemas_map to avoid
-   redundant network requests.
-
-4. Reference Resolution: Uses the referencing library to resolve $ref JSON pointers within
-   and across schema files. Core objects use $ref to the full schema document to ensure
-   internal references resolve correctly.
-
-5. Validation: Validates objects against their corresponding schemas, handling both core
-   Beckn objects and domain-specific attribute objects with different validation strategies.
-   
-Note: Schemas are loaded from the exact branch specified in the @context URL. If a schema
-is not found on that branch, validation will fail. No branch fallback is performed.
-
-ARCHITECTURE:
--------------
-- Core Objects (beckn:Order, beckn:Offer, etc.): Validated using schemas from core/v2/attributes.yaml
-- Attribute Objects (ChargingOffer, ChargingSession, etc.): Validated using schemas from
-  domain-specific attributes.yaml files (e.g., EvChargingOffer/v1/attributes.yaml)
-- JSON-LD Support: Automatically allows @context and @type properties even when schemas
-  have additionalProperties: false
-
-USAGE EXAMPLES:
----------------
-# Validate a single JSON file:
-python3 scripts/validate_schema.py examples/ev-charging/v2/03_select/time-based-ev-charging-slot-select.json
-
-# Validate multiple files:
-python3 scripts/validate_schema.py examples/ev-charging/v2/**/*.json
-
-# Validate only core Beckn objects (skip domain-specific attributes):
-python3 scripts/validate_schema.py --core-only examples/ev-charging/v2/03_select/time-based-ev-charging-slot-select.json
-
-# Validate Postman collection:
-python3 scripts/validate_schema.py devkits/ev-charging/postman/ev-charging:BAP-DEG.postman_collection.json
-
-EXAMPLE JSON STRUCTURE:
+Supported URL patterns
 ----------------------
-{
-  "message": {
-    "order": {
-      "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
-      "@type": "beckn:Order",
-      "beckn:id": "order-123",
-      "beckn:orderItems": [
-        {
-          "beckn:acceptedOffer": {
-            "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
-            "@type": "beckn:Offer",
-            "beckn:offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingOffer/v1.0/context.jsonld",
-              "@type": "ChargingOffer",
-              "tariffModel": "PER_KWH"
-            }
-          }
-        }
-      ]
-    }
-  }
-}
+  GitHub raw    : .../refs/heads/<branch>/schema/<Name>/<ver>/attributes.yaml
+  schema.beckn.io : schema.beckn.io/<Name>/<ver>/attributes.yaml
 
-The validator will:
-1. Detect beckn:Order and load core/v2/attributes.yaml
-2. Detect beckn:Offer and use the already-loaded core schema
-3. Detect ChargingOffer and load EvChargingOffer/v1/attributes.yaml
-4. Validate each object against its corresponding schema
+External $ref resolution
+------------------------
+The referencing.Registry is configured with an on-demand URL retriever so that
+$ref values pointing to schema.beckn.io (e.g. Address/v2.0, GeoJSONGeometry/v2.0)
+are fetched and resolved automatically without pre-registration.
 
-DEPENDENCIES:
--------------
-- jsonschema: JSON Schema validation
-- referencing: JSON Schema reference resolution
-- requests: HTTP requests for schema loading
-- yaml: YAML parsing for schema files
+Usage
+-----
+  # Validate one file:
+  python3 scripts/validate_schema.py examples/ev-charging/v2/03_select/select.json
+
+  # Validate a glob:
+  python3 scripts/validate_schema.py examples/ev-charging/v2/**/*.json
+
+  # Skip domain-specific attributes, only core beckn objects:
+  python3 scripts/validate_schema.py --core-only examples/...
+
+  # Validate a Postman collection:
+  python3 scripts/validate_schema.py devkits/ev-charging/postman/BAP.postman_collection.json
 """
 
+import copy
 import json
 import re
-import copy
+
 import requests
 import yaml
 from jsonschema import validate, ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
+
+# ---------------------------------------------------------------------------
+# Type helpers
+# ---------------------------------------------------------------------------
+
+# Well-known W3C VC base types that carry no domain-specific schema.
+_GENERIC_VC_TYPES = {"VerifiableCredential", "VerifiablePresentation"}
+
+
+def _iter_types(raw_type):
+    """
+    Yield every type string from a @type value (string or array).
+
+    With component-map lookup (see _components_for_context) the order of
+    iteration no longer affects which schema is chosen — each type is looked
+    up independently by name.
+    """
+    if isinstance(raw_type, list):
+        yield from (t for t in raw_type if t)
+    elif raw_type:
+        yield raw_type
+
+
+# ---------------------------------------------------------------------------
+# URL helpers
+# ---------------------------------------------------------------------------
+
 def load_schema_from_url(url):
-    """
-    Load a YAML schema file from a URL.
-    
-    Args:
-        url: URL to the attributes.yaml schema file
-        
-    Returns:
-        dict: Parsed YAML schema as a dictionary
-        
-    Raises:
-        requests.HTTPError: If the HTTP request fails
-        yaml.YAMLError: If YAML parsing fails
-    """
-    response = requests.get(url)
+    """Fetch and parse a YAML or JSON schema from *url*."""
+    response = requests.get(url, timeout=15)
     response.raise_for_status()
     return yaml.safe_load(response.text)
 
+
 def extract_schema_info_from_url(url):
     """
-    Extract schema name and version from attributes.yaml URL.
-    
-    Example: 
-        https://.../EvChargingOffer/v1/attributes.yaml -> (EvChargingOffer, v1)
+    Return (schema_name, version) from an attributes.yaml URL.
+
+    Supports:
+      GitHub : .../schema/<Name>/<ver>/attributes.yaml
+      beckn  : schema.beckn.io/<Name>/<ver>/attributes.yaml
+    Returns (None, None) when neither pattern matches.
     """
-    match = re.search(r'/schema/([^/]+)/([^/]+)/attributes\.yaml', url)
-    if match:
-        return match.group(1), match.group(2)
+    m = re.search(r'/schema/([^/]+)/([^/]+)/attributes\.yaml', url)
+    if m:
+        return m.group(1), m.group(2)
+    m = re.search(r'schema\.beckn\.io/([^/]+)/([^/]+)/attributes\.yaml', url)
+    if m:
+        return m.group(1), m.group(2)
     return None, None
+
 
 def extract_branch_from_context_url(context_url):
     """
-    Extract branch name from @context URL.
-
-    Example:
-        .../refs/heads/draft/schema/... -> draft
-        .../refs/heads/p2p_trading/schema/... -> p2p_trading
-        .../refs/heads/main/schema/... -> main
-        .../refs/heads/p2p-trading-becknv2/specification/schema/... -> p2p-trading-becknv2
+    Extract the Git branch embedded in a GitHub raw @context URL.
+    Returns None for canonical URLs (e.g. schema.beckn.io) with no branch.
     """
-    match = re.search(r'/refs/heads/([^/]+)/(?:specification/)?schema/', context_url)
-    if match:
-        return match.group(1)
-    # Also handle tags
-    match = re.search(r'/tags/([^/]+)/(?:specification/)?schema/', context_url)
-    if match:
-        return match.group(1)
+    m = re.search(r'/refs/heads/([^/]+)/(?:specification/)?schema/', context_url)
+    if m:
+        return m.group(1)
+    m = re.search(r'/tags/([^/]+)/(?:specification/)?schema/', context_url)
+    if m:
+        return m.group(1)
     return None
 
+
 def get_attributes_url_from_context_url(context_url):
-    """
-    Convert context.jsonld URL to corresponding attributes.yaml URL.
-    Infers branch from the context URL.
-    
-    Example:
-        .../draft/schema/EvChargingOffer/v1/context.jsonld -> .../draft/schema/EvChargingOffer/v1/attributes.yaml
-        .../p2p_trading/schema/EnergyResource/v0.2/context.jsonld -> .../p2p_trading/schema/EnergyResource/v0.2/attributes.yaml
-        .../draft/schema/core/v2/context.jsonld -> .../draft/schema/core/v2/attributes.yaml
-    """
+    """Convert a context.jsonld URL to the sibling attributes.yaml URL."""
     return context_url.replace('/context.jsonld', '/attributes.yaml')
-
-def select_context_url(context_url, obj_type):
-    """
-    Normalize the @context value to a single string URL.
-
-    JSON-LD allows @context to be a string or an array of strings. When it is an
-    array, select the URL that best matches the @type. Heuristic:
-    1. Prefer a URL whose path contains "/<TypeName>/" (case-insensitive).
-    2. Otherwise, return the first URL that is not the W3C credentials context
-       or a generic vocabulary (schema.org, beckn Location, etc.).
-    3. As a final fallback, return the first string URL.
-
-    Returns a string URL or None.
-    """
-    if isinstance(context_url, str):
-        return context_url
-    if not isinstance(context_url, list):
-        return None
-
-    string_urls = [u for u in context_url if isinstance(u, str)]
-    if not string_urls:
-        return None
-
-    type_name = (obj_type or "").split(":")[-1].lower() if obj_type else ""
-
-    # 1. Match by @type name in URL path
-    if type_name:
-        for url in string_urls:
-            if f"/{type_name}/" in url.lower():
-                return url
-
-    # 2. Skip generic / vocabulary URLs
-    generic_substrings = (
-        "www.w3.org/ns/credentials",
-        "schema.org",
-        "/Location/",
-    )
-    for url in string_urls:
-        if not any(s in url for s in generic_substrings):
-            return url
-
-    # 3. Fallback
-    return string_urls[0]
 
 
 def is_core_context_url(context_url):
-    """
-    Check if @context URL points to core schema.
-    
-    Example:
-        .../schema/core/v2/context.jsonld -> True
-        .../schema/EvChargingOffer/v1/context.jsonld -> False
-    """
+    """Return True when the URL points to the Beckn core schema."""
     return '/schema/core/' in context_url
+
+
+# ---------------------------------------------------------------------------
+# On-demand URL retriever for the referencing Registry
+# ---------------------------------------------------------------------------
+
+def _retrieve_url(uri):
+    """
+    Fetch and parse a schema from *uri* on demand.
+
+    The referencing.Registry calls this whenever it encounters an unregistered
+    $ref URI (e.g. https://schema.beckn.io/Address/v2.0/attributes.yaml#/…).
+
+    Bare schema.beckn.io URLs without a filename extension (e.g. the allOf
+    $ref "https://schema.beckn.io/EnergyCredential/v2.0") are probed first
+    with /attributes.yaml, then /schema.json.
+    """
+    uri_str = str(uri)
+
+    if "schema.beckn.io" in uri_str and not uri_str.endswith((".yaml", ".json")):
+        candidates = [f"{uri_str}/attributes.yaml", f"{uri_str}/schema.json"]
+    else:
+        candidates = [uri_str]
+
+    last_exc: Exception = RuntimeError(f"No candidates for {uri_str}")
+    for url in candidates:
+        try:
+            resp = requests.get(url, timeout=15)
+            resp.raise_for_status()
+            content = (yaml.safe_load(resp.text) if url.endswith(".yaml")
+                       else json.loads(resp.text))
+            return Resource.from_contents(content, DRAFT202012)
+        except Exception as exc:
+            last_exc = exc
+
+    raise Exception(f"Cannot retrieve {uri_str}: {last_exc}") from last_exc
+
+
+def get_schema_store():
+    """
+    Create a fresh schema store.
+
+    Returns (registry_list, None, attribute_schemas_map) where:
+      registry_list        – single-element list wrapping the (immutable)
+                             Registry so callees can replace it via index 0.
+      attribute_schemas_map – dict mapping @context URL → (name, data, url).
+    """
+    registry = Registry(retrieve=_retrieve_url)
+    return [registry], None, {}
+
+
+# ---------------------------------------------------------------------------
+# Schema loading
+# ---------------------------------------------------------------------------
+
+CORE_BECKN_SCHEMA_URL = (
+    "https://raw.githubusercontent.com/beckn/protocol-specifications-v2"
+    "/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml"
+)
+
+
+def load_schema_for_context_url(context_url, attribute_schemas_map, registry_list=None):
+    """
+    Load the attributes.yaml for *context_url* and cache it.
+
+    Converts context.jsonld → attributes.yaml, fetches the schema, and
+    registers it in the referencing Registry.  Works with both GitHub branch
+    URLs and canonical schema.beckn.io URLs.
+
+    Returns (schema_name, schema_data, attributes_url), or None on failure.
+    """
+    if context_url in attribute_schemas_map:
+        return attribute_schemas_map[context_url]
+
+    attributes_url = get_attributes_url_from_context_url(context_url)
+    schema_name, version = extract_schema_info_from_url(attributes_url)
+    if not schema_name:
+        return None
+
+    branch = extract_branch_from_context_url(context_url)
+
+    try:
+        schema_data = load_schema_from_url(attributes_url)
+        attribute_schemas_map[context_url] = (schema_name, schema_data, attributes_url)
+        if registry_list is not None:
+            registry_list[0] = registry_list[0].with_resource(
+                attributes_url, Resource.from_contents(schema_data, DRAFT202012)
+            )
+        source = f"branch: {branch}" if branch else attributes_url
+        print(f"  Loaded: {schema_name}/{version} ({source})")
+        return (schema_name, schema_data, attributes_url)
+    except Exception as e:
+        print(f"  Warning: Failed to load {schema_name}/{version} from {attributes_url}: {e}")
+        return None
+
 
 def load_core_schema_for_context_url(context_url, registry_list):
     """
-    Load core attributes schema for a given @context URL.
-    
-    Loads the schema from the branch specified in the context_url. Caches the schema
-    in the registry for reuse.
-    
-    Args:
-        context_url: The @context URL from the JSON (e.g., .../core/v2/context.jsonld)
-        registry_list: List containing referencing Registry (mutated in place)
-    
-    Returns:
-        dict: Schema data if successful, None if loading fails
+    Load the core attributes.yaml for *context_url* into the registry.
+    Returns the parsed schema dict, or None on failure.
     """
     registry = registry_list[0]
     attributes_url = get_attributes_url_from_context_url(context_url)
-    
-    # Check if already loaded in registry
+
     try:
         resource = registry.get(attributes_url)
         if resource is not None:
             return resource.contents
     except (KeyError, AttributeError):
         pass
-    
-    # Load from the branch specified in context_url
+
     try:
         schema_data = load_schema_from_url(attributes_url)
-        registry_list[0] = registry.with_resource(attributes_url, Resource.from_contents(schema_data, DRAFT202012))
+        registry_list[0] = registry.with_resource(
+            attributes_url, Resource.from_contents(schema_data, DRAFT202012)
+        )
         branch = extract_branch_from_context_url(context_url)
         print(f"  Loaded core attributes schema (branch: {branch})")
         return schema_data
@@ -250,160 +254,9 @@ def load_core_schema_for_context_url(context_url, registry_list):
         print(f"  Warning: Failed to load core attributes schema from {attributes_url}: {e}")
         return None
 
-def load_schema_for_context_url(context_url, attribute_schemas_map, registry_list=None):
-    """
-    Load schema for a given @context URL from the branch specified in the URL.
-    
-    Args:
-        context_url: The @context URL from the JSON
-        attribute_schemas_map: Existing map to add to (may be modified)
-        registry_list: List containing referencing Registry (mutated in place, optional)
-    
-    Returns:
-        tuple: (schema_name, schema_data, schema_url) or None if failed
-    """
-    # Check if we already have this context URL mapped
-    if context_url in attribute_schemas_map:
-        return attribute_schemas_map[context_url]
-    
-    # Extract branch from context URL
-    branch = extract_branch_from_context_url(context_url)
-    if not branch:
-        return None
-    
-    # Convert context URL to attributes URL
-    attributes_url = get_attributes_url_from_context_url(context_url)
-    
-    # Extract schema name and version
-    schema_name, version = extract_schema_info_from_url(attributes_url)
-    if not schema_name:
-        return None
-    
-    # Load the schema from the branch specified in context_url
-    try:
-        schema_data = load_schema_from_url(attributes_url)
-        attribute_schemas_map[context_url] = (schema_name, schema_data, attributes_url)
-        if registry_list is not None:
-            registry = registry_list[0]
-            registry_list[0] = registry.with_resource(attributes_url, Resource.from_contents(schema_data, DRAFT202012))
-        print(f"  Loaded: {schema_name}/{version} (branch: {branch})")
-        return (schema_name, schema_data, attributes_url)
-    except Exception as e:
-        print(f"  Warning: Failed to load {schema_name}/{version} from {attributes_url}: {e}")
-        return None
-
-
-def _validate_attribute_object(data, schema_def, schema_type, schema_name, path, errors, registry_list, schema_url=None):
-    """
-    Validate a domain-specific attribute object against its schema.
-    
-    Uses $ref to full document to allow nested $ref resolution, then handles
-    @context and @type properties which are required for JSON-LD.
-    
-    Args:
-        data: Object data to validate
-        schema_def: Schema definition from attributes.yaml (used as fallback)
-        schema_type: Type name for logging (e.g., "ChargingOffer")
-        schema_name: Schema name for logging (e.g., "EvChargingOffer")
-        path: JSON path for error reporting
-        errors: List to append validation errors to
-        registry_list: Registry list for reference resolution
-        schema_url: Full URL to the attributes.yaml file (for $ref resolution)
-    """
-    print(f"  Validating {schema_type} (from {schema_name}) at {path or 'root'}...")
-    
-    # Try using $ref to full document first (allows nested $ref resolution)
-    if schema_url:
-        try:
-            # Get the full document resource from registry
-            full_doc_resource = registry_list[0].get(schema_url)
-            if full_doc_resource:
-                full_doc = full_doc_resource.contents
-                # Extract the schema from the full document
-                if "components" in full_doc and "schemas" in full_doc["components"]:
-                    target_schema = full_doc["components"]["schemas"].get(schema_type)
-                    if target_schema:
-                        # Recursively convert relative $ref to absolute $ref
-                        # Also need to handle nested schemas referenced within this schema
-                        def convert_relative_refs(obj, base_url, full_doc_schemas=None):
-                            """Recursively convert relative $ref to absolute $ref"""
-                            if isinstance(obj, dict):
-                                result = {}
-                                for k, v in obj.items():
-                                    if k == "$ref" and isinstance(v, str) and v.startswith("#"):
-                                        # Convert relative ref to absolute
-                                        result[k] = f"{base_url}{v}"
-                                    elif k == "allOf" and isinstance(v, list):
-                                        # Handle allOf with $ref - convert $ref in allOf items
-                                        result[k] = [convert_relative_refs(item, base_url, full_doc_schemas) for item in v]
-                                    else:
-                                        result[k] = convert_relative_refs(v, base_url, full_doc_schemas)
-                                return result
-                            elif isinstance(obj, list):
-                                return [convert_relative_refs(item, base_url, full_doc_schemas) for item in obj]
-                            return obj
-                        
-                        # Get schema and convert relative $ref to absolute $ref
-                        resolved_schema = copy.deepcopy(target_schema)
-                        resolved_schema = convert_relative_refs(resolved_schema, schema_url)
-                        
-                        # Modify to allow @context and @type (required for JSON-LD)
-                        if resolved_schema.get("additionalProperties") is False:
-                            if "properties" not in resolved_schema:
-                                resolved_schema["properties"] = {}
-                            resolved_schema["properties"]["@context"] = {"type": "string"}
-                            resolved_schema["properties"]["@type"] = {"type": "string"}
-                        
-                        # Validate against the resolved and modified schema
-                        validate(instance=data, schema=resolved_schema, registry=registry_list[0])
-                        print(f"  {schema_type} at {path or 'root'} is VALID.")
-                        return
-        except ValidationError as e:
-            print(f"  {schema_type} at {path or 'root'} is INVALID: {e.message}")
-            print(f"  Path: {e.json_path}")
-            errors.append(f"{path} ({schema_type}): {e.message}")
-            return
-        except Exception as e:
-            # Fallback to direct validation if $ref resolution fails
-            pass
-    
-    # Fallback: direct validation with schema fragment (may fail on nested $ref)
-    validation_schema = copy.deepcopy(schema_def)
-    if validation_schema.get("additionalProperties") is False:
-        if "properties" not in validation_schema:
-            validation_schema["properties"] = {}
-        validation_schema["properties"]["@context"] = {"type": "string"}
-        validation_schema["properties"]["@type"] = {"type": "string"}
-    
-    try:
-        validate(instance=data, schema=validation_schema, registry=registry_list[0])
-        print(f"  {schema_type} at {path or 'root'} is VALID.")
-    except ValidationError as e:
-        print(f"  {schema_type} at {path or 'root'} is INVALID: {e.message}")
-        print(f"  Path: {e.json_path}")
-        errors.append(f"{path} ({schema_type}): {e.message}")
-
-def get_schema_store():
-    """
-    Initialize empty schema store for on-demand schema loading.
-    
-    Returns:
-        tuple: (registry_list, attributes_schema, attribute_schemas_map)
-            - registry_list: List containing referencing Registry (wrapped for mutability)
-            - attributes_schema: Unused, kept for compatibility (None)
-            - attribute_schemas_map: Dict mapping @context URLs to (schema_name, schema_data, schema_url)
-    """
-    registry = Registry()
-    attribute_schemas_map = {}
-    return [registry], None, attribute_schemas_map
-
-CORE_BECKN_SCHEMA_URL = "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml"
 
 def _load_core_beckn_schema(registry_list):
-    """
-    Load the core beckn.yaml OpenAPI schema and register it.
-    Returns the parsed schema data or None on failure.
-    """
+    """Load and cache the core beckn.yaml schema. Returns None on failure."""
     url = CORE_BECKN_SCHEMA_URL
     try:
         resource = registry_list[0].get(url)
@@ -411,33 +264,145 @@ def _load_core_beckn_schema(registry_list):
             return resource.contents
     except (KeyError, AttributeError):
         pass
-
     try:
         schema_data = load_schema_from_url(url)
-        registry_list[0] = registry_list[0].with_resource(url, Resource.from_contents(schema_data, DRAFT202012))
-        print(f"  Loaded core beckn.yaml schema")
+        registry_list[0] = registry_list[0].with_resource(
+            url, Resource.from_contents(schema_data, DRAFT202012)
+        )
+        print("  Loaded core beckn.yaml schema")
         return schema_data
     except Exception as e:
         print(f"  Warning: Failed to load core beckn.yaml: {e}")
         return None
 
 
+# ---------------------------------------------------------------------------
+# Component map — the heart of schema discovery
+# ---------------------------------------------------------------------------
+
+def _components_for_context(context_value, attribute_schemas_map, registry_list):
+    """
+    Build a flat map of every schema component reachable from *context_value*.
+
+    For each URL in the @context array (string or list) that ends with
+    '/context.jsonld', the sibling attributes.yaml is loaded (results are
+    cached in attribute_schemas_map) and its components/schemas entries are
+    merged into the returned dict.
+
+    Return value:
+        { component_name_lower: (schema_def, schema_name, schema_url, canonical_key) }
+
+    URLs with no sibling attributes.yaml (W3C credentials context, schema.org,
+    etc.) are silently skipped.
+
+    Because types are looked up by component name rather than by URL path,
+    type names do not need to match context file names, and the order of
+    types in @type arrays does not affect which schema is chosen.
+    """
+    if isinstance(context_value, str):
+        context_urls = [context_value]
+    elif isinstance(context_value, list):
+        context_urls = [u for u in context_value if isinstance(u, str)]
+    else:
+        return {}
+
+    combined = {}
+    for ctx_url in context_urls:
+        # Only process URLs that are context.jsonld files — others (W3C, schema.org)
+        # have no sibling attributes.yaml and are intentionally skipped.
+        if not ctx_url.endswith('/context.jsonld'):
+            continue
+
+        if ctx_url not in attribute_schemas_map:
+            load_schema_for_context_url(ctx_url, attribute_schemas_map, registry_list)
+
+        if ctx_url not in attribute_schemas_map:
+            continue  # loading failed — skip silently
+
+        _, schema_data, schema_url = attribute_schemas_map[ctx_url]
+        schema_name, _ = extract_schema_info_from_url(schema_url)
+        for key, defn in (schema_data.get("components") or {}).get("schemas", {}).items():
+            # Later entries win if two context files define the same component name,
+            # which mirrors JSON-LD's last-definition-wins semantics.
+            combined[key.lower()] = (defn, schema_name or key, schema_url, key)
+
+    return combined
+
+
+# ---------------------------------------------------------------------------
+# Validation helpers
+# ---------------------------------------------------------------------------
+
+def _validate_attribute_object(data, schema_def, schema_type, schema_name,
+                                path, errors, registry_list, schema_url=None):
+    """
+    Validate *data* against *schema_def* (a domain-specific component schema).
+
+    Converts relative '#/...' $ref values to absolute so the referencing
+    Registry can resolve them, and injects @context / @type into schemas that
+    have additionalProperties=false to allow JSON-LD annotations.
+    """
+    print(f"  Validating {schema_type} (from {schema_name}) at {path or 'root'}...")
+
+    def _make_absolute_refs(obj, base_url):
+        """Rewrite '#/...' $ref values to '<base_url>#/...'."""
+        if isinstance(obj, dict):
+            return {
+                k: (f"{base_url}{v}" if k == "$ref" and isinstance(v, str) and v.startswith("#")
+                    else _make_absolute_refs(v, base_url))
+                for k, v in obj.items()
+            }
+        if isinstance(obj, list):
+            return [_make_absolute_refs(i, base_url) for i in obj]
+        return obj
+
+    def _allow_jsonld_annotations(schema):
+        """Allow @context and @type even when additionalProperties is false."""
+        if schema.get("additionalProperties") is False:
+            schema.setdefault("properties", {})
+            schema["properties"].setdefault("@context", {})
+            schema["properties"].setdefault("@type", {})
+        return schema
+
+    # Preferred path: $ref-based validation enables full nested $ref resolution.
+    if schema_url:
+        try:
+            full_doc = registry_list[0].get(schema_url)
+            if full_doc:
+                schemas = (full_doc.contents.get("components") or {}).get("schemas") or {}
+                if schema_type in schemas:
+                    resolved = _allow_jsonld_annotations(
+                        _make_absolute_refs(copy.deepcopy(schemas[schema_type]), schema_url)
+                    )
+                    validate(instance=data, schema=resolved, registry=registry_list[0])
+                    print(f"  {schema_type} at {path or 'root'} is VALID.")
+                    return
+        except ValidationError as e:
+            print(f"  {schema_type} at {path or 'root'} is INVALID: {e.message}")
+            print(f"  Path: {e.json_path}")
+            errors.append(f"{path} ({schema_type}): {e.message}")
+            return
+        except Exception:
+            pass  # Fall through to direct validation
+
+    # Fallback: validate directly from the schema fragment.
+    try:
+        fallback = _allow_jsonld_annotations(copy.deepcopy(schema_def))
+        validate(instance=data, schema=fallback, registry=registry_list[0])
+        print(f"  {schema_type} at {path or 'root'} is VALID.")
+    except ValidationError as e:
+        print(f"  {schema_type} at {path or 'root'} is INVALID: {e.message}")
+        print(f"  Path: {e.json_path}")
+        errors.append(f"{path} ({schema_type}): {e.message}")
+
+
 def _validate_core_structure(payload, registry_list, errors):
     """
-    Validate message.contract (or message.order) against core beckn.yaml schemas.
-    This catches missing required fields on Contract, Commitment, Resource, etc.
+    Validate message.contract / message.order against core beckn.yaml.
+    Catches missing required fields on Contract, Order, Commitment, etc.
     """
     message = payload.get("message")
     if not isinstance(message, dict):
-        return
-
-    # Determine which top-level object to validate and its schema name
-    targets = []
-    for key, schema_name in [("contract", "Contract"), ("order", "Order")]:
-        if key in message and isinstance(message[key], dict):
-            targets.append((key, schema_name, message[key]))
-
-    if not targets:
         return
 
     core_schema = _load_core_beckn_schema(registry_list)
@@ -445,17 +410,17 @@ def _validate_core_structure(payload, registry_list, errors):
         return
 
     schemas = (core_schema.get("components") or {}).get("schemas") or {}
-
-    for key, schema_name, data in targets:
-        if schema_name not in schemas:
+    for key, schema_name in [("contract", "Contract"), ("order", "Order")]:
+        obj = message.get(key)
+        if not isinstance(obj, dict) or schema_name not in schemas:
             continue
-
         print(f"  Validating message.{key} against core {schema_name} schema...")
         try:
-            schema_to_validate = {
-                "$ref": f"{CORE_BECKN_SCHEMA_URL}#/components/schemas/{schema_name}"
-            }
-            validate(instance=data, schema=schema_to_validate, registry=registry_list[0])
+            validate(
+                instance=obj,
+                schema={"$ref": f"{CORE_BECKN_SCHEMA_URL}#/components/schemas/{schema_name}"},
+                registry=registry_list[0],
+            )
             print(f"  message.{key} core structure is VALID.")
         except ValidationError as e:
             print(f"  message.{key} core structure is INVALID: {e.message}")
@@ -463,195 +428,204 @@ def _validate_core_structure(payload, registry_list, errors):
             errors.append(f"message/{key}{e.json_path.lstrip('$')}: {e.message}")
 
 
-def validate_payload(payload, registry_list, attributes_schema, attribute_schemas_map=None, core_only=False):
+# ---------------------------------------------------------------------------
+# Main payload walker
+# ---------------------------------------------------------------------------
+
+def validate_payload(payload, registry_list, attributes_schema,
+                     attribute_schemas_map=None, core_only=False):
     """
-    Validate JSON payload against Beckn protocol schemas.
+    Validate *payload* against Beckn / JSON-LD schemas discovered at runtime.
 
-    Recursively traverses the payload, identifies objects with @context and @type,
-    loads schemas on-demand, and validates each object against its corresponding schema.
-    Also validates message.contract/order against core beckn.yaml structural schemas
-    to catch missing required fields.
-    Supports both core Beckn objects (beckn:Order, etc.) and domain-specific attribute
-    objects (ChargingOffer, etc.).
+    Schema discovery
+    ~~~~~~~~~~~~~~~~
+    For every dict node in the payload that carries a type discriminator
+    ("@type" or "type") and an active context ("@context" on the node itself
+    or inherited from an ancestor), the validator:
 
-    Args:
-        payload: JSON payload to validate (dict or list)
-        registry_list: List containing referencing Registry with all loaded schemas
-        attributes_schema: Unused, kept for compatibility (None)
-        attribute_schemas_map: Dict mapping @context URLs to (schema_name, schema_data, schema_url)
-        core_only: If True, only validate core Beckn objects, skip domain-specific attributes
+      1. Loads every attributes.yaml reachable from the @context array.
+      2. Builds a flat component map: {name_lower → schema_def}.
+      3. Looks up each type in @type by name (case-insensitive).
+      4. Validates the object against each found component schema.
 
-    Returns:
-        list: List of validation error messages (empty if validation passes)
+    Because lookup is by component name rather than URL path, type names do
+    not need to match context file names, and the order of types in @type
+    arrays does not matter.
+
+    In-header context
+    ~~~~~~~~~~~~~~~~~
+    "@context" at the document root is propagated to all descendants so that
+    W3C VCs (where @context lives only at the root) are handled correctly.
+    When using inherited context, a node is only validated if its type matches
+    an explicit component — this prevents false positives from generic "type"
+    fields (GeoJSON "Point", proof types, etc.).
     """
     errors = []
 
-    # Phase 1: Core structure validation (Contract/Commitment required fields etc.)
+    # Phase 1: validate core beckn message envelope when present.
     if isinstance(payload, dict) and "message" in payload:
         _validate_core_structure(payload, registry_list, errors)
 
-    def find_and_validate_objects(data, path=""):
-        if isinstance(data, dict):
-            # Check for objects with @context and @type
-            if "@context" in data and "@type" in data and attribute_schemas_map is not None:
-                obj_type = data.get("@type")
-                context_url = select_context_url(data.get("@context"), obj_type)
-                if context_url is None:
-                    # Recurse without attempting validation at this node
-                    for key, value in data.items():
-                        find_and_validate_objects(value, f"{path}/{key}" if path else key)
-                    return
-                
-                # Handle core Beckn objects (e.g., beckn:Order, beckn:Offer)
-                if obj_type and obj_type.startswith("beckn:"):
-                    if is_core_context_url(context_url):
-                        attributes_url = get_attributes_url_from_context_url(context_url)
-                        if attributes_url not in registry_list[0]:
-                            load_core_schema_for_context_url(context_url, registry_list)
-                        
-                        try:
-                            resource = registry_list[0].get(attributes_url)
-                            if resource is not None:
-                                core_attributes = resource.contents
-                                object_name = obj_type.split(":")[-1]
-                                
-                                if "components" in core_attributes and "schemas" in core_attributes["components"]:
-                                    schemas = core_attributes["components"]["schemas"]
-                                    if object_name in schemas:
-                                        print(f"  Validating {object_name} at {path or 'root'}...")
-                                        try:
-                                            # Use $ref to full document to allow internal JSON pointer resolution
-                                            schema_to_validate = {
-                                                "$ref": f"{attributes_url}#/components/schemas/{object_name}"
-                                            }
-                                            validate(instance=data, schema=schema_to_validate, registry=registry_list[0])
-                                            print(f"  {object_name} at {path or 'root'} is VALID.")
-                                        except ValidationError as e:
-                                            print(f"  {object_name} at {path or 'root'} is INVALID: {e.message}")
-                                            print(f"  Path: {e.json_path}")
-                                            errors.append(f"{path}: {e.message}")
-                                        except Exception as e:
-                                            # Fallback to direct fragment validation if $ref resolution fails
-                                            print(f"  Warning: $ref resolution failed, trying direct validation: {e}")
-                                            try:
-                                                validate(instance=data, schema=schemas[object_name], registry=registry_list[0])
-                                                print(f"  {object_name} at {path or 'root'} is VALID.")
-                                            except ValidationError as ve:
-                                                print(f"  {object_name} at {path or 'root'} is INVALID: {ve.message}")
-                                                print(f"  Path: {ve.json_path}")
-                                                errors.append(f"{path}: {ve.message}")
-                        except (KeyError, AttributeError):
-                            pass
-                
-                # Handle non-core domain-specific attribute objects
-                else:
-                    if core_only:
-                        # Skip domain-specific attribute validation when --core-only flag is set
+    def _walk(data, path="", inherited_context=None):
+        """
+        Recursively walk *data*, validating every JSON-LD-typed object.
+
+        *inherited_context* is the nearest ancestor's @context value, used
+        when the current node has no own @context (in-header context pattern).
+        """
+        if not isinstance(data, dict):
+            if isinstance(data, list):
+                for idx, item in enumerate(data):
+                    _walk(item, f"{path}[{idx}]", inherited_context)
+            return
+
+        own_context = data.get("@context")
+        # W3C VCs use "type" (no @); JSON-LD uses "@type".  Support both.
+        raw_type = data.get("@type") or data.get("type")
+
+        # Active context: own context takes priority over inherited ancestor context.
+        active_context = own_context if own_context is not None else inherited_context
+
+        if active_context and raw_type and attribute_schemas_map is not None:
+
+            # Build (or reuse cached) flat map of all components across every
+            # attributes.yaml reachable from the active context.
+            context_components = _components_for_context(
+                active_context, attribute_schemas_map, registry_list
+            )
+
+            for obj_type in _iter_types(raw_type):
+
+                if obj_type.startswith("beckn:"):
+                    # ----- Core beckn object (beckn:Order, beckn:Offer, …) -----
+                    # Core objects still use URL-based context selection because
+                    # they need the specific core/v2/attributes.yaml URL for $ref.
+                    # Find the first core context URL from the active context.
+                    core_ctx = next(
+                        (u for u in ([active_context] if isinstance(active_context, str)
+                                     else active_context)
+                         if isinstance(u, str) and is_core_context_url(u)),
+                        None,
+                    )
+                    if core_ctx is None:
+                        continue
+                    attrs_url = get_attributes_url_from_context_url(core_ctx)
+                    if attrs_url not in registry_list[0]:
+                        load_core_schema_for_context_url(core_ctx, registry_list)
+                    try:
+                        resource = registry_list[0].get(attrs_url)
+                        if resource:
+                            object_name = obj_type.split(":")[-1]
+                            schemas = (resource.contents.get("components") or {}).get("schemas") or {}
+                            if object_name in schemas:
+                                print(f"  Validating {object_name} at {path or 'root'}...")
+                                try:
+                                    validate(
+                                        instance=data,
+                                        schema={"$ref": f"{attrs_url}#/components/schemas/{object_name}"},
+                                        registry=registry_list[0],
+                                    )
+                                    print(f"  {object_name} at {path or 'root'} is VALID.")
+                                except ValidationError as e:
+                                    print(f"  {object_name} at {path or 'root'} is INVALID: {e.message}")
+                                    errors.append(f"{path}: {e.message}")
+                                except Exception as e:
+                                    print(f"  Warning: $ref resolution failed for {object_name}: {e}")
+                    except (KeyError, AttributeError):
                         pass
-                    else:
-                        if context_url not in attribute_schemas_map:
-                            load_schema_for_context_url(context_url, attribute_schemas_map, registry_list)
-                        
-                        if context_url in attribute_schemas_map:
-                            schema_name, schema_data, schema_url = attribute_schemas_map[context_url]
-                            schema_type = obj_type.split(":")[-1] if ":" in obj_type else obj_type
-                            
-                            if "components" in schema_data and "schemas" in schema_data["components"]:
-                                schemas = schema_data["components"]["schemas"]
 
-                                # Try exact match first
-                                if schema_type in schemas:
-                                    _validate_attribute_object(data, schemas[schema_type], schema_type, schema_name, path, errors, registry_list, schema_url)
-                                else:
-                                    # Try case-insensitive match
-                                    for schema_key, schema_def in schemas.items():
-                                        if schema_key.lower() == schema_type.lower():
-                                            _validate_attribute_object(data, schema_def, schema_key, schema_name, path, errors, registry_list, schema_url)
-                                            break
-                            else:
-                                # Standalone schema (e.g., DEG domain schemas without components wrapper)
-                                _validate_attribute_object(data, schema_data, schema_type, schema_name, path, errors, registry_list, schema_url)
-            
-            # Recursively check children
-            for key, value in data.items():
-                find_and_validate_objects(value, f"{path}/{key}" if path else key)
-        elif isinstance(data, list):
-            for idx, item in enumerate(data):
-                find_and_validate_objects(item, f"{path}[{idx}]")
+                elif not core_only:
+                    # ----- Domain-specific attribute object -----
+                    # Look up by component name across all schemas loaded from
+                    # the active context — no URL path matching needed.
+                    schema_type = obj_type.split(":")[-1] if ":" in obj_type else obj_type
+                    match = (context_components.get(schema_type) or
+                             context_components.get(schema_type.lower()))
 
-    find_and_validate_objects(payload)
+                    if match is None:
+                        # When using inherited context, skip unknown types
+                        # silently — they are not domain objects from this schema.
+                        # (With own @context we also skip: an unknown type in
+                        # its own context likely has no schema defined for it.)
+                        continue
+
+                    schema_def, schema_name, schema_url, component_key = match
+                    _validate_attribute_object(
+                        data, schema_def, component_key, schema_name,
+                        path, errors, registry_list, schema_url,
+                    )
+
+        # Recurse into children, propagating the active context for
+        # descendants that have no own @context (in-header context pattern).
+        next_inherited = own_context if own_context is not None else inherited_context
+        for key, value in data.items():
+            if key != "@context":
+                _walk(value, f"{path}/{key}" if path else key, next_inherited)
+
+    _walk(payload)
     return errors
 
-def process_file(filepath, registry_list, attributes_schema, attribute_schemas_map=None, core_only=False):
-    """
-    Process and validate a JSON file or Postman collection.
-    
-    Supports two file types:
-    1. Regular JSON files: Validated directly
-    2. Postman collections: Extracts JSON bodies from request items and validates them
-    
-    Args:
-        filepath: Path to JSON file or Postman collection
-        registry_list: List containing referencing Registry
-        attributes_schema: Unused, kept for compatibility (None)
-        attribute_schemas_map: Dict mapping @context URLs to schema info
-        core_only: If True, only validate core Beckn objects, skip domain-specific attributes
-    """
+
+# ---------------------------------------------------------------------------
+# File and Postman collection processing
+# ---------------------------------------------------------------------------
+
+def process_file(filepath, registry_list, attributes_schema,
+                 attribute_schemas_map=None, core_only=False):
+    """Load *filepath* (JSON file or Postman collection) and validate it."""
     print(f"Processing {filepath}...")
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
-        
-        is_postman = "info" in data and "_postman_id" in data.get("info", {})
-        
-        if is_postman:
+
+        if "info" in data and "_postman_id" in data.get("info", {}):
             print("  Identified as Postman collection.")
-            _traverse_postman_items(data.get("item", []), registry_list, attributes_schema, attribute_schemas_map, core_only)
+            _traverse_postman_items(data.get("item", []), registry_list,
+                                    attributes_schema, attribute_schemas_map, core_only)
         else:
-            validate_payload(data, registry_list, attributes_schema, attribute_schemas_map, core_only)
+            validate_payload(data, registry_list, attributes_schema,
+                             attribute_schemas_map, core_only)
     except Exception as e:
         print(f"  Error processing {filepath}: {e}")
 
-def _traverse_postman_items(items, registry_list, attributes_schema, attribute_schemas_map, core_only=False):
-    """
-    Recursively traverse Postman collection items and validate JSON request bodies.
-    
-    Args:
-        items: List of Postman collection items (may contain nested items)
-        registry_list: List containing referencing Registry
-        attributes_schema: Unused, kept for compatibility (None)
-        attribute_schemas_map: Dict mapping @context URLs to schema info
-        core_only: If True, only validate core Beckn objects, skip domain-specific attributes
-    """
+
+def _traverse_postman_items(items, registry_list, attributes_schema,
+                             attribute_schemas_map, core_only=False):
+    """Recursively extract and validate JSON bodies from a Postman collection."""
     for item in items:
         if "item" in item:
-            _traverse_postman_items(item["item"], registry_list, attributes_schema, attribute_schemas_map, core_only)
-        if "request" in item and "body" in item["request"]:
-            body = item["request"]["body"]
-            if body.get("mode") == "raw":
-                try:
-                    json_body = json.loads(body["raw"])
-                    validate_payload(json_body, registry_list, attributes_schema, attribute_schemas_map, core_only)
-                except json.JSONDecodeError:
-                    pass
+            _traverse_postman_items(item["item"], registry_list,
+                                    attributes_schema, attribute_schemas_map, core_only)
+        request = item.get("request", {})
+        body = request.get("body", {})
+        if body.get("mode") == "raw":
+            try:
+                json_body = json.loads(body["raw"])
+                validate_payload(json_body, registry_list, attributes_schema,
+                                 attribute_schemas_map, core_only)
+            except json.JSONDecodeError:
+                pass
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(
-        description="Validate JSON files against Beckn protocol schemas",
-        epilog="Example: python3 scripts/validate_schema.py examples/ev-charging/v2/**/*.json"
+        description="Validate JSON files against Beckn protocol schemas.",
+        epilog="Example: python3 scripts/validate_schema.py examples/ev-charging/v2/**/*.json",
     )
-    parser.add_argument("files", nargs="+", help="JSON files or Postman collections to validate")
-    parser.add_argument(
-        "--core-only",
-        action="store_true",
-        default=False,
-        help="Only validate core Beckn objects (beckn:Order, beckn:Offer, etc.), skip domain-specific attribute objects"
-    )
-    
+    parser.add_argument("files", nargs="+",
+                        help="JSON files or Postman collections to validate.")
+    parser.add_argument("--core-only", action="store_true", default=False,
+                        help="Only validate core Beckn objects; skip domain-specific attributes.")
+
     args = parser.parse_args()
     registry, attributes_schema, attribute_schemas_map = get_schema_store()
-    
+
     for file in args.files:
-        process_file(file, registry, attributes_schema, attribute_schemas_map, core_only=args.core_only)
+        process_file(file, registry, attributes_schema, attribute_schemas_map,
+                     core_only=args.core_only)
