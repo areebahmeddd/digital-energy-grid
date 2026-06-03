@@ -199,7 +199,7 @@
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 481.0},
             "settlementStatus": "PENDING",
-            "paymentTrigger": {"code": "ON_FULFILLMENT"},
+            "paymentTrigger": "ON_FULFILLMENT",
             "payTo": {"accountHolderName": "Solar Farm Energy Provider Pvt Ltd", "accountNumber": "9876543210", "branchCode": "ICICI0005678", "bankName": "ICICI Bank"},
             "acceptedPaymentMethods": ["BANK_TRANSFER"]
           }
