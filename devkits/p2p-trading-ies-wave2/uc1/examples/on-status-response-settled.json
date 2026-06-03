@@ -16,21 +16,22 @@
       "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
       "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld"
+      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-p2p-001",
       "status": {
-        "code": "ACTIVE"
+        "code": "SETTLED"
       },
       "commitments": [
         {
           "id": "commitment-p2p-001",
           "status": {
             "descriptor": {
-              "code": "ACTIVE"
+              "code": "SETTLED"
             }
           },
           "resources": [
@@ -277,6 +278,45 @@
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUri": "http://seller-discom-ledger.example.com:9000"
+          }
+        }
+      ],
+      "paymentTerms": [
+        {
+          "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+          "@type": "SettlementTerm",
+          "id": "payment-term-p2p-001",
+          "settlementFor": "sellerPlatform",
+          "amount": {"currency": "INR", "value": 450.26},
+          "settlementStatus": "COMPLETE",
+          "paymentTrigger": {"code": "ON_FULFILLMENT"},
+          "payTo": {
+            "accountHolderName": "Solar Farm Energy Provider Pvt Ltd",
+            "accountNumber": "9876543210",
+            "branchCode": "ICICI0005678",
+            "bankName": "ICICI Bank"
+          },
+          "acceptedPaymentMethods": ["BANK_TRANSFER"],
+          "settlementTermAttributes": {
+            "energyValue": 437.15,
+            "sellerPlatformFee": 13.11,
+            "buyerPlatformFee": 8.74,
+            "totalPayable": 459.0,
+            "paidAt": "2026-04-26T07:30:00Z",
+            "txnRef": "TXN-P2P-001-SETTLED"
+          }
+        }
+      ],
+      "consideration": [
+        {
+          "id": "consideration-p2p-001",
+          "considerationAttributes": {
+            "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
+            "@type": "RevenueFlow",
+            "revenueFlows": [
+              {"role": "sellerPlatform", "value": 450.26, "currency": "INR", "description": "Energy sale proceeds + seller platform fee (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5 + 3%)"},
+              {"role": "buyerPlatform", "value": -450.26, "currency": "INR", "description": "Energy purchase net of retained buyer platform fee (2%)"}
+            ]
           }
         }
       ]

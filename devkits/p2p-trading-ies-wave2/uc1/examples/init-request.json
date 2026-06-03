@@ -16,7 +16,8 @@
       "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld"
+      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -205,6 +206,17 @@
             "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUri": "http://seller-discom-ledger.example.com:9000"
           }
+        }
+      ],
+      "paymentTerms": [
+        {
+          "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+          "@type": "SettlementTerm",
+          "id": "payment-term-p2p-001",
+          "settlementFor": "sellerPlatform",
+          "amount": {"currency": "INR", "value": 481.0},
+          "settlementStatus": "PENDING",
+          "acceptedPaymentMethods": ["BANK_TRANSFER"]
         }
       ]
     }
