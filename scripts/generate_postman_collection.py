@@ -141,6 +141,18 @@ DEVKIT_CONFIGS = {
         "examples_path": "devkits/demand-flex/uc1-bdr-w-baselining/examples",
         "structure": "flat"
     },
+    "demand-flex-uc2-bid-curve-pac": {
+        "domain": "nfh.global/testnet-deg",
+        "bap_id": "bap.example.com",
+        "bap_host_root": "http://beckn-router:9000",
+        "bpp_id": "bpp.example.com",
+        "bpp_host_root": "http://beckn-router:9000",
+        "bap_caller_url": "http://localhost:8081/bap/caller",
+        "bpp_caller_url": "http://localhost:8082/bpp/caller",
+        "transaction_id": "c2d3e4f5-a6b7-8901-abcd-ef5678901234",
+        "examples_path": "devkits/demand-flex/uc2-bid-curve-pac/examples",
+        "structure": "flat"
+    },
     "p2p-trading-ies-wave1": {
         "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0",
         "bap_id": "p2p-trading-sandbox1.com",
@@ -1439,7 +1451,7 @@ def main():
     parser.add_argument(
         "--devkit",
         type=str,
-        choices=["ev-charging", "p2p-trading", "p2p-enrollment", "p2p-trading-interdiscom", "demand-flex", "p2p-trading-ies-wave1", "p2p-trading-ies-wave2", "data-exchange-uc1-meter-data", "data-exchange-uc2-regulatory-data", "data-exchange-uc3-tariff-policy"],
+        choices=["ev-charging", "p2p-trading", "p2p-enrollment", "p2p-trading-interdiscom", "demand-flex", "demand-flex-uc2-bid-curve-pac", "p2p-trading-ies-wave1", "p2p-trading-ies-wave2", "data-exchange-uc1-meter-data", "data-exchange-uc2-regulatory-data", "data-exchange-uc3-tariff-policy"],
         required=True,
         help="Devkit type"
     )
