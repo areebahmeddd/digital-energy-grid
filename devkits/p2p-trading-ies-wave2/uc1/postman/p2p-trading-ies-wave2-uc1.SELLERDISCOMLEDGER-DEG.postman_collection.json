@@ -175,6 +175,14 @@
       "value": "https://ies-p2p-energy-ledger.beckn.io"
     },
     {
+      "key": "buyer_discom_host_url",
+      "value": "http://buyer-discom.example.com:9000"
+    },
+    {
+      "key": "seller_discom_host_url",
+      "value": "http://seller-discom.example.com:9000"
+    },
+    {
       "key": "ledger_buyer_discom_id",
       "value": "ies-p2p-energy-ledger.beckn.io"
     },

@@ -197,6 +197,11 @@ DEVKIT_CONFIGS = {
         # Pushes meter actuals as on_status to buyer-discom-ledger /bap/receiver.
         "buyerdiscom_host_root": "http://buyerdiscom.example.com:9000",
         "buyerdiscom_bpp_caller_url": "http://localhost:8085/bpp/caller",
+        # Platform URLs for the discom Beckn platforms (distinct from the ledger
+        # TSP URLs). Used for trade allocation requests; emitted as dedicated
+        # Postman variables so testers can override them independently.
+        "buyer_discom_host_url": "http://buyer-discom.example.com:9000",
+        "seller_discom_host_url": "http://seller-discom.example.com:9000",
         # Subscriber IDs for the discom-ledger TSPs. Emitted as Postman variables
         # in all wave2 collections so participantId fields in the contract body can
         # reference them. seller_discom_ledger_id is also used in substitutions.yaml
@@ -223,10 +228,10 @@ DEVKIT_CONFIGS = {
         # attribute names to Postman variable names. Applied during collection
         # generation; example JSONs on disk stay with their hardcoded values.
         "participant_attr_vars": {
-            "buyer":        {"platformUri": "buyerplatform_host_root"},
-            "seller":       {"platformUri": "sellerplatform_host_root"},
-            "buyerDiscom":  {"ledgerUri": "ledger_host_buyer"},
-            "sellerDiscom": {"ledgerUri": "ledger_host_seller"},
+            "buyer":        {"platformUrl": "buyerplatform_host_root"},
+            "seller":       {"platformUrl": "sellerplatform_host_root"},
+            "buyerDiscom":  {"ledgerUrl": "ledger_host_buyer",  "platformUrl": "buyer_discom_host_url"},
+            "sellerDiscom": {"ledgerUrl": "ledger_host_seller", "platformUrl": "seller_discom_host_url"},
         },
     },
     "data-exchange-uc1-meter-data": {
@@ -1197,6 +1202,11 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         variables.append({"key": "ledger_host_buyer", "value": config["ledger_host_buyer"]})
     if "ledger_host_seller" in config:
         variables.append({"key": "ledger_host_seller", "value": config["ledger_host_seller"]})
+    # Discom platform URLs — distinct from the ledger TSP URLs; used for trade allocation.
+    if "buyer_discom_host_url" in config:
+        variables.append({"key": "buyer_discom_host_url", "value": config["buyer_discom_host_url"]})
+    if "seller_discom_host_url" in config:
+        variables.append({"key": "seller_discom_host_url", "value": config["seller_discom_host_url"]})
     if "ledger_adapter_url" in config:
         variables.append({"key": "ledger_adapter_url", "value": config["ledger_adapter_url"]})
     # Discom-ledger subscriber IDs — emitted for all roles so contract body

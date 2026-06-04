@@ -58,8 +58,8 @@ roles:
         message.contract.participants[role=seller].participantAttributes.platformUrl:        {var: sellerplatform_host_root, required: false}
         message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
         message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: ledger_host_seller, required: false}
+        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
+        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
   # ── SELLER (BPP) ─────────────────────────────────────────────────────────
   # Three sub-cases handled by ordered rules (later rules override earlier):
@@ -86,8 +86,8 @@ roles:
         message.contract.participants[role=seller].participantAttributes.platformUrl:        {var: sellerplatform_host_root, required: false}
         message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
         message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: ledger_host_seller, required: false}
+        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
+        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
     # 2. Seller-initiated to buyer: seller=BAP, buyer=BPP (roles swapped vs. default)
     #    {{sellerplatform_id}} = sellerapp.example.com; {{buyerplatform_id}} = buyerapp.example.com
@@ -137,8 +137,8 @@ roles:
         message.contract.participants[role=buyer].participantAttributes.platformUrl:         {var: bap_host_root, required: false}
         message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
         message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: ledger_host_seller, required: false}
+        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
+        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
   # ── SELLERDISCOMLEDGER ───────────────────────────────────────────────────
   # Seller-discom ledger TSP. Two outbound flows:
@@ -169,8 +169,8 @@ roles:
         message.contract.participants[role=buyer].participantAttributes.platformUrl:         {var: bap_host_root, required: false}
         message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
         message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: ledger_host_seller, required: false}
+        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
+        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
   # ── SELLERDISCOM ─────────────────────────────────────────────────────────
   # Seller-discom actor (the utility itself) pushing meter actuals as on_status
