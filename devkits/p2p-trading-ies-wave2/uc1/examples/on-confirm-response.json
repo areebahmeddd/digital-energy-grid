@@ -200,9 +200,17 @@
             "amount": {"currency": "INR", "value": 481.0},
             "settlementStatus": "PENDING",
             "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "Solar Farm Energy Provider Pvt Ltd", "accountNumber": "9876543210", "branchCode": "ICICI0005678", "bankName": "ICICI Bank"},
+            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
             "acceptedPaymentMethods": ["BANK_TRANSFER"]
           }
+        }
+      ],
+      "settlements": [
+        {
+          "id": "settlement-p2p-001",
+          "considerationId": "payment-term-p2p-001",
+          "status": "COMMITTED",
+          "settlementAttributes": {"@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 35 kWh on 2026-04-26 10:00-12:00 IST"}
         }
       ]
     }
