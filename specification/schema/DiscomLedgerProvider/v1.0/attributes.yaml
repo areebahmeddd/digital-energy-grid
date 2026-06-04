@@ -70,6 +70,6 @@ components:
             Used to request allocation of unallocated trades to this discom.
             The platform exposes standard Beckn paths under this base:
             `/bap/caller`, `/bap/receiver`, `/bpp/caller`, `/bpp/receiver`.
-          example: "https://ies-p2p-energy-ledger.beckn.io"
+          example: "https://ies-p2p-energy-discom.beckn.io"
           x-jsonld:
             "@id": platformUrl

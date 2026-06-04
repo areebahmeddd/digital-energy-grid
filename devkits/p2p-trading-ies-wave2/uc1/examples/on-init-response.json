@@ -178,7 +178,7 @@
             "utilityId": "TEST_DISCOM_BUYER",
             "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
 
-            "platformUrl": "http://buyer-discom-ledger.example.com:9000"
+            "platformUrl": "http://buyer-discom.example.com:9000"
           }
         },
         {
@@ -190,7 +190,7 @@
             "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
 
-            "platformUrl": "http://seller-discom-ledger.example.com:9000"
+            "platformUrl": "http://seller-discom.example.com:9000"
           }
         }
       ],
