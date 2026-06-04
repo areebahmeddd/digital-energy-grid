@@ -28,10 +28,10 @@ info:
       sellerdiscom/bpp/caller         --on_status-->  sellerdiscom-ledger/bap/receiver
       buyerdiscom/bpp/caller          --on_status-->  buyerdiscom-ledger/bap/receiver
 
-    Rule 1: /status at /bpp/receiver → cascade to own discom (sellerDiscom.ledgerUri).
+    Rule 1: /status at /bpp/receiver → cascade to own discom (sellerDiscom.ledgerUrl).
     Rule 2: /on_status at /bap/receiver → check context.bppId:
         if it matches own discom's participantId → forward to peer's /bap/receiver,
-        else → cascade to own discom's ledgerUri.
+        else → cascade to own discom's ledgerUrl.
 
     Run with Redocly respect (from p2p-trading-ies-wave2/):
 

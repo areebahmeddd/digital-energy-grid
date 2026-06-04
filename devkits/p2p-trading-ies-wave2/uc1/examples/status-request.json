@@ -154,7 +154,7 @@
             "meterId": "TEST_METER_SELLER_001",
             "utilityId": "TEST_DISCOM_SELLER",
             "utilityCustomerId": "TEST_CUST_SELLER_001",
-            "platformUri": "http://sellerapp.example.com:9000"
+            "platformUrl": "http://sellerapp.example.com:9000"
           }
         },
         {
@@ -166,7 +166,7 @@
             "meterId": "TEST_METER_BUYER_001",
             "utilityId": "TEST_DISCOM_BUYER",
             "utilityCustomerId": "TEST_CUST_BUYER_001",
-            "platformUri": "http://buyerapp.example.com:9000"
+            "platformUrl": "http://buyerapp.example.com:9000"
           }
         },
         {
@@ -176,7 +176,9 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUri": "http://buyer-discom-ledger.example.com:9000"
+            "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
+
+            "platformUrl": "http://buyer-discom-ledger.example.com:9000"
           }
         },
         {
@@ -186,7 +188,9 @@
             "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUri": "http://seller-discom-ledger.example.com:9000"
+            "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
+
+            "platformUrl": "http://seller-discom-ledger.example.com:9000"
           }
         }
       ]

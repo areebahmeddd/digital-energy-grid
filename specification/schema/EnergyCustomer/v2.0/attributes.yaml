@@ -68,7 +68,7 @@ components:
           x-jsonld:
             "@id": utilityId
 
-        platformUri:
+        platformUrl:
           type: string
           format: uri
           description: >
@@ -84,4 +84,4 @@ components:
             request actions).
           example: "http://bap.example.com:9000"
           x-jsonld:
-            "@id": platformUri
+            "@id": platformUrl
