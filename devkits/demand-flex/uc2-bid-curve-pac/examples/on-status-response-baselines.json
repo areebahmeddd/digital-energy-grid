@@ -17,7 +17,8 @@
       "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -176,6 +177,20 @@
       "participants": [
         { "role": "buyer", "participantId": "tpddl-north-delhi" },
         { "role": "seller", "participantId": "greenflex-agg" }
+      ],
+      "consideration": [
+        {
+          "id": "payment-term-pac-001",
+          "considerationAttributes": {
+            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "amount": { "currency": "INR", "value": 332.5 },
+            "settlementStatus": "PENDING",
+            "paymentTrigger": "ON_FULFILLMENT",
+            "payTo": { "accountHolderName": "GreenFlex Aggregator Pvt Ltd", "accountNumber": "4567890123456", "branchCode": "ICIC0002345", "bankName": "ICICI Bank" },
+            "acceptedPaymentMethods": ["BANK_TRANSFER"]
+          }
+        }
       ]
     }
   }
