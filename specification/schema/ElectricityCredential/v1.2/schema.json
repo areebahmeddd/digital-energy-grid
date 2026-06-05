@@ -159,7 +159,7 @@
                             "type": "array",
                             "uniqueItems": true,
                             "description": "Bag of optional capabilities per IEC 61968-9 EndDeviceFunction[0..*] — multiple values valid simultaneously.",
-                            "items": { "type": "string", "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging", "DLMS_COSEM"] }
+                            "items": { "type": "string", "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging"] }
                         },
                         "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
                         "bus": { "type": "string", "description": "Busbar identifier." },
@@ -167,7 +167,12 @@
                         "communicationTechnology": {
                             "type": "string",
                             "enum": ["PLC", "RF_Mesh", "GPRS", "NB-IoT", "LoRa", "ZigBee", "Other"],
-                            "description": "Communication technology used for AMI/AMR data collection."
+                            "description": "Last-mile (physical layer) communication technology."
+                        },
+                        "applicationProtocol": {
+                            "type": "string",
+                            "enum": ["DLMS_COSEM", "ANSI_C12_18", "IEC_61850", "Modbus", "Other"],
+                            "description": "Application-layer protocol for meter data. DLMS_COSEM: IEC 62056. ANSI_C12_18: North American table model. IEC_61850: smart grid. Modbus: legacy industrial."
                         }
                     }
                 }

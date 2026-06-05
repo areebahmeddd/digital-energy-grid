@@ -64,11 +64,12 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 |-------|------|--------------------------|-------------|
 | `meterCapability` | enum | `AmiBillingReadyKind` (IEC 61968-9) | Communication/capability tier: `Electromechanical` · `CMRI` · `AMR` · `AMI` |
 | `energyDirection` | enum | `FlowDirectionKind` (ESPI NAESB REQ.21) | `Forward` (default) · `Reverse` · `Bidirectional` · `Net` |
-| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | Bag of active capabilities: `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` · `DLMS_COSEM` |
+| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | Bag of active capabilities: `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
 | `bus` | string | — | Busbar identifier |
 | `location` | object | beckn Location/2.0 | `geo` (GeoJSON Point) + `address` (PostalAddress) |
-| `communicationTechnology` | enum | — | Physical transport layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
+| `communicationTechnology` | enum | — | Physical layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
+| `applicationProtocol` | enum | IEC 62056 / ANSI C12 | Application layer: `DLMS_COSEM` · `ANSI_C12_18` · `IEC_61850` · `Modbus` · `Other` |
 
 `billingMode` (`Postpaid` \| `Prepaid`) is an administrative attribute and lives on `ConsumptionProfile`, not the meter (aligns with ESPI `UsagePoint.amiBillingReady`).
 
@@ -123,7 +124,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 ```json
 "energyResources": [
   {"id": "MET-IMPORT", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Forward"},  "parentResources": ["DEL-F08"]},
-  {"id": "MET-EXPORT", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Reverse", "functions": ["NetMetering"]}},
+  {"id": "MET-EXPORT", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Reverse"}},
   {"id": "SOLAR-001",  "type": "SOLAR_PV", "attributes": {"ratedPowerKw": 5},      "parentResources": ["MET-EXPORT"]}
 ],
 "consumptionProfiles": [

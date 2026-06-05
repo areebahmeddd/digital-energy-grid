@@ -25,7 +25,8 @@
             "feeder":             { "@id": "erDeg:feeder",             "@type": "xsd:string"  },
             "bus":                { "@id": "erDeg:bus",                "@type": "xsd:string"  },
             "location":           { "@id": "erDeg:meterLocation",      "@type": "@id"         },
-            "communicationTechnology": { "@id": "erDeg:communicationTechnology", "@type": "xsd:string" }
+            "communicationTechnology": { "@id": "erDeg:communicationTechnology", "@type": "xsd:string" },
+            "applicationProtocol":     { "@id": "erDeg:applicationProtocol",     "@type": "xsd:string" }
           }
         },
         "subResources":    { "@id": "erDeg:subResources",    "@container": "@list" },

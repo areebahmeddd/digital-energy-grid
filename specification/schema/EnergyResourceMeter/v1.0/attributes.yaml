@@ -199,7 +199,6 @@ components:
               - TamperDetection
               - PowerQuality
               - EventLogging
-              - DLMS_COSEM
             description: >
               ToU: time-of-use / time-of-day tariff registers.
               NetMetering: net-metering tariff scheme active (prosumer).
@@ -208,8 +207,6 @@ components:
               TamperDetection: anti-tamper magnetic/optical detection.
               PowerQuality: harmonics, voltage sag/swell, power factor monitoring.
               EventLogging: tamper/connect/disconnect audit log.
-              DLMS_COSEM: DLMS/COSEM application-layer protocol compliant
-              (mandatory for India AMI per BIS IS 16444 / CEA specification).
           x-cim-class: cim:EndDeviceFunctionKind
           x-jsonld:
             "@id": erDeg:functions
@@ -273,6 +270,26 @@ components:
             - ZigBee
             - Other
           description: >
-            Last-mile communication technology used by this meter's head-end system.
+            Last-mile (physical layer) communication technology used by this meter's head-end system.
+            Orthogonal to applicationProtocol (application layer).
           x-jsonld:
             "@id": erDeg:communicationTechnology
+
+        applicationProtocol:
+          type: string
+          enum:
+            - DLMS_COSEM
+            - ANSI_C12_18
+            - IEC_61850
+            - Modbus
+            - Other
+          description: >
+            Application-layer protocol used to read/communicate meter data.
+            DLMS_COSEM: IEC 62056, dominant in India and Europe; mandatory for
+            India AMI per BIS IS 16444 / CEA specification.
+            ANSI_C12_18: North American optical-port / table-data model (ANSI C12.18/C12.19).
+            IEC_61850: substation automation and smart grid messaging.
+            Modbus: legacy industrial serial protocol.
+            Orthogonal to communicationTechnology (physical layer).
+          x-jsonld:
+            "@id": erDeg:applicationProtocol

@@ -51,11 +51,12 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 |-------|------|-----|-------------|
 | `meterCapability` | enum | `AmiBillingReadyKind` (IEC 61968-9) | `Electromechanical` · `CMRI` · `AMR` · `AMI` |
 | `energyDirection` | enum | `FlowDirectionKind` (ESPI NAESB REQ.21) | `Forward` (default) · `Reverse` · `Bidirectional` · `Net` |
-| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` · `DLMS_COSEM` |
+| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
 | `bus` | string | — | Busbar identifier at the connection point |
 | `location` | object (beckn Location/2.0) | — | `geo` (GeoJSON Point) + `address` (PostalAddress) |
-| `communicationTechnology` | enum | — | `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
+| `communicationTechnology` | enum | — | Physical layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
+| `applicationProtocol` | enum | IEC 62056 / ANSI C12 | Application layer: `DLMS_COSEM` · `ANSI_C12_18` · `IEC_61850` · `Modbus` · `Other` |
 
 ---
 
@@ -70,13 +71,13 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
     "model": "E350",
     "meterCapability": "AMI",
     "energyDirection": "Forward",
-    "functions": ["ToU", "MaxDemand", "DLMS_COSEM"],
     "ratedPowerKw": 10,
     "commissioningDate": "2022-04-01",
     "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]},
     "feeder": "FDR-BLR-042",
     "bus": "BUS-042-A",
     "communicationTechnology": "NB-IoT",
+    "applicationProtocol": "DLMS_COSEM",
     "location": {
       "geo": {"type": "Point", "coordinates": [77.5946, 12.9716]},
       "address": {"streetAddress": "12 MG Road", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "postalCode": "560001", "addressCountry": "IN"}

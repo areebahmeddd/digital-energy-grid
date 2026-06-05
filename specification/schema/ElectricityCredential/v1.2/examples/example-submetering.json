@@ -21,7 +21,7 @@
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001",
           "type": "METER",
-          "attributes": {"meterCapability": "AMI", "energyDirection": "Forward", "functions": ["ToU", "MaxDemand", "DLMS_COSEM"], "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
+          "attributes": {"meterCapability": "AMI", "energyDirection": "Forward", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:feeder:BAN-NR-F22"]
         },
         {

@@ -97,7 +97,7 @@
       "@id": "erDeg:meterFunctions",
       "@type": "rdf:Property",
       "rdfs:label": "Meter functions",
-      "rdfs:comment": "Bag of optional capabilities active on this meter. Modelled as a set per IEC 61968-9 EndDeviceFunction[0..*] pattern. Defined values: ToU (time-of-use registers), NetMetering (net-metering tariff scheme), MaxDemand (maximum demand register), LoadControl (demand-response relay), TamperDetection (anti-tamper detection), PowerQuality (harmonics/sag/swell monitoring), EventLogging (tamper/connect-disconnect audit log), DLMS_COSEM (DLMS/COSEM application-layer protocol, mandatory for India AMI per BIS IS 16444).",
+      "rdfs:comment": "Bag of optional capabilities active on this meter. Modelled as a set per IEC 61968-9 EndDeviceFunction[0..*] pattern. Defined values: ToU (time-of-use registers), NetMetering (net-metering tariff scheme), MaxDemand (maximum demand register), LoadControl (demand-response relay), TamperDetection (anti-tamper detection), PowerQuality (harmonics/sag/swell monitoring), EventLogging (tamper/connect-disconnect audit log). Application-layer protocol (e.g. DLMS/COSEM) is captured separately in erDeg:applicationProtocol.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
       "schema:rangeIncludes": { "@id": "xsd:string" },
       "rdfs:seeAlso": [
@@ -136,6 +136,18 @@
       "rdfs:comment": "Physical transport layer used by this meter's head-end system (PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other). Orthogonal to meterCapability: an AMI meter can use any of these transports.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
       "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:applicationProtocol",
+      "@type": "rdf:Property",
+      "rdfs:label": "Application protocol",
+      "rdfs:comment": "Application-layer (OSI L7) protocol used to read/communicate meter data. DLMS_COSEM (IEC 62056): dominant in India/Europe, mandatory for India AMI per BIS IS 16444. ANSI_C12_18: North American table-data model. IEC_61850: substation/smart-grid messaging. Modbus: legacy industrial. Orthogonal to communicationTechnology (physical layer).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" },
+      "rdfs:seeAlso": [
+        { "@id": "https://webstore.iec.ch/en/publication/67916" },
+        { "@id": "https://www.nema.org/standards/view/ANSI-C12-18" }
+      ]
     },
     {
       "@id": "erDeg:subResources",

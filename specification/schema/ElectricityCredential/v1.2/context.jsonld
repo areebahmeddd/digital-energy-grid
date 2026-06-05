@@ -52,6 +52,7 @@
                                 "bus":                   { "@id": "erDeg:bus",                   "@type": "xsd:string"  },
                                 "meterLocation":         { "@id": "erDeg:meterLocation",         "@type": "@id"         },
                                 "communicationTechnology":{ "@id": "erDeg:communicationTechnology","@type": "xsd:string"},
+                                "applicationProtocol":    { "@id": "erDeg:applicationProtocol",    "@type": "xsd:string"},
                                 "nominalPowerKw":        { "@id": "erDeg:nominalPowerKw",        "@type": "xsd:decimal" },
                                 "efficiency":            { "@id": "erDeg:efficiency",            "@type": "xsd:decimal" },
                                 "storageCapacityKwh":    { "@id": "erDeg:storageCapacityKwh",    "@type": "xsd:decimal" },
