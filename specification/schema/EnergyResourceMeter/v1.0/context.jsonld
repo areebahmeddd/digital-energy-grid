@@ -17,14 +17,13 @@
             "model":              { "@id": "erDeg:model",              "@type": "xsd:string"  },
             "ratedPowerKw":       { "@id": "erDeg:ratedPowerKw",       "@type": "xsd:decimal" },
             "telemetryProvider":  { "@id": "erDeg:telemetryProvider",  "@type": "xsd:string"  },
-            "commissioningDate":  { "@id": "deg:commissioningDate",    "@type": "xsd:string"  },
-            "gps":                { "@id": "erDeg:gps",                "@type": "@id"         },
+            "commissioningDate":  { "@id": "deg:commissioningDate",    "@type": "xsd:dateTime" },
+            "location":           { "@id": "erDeg:location",           "@type": "@id"         },
             "meterCapability":    { "@id": "erDeg:meterCapability",    "@type": "xsd:string"  },
             "energyDirection":    { "@id": "erDeg:energyDirection",    "@type": "xsd:string"  },
             "functions":          { "@id": "erDeg:meterFunctions",     "@container": "@set"   },
             "feeder":             { "@id": "erDeg:feeder",             "@type": "xsd:string"  },
             "bus":                { "@id": "erDeg:bus",                "@type": "xsd:string"  },
-            "location":           { "@id": "erDeg:meterLocation",      "@type": "@id"         },
             "communicationTechnology": { "@id": "erDeg:communicationTechnology", "@type": "xsd:string" },
             "applicationProtocol":     { "@id": "erDeg:applicationProtocol",     "@type": "xsd:string" }
           }

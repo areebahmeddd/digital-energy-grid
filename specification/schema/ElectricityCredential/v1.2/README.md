@@ -51,14 +51,14 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number | `GeneratingUnit.maxOperatingP` | Nameplate peak power, kW |
 | `telemetryProvider` | string | — | Vendor API / data-source for telemetry |
-| `commissioningDate` | string | — | ISO 8601 commissioning date |
-| `gps` | string | — | `"lat,lng"` coordinates |
+| `commissioningDate` | string (date-time) | — | ISO 8601 commissioning date-time |
+| `location` | object | — | `geo` (GeoJSONGeometry) + optional `address` (PostalAddress) |
 
 ## Kind-specific attributes
 
 ### EnergyResourceMeter (type: `METER`)
 
-`meterType` (flat enum) is replaced in v1.2 with four orthogonal fields matching IEC 61968-9 / ESPI NAESB REQ.21 semantics. Each field is independent — a single meter can be `AMI` + `Bidirectional` + `["ToU","NetMetering"]` simultaneously.
+`meterType` (flat enum) is replaced in v1.2 with four orthogonal fields matching IEC 61968-9 / ESPI NAESB REQ.21 semantics. Each field is independent — a single meter can be `AMI` + `Bidirectional` + `["ToU","NetMetering"]` simultaneously. Physical location (`location`) moved to `EnergyResourceCommonAttributes` in v1.2.
 
 | Field | Type | CIM / standard alignment | Description |
 |-------|------|--------------------------|-------------|
@@ -67,11 +67,10 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 | `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | Bag of active capabilities: `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
 | `bus` | string | — | Busbar identifier |
-| `location` | object | beckn Location/2.0 | `geo` (GeoJSON Point) + `address` (PostalAddress) |
 | `communicationTechnology` | enum | — | Physical layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
 | `applicationProtocol` | enum | IEC 62056 / ANSI C12 | Application layer: `DLMS_COSEM` · `ANSI_C12_18` · `IEC_61850` · `Modbus` · `Other` |
 
-`billingMode` (`Postpaid` \| `Prepaid`) is an administrative attribute and lives on `ConsumptionProfile`, not the meter (aligns with ESPI `UsagePoint.amiBillingReady`).
+`paymentMode` (`POSTPAID` \| `PREPAID`) is an administrative attribute and lives on `ConsumptionProfile`, not the meter (aligns with ESPI `UsagePoint.amiBillingReady`).
 
 ### EnergyResourceGenerator (type: `SOLAR_PV` | `WIND` | `HYDRO` | `BIOGAS` | `CHP` | `FUEL_CELL`)
 
@@ -128,8 +127,8 @@ A single `customerNumber` can span arbitrary asset topologies.
   {"id": "SOLAR-001",  "type": "SOLAR_PV", "attributes": {"ratedPowerKw": 5},      "parentResources": ["MET-EXPORT"]}
 ],
 "consumptionProfiles": [
-  {"meterId": "MET-IMPORT", "sanctionedLoadKW": 10, "tariffCategoryCode": "DS-I"},
-  {"meterId": "MET-EXPORT", "sanctionedLoadKW": 5,  "tariffCategoryCode": "FIT-SOLAR-01"}
+  {"meterId": "MET-IMPORT", "sanctionedLoadKw": 10, "tariffCategoryCode": "DS-I"},
+  {"meterId": "MET-EXPORT", "sanctionedLoadKw": 5,  "tariffCategoryCode": "FIT-SOLAR-01"}
 ]
 ```
 
@@ -143,12 +142,14 @@ A single `customerNumber` can span arbitrary asset topologies.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `meterId` | string | Yes | Matches `id` of a METER entry in `energyResources[]` |
-| `sanctionedLoadKW` | number | Yes | Utility-approved load in kW |
+| `sanctionedLoadKw` | number | Yes | Utility-approved load in kW |
+| `sanctionedExportLoadKw` | number | No | Sanctioned/approved grid export limit in kW |
+| `billingCycleDay` | integer (1–31) | No | Day of month on which the billing cycle resets |
 | `contractMaxDemandKw` | number | No | Maximum demand contracted with the utility, kW |
 | `tariffCategoryCode` | string | Yes | Billing/tariff category code |
 | `premisesType` | enum | No | Residential, Commercial, Industrial, Agricultural |
 | `connectionType` | enum | No | Single-phase, Three-phase |
-| `billingMode` | enum | No | Postpaid, Prepaid — administrative; placed here (not on meter) per ESPI `UsagePoint.amiBillingReady` (IEC 61968-9) |
+| `paymentMode` | enum | No | POSTPAID, PREPAID — administrative; placed here (not on meter) per ESPI `UsagePoint.amiBillingReady` (IEC 61968-9) |
 
 ## customerDetails (PII)
 

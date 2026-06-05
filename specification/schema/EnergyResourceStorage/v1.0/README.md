@@ -77,8 +77,8 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
     "maxChargeRateKw": 11.5,
     "maxDischargeRateKw": 11.5,
     "stateOfHealthPct": 98,
-    "commissioningDate": "2024-01-10",
-    "gps": "12.9716,77.5946",
+    "commissioningDate": "2024-01-10T00:00:00+05:30",
+    "location": {"geo": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
     "telemetryProvider": "Tesla Gateway"
   },
   "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-001"]

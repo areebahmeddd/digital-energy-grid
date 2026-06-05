@@ -74,9 +74,9 @@ components:
       additionalProperties: true
       description: >
         Attributes for METER resources. Includes EnergyResourceCommonAttributes
-        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, gps)
+        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location)
         plus meter-specific fields (meterCapability, energyDirection, functions,
-        feeder, bus, location, communicationTechnology).
+        feeder, bus, communicationTechnology).
       x-jsonld:
         "@id": erDeg:attributes
       properties:
@@ -110,29 +110,41 @@ components:
 
         commissioningDate:
           type: string
-          format: date
-          description: ISO 8601 date when this meter was commissioned.
+          format: date-time
+          description: ISO 8601 date-time when this meter was commissioned.
           x-jsonld:
             "@id": deg:commissioningDate
 
-        gps:
+        location:
           type: object
           description: >
-            GeoJSON Point location of this meter. Coordinates are [longitude, latitude]
-            per RFC 7946. Aligns with beckn Location/2.0 geo field.
-          required: [type, coordinates]
+            Physical location of this asset per beckn Location/2.0.
+            geo (required) is a GeoJSON geometry; address is a postal address.
+          required: [geo]
           properties:
-            type: { type: string, const: "Point" }
-            coordinates:
-              type: array
-              minItems: 2
-              maxItems: 3
-              prefixItems:
-                - { type: number, minimum: -180, maximum: 180, description: Longitude }
-                - { type: number, minimum: -90, maximum: 90, description: Latitude }
-              items: { type: number }
+            geo:
+              type: object
+              description: GeoJSON geometry — coordinates are [longitude, latitude].
+              required: [type]
+              properties:
+                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                geometries: { type: array }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+              additionalProperties: true
+            address:
+              type: object
+              additionalProperties: false
+              description: schema.org PostalAddress fields.
+              properties:
+                streetAddress: { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion: { type: string }
+                postalCode: { type: string }
+                addressCountry: { type: string }
           x-jsonld:
-            "@id": erDeg:gps
+            "@id": erDeg:location
 
         # ── Meter-specific attributes ────────────────────────────────────────
 
@@ -222,42 +234,6 @@ components:
           description: Busbar identifier at the meter's connection point.
           x-jsonld:
             "@id": erDeg:bus
-
-        location:
-          type: object
-          description: >
-            Physical location of the meter installation, per beckn Location/2.0.
-            geo (required) is a GeoJSON Point; address is a schema.org PostalAddress.
-          required: [geo]
-          additionalProperties: false
-          properties:
-            geo:
-              type: object
-              required: [type, coordinates]
-              description: GeoJSON Point — coordinates are [longitude, latitude].
-              properties:
-                type: { type: string, const: "Point" }
-                coordinates:
-                  type: array
-                  minItems: 2
-                  maxItems: 3
-                  prefixItems:
-                    - { type: number, minimum: -180, maximum: 180, description: Longitude }
-                    - { type: number, minimum: -90, maximum: 90, description: Latitude }
-                  items: { type: number }
-            address:
-              type: object
-              additionalProperties: false
-              description: schema.org PostalAddress fields.
-              properties:
-                streetAddress: { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion: { type: string }
-                postalCode: { type: string }
-                addressCountry: { type: string }
-          x-jsonld:
-            "@id": erDeg:meterLocation
 
         communicationTechnology:
           type: string

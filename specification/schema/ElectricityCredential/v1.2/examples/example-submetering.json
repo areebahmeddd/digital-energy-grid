@@ -21,32 +21,32 @@
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001",
           "type": "METER",
-          "attributes": {"meterCapability": "AMI", "energyDirection": "Forward", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
+          "attributes": {"meterCapability": "AMI", "energyDirection": "Forward", "location": {"geo": {"type": "Point", "coordinates": [77.5946, 12.9716]}}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:feeder:BAN-NR-F22"]
         },
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101",
           "type": "METER",
-          "attributes": {"meterCapability": "AMR", "energyDirection": "Forward", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
+          "attributes": {"meterCapability": "AMR", "energyDirection": "Forward", "location": {"geo": {"type": "Point", "coordinates": [77.5946, 12.9716]}}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-102",
           "type": "METER",
-          "attributes": {"meterCapability": "AMR", "energyDirection": "Forward", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
+          "attributes": {"meterCapability": "AMR", "energyDirection": "Forward", "location": {"geo": {"type": "Point", "coordinates": [77.5946, 12.9716]}}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:solar-plant:ROOFTOP-UNIT-101",
           "type": "SOLAR_PV",
-          "attributes": {"ratedPowerKw": 2, "make": "Waaree", "model": "WS-200", "commissioningDate": "2024-06-15"},
+          "attributes": {"ratedPowerKw": 2, "make": "Waaree", "model": "WS-200", "commissioningDate": "2024-06-15T00:00:00+05:30"},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101"]
         }
       ],
       "consumptionProfiles": [
         {
           "meterId": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101",
-          "sanctionedLoadKW": 3,
+          "sanctionedLoadKw": 3,
           "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
           "premisesType": "Residential",
@@ -54,7 +54,7 @@
         },
         {
           "meterId": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-102",
-          "sanctionedLoadKW": 3,
+          "sanctionedLoadKw": 3,
           "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
           "premisesType": "Residential",

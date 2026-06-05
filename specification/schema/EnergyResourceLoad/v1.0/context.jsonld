@@ -17,8 +17,8 @@
             "model": { "@id": "erDeg:model", "@type": "xsd:string" },
             "ratedPowerKw": { "@id": "erDeg:ratedPowerKw", "@type": "xsd:decimal" },
             "telemetryProvider": { "@id": "erDeg:telemetryProvider", "@type": "xsd:string" },
-            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:string" },
-            "gps": { "@id": "erDeg:gps", "@type": "xsd:string" },
+            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
+            "location":          { "@id": "erDeg:location",        "@type": "@id"         },
             "controlProtocol": { "@id": "erDeg:controlProtocol", "@type": "xsd:string" },
             "loadCategory": { "@id": "erDeg:loadCategory", "@type": "xsd:string" }
           }

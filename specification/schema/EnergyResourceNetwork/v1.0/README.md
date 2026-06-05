@@ -70,8 +70,8 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
     "zone": "BESCOM-BLR-SOUTH",
     "substationId": "SST-BLR-007",
     "feederCode": "FDR-BLR-042",
-    "commissioningDate": "2018-09-01",
-    "gps": "12.9250,77.5938"
+    "commissioningDate": "2018-09-01T00:00:00+05:30",
+    "location": {"geo": {"type": "Point", "coordinates": [77.5938, 12.9250]}}
   },
   "subResources": [
     "did:web:bescom.karnataka.gov.in:assets:meter:MET-001",

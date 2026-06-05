@@ -140,7 +140,7 @@ components:
         meterId links to a METER entry's id in energyResources[].
       required:
         - meterId
-        - sanctionedLoadKW
+        - sanctionedLoadKw
         - tariffCategoryCode
       x-jsonld:
         "@id": deg:ConsumptionProfile
@@ -151,13 +151,26 @@ components:
           description: Matches the id of a METER entry in customerProfile.energyResources[].
           x-jsonld:
             "@id": deg:meterId
-        sanctionedLoadKW:
+        sanctionedLoadKw:
           type: number
           minimum: 0.5
           maximum: 10000
           description: Sanctioned/approved electrical load in kW.
           x-jsonld:
-            "@id": deg:sanctionedLoadKW
+            "@id": deg:sanctionedLoadKw
+        sanctionedExportLoadKw:
+          type: number
+          minimum: 0
+          description: Sanctioned/approved grid export limit in kW.
+          x-jsonld:
+            "@id": deg:sanctionedExportLoadKw
+        billingCycleDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: Day of month on which the billing cycle resets.
+          x-jsonld:
+            "@id": deg:billingCycleDay
         contractMaxDemandKw:
           type: number
           minimum: 0
@@ -186,20 +199,20 @@ components:
             - Three-phase
           x-jsonld:
             "@id": deg:connectionType
-        billingMode:
+        paymentMode:
           type: string
           enum:
-            - Postpaid
-            - Prepaid
+            - POSTPAID
+            - PREPAID
           description: >
-            Billing/payment modality for this connection. Postpaid: standard
-            credit-based (consume now, pay later). Prepaid: pay-before-use;
+            Billing/payment modality for this connection. POSTPAID: standard
+            credit-based (consume now, pay later). PREPAID: pay-before-use;
             supply is disconnected when credit is exhausted. Administrative
             attribute — placed here (not on the meter) because it can change
             via firmware without hardware replacement. Aligns with ESPI
             AmiBillingReadyKind on UsagePoint (IEC 61968-9).
           x-jsonld:
-            "@id": deg:billingMode
+            "@id": deg:paymentMode
 
     CustomerDetails:
       type: object

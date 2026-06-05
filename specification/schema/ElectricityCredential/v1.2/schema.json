@@ -96,15 +96,17 @@
         "ConsumptionProfile": {
             "type": "object",
             "description": "Tariff and load characteristics for one meter. meterId matches the id of a METER entry in energyResources[].",
-            "required": ["meterId", "sanctionedLoadKW", "tariffCategoryCode"],
+            "required": ["meterId", "sanctionedLoadKw", "tariffCategoryCode"],
             "properties": {
                 "meterId": { "type": "string", "minLength": 1 },
-                "sanctionedLoadKW": { "type": "number", "minimum": 0.5, "maximum": 10000 },
+                "sanctionedLoadKw": { "type": "number", "minimum": 0.5, "maximum": 10000 },
+                "sanctionedExportLoadKw": { "type": "number", "minimum": 0, "description": "Sanctioned/approved grid export limit in kW." },
+                "billingCycleDay": { "type": "integer", "minimum": 1, "maximum": 31, "description": "Day of month on which the billing cycle resets." },
                 "contractMaxDemandKw": { "type": "number", "minimum": 0 },
                 "tariffCategoryCode": { "type": "string", "minLength": 1 },
                 "premisesType": { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
                 "connectionType": { "type": "string", "enum": ["Single-phase", "Three-phase"] },
-                "billingMode": { "type": "string", "enum": ["Postpaid", "Prepaid"], "description": "Billing/payment modality for this connection. Administrative: placed on ConsumptionProfile (not the meter) because it can change via firmware. CIM: EndDeviceFunction kind=prepayment / ESPI AmiBillingReadyKind (IEC 61968-9)." }
+                "paymentMode": { "type": "string", "enum": ["POSTPAID", "PREPAID"], "description": "Billing/payment modality for this connection. Administrative: placed on ConsumptionProfile (not the meter) because it can change via firmware. CIM: EndDeviceFunction kind=prepayment / ESPI AmiBillingReadyKind (IEC 61968-9)." }
             }
         },
         "CustomerDetails": {
@@ -130,11 +132,8 @@
                     "description": "Nameplate peak power rating in kW. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower."
                 },
                 "telemetryProvider": { "type": "string", "description": "Vendor API or data-source identifier for telemetry." },
-                "commissioningDate": { "type": "string", "description": "ISO 8601 date (YYYY-MM-DD) the asset was commissioned." },
-                "gps": {
-                    "$ref": "#/$defs/GeoJSONPoint",
-                    "description": "GeoJSON Point location of the asset. Coordinates are [longitude, latitude] per RFC 7946."
-                }
+                "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
+                "location": { "$ref": "#/$defs/Location" }
             }
         },
         "EnergyResourceMeterAttributes": {
@@ -163,7 +162,6 @@
                         },
                         "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
                         "bus": { "type": "string", "description": "Busbar identifier." },
-                        "location": { "$ref": "#/$defs/Location" },
                         "communicationTechnology": {
                             "type": "string",
                             "enum": ["PLC", "RF_Mesh", "GPRS", "NB-IoT", "LoRa", "ZigBee", "Other"],
@@ -359,34 +357,26 @@
         },
         "Location": {
             "type": "object",
-            "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSON Point; address is a schema.org PostalAddress. Coordinates are [longitude, latitude] per RFC 7946.",
+            "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
             "required": ["geo"],
-            "additionalProperties": false,
             "properties": {
-                "geo": { "$ref": "#/$defs/GeoJSONPoint" },
-                "address": { "$ref": "#/$defs/PostalAddress" }
+                "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
+                "address": { "$ref": "#/$defs/Address" }
             }
         },
-        "GeoJSONPoint": {
+        "GeoJSONGeometry": {
             "type": "object",
-            "description": "GeoJSON Point geometry (RFC 7946). Coordinates are [longitude, latitude] — note: longitude first.",
-            "required": ["type", "coordinates"],
+            "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326). For a point: {type: 'Point', coordinates: [lon, lat]}.",
+            "required": ["type"],
             "properties": {
-                "type": { "type": "string", "const": "Point" },
-                "coordinates": {
-                    "type": "array",
-                    "minItems": 2,
-                    "maxItems": 3,
-                    "prefixItems": [
-                        { "type": "number", "minimum": -180, "maximum": 180, "description": "Longitude" },
-                        { "type": "number", "minimum": -90, "maximum": 90, "description": "Latitude" }
-                    ],
-                    "items": { "type": "number" }
-                },
-                "bbox": { "type": "array", "items": { "type": "number" }, "minItems": 4 }
-            }
+                "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
+                "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
+                "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
+                "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
+            },
+            "additionalProperties": true
         },
-        "PostalAddress": {
+        "Address": {
             "type": "object",
             "description": "schema.org PostalAddress-aligned address object per beckn Address/2.0.",
             "additionalProperties": false,

@@ -42,8 +42,8 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
-| `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | object (GeoJSON Point) | — | `{"type":"Point","coordinates":[lon,lat]}` — RFC 7946 |
+| `commissioningDate` | string (ISO 8601 date-time) | — | Date-time commissioned |
+| `location` | object (beckn Location/2.0) | — | `geo` (GeoJSONGeometry) + `address` (PostalAddress) |
 
 ### Meter-specific attributes
 
@@ -54,7 +54,6 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
 | `bus` | string | — | Busbar identifier at the connection point |
-| `location` | object (beckn Location/2.0) | — | `geo` (GeoJSON Point) + `address` (PostalAddress) |
 | `communicationTechnology` | enum | — | Physical layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
 | `applicationProtocol` | enum | IEC 62056 / ANSI C12 | Application layer: `DLMS_COSEM` · `ANSI_C12_18` · `IEC_61850` · `Modbus` · `Other` |
 
@@ -72,16 +71,12 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
     "meterCapability": "AMI",
     "energyDirection": "Forward",
     "ratedPowerKw": 10,
-    "commissioningDate": "2022-04-01",
-    "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]},
+    "commissioningDate": "2022-04-01T00:00:00+05:30",
+    "location": {"geo": {"type": "Point", "coordinates": [77.5946, 12.9716]}, "address": {"streetAddress": "12 MG Road", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "postalCode": "560001", "addressCountry": "IN"}},
     "feeder": "FDR-BLR-042",
     "bus": "BUS-042-A",
     "communicationTechnology": "NB-IoT",
-    "applicationProtocol": "DLMS_COSEM",
-    "location": {
-      "geo": {"type": "Point", "coordinates": [77.5946, 12.9716]},
-      "address": {"streetAddress": "12 MG Road", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "postalCode": "560001", "addressCountry": "IN"}
-    }
+    "applicationProtocol": "DLMS_COSEM"
   },
   "subResources": [],
   "parentResources": ["did:web:bescom.karnataka.gov.in:assets:feeder:FDR-BLR-042"]
