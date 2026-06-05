@@ -1,0 +1,119 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+    "deg": "https://schema.beckn.io/deg#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceNetwork",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Network",
+      "rdfs:comment": "A grid-network infrastructure energy resource (DT, busbar, feeder, microgrid). CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#EquipmentContainer" }
+    },
+    {
+      "@id": "erDeg:resourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Resource type",
+      "rdfs:comment": "Asset-class discriminator. Values: DT, BUS, FEEDER, MICROGRID.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:make",
+      "@type": "rdf:Property",
+      "rdfs:label": "Manufacturer",
+      "rdfs:comment": "Manufacturer name of the energy resource.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:model",
+      "@type": "rdf:Property",
+      "rdfs:label": "Model",
+      "rdfs:comment": "Model number of the energy resource.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:ratedPowerKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Rated power (kW)",
+      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. CIM: GeneratingUnit.maxOperatingP.",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "erDeg:telemetryProvider",
+      "@type": "rdf:Property",
+      "rdfs:label": "Telemetry provider",
+      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Commissioning date",
+      "rdfs:comment": "ISO 8601 date when the asset was commissioned.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:gps",
+      "@type": "rdf:Property",
+      "rdfs:label": "GPS coordinates",
+      "rdfs:comment": "GPS coordinates of the asset as 'lat,lng' decimal string.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:nominalVoltageKv",
+      "@type": "rdf:Property",
+      "rdfs:label": "Nominal voltage (kV)",
+      "rdfs:comment": "Nominal operating voltage in kilovolts. CIM: BaseVoltage.nominalVoltage.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#BaseVoltage.nominalVoltage" }
+    },
+    {
+      "@id": "erDeg:zone",
+      "@type": "rdf:Property",
+      "rdfs:label": "Operating zone",
+      "rdfs:comment": "Operating zone or region identifier used by the utility.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:substationId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Substation ID",
+      "rdfs:comment": "Parent substation identifier per utility records. CIM: Substation.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#Substation" }
+    },
+    {
+      "@id": "erDeg:feederCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Feeder code",
+      "rdfs:comment": "Feeder code per utility records. CIM: Feeder (EquipmentContainer).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#Feeder" }
+    },
+    {
+      "@id": "erDeg:subResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sub-resources",
+      "rdfs:comment": "Child resources anchored to this network element (meters, DTs, buses).",
+      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceNetwork" }
+    },
+    {
+      "@id": "erDeg:parentResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Parent resources",
+      "rdfs:comment": "ids of parent network elements (e.g. substation or feeder this DT belongs to).",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

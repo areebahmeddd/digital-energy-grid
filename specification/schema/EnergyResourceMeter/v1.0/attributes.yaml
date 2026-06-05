@@ -1,0 +1,271 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceMeter
+  version: 1.0.0
+  description: |
+    Typed attribute schema for metering-point energy resources (type = METER).
+
+    CIM alignment: cim:Meter extends cim:EndDevice (IEC 61968-9). A METER
+    resource anchors all DER resources behind it topologically and carries
+    the physical installation location, feeder/bus references, and
+    communication technology.
+
+    Type discriminator: type must equal "METER".
+
+components:
+  schemas:
+
+    EnergyResourceMeter:
+      type: object
+      required: [id, type]
+      additionalProperties: false
+      description: >
+        A metering-point energy resource. Anchors all DER sub-resources behind
+        it in the topology tree. Corresponds to cim:Meter (IEC 61968-9).
+      x-tags:
+        - energy-resource
+        - energy
+        - deg
+        - meter
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceMeter
+      properties:
+        id:
+          type: string
+          description: >
+            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
+            e.g. did:web:bescom.karnataka.gov.in:assets:meter:MET-001
+          example: "did:web:bescom.karnataka.gov.in:assets:meter:MET-001"
+          x-jsonld:
+            "@id": "@id"
+        type:
+          type: string
+          const: "METER"
+          description: >
+            Asset-class discriminator. Must be "METER". CIM: cim:Meter
+            (IEC 61968-9 EndDevice subtype).
+          x-cim-class: cim:Meter
+          x-jsonld:
+            "@id": erDeg:resourceType
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceMeterAttributes"
+        subResources:
+          type: array
+          description: >
+            Child resources behind this meter (DERs, storage, loads).
+            Each item is a bare id string or an inline EnergyResourceMeter object.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource in the same payload.
+              - $ref: "#/components/schemas/EnergyResourceMeter"
+                description: Inline nested resource.
+        parentResources:
+          type: array
+          description: >
+            ids of parent resources (e.g. feeder or substation this meter
+            is supplied from). String references only.
+          items:
+            type: string
+
+    EnergyResourceMeterAttributes:
+      type: object
+      additionalProperties: true
+      description: >
+        Attributes for METER resources. Includes EnergyResourceCommonAttributes
+        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location)
+        plus meter-specific fields (meterCapability, energyDirection, functions,
+        feeder, bus, communicationTechnology).
+      x-jsonld:
+        "@id": erDeg:attributes
+      properties:
+
+        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": erDeg:make
+
+        model:
+          type: string
+          description: Model number (free text).
+          x-jsonld:
+            "@id": erDeg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time when this meter was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        location:
+          type: object
+          description: >
+            Physical location of this asset per beckn Location/2.0.
+            geo (required) is a GeoJSON geometry; address is a postal address.
+          required: [geo]
+          properties:
+            geo:
+              type: object
+              description: GeoJSON geometry — coordinates are [longitude, latitude].
+              required: [type]
+              properties:
+                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                geometries: { type: array }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+              additionalProperties: true
+            address:
+              type: object
+              additionalProperties: false
+              description: schema.org PostalAddress fields.
+              properties:
+                streetAddress: { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion: { type: string }
+                postalCode: { type: string }
+                addressCountry: { type: string }
+          x-jsonld:
+            "@id": erDeg:location
+
+        # ── Meter-specific attributes ────────────────────────────────────────
+
+        meterCapability:
+          type: string
+          enum:
+            - Electromechanical
+            - CMRI
+            - AMR
+            - AMI
+          description: >
+            Communication/automation generation of the meter hardware.
+            Electromechanical: induction-disc, no remote comms.
+            CMRI: static solid-state, manual optical-port read via Common Meter
+            Reading Instrument (India legacy AMR).
+            AMR: one-way automated read (periodic push); no remote commands.
+            AMI: two-way smart meter; supports remote disconnect, OTA, real-time
+            data. CIM alignment: maps to IEC 61968-9 AmiBillingReadyKind
+            (nonAmi → Electromechanical/CMRI, amiCapable/operable → AMR,
+            enabled/billingApproved → AMI).
+          x-cim-class: cim:AmiBillingReadyKind
+          x-jsonld:
+            "@id": erDeg:meterCapability
+
+        energyDirection:
+          type: string
+          enum:
+            - Forward
+            - Reverse
+            - Bidirectional
+            - Net
+          default: Forward
+          description: >
+            Direction(s) of energy flow metered at this point.
+            Forward: import from grid to customer only (default; standard load meter).
+            Reverse: export from customer to grid only (e.g. dedicated gross-export
+            meter in a solar feed-in tariff scheme).
+            Bidirectional: import and export measured in separate registers on the
+            same meter (prosumer / net-metering installation with separate kWh
+            registers for each direction).
+            Net: algebraically netted register — |import| − |export| — meter stores
+            only the running net balance.
+            CIM: maps to IEC 61968-9 / ESPI NAESB REQ.21 FlowDirectionKind
+            (1=Forward, 19=Reverse, 4=Net; Bidirectional implies both 1 and 19).
+          x-cim-class: cim:FlowDirectionKind
+          x-jsonld:
+            "@id": erDeg:energyDirection
+
+        functions:
+          type: array
+          uniqueItems: true
+          description: >
+            Set of optional capabilities or features active on this meter.
+            Modelled as a bag (unordered, no duplicates) per IEC 61968-9
+            EndDeviceFunction[0..*] pattern. Multiple values are valid simultaneously
+            (e.g. ["ToU", "NetMetering", "MaxDemand"]).
+          items:
+            type: string
+            enum:
+              - ToU
+              - NetMetering
+              - MaxDemand
+              - LoadControl
+              - TamperDetection
+              - PowerQuality
+              - EventLogging
+            description: >
+              ToU: time-of-use / time-of-day tariff registers.
+              NetMetering: net-metering tariff scheme active (prosumer).
+              MaxDemand: maximum demand register (kW or kVA, 15/30-min interval).
+              LoadControl: demand-response relay / remote load control capability.
+              TamperDetection: anti-tamper magnetic/optical detection.
+              PowerQuality: harmonics, voltage sag/swell, power factor monitoring.
+              EventLogging: tamper/connect/disconnect audit log.
+          x-cim-class: cim:EndDeviceFunctionKind
+          x-jsonld:
+            "@id": erDeg:functions
+
+        feeder:
+          type: string
+          description: Feeder identifier this meter is supplied from.
+          x-jsonld:
+            "@id": erDeg:feeder
+
+        bus:
+          type: string
+          description: Busbar identifier at the meter's connection point.
+          x-jsonld:
+            "@id": erDeg:bus
+
+        communicationTechnology:
+          type: string
+          enum:
+            - PLC
+            - RF_Mesh
+            - GPRS
+            - NB-IoT
+            - LoRa
+            - ZigBee
+            - Other
+          description: >
+            Last-mile (physical layer) communication technology used by this meter's head-end system.
+            Orthogonal to applicationProtocol (application layer).
+          x-jsonld:
+            "@id": erDeg:communicationTechnology
+
+        applicationProtocol:
+          type: string
+          enum:
+            - DLMS_COSEM
+            - ANSI_C12_18
+            - IEC_61850
+            - Modbus
+            - Other
+          description: >
+            Application-layer protocol used to read/communicate meter data.
+            DLMS_COSEM: IEC 62056, dominant in India and Europe; mandatory for
+            India AMI per BIS IS 16444 / CEA specification.
+            ANSI_C12_18: North American optical-port / table-data model (ANSI C12.18/C12.19).
+            IEC_61850: substation automation and smart grid messaging.
+            Modbus: legacy industrial serial protocol.
+            Orthogonal to communicationTechnology (physical layer).
+          x-jsonld:
+            "@id": erDeg:applicationProtocol

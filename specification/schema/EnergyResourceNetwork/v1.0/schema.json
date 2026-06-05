@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceNetwork/v1.0",
+  "title": "EnergyResourceNetwork",
+  "description": "Typed schema for grid-network infrastructure energy resources acting as topology anchors (distribution transformer, busbar, feeder, microgrid). CIM: DT → cim:PowerTransformer, BUS → cim:BusbarSection, FEEDER → cim:Feeder (EquipmentContainer), MICROGRID → cim:Substation (IEC 61970-301).",
+  "type": "object",
+  "required": ["id", "type"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>. Example: did:web:bescom.karnataka.gov.in:assets:feeder:FDR-BLR-042"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["DT", "BUS", "FEEDER", "MICROGRID"],
+      "description": "Asset-class discriminator. CIM: DT → PowerTransformer, BUS → BusbarSection, FEEDER → Feeder, MICROGRID → Substation/microgrid container (IEC 61970-301)."
+    },
+    "attributes": {
+      "$ref": "#/$defs/EnergyResourceNetworkAttributes"
+    },
+    "subResources": {
+      "type": "array",
+      "description": "Child resources anchored to this network element (meters, DTs, buses, feeders). Each item is a bare id string or an inline EnergyResource object.",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#" }
+        ]
+      }
+    },
+    "parentResources": {
+      "type": "array",
+      "description": "ids of parent network elements (e.g. the substation or feeder this DT belongs to).",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "GeoJSONGeometry": {
+      "type": "object",
+      "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326). For a point: {type: 'Point', coordinates: [lon, lat]}.",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
+        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
+        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
+        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
+      },
+      "additionalProperties": true
+    },
+    "Address": {
+      "type": "object",
+      "description": "schema.org PostalAddress per beckn Address/2.0.",
+      "additionalProperties": false,
+      "properties": {
+        "streetAddress": { "type": "string" },
+        "extendedAddress": { "type": "string" },
+        "addressLocality": { "type": "string" },
+        "addressRegion": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "addressCountry": { "type": "string" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
+      "required": ["geo"],
+      "properties": {
+        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
+        "address": { "$ref": "#/$defs/Address" }
+      }
+    },
+    "EnergyResourceNetworkAttributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Attributes for grid-network infrastructure resources. Includes common fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location) plus network-specific fields (nominalVoltageKv, zone, substationId, feederCode).",
+      "properties": {
+        "make": { "type": "string", "description": "Manufacturer (free text)." },
+        "model": { "type": "string", "description": "Model number (free text)." },
+        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power capacity, kW. CIM: GeneratingUnit.maxOperatingP." },
+        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
+        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this network element was commissioned." },
+        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
+        "nominalVoltageKv": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Nominal operating voltage, kV. CIM: BaseVoltage.nominalVoltage."
+        },
+        "zone": {
+          "type": "string",
+          "description": "Operating zone or region identifier used by the utility."
+        },
+        "substationId": {
+          "type": "string",
+          "description": "Parent substation identifier per utility records."
+        },
+        "feederCode": {
+          "type": "string",
+          "description": "Feeder code per utility records. Relevant for FEEDER and DT resources."
+        }
+      }
+    }
+  }
+}
