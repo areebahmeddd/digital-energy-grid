@@ -203,38 +203,11 @@ components:
           type: string
           description: Full name of the customer as per ID proof.
         installationAddress:
-          type: object
-          description: Physical location of the installation. Follows the beckn Location schema.
-          required:
-            - address
-            - area_code
-            - country
-          properties:
-            address: { type: string }
-            city:
-              type: object
-              properties:
-                name: { type: string }
-                code: { type: string }
-            district: { type: string }
-            state:
-              type: object
-              properties:
-                name: { type: string }
-                code: { type: string }
-            country:
-              type: object
-              required: [code]
-              properties:
-                name: { type: string }
-                code:
-                  type: string
-                  pattern: "^[A-Z]{2}$"
-            area_code: { type: string }
-            gps:
-              type: string
-              description: "GPS coordinates as 'lat,lng'."
-            openLocationCode: { type: string }
+          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          description: >
+            Physical location of the installation. Follows the beckn Location/2.0 schema:
+            geo (required, GeoJSON Point — coordinates [longitude, latitude]) and
+            address (optional, schema.org PostalAddress fields).
         serviceConnectionDate:
           type: string
           format: date-time

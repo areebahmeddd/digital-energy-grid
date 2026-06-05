@@ -37,6 +37,22 @@
     }
   },
   "$defs": {
+    "GeoJSONPoint": {
+      "type": "object",
+      "description": "GeoJSON Point geometry (RFC 7946). Coordinates are [longitude, latitude].",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "type": "string", "const": "Point" },
+        "coordinates": {
+          "type": "array", "minItems": 2, "maxItems": 3,
+          "prefixItems": [
+            { "type": "number", "minimum": -180, "maximum": 180 },
+            { "type": "number", "minimum": -90, "maximum": 90 }
+          ],
+          "items": { "type": "number" }
+        }
+      }
+    },
     "EnergyResourceStorageAttributes": {
       "type": "object",
       "additionalProperties": true,
@@ -48,9 +64,8 @@
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date", "description": "ISO 8601 date when this storage asset was commissioned." },
         "gps": {
-          "type": "string",
-          "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$",
-          "description": "GPS coordinates as 'lat,lng'."
+          "$ref": "#/$defs/GeoJSONPoint",
+          "description": "GeoJSON Point location of this asset. Coordinates are [longitude, latitude] per RFC 7946."
         },
         "storageCapacityKwh": {
           "type": "number",

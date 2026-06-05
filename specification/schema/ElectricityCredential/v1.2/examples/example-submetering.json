@@ -21,19 +21,19 @@
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001",
           "type": "METER",
-          "attributes": {"meterType": "AMI", "gps": "12.9716,77.5946"},
+          "attributes": {"meterType": "AMI", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:feeder:BAN-NR-F22"]
         },
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101",
           "type": "METER",
-          "attributes": {"meterType": "AMR", "gps": "12.9716,77.5946"},
+          "attributes": {"meterType": "AMR", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
           "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-102",
           "type": "METER",
-          "attributes": {"meterType": "AMR", "gps": "12.9716,77.5946"},
+          "attributes": {"meterType": "AMR", "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]}},
           "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
@@ -65,13 +65,8 @@
     "customerDetails": {
       "fullName": "Sunita Rao",
       "installationAddress": {
-        "address": "12 Residency Road, Flat 101",
-        "city": {"name": "Bengaluru", "code": "BLR"},
-        "district": "Bengaluru Urban",
-        "state": {"name": "Karnataka", "code": "KA"},
-        "country": {"name": "India", "code": "IN"},
-        "area_code": "560025",
-        "gps": "12.9716,77.5946"
+        "geo": {"type": "Point", "coordinates": [77.5946, 12.9716]},
+        "address": {"streetAddress": "12 Residency Road, Flat 101", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "postalCode": "560025", "addressCountry": "IN"}
       },
       "serviceConnectionDate": "2020-03-01T00:00:00+05:30"
     }

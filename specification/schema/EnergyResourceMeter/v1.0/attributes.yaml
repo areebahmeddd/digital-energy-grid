@@ -116,9 +116,21 @@ components:
             "@id": deg:commissioningDate
 
         gps:
-          type: string
-          pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
-          description: GPS coordinates of the meter installation as 'lat,lng'.
+          type: object
+          description: >
+            GeoJSON Point location of this meter. Coordinates are [longitude, latitude]
+            per RFC 7946. Aligns with beckn Location/2.0 geo field.
+          required: [type, coordinates]
+          properties:
+            type: { type: string, const: "Point" }
+            coordinates:
+              type: array
+              minItems: 2
+              maxItems: 3
+              prefixItems:
+                - { type: number, minimum: -180, maximum: 180, description: Longitude }
+                - { type: number, minimum: -90, maximum: 90, description: Latitude }
+              items: { type: number }
           x-jsonld:
             "@id": erDeg:gps
 
@@ -156,29 +168,36 @@ components:
         location:
           type: object
           description: >
-            Postal/physical location of the meter installation (beckn Location shape).
-          additionalProperties: true
+            Physical location of the meter installation, per beckn Location/2.0.
+            geo (required) is a GeoJSON Point; address is a schema.org PostalAddress.
+          required: [geo]
+          additionalProperties: false
           properties:
-            address: { type: string }
-            city:
+            geo:
               type: object
+              required: [type, coordinates]
+              description: GeoJSON Point — coordinates are [longitude, latitude].
               properties:
-                name: { type: string }
-                code: { type: string }
-            district: { type: string }
-            state:
+                type: { type: string, const: "Point" }
+                coordinates:
+                  type: array
+                  minItems: 2
+                  maxItems: 3
+                  prefixItems:
+                    - { type: number, minimum: -180, maximum: 180, description: Longitude }
+                    - { type: number, minimum: -90, maximum: 90, description: Latitude }
+                  items: { type: number }
+            address:
               type: object
+              additionalProperties: false
+              description: schema.org PostalAddress fields.
               properties:
-                name: { type: string }
-                code: { type: string }
-            country:
-              type: object
-              properties:
-                name: { type: string }
-                code: { type: string, pattern: "^[A-Z]{2}$" }
-            area_code: { type: string }
-            gps: { type: string }
-            openLocationCode: { type: string }
+                streetAddress: { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion: { type: string }
+                postalCode: { type: string }
+                addressCountry: { type: string }
           x-jsonld:
             "@id": erDeg:meterLocation
 

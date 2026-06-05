@@ -21,13 +21,13 @@
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-IMPORT-001",
           "type": "METER",
-          "attributes": {"meterType": "AMI", "gps": "28.6139,77.2090"},
+          "attributes": {"meterType": "AMI", "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}},
           "parentResources": ["did:web:tpddl.delhi.gov.in:assets:feeder:DEL-SB-F08"]
         },
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-EXPORT-001",
           "type": "METER",
-          "attributes": {"meterType": "Reverse", "gps": "28.6139,77.2090"}
+          "attributes": {"meterType": "Reverse", "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}}
         },
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:solar-plant:ROOFTOP-SOLAR-001",
@@ -55,12 +55,8 @@
     "customerDetails": {
       "fullName": "Arjun Mehra",
       "installationAddress": {
-        "address": "45 Rohini Sector 9",
-        "city": {"name": "Delhi", "code": "DEL"},
-        "state": {"name": "Delhi", "code": "DL"},
-        "country": {"name": "India", "code": "IN"},
-        "area_code": "110085",
-        "gps": "28.6139,77.2090"
+        "geo": {"type": "Point", "coordinates": [77.2090, 28.6139]},
+        "address": {"streetAddress": "45 Rohini Sector 9", "addressLocality": "Delhi", "addressRegion": "Delhi", "postalCode": "110085", "addressCountry": "IN"}
       },
       "serviceConnectionDate": "2018-07-15T00:00:00+05:30"
     }

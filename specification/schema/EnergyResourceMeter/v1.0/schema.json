@@ -37,6 +37,35 @@
     }
   },
   "$defs": {
+    "GeoJSONPoint": {
+      "type": "object",
+      "description": "GeoJSON Point geometry (RFC 7946). Coordinates are [longitude, latitude].",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "type": "string", "const": "Point" },
+        "coordinates": {
+          "type": "array", "minItems": 2, "maxItems": 3,
+          "prefixItems": [
+            { "type": "number", "minimum": -180, "maximum": 180 },
+            { "type": "number", "minimum": -90, "maximum": 90 }
+          ],
+          "items": { "type": "number" }
+        }
+      }
+    },
+    "PostalAddress": {
+      "type": "object",
+      "description": "schema.org PostalAddress per beckn Address/2.0.",
+      "additionalProperties": false,
+      "properties": {
+        "streetAddress": { "type": "string" },
+        "extendedAddress": { "type": "string" },
+        "addressLocality": { "type": "string" },
+        "addressRegion": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "addressCountry": { "type": "string" }
+      }
+    },
     "EnergyResourceMeterAttributes": {
       "type": "object",
       "additionalProperties": true,
@@ -47,11 +76,7 @@
         "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date", "description": "ISO 8601 date when this meter was commissioned." },
-        "gps": {
-          "type": "string",
-          "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$",
-          "description": "GPS coordinates as 'lat,lng'."
-        },
+        "gps": { "$ref": "#/$defs/GeoJSONPoint", "description": "GeoJSON Point location of this meter. Coordinates are [longitude, latitude] per RFC 7946." },
         "meterType": {
           "type": "string",
           "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"],
@@ -61,17 +86,12 @@
         "bus": { "type": "string", "description": "Busbar identifier at the meter's connection point." },
         "location": {
           "type": "object",
-          "additionalProperties": true,
-          "description": "Postal/physical location of the meter installation (beckn Location shape).",
+          "additionalProperties": false,
+          "description": "Physical location of the meter installation per beckn Location/2.0.",
+          "required": ["geo"],
           "properties": {
-            "address": { "type": "string" },
-            "city": { "type": "object", "properties": { "name": { "type": "string" }, "code": { "type": "string" } } },
-            "district": { "type": "string" },
-            "state": { "type": "object", "properties": { "name": { "type": "string" }, "code": { "type": "string" } } },
-            "country": { "type": "object", "properties": { "name": { "type": "string" }, "code": { "type": "string", "pattern": "^[A-Z]{2}$" } } },
-            "area_code": { "type": "string" },
-            "gps": { "type": "string" },
-            "openLocationCode": { "type": "string" }
+            "geo": { "$ref": "#/$defs/GeoJSONPoint" },
+            "address": { "$ref": "#/$defs/PostalAddress" }
           }
         },
         "communicationTechnology": {
