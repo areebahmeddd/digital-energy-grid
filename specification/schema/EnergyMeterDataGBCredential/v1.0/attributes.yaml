@@ -60,7 +60,7 @@ components:
               x-jsonld:
                 "@id": deg:customerProfile
             meterDataGB:
-              $ref: "../../EnergyMeterDataGB/v1.0/attributes.yaml#/components/schemas/EnergyMeterDataGB"
+              $ref: "../../EnergyMeterDataGBCredential/v1.0/attributes.yaml#/components/schemas/EnergyMeterDataGBCredential"
               description: ESPI/Green Button meter reading data for the meter.
               x-jsonld:
                 "@id": deg:meterDataGB

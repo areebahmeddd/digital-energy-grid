@@ -2,7 +2,7 @@
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/EnergyMeterDataGB/v1.0/context.jsonld"
+    "https://schema.beckn.io/EnergyMeterDataGBCredential/v1.0/context.jsonld"
   ],
   "id": "urn:uuid:a1b2c3d4-5678-90ab-cdef-1234567890ab",
   "type": [
