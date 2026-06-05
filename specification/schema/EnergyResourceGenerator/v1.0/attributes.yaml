@@ -1,0 +1,158 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceGenerator
+  version: 1.0.0
+  description: |
+    Typed attribute schema for generation DER energy resources.
+
+    CIM alignment (IEC 61970-301/302):
+      SOLAR_PV        → cim:PhotovoltaicUnit
+      SOLAR           → cim:PhotovoltaicUnit (deprecated alias for SOLAR_PV)
+      WIND            → cim:WindGeneratingUnit
+      HYDRO           → cim:HydroGeneratingUnit
+      BIOGAS          → cim:ThermalGeneratingUnit
+      CHP             → cim:ThermalGeneratingUnit
+      FUEL_CELL       → IEC 62933-2 fuel cell unit
+
+    SOLAR is a deprecated alias for SOLAR_PV; new payloads should use SOLAR_PV.
+
+components:
+  schemas:
+
+    EnergyResourceGenerator:
+      type: object
+      required: [id, type]
+      additionalProperties: false
+      description: >
+        A generation DER energy resource (solar PV, wind, hydro, biogas, CHP,
+        fuel cell). Corresponds to GeneratingUnit and its CIM subtypes
+        (IEC 61970-301).
+      x-tags:
+        - energy-resource
+        - energy
+        - deg
+        - generation
+        - der
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceGenerator
+      properties:
+        id:
+          type: string
+          description: >
+            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
+            e.g. did:web:bescom.karnataka.gov.in:assets:solar:SOL-001
+          example: "did:web:bescom.karnataka.gov.in:assets:solar:SOL-001"
+          x-jsonld:
+            "@id": "@id"
+        type:
+          type: string
+          enum:
+            - SOLAR_PV
+            - SOLAR
+            - WIND
+            - HYDRO
+            - BIOGAS
+            - CHP
+            - FUEL_CELL
+          description: >
+            Asset-class discriminator. SOLAR is a deprecated alias for SOLAR_PV;
+            new payloads should use SOLAR_PV.
+            CIM classes: SOLAR_PV/SOLAR → PhotovoltaicUnit,
+            WIND → WindGeneratingUnit, HYDRO → HydroGeneratingUnit,
+            BIOGAS/CHP → ThermalGeneratingUnit, FUEL_CELL → IEC 62933-2.
+          x-cim-class: cim:GeneratingUnit
+          x-jsonld:
+            "@id": erDeg:resourceType
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceGeneratorAttributes"
+        subResources:
+          type: array
+          description: >
+            Child resources (e.g. inverters, tracking units). Each item is a
+            bare id string or an inline EnergyResourceGenerator object.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource in the same payload.
+              - $ref: "#/components/schemas/EnergyResourceGenerator"
+                description: Inline nested resource.
+        parentResources:
+          type: array
+          description: >
+            ids of parent resources (e.g. the meter this DER sits behind).
+            String references only.
+          items:
+            type: string
+
+    EnergyResourceGeneratorAttributes:
+      type: object
+      additionalProperties: true
+      description: >
+        Attributes for generation DER resources. Includes EnergyResourceCommonAttributes
+        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, gps)
+        plus generator-specific fields (nominalPowerKw, efficiency).
+      x-jsonld:
+        "@id": erDeg:attributes
+      properties:
+
+        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": erDeg:make
+
+        model:
+          type: string
+          description: Model number (free text).
+          x-jsonld:
+            "@id": erDeg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date
+          description: ISO 8601 date when this generator was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        gps:
+          type: string
+          pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+          description: GPS coordinates of the generator installation as 'lat,lng'.
+          x-jsonld:
+            "@id": erDeg:gps
+
+        # ── Generator-specific attributes ────────────────────────────────────
+        nominalPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Nominal (nameplate) power output, kW. CIM: GeneratingUnit.nominalP.
+            Typically equals the DC STC rating for solar PV.
+          x-jsonld:
+            "@id": erDeg:nominalPowerKw
+
+        efficiency:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: >
+            Conversion efficiency as a percentage (0–100). Most relevant for
+            FUEL_CELL and CHP resources.
+          x-jsonld:
+            "@id": erDeg:efficiency

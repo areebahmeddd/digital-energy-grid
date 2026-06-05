@@ -1,0 +1,125 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+    "deg": "https://schema.beckn.io/deg#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceMeter",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Meter",
+      "rdfs:comment": "A metering-point energy resource. Anchors DER sub-resources in the topology tree. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#Meter" }
+    },
+    {
+      "@id": "erDeg:resourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Resource type",
+      "rdfs:comment": "Asset-class discriminator. For this schema the value is always METER.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:make",
+      "@type": "rdf:Property",
+      "rdfs:label": "Manufacturer",
+      "rdfs:comment": "Manufacturer name of the energy resource.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:model",
+      "@type": "rdf:Property",
+      "rdfs:label": "Model",
+      "rdfs:comment": "Model number of the energy resource.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:ratedPowerKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Rated power (kW)",
+      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. CIM: GeneratingUnit.maxOperatingP.",
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "erDeg:telemetryProvider",
+      "@type": "rdf:Property",
+      "rdfs:label": "Telemetry provider",
+      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Commissioning date",
+      "rdfs:comment": "ISO 8601 date when the asset was commissioned.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:gps",
+      "@type": "rdf:Property",
+      "rdfs:label": "GPS coordinates",
+      "rdfs:comment": "GPS coordinates of the asset as 'lat,lng' decimal string.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:meterType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter type",
+      "rdfs:comment": "Meter kind classification (AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other). CIM: EndDevice.amrSystem.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#EndDevice" }
+    },
+    {
+      "@id": "erDeg:feeder",
+      "@type": "rdf:Property",
+      "rdfs:label": "Feeder",
+      "rdfs:comment": "Feeder identifier this meter is supplied from.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:bus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Bus",
+      "rdfs:comment": "Busbar identifier at the meter's connection point.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:meterLocation",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter location",
+      "rdfs:comment": "Postal/physical location of the meter installation (beckn Location shape).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "schema:Place" }
+    },
+    {
+      "@id": "erDeg:communicationTechnology",
+      "@type": "rdf:Property",
+      "rdfs:label": "Communication technology",
+      "rdfs:comment": "Last-mile communication technology used by the meter's head-end system (PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:subResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sub-resources",
+      "rdfs:comment": "Child resources in the topology tree (DERs, storage, loads behind this meter).",
+      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceMeter" }
+    },
+    {
+      "@id": "erDeg:parentResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "Parent resources",
+      "rdfs:comment": "ids of parent resources (feeder, substation) this meter belongs to.",
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

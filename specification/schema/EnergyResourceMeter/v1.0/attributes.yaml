@@ -1,0 +1,198 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceMeter
+  version: 1.0.0
+  description: |
+    Typed attribute schema for metering-point energy resources (type = METER).
+
+    CIM alignment: cim:Meter extends cim:EndDevice (IEC 61968-9). A METER
+    resource anchors all DER resources behind it topologically and carries
+    the physical installation location, feeder/bus references, and
+    communication technology.
+
+    Type discriminator: type must equal "METER".
+
+components:
+  schemas:
+
+    EnergyResourceMeter:
+      type: object
+      required: [id, type]
+      additionalProperties: false
+      description: >
+        A metering-point energy resource. Anchors all DER sub-resources behind
+        it in the topology tree. Corresponds to cim:Meter (IEC 61968-9).
+      x-tags:
+        - energy-resource
+        - energy
+        - deg
+        - meter
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceMeter
+      properties:
+        id:
+          type: string
+          description: >
+            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
+            e.g. did:web:bescom.karnataka.gov.in:assets:meter:MET-001
+          example: "did:web:bescom.karnataka.gov.in:assets:meter:MET-001"
+          x-jsonld:
+            "@id": "@id"
+        type:
+          type: string
+          const: "METER"
+          description: >
+            Asset-class discriminator. Must be "METER". CIM: cim:Meter
+            (IEC 61968-9 EndDevice subtype).
+          x-cim-class: cim:Meter
+          x-jsonld:
+            "@id": erDeg:resourceType
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceMeterAttributes"
+        subResources:
+          type: array
+          description: >
+            Child resources behind this meter (DERs, storage, loads).
+            Each item is a bare id string or an inline EnergyResourceMeter object.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource in the same payload.
+              - $ref: "#/components/schemas/EnergyResourceMeter"
+                description: Inline nested resource.
+        parentResources:
+          type: array
+          description: >
+            ids of parent resources (e.g. feeder or substation this meter
+            is supplied from). String references only.
+          items:
+            type: string
+
+    EnergyResourceMeterAttributes:
+      type: object
+      additionalProperties: true
+      description: >
+        Attributes for METER resources. Includes EnergyResourceCommonAttributes
+        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, gps)
+        plus meter-specific fields (meterType, feeder, bus, location,
+        communicationTechnology).
+      x-jsonld:
+        "@id": erDeg:attributes
+      properties:
+
+        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": erDeg:make
+
+        model:
+          type: string
+          description: Model number (free text).
+          x-jsonld:
+            "@id": erDeg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date
+          description: ISO 8601 date when this meter was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        gps:
+          type: string
+          pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+          description: GPS coordinates of the meter installation as 'lat,lng'.
+          x-jsonld:
+            "@id": erDeg:gps
+
+        # ── Meter-specific attributes ────────────────────────────────────────
+        meterType:
+          type: string
+          enum:
+            - AMR
+            - AMI
+            - Electromechanical
+            - Forward
+            - Reverse
+            - Bidirectional
+            - Prepaid
+            - NetMeter
+            - Other
+          description: >
+            Meter kind classification per Green Button / ESPI taxonomy.
+            CIM: EndDevice.amrSystem / EndDeviceFunction.
+          x-jsonld:
+            "@id": erDeg:meterType
+
+        feeder:
+          type: string
+          description: Feeder identifier this meter is supplied from.
+          x-jsonld:
+            "@id": erDeg:feeder
+
+        bus:
+          type: string
+          description: Busbar identifier at the meter's connection point.
+          x-jsonld:
+            "@id": erDeg:bus
+
+        location:
+          type: object
+          description: >
+            Postal/physical location of the meter installation (beckn Location shape).
+          additionalProperties: true
+          properties:
+            address: { type: string }
+            city:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            district: { type: string }
+            state:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            country:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string, pattern: "^[A-Z]{2}$" }
+            area_code: { type: string }
+            gps: { type: string }
+            openLocationCode: { type: string }
+          x-jsonld:
+            "@id": erDeg:meterLocation
+
+        communicationTechnology:
+          type: string
+          enum:
+            - PLC
+            - RF_Mesh
+            - GPRS
+            - NB-IoT
+            - LoRa
+            - ZigBee
+            - Other
+          description: >
+            Last-mile communication technology used by this meter's head-end system.
+          x-jsonld:
+            "@id": erDeg:communicationTechnology

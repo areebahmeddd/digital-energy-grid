@@ -27,13 +27,15 @@ credentialSubject
 
 ## EnergyResource kinds
 
-| Kind | type enum values | CIM class (IEC 61970/61968) |
-|------|------------------|-----------------------------|
-| `EnergyResourceMeter` | `METER` | `cim:Meter` / `cim:EndDevice` (IEC 61968-9) |
-| `EnergyResourceGenerator` | `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` | `cim:GeneratingUnit` subtypes (IEC 61970-302) |
-| `EnergyResourceStorage` | `BESS`, `EV_CHARGER`, `EV_V2G` | `cim:BatteryUnit`, `cim:ElectricVehicleChargingStation` (IEC 61970-302) |
-| `EnergyResourceLoad` | `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` | `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301) |
-| `EnergyResourceNetwork` | `DT`, `BUS`, `FEEDER`, `MICROGRID` | `cim:PowerTransformer`, `cim:BusbarSection`, `cim:Feeder`, `cim:Substation` (IEC 61970-301) |
+Each kind is also published as a **standalone reusable schema** in `specification/schema/<Kind>/v1.0/`.
+
+| Kind | Standalone schema | type enum values | CIM class (IEC 61970/61968) |
+|------|-------------------|------------------|-----------------------------|
+| `EnergyResourceMeter` | `EnergyResourceMeter/v1.0` | `METER` | `cim:Meter` / `cim:EndDevice` (IEC 61968-9) |
+| `EnergyResourceGenerator` | `EnergyResourceGenerator/v1.0` | `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` | `cim:GeneratingUnit` subtypes (IEC 61970-302) |
+| `EnergyResourceStorage` | `EnergyResourceStorage/v1.0` | `BESS`, `EV_CHARGER`, `EV_V2G` | `cim:BatteryUnit`, `cim:ElectricVehicleChargingStation` (IEC 61970-302) |
+| `EnergyResourceLoad` | `EnergyResourceLoad/v1.0` | `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` | `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301) |
+| `EnergyResourceNetwork` | `EnergyResourceNetwork/v1.0` | `DT`, `BUS`, `FEEDER`, `MICROGRID` | `cim:PowerTransformer`, `cim:BusbarSection`, `cim:Feeder`, `cim:Substation` (IEC 61970-301) |
 
 **Deprecated type aliases** (still valid in v1.2 for backward compatibility):
 - `SOLAR` → use `SOLAR_PV` (CIM: `cim:PhotovoltaicUnit`)

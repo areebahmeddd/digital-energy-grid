@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/beckn/DEG/blob/main/specification/schema/ElectricityCredential/v1.2/schema.json",
     "title": "ElectricityCredential v1.2",
-    "description": "Bundled JSON Schema for ElectricityCredential v1.2. EnergyResource is composable: oneOf [EnergyResourceMeter | EnergyResourceGenerator | EnergyResourceStorage | EnergyResourceLoad | EnergyResourceNetwork]. Each kind inherits EnergyResourceCommonAttributes (no storageCapacityKwh). storageCapacityKwh lives only on EnergyResourceStorage. type enums are restricted per kind. CIM alignment per IEC 61970-301/302 and IEC 61968-9.",
+    "description": "Bundled (self-contained) JSON Schema for ElectricityCredential v1.2. EnergyResource is composable: oneOf [EnergyResourceMeter | EnergyResourceGenerator | EnergyResourceStorage | EnergyResourceLoad | EnergyResourceNetwork]. Each kind is also published as a standalone schema at schema.beckn.io/<Kind>/v1.0. $defs here mirror those external schemas. storageCapacityKwh is restricted to EnergyResourceStorage. type enums are restricted per kind. CIM alignment per IEC 61970-301/302 and IEC 61968-9.",
     "type": "object",
     "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
     "properties": {
