@@ -27,7 +27,7 @@
         {
           "id": "did:web:example-utility.com:assets:meter:MET2025789456123",
           "type": "METER",
-          "attributes": {"meterType": "AMI", "gps": {"type": "Point", "coordinates": [-122.4194, 37.7749]}},
+          "attributes": {"meterGeneration": "AMI", "energyDirection": "Forward", "gps": {"type": "Point", "coordinates": [-122.4194, 37.7749]}},
           "parentResources": ["did:web:example-utility.com:assets:feeder:DT-FEEDER-A1-001"]
         },
         {

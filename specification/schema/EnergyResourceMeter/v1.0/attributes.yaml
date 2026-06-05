@@ -135,23 +135,84 @@ components:
             "@id": erDeg:gps
 
         # ── Meter-specific attributes ────────────────────────────────────────
-        meterType:
+
+        meterGeneration:
           type: string
           enum:
+            - Electromechanical
+            - CMRI
             - AMR
             - AMI
-            - Electromechanical
+          description: >
+            Communication/automation generation of the meter hardware.
+            Electromechanical: induction-disc, no remote comms.
+            CMRI: static solid-state, manual optical-port read via Common Meter
+            Reading Instrument (India legacy AMR).
+            AMR: one-way automated read (periodic push); no remote commands.
+            AMI: two-way smart meter; supports remote disconnect, OTA, real-time
+            data. CIM alignment: maps to IEC 61968-9 AmiBillingReadyKind
+            (nonAmi → Electromechanical/CMRI, amiCapable/operable → AMR,
+            enabled/billingApproved → AMI).
+          x-cim-class: cim:AmiBillingReadyKind
+          x-jsonld:
+            "@id": erDeg:meterGeneration
+
+        energyDirection:
+          type: string
+          enum:
             - Forward
             - Reverse
             - Bidirectional
-            - Prepaid
-            - NetMeter
-            - Other
+            - Net
+          default: Forward
           description: >
-            Meter kind classification per Green Button / ESPI taxonomy.
-            CIM: EndDevice.amrSystem / EndDeviceFunction.
+            Direction(s) of energy flow metered at this point.
+            Forward: import from grid to customer only (default; standard load meter).
+            Reverse: export from customer to grid only (e.g. dedicated gross-export
+            meter in a solar feed-in tariff scheme).
+            Bidirectional: import and export measured in separate registers on the
+            same meter (prosumer / net-metering installation with separate kWh
+            registers for each direction).
+            Net: algebraically netted register — |import| − |export| — meter stores
+            only the running net balance.
+            CIM: maps to IEC 61968-9 / ESPI NAESB REQ.21 FlowDirectionKind
+            (1=Forward, 19=Reverse, 4=Net; Bidirectional implies both 1 and 19).
+          x-cim-class: cim:FlowDirectionKind
           x-jsonld:
-            "@id": erDeg:meterType
+            "@id": erDeg:energyDirection
+
+        functions:
+          type: array
+          uniqueItems: true
+          description: >
+            Set of optional capabilities or features active on this meter.
+            Modelled as a bag (unordered, no duplicates) per IEC 61968-9
+            EndDeviceFunction[0..*] pattern. Multiple values are valid simultaneously
+            (e.g. ["ToU", "NetMetering", "MaxDemand"]).
+          items:
+            type: string
+            enum:
+              - ToU
+              - NetMetering
+              - MaxDemand
+              - LoadControl
+              - TamperDetection
+              - PowerQuality
+              - EventLogging
+              - DLMS_COSEM
+            description: >
+              ToU: time-of-use / time-of-day tariff registers.
+              NetMetering: net-metering tariff scheme active (prosumer).
+              MaxDemand: maximum demand register (kW or kVA, 15/30-min interval).
+              LoadControl: demand-response relay / remote load control capability.
+              TamperDetection: anti-tamper magnetic/optical detection.
+              PowerQuality: harmonics, voltage sag/swell, power factor monitoring.
+              EventLogging: tamper/connect/disconnect audit log.
+              DLMS_COSEM: DLMS/COSEM application-layer protocol compliant
+              (mandatory for India AMI per BIS IS 16444 / CEA specification).
+          x-cim-class: cim:EndDeviceFunctionKind
+          x-jsonld:
+            "@id": erDeg:functions
 
         feeder:
           type: string

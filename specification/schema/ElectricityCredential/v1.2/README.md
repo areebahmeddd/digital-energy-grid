@@ -58,13 +58,19 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 
 ### EnergyResourceMeter (type: `METER`)
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `meterType` | enum | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
-| `feeder` | string | Feeder identifier this meter is supplied from |
-| `bus` | string | Busbar identifier |
-| `location` | object | Postal location (beckn Location shape) |
-| `communicationTechnology` | enum | PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other |
+`meterType` (flat enum) is replaced in v1.2 with four orthogonal fields matching IEC 61968-9 / ESPI NAESB REQ.21 semantics. Each field is independent — a single meter can be `AMI` + `Bidirectional` + `["ToU","NetMetering"]` simultaneously.
+
+| Field | Type | CIM / standard alignment | Description |
+|-------|------|--------------------------|-------------|
+| `meterGeneration` | enum | `AmiBillingReadyKind` (IEC 61968-9) | Communication/capability tier: `Electromechanical` · `CMRI` · `AMR` · `AMI` |
+| `energyDirection` | enum | `FlowDirectionKind` (ESPI NAESB REQ.21) | `Forward` (default) · `Reverse` · `Bidirectional` · `Net` |
+| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | Bag of active capabilities: `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` · `DLMS_COSEM` |
+| `feeder` | string | — | Feeder identifier this meter is supplied from |
+| `bus` | string | — | Busbar identifier |
+| `location` | object | beckn Location/2.0 | `geo` (GeoJSON Point) + `address` (PostalAddress) |
+| `communicationTechnology` | enum | — | Physical transport layer: `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
+
+`billingMode` (`Postpaid` \| `Prepaid`) is an administrative attribute and lives on `ConsumptionProfile`, not the meter (aligns with ESPI `UsagePoint.amiBillingReady`).
 
 ### EnergyResourceGenerator (type: `SOLAR_PV` | `WIND` | `HYDRO` | `BIOGAS` | `CHP` | `FUEL_CELL`)
 
@@ -141,6 +147,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 | `tariffCategoryCode` | string | Yes | Billing/tariff category code |
 | `premisesType` | enum | No | Residential, Commercial, Industrial, Agricultural |
 | `connectionType` | enum | No | Single-phase, Three-phase |
+| `billingMode` | enum | No | Postpaid, Prepaid — administrative; placed here (not on meter) per ESPI `UsagePoint.amiBillingReady` (IEC 61968-9) |
 
 ## customerDetails (PII)
 

@@ -103,7 +103,8 @@
                 "contractMaxDemandKw": { "type": "number", "minimum": 0 },
                 "tariffCategoryCode": { "type": "string", "minLength": 1 },
                 "premisesType": { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
-                "connectionType": { "type": "string", "enum": ["Single-phase", "Three-phase"] }
+                "connectionType": { "type": "string", "enum": ["Single-phase", "Three-phase"] },
+                "billingMode": { "type": "string", "enum": ["Postpaid", "Prepaid"], "description": "Billing/payment modality for this connection. Administrative: placed on ConsumptionProfile (not the meter) because it can change via firmware. CIM: EndDeviceFunction kind=prepayment / ESPI AmiBillingReadyKind (IEC 61968-9)." }
             }
         },
         "CustomerDetails": {
@@ -143,10 +144,22 @@
                 {
                     "type": "object",
                     "properties": {
-                        "meterType": {
+                        "meterGeneration": {
                             "type": "string",
-                            "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"],
-                            "description": "Metering technology class. CIM: EndDeviceInfo.isoStandard-adjacent."
+                            "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
+                            "description": "Communication/automation generation. Electromechanical=induction disc. CMRI=static, manual optical-port read (India legacy). AMR=one-way automated read. AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9)."
+                        },
+                        "energyDirection": {
+                            "type": "string",
+                            "enum": ["Forward", "Reverse", "Bidirectional", "Net"],
+                            "default": "Forward",
+                            "description": "Energy flow direction. Forward=import only (default). Reverse=export only. Bidirectional=separate import+export registers. Net=algebraically netted register. CIM: FlowDirectionKind (ESPI NAESB REQ.21)."
+                        },
+                        "functions": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "description": "Bag of optional capabilities per IEC 61968-9 EndDeviceFunction[0..*] — multiple values valid simultaneously.",
+                            "items": { "type": "string", "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging", "DLMS_COSEM"] }
                         },
                         "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
                         "bus": { "type": "string", "description": "Busbar identifier." },

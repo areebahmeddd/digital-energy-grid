@@ -77,10 +77,25 @@
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date", "description": "ISO 8601 date when this meter was commissioned." },
         "gps": { "$ref": "#/$defs/GeoJSONPoint", "description": "GeoJSON Point location of this meter. Coordinates are [longitude, latitude] per RFC 7946." },
-        "meterType": {
+        "meterGeneration": {
           "type": "string",
-          "enum": ["AMR", "AMI", "Electromechanical", "Forward", "Reverse", "Bidirectional", "Prepaid", "NetMeter", "Other"],
-          "description": "Meter kind classification per Green Button / ESPI taxonomy. CIM: EndDevice.amrSystem."
+          "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
+          "description": "Communication/automation generation. Electromechanical=induction disc, no comms. CMRI=static with manual optical-port read (India legacy). AMR=one-way automated read. AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9)."
+        },
+        "energyDirection": {
+          "type": "string",
+          "enum": ["Forward", "Reverse", "Bidirectional", "Net"],
+          "default": "Forward",
+          "description": "Energy flow direction metered. Forward=import only (default). Reverse=export only. Bidirectional=import and export in separate registers. Net=algebraically netted register. CIM: FlowDirectionKind (ESPI NAESB REQ.21)."
+        },
+        "functions": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "Bag of optional capabilities active on this meter, per IEC 61968-9 EndDeviceFunction[0..*] pattern. Multiple values valid simultaneously.",
+          "items": {
+            "type": "string",
+            "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging", "DLMS_COSEM"]
+          }
         },
         "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
         "bus": { "type": "string", "description": "Busbar identifier at the meter's connection point." },
