@@ -19,26 +19,26 @@
       "customerNumber": "TPDDL-2025-00987654",
       "energyResources": [
         {
-          "id": "did:dedi:tpddl:assets:meter:MET-IMPORT-001",
+          "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-IMPORT-001",
           "type": "METER",
           "attributes": {"meterType": "AMI", "gps": "28.6139,77.2090"},
-          "parentResources": ["did:dedi:tpddl:assets:feeder:DEL-SB-F08"]
+          "parentResources": ["did:web:tpddl.delhi.gov.in:assets:feeder:DEL-SB-F08"]
         },
         {
-          "id": "did:dedi:tpddl:assets:meter:MET-EXPORT-001",
+          "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-EXPORT-001",
           "type": "METER",
           "attributes": {"meterType": "Reverse", "gps": "28.6139,77.2090"}
         },
         {
-          "id": "did:dedi:tpddl:assets:solar-plant:ROOFTOP-SOLAR-001",
+          "id": "did:web:tpddl.delhi.gov.in:assets:solar-plant:ROOFTOP-SOLAR-001",
           "type": "SOLAR_PV",
           "attributes": {"ratedPowerKw": 5, "make": "Adani Solar", "model": "ASPM-400M", "commissioningDate": "2025-02-10"},
-          "parentResources": ["did:dedi:tpddl:assets:meter:MET-EXPORT-001"]
+          "parentResources": ["did:web:tpddl.delhi.gov.in:assets:meter:MET-EXPORT-001"]
         }
       ],
       "consumptionProfiles": [
         {
-          "meterId": "did:dedi:tpddl:assets:meter:MET-IMPORT-001",
+          "meterId": "did:web:tpddl.delhi.gov.in:assets:meter:MET-IMPORT-001",
           "sanctionedLoadKW": 10,
           "contractMaxDemandKw": 8,
           "tariffCategoryCode": "DS-I",
@@ -46,7 +46,7 @@
           "connectionType": "Single-phase"
         },
         {
-          "meterId": "did:dedi:tpddl:assets:meter:MET-EXPORT-001",
+          "meterId": "did:web:tpddl.delhi.gov.in:assets:meter:MET-EXPORT-001",
           "sanctionedLoadKW": 5,
           "tariffCategoryCode": "FIT-SOLAR-01"
         }

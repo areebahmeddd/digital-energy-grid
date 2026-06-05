@@ -19,33 +19,33 @@
       "customerNumber": "BESCOM-2025-BLDG-001",
       "energyResources": [
         {
-          "id": "did:dedi:bescom:assets:meter:MET-BLDG-001",
+          "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001",
           "type": "METER",
           "attributes": {"meterType": "AMI", "gps": "12.9716,77.5946"},
-          "parentResources": ["did:dedi:bescom:assets:feeder:BAN-NR-F22"]
+          "parentResources": ["did:web:bescom.karnataka.gov.in:assets:feeder:BAN-NR-F22"]
         },
         {
-          "id": "did:dedi:bescom:assets:meter:MET-UNIT-101",
+          "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101",
           "type": "METER",
           "attributes": {"meterType": "AMR", "gps": "12.9716,77.5946"},
-          "parentResources": ["did:dedi:bescom:assets:meter:MET-BLDG-001"]
+          "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
-          "id": "did:dedi:bescom:assets:meter:MET-UNIT-102",
+          "id": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-102",
           "type": "METER",
           "attributes": {"meterType": "AMR", "gps": "12.9716,77.5946"},
-          "parentResources": ["did:dedi:bescom:assets:meter:MET-BLDG-001"]
+          "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-BLDG-001"]
         },
         {
-          "id": "did:dedi:bescom:assets:solar-plant:ROOFTOP-UNIT-101",
+          "id": "did:web:bescom.karnataka.gov.in:assets:solar-plant:ROOFTOP-UNIT-101",
           "type": "SOLAR_PV",
           "attributes": {"ratedPowerKw": 2, "make": "Waaree", "model": "WS-200", "commissioningDate": "2024-06-15"},
-          "parentResources": ["did:dedi:bescom:assets:meter:MET-UNIT-101"]
+          "parentResources": ["did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101"]
         }
       ],
       "consumptionProfiles": [
         {
-          "meterId": "did:dedi:bescom:assets:meter:MET-UNIT-101",
+          "meterId": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-101",
           "sanctionedLoadKW": 3,
           "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
@@ -53,7 +53,7 @@
           "connectionType": "Single-phase"
         },
         {
-          "meterId": "did:dedi:bescom:assets:meter:MET-UNIT-102",
+          "meterId": "did:web:bescom.karnataka.gov.in:assets:meter:MET-UNIT-102",
           "sanctionedLoadKW": 3,
           "contractMaxDemandKw": 2.5,
           "tariffCategoryCode": "LT-2A",
