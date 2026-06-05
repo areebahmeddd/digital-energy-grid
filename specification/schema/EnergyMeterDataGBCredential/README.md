@@ -34,7 +34,7 @@ beckn:Credential
 |----------|------|----------|-------------|
 | `id` | `string` (URI) | | DID of the customer/credential subject |
 | `customerProfile` | [`EnergyCustomerProfile`](../EnergyCustomerProfile/) | ✅ | Customer identity linking utility account to meter |
-| `meterDataGB` | [`EnergyMeterDataCredentialGB`](../EnergyMeterDataCredentialGB/) | ✅ | ESPI/Green Button meter reading data |
+| `meterDataGB` | [`EnergyMeterDataGBCredential`](../EnergyMeterDataGBCredential/) | ✅ | ESPI/Green Button meter reading data |
 
 ---
 
