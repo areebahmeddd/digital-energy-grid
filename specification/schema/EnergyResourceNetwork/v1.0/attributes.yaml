@@ -1,0 +1,186 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceNetwork
+  version: 1.0.0
+  description: |
+    Typed attribute schema for grid-network infrastructure energy resources.
+
+    CIM alignment (IEC 61970-301):
+      DT        → cim:PowerTransformer
+      BUS       → cim:BusbarSection
+      FEEDER    → cim:Feeder (EquipmentContainer)
+      MICROGRID → cim:Substation / custom microgrid container
+
+    Network resources act as topology anchors in the EnergyResource graph;
+    they carry metering points and DER resources as subResources.
+
+components:
+  schemas:
+
+    EnergyResourceNetwork:
+      type: object
+      required: [id, type]
+      additionalProperties: false
+      description: >
+        A grid-network infrastructure energy resource (distribution transformer,
+        busbar, feeder, or microgrid). These are topology containers that anchor
+        metering points and DER resources. CIM: PowerTransformer, BusbarSection,
+        Feeder, Substation (IEC 61970-301).
+      x-tags:
+        - energy-resource
+        - energy
+        - deg
+        - network
+        - grid
+        - infrastructure
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceNetwork
+      properties:
+        id:
+          type: string
+          description: >
+            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
+            e.g. did:web:bescom.karnataka.gov.in:assets:feeder:FDR-BLR-042
+          example: "did:web:bescom.karnataka.gov.in:assets:feeder:FDR-BLR-042"
+          x-jsonld:
+            "@id": "@id"
+        type:
+          type: string
+          enum:
+            - DT
+            - BUS
+            - FEEDER
+            - MICROGRID
+          description: >
+            Asset-class discriminator. CIM: DT → PowerTransformer,
+            BUS → BusbarSection, FEEDER → Feeder (EquipmentContainer),
+            MICROGRID → Substation / custom microgrid container (IEC 61970-301).
+          x-cim-class: cim:EquipmentContainer
+          x-jsonld:
+            "@id": erDeg:resourceType
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceNetworkAttributes"
+        subResources:
+          type: array
+          description: >
+            Child resources anchored to this network element (meters, DTs,
+            buses, feeders). Each item is a bare id string or an inline
+            EnergyResourceNetwork object.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource in the same payload.
+              - $ref: "#/components/schemas/EnergyResourceNetwork"
+                description: Inline nested resource.
+        parentResources:
+          type: array
+          description: >
+            ids of parent network elements (e.g. the substation or feeder
+            this DT belongs to). String references only.
+          items:
+            type: string
+
+    EnergyResourceNetworkAttributes:
+      type: object
+      additionalProperties: true
+      description: >
+        Attributes for grid-network infrastructure resources. Includes
+        EnergyResourceCommonAttributes fields (make, model, ratedPowerKw,
+        telemetryProvider, commissioningDate, location) plus network-specific
+        fields (nominalVoltageKv, zone, substationId, feederCode).
+      x-jsonld:
+        "@id": erDeg:attributes
+      properties:
+
+        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": erDeg:make
+
+        model:
+          type: string
+          description: Model number (free text).
+          x-jsonld:
+            "@id": erDeg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power capacity, kW. CIM: GeneratingUnit.maxOperatingP.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time when this network element was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        location:
+          type: object
+          description: >
+            Physical location of this asset per beckn Location/2.0.
+            geo (required) is a GeoJSON geometry; address is a postal address.
+          required: [geo]
+          properties:
+            geo:
+              type: object
+              description: GeoJSON geometry — coordinates are [longitude, latitude].
+              required: [type]
+              properties:
+                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                geometries: { type: array }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+              additionalProperties: true
+            address:
+              type: object
+              additionalProperties: false
+              description: schema.org PostalAddress fields.
+              properties:
+                streetAddress: { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion: { type: string }
+                postalCode: { type: string }
+                addressCountry: { type: string }
+          x-jsonld:
+            "@id": erDeg:location
+
+        # ── Network-specific attributes ──────────────────────────────────────
+        nominalVoltageKv:
+          type: number
+          minimum: 0
+          description: >
+            Nominal operating voltage, kV. CIM: BaseVoltage.nominalVoltage.
+          x-jsonld:
+            "@id": erDeg:nominalVoltageKv
+
+        zone:
+          type: string
+          description: Operating zone or region identifier used by the utility.
+          x-jsonld:
+            "@id": erDeg:zone
+
+        substationId:
+          type: string
+          description: Parent substation identifier per utility records.
+          x-jsonld:
+            "@id": erDeg:substationId
+
+        feederCode:
+          type: string
+          description: Feeder code per utility records. Relevant for FEEDER and DT resources.
+          x-jsonld:
+            "@id": erDeg:feederCode

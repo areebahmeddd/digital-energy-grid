@@ -1,0 +1,33 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+    "deg": "https://schema.beckn.io/deg#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "EnergyResourceNetwork": {
+      "@id": "erDeg:EnergyResourceNetwork",
+      "@context": {
+        "@version": 1.1,
+        "resourceType": { "@id": "erDeg:resourceType", "@type": "xsd:string" },
+        "attributes": {
+          "@id": "erDeg:attributes",
+          "@type": "@id",
+          "@context": {
+            "make": { "@id": "erDeg:make", "@type": "xsd:string" },
+            "model": { "@id": "erDeg:model", "@type": "xsd:string" },
+            "ratedPowerKw": { "@id": "erDeg:ratedPowerKw", "@type": "xsd:decimal" },
+            "telemetryProvider": { "@id": "erDeg:telemetryProvider", "@type": "xsd:string" },
+            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
+            "location":          { "@id": "erDeg:location",        "@type": "@id"         },
+            "nominalVoltageKv": { "@id": "erDeg:nominalVoltageKv", "@type": "xsd:decimal" },
+            "zone": { "@id": "erDeg:zone", "@type": "xsd:string" },
+            "substationId": { "@id": "erDeg:substationId", "@type": "xsd:string" },
+            "feederCode": { "@id": "erDeg:feederCode", "@type": "xsd:string" }
+          }
+        },
+        "subResources": { "@id": "erDeg:subResources", "@container": "@list" },
+        "parentResources": { "@id": "erDeg:parentResources", "@container": "@list" }
+      }
+    }
+  }
+}
