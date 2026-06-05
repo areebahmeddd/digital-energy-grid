@@ -1,0 +1,622 @@
+openapi: 3.1.1
+info:
+  title: ElectricityCredential
+  version: 1.2.0
+  description: >
+    W3C Verifiable Credential (VC Data Model 2.0) issued per meter by
+    electricity distribution utilities.
+
+    v1.2 introduces composable EnergyResource kinds. energyResources[] entries
+    are now discriminated by 'type' into one of five kinds:
+      - EnergyResourceMeter    (type: METER)
+      - EnergyResourceGenerator (type: SOLAR_PV | SOLAR | WIND | HYDRO | BIOGAS | CHP | FUEL_CELL)
+      - EnergyResourceStorage   (type: BESS | BATTERY | EV_CHARGER | EV_V2G)
+      - EnergyResourceLoad      (type: SMART_HVAC | SMART_WATER_HEATER | CONTROLLABLE_LOAD)
+      - EnergyResourceNetwork   (type: DT | BUS | FEEDER | MICROGRID)
+
+    Each kind's attributes bag inherits EnergyResourceCommonAttributes.
+    storageCapacityKwh is ONLY on EnergyResourceStorage.
+
+    CIM alignment: IEC 61970-301/302 (GeneratingUnit, BatteryUnit,
+    EnergyConsumer, Feeder) and IEC 61968-9 (Meter, EndDevice).
+
+    v1.1 → v1.2 field changes
+    ──────────────────────────
+    energyResources[BATTERY/BESS].attributes.energyCapacityKwh → storageCapacityKwh
+    energyResources[*].type enum "SOLAR"   → deprecated; use SOLAR_PV
+    energyResources[*].type enum "BATTERY" → deprecated; use BESS
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    ElectricityCredential:
+      $id: https://schema.beckn.io/ElectricityCredential/v1.2
+      title: ElectricityCredential
+      type: object
+      additionalProperties: true
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+      x-tags:
+        - energy
+        - credential
+        - verifiable-credential
+        - electricity
+        - customer
+        - deg
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": ElectricityCredential
+      properties:
+        credentialSubject:
+          type: object
+          required:
+            - customerProfile
+          x-jsonld:
+            "@id": deg:credentialSubject
+          properties:
+            id:
+              type: string
+              format: uri
+              description: Optional DID of the customer/credential subject.
+              x-jsonld:
+                "@id": "@id"
+            customerProfile:
+              $ref: "#/components/schemas/CustomerProfile"
+            customerDetails:
+              $ref: "#/components/schemas/CustomerDetails"
+
+    CustomerProfile:
+      type: object
+      description: >
+        Non-PII customer identity and asset list. Supports arbitrary topologies:
+        a single customerNumber may span multiple METER entries (different premises,
+        sub-meters, parallel meters) each with child DERs.
+      required:
+        - customerNumber
+        - energyResources
+      x-jsonld:
+        "@id": deg:customerProfile
+      properties:
+        customerNumber:
+          type: string
+          minLength: 1
+          description: Utility customer account (CA) number.
+          x-jsonld:
+            "@id": deg:customerNumber
+        idRef:
+          $ref: "#/components/schemas/IdRef"
+        energyResources:
+          type: array
+          minItems: 1
+          description: >
+            All physical energy assets for this account. Each entry is
+            discriminated by 'type' into one of five composable kinds.
+          x-jsonld:
+            "@id": deg:energyResources
+          items:
+            $ref: "#/components/schemas/EnergyResource"
+        consumptionProfiles:
+          type: array
+          minItems: 1
+          description: >
+            Tariff and load characteristics per meter connection.
+            Each entry links to a METER via meterId.
+          x-jsonld:
+            "@id": deg:consumptionProfiles
+          items:
+            $ref: "#/components/schemas/ConsumptionProfile"
+
+    IdRef:
+      type: object
+      description: External identity reference for the customer.
+      required:
+        - issuedBy
+        - subjectId
+      x-jsonld:
+        "@id": deg:idRef
+      properties:
+        issuedBy:
+          type: string
+          format: uri
+          description: DID of the authority that issued the identity.
+          x-jsonld:
+            "@id": deg:issuedBy
+        subjectId:
+          type: string
+          pattern: "^[A-Za-z0-9._-]+:[A-Za-z0-9X_-]+$"
+          description: Subject identifier in authority-domain:id-value format.
+          x-jsonld:
+            "@id": deg:subjectId
+
+    ConsumptionProfile:
+      type: object
+      description: >
+        Tariff and regulatory load profile for one meter connection.
+        meterId links to a METER entry's id in energyResources[].
+      required:
+        - meterId
+        - sanctionedLoadKW
+        - tariffCategoryCode
+      x-jsonld:
+        "@id": deg:ConsumptionProfile
+      properties:
+        meterId:
+          type: string
+          minLength: 1
+          description: Matches the id of a METER entry in customerProfile.energyResources[].
+          x-jsonld:
+            "@id": deg:meterId
+        sanctionedLoadKW:
+          type: number
+          minimum: 0.5
+          maximum: 10000
+          description: Sanctioned/approved electrical load in kW.
+          x-jsonld:
+            "@id": deg:sanctionedLoadKW
+        contractMaxDemandKw:
+          type: number
+          minimum: 0
+          description: Maximum demand contracted with the utility for this connection, in kW.
+          x-jsonld:
+            "@id": deg:contractMaxDemandKw
+        tariffCategoryCode:
+          type: string
+          minLength: 1
+          description: Billing/tariff category code assigned by the utility.
+          x-jsonld:
+            "@id": deg:tariffCategoryCode
+        premisesType:
+          type: string
+          enum:
+            - Residential
+            - Commercial
+            - Industrial
+            - Agricultural
+          x-jsonld:
+            "@id": deg:premisesType
+        connectionType:
+          type: string
+          enum:
+            - Single-phase
+            - Three-phase
+          x-jsonld:
+            "@id": deg:connectionType
+
+    CustomerDetails:
+      type: object
+      description: >
+        PII section. fullName appears ONLY here — never in customerProfile
+        or any resource entry.
+      required:
+        - fullName
+        - installationAddress
+        - serviceConnectionDate
+      x-jsonld:
+        "@id": deg:customerDetails
+      properties:
+        fullName:
+          type: string
+          description: Full name of the customer as per ID proof.
+        installationAddress:
+          type: object
+          description: Physical location of the installation. Follows the beckn Location schema.
+          required:
+            - address
+            - area_code
+            - country
+          properties:
+            address: { type: string }
+            city:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            district: { type: string }
+            state:
+              type: object
+              properties:
+                name: { type: string }
+                code: { type: string }
+            country:
+              type: object
+              required: [code]
+              properties:
+                name: { type: string }
+                code:
+                  type: string
+                  pattern: "^[A-Z]{2}$"
+            area_code: { type: string }
+            gps:
+              type: string
+              description: "GPS coordinates as 'lat,lng'."
+            openLocationCode: { type: string }
+        serviceConnectionDate:
+          type: string
+          format: date-time
+          description: Date and time the connection was activated (with timezone offset).
+
+    # ──────────────────────────────────────────────────────────────────────
+    # EnergyResource composable hierarchy
+    # ──────────────────────────────────────────────────────────────────────
+
+    EnergyResourceCommonAttributes:
+      type: object
+      description: >
+        Base attributes shared by all EnergyResource kinds.
+        Does NOT include storageCapacityKwh — that field belongs exclusively
+        to EnergyResourceStorageAttributes (CIM: BatteryUnit.ratedE).
+      additionalProperties: true
+      x-jsonld:
+        "@id": erDeg:commonAttributes
+      properties:
+        make:
+          type: string
+          description: Manufacturer name.
+          x-jsonld:
+            "@id": erDeg:make
+        model:
+          type: string
+          description: Model number or name.
+          x-jsonld:
+            "@id": erDeg:model
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Nameplate peak power rating in kW.
+            CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+        telemetryProvider:
+          type: string
+          description: Vendor API or data-source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+        commissioningDate:
+          type: string
+          description: ISO 8601 date (YYYY-MM-DD) the asset was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+        gps:
+          type: string
+          pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
+          description: "GPS coordinates as 'lat,lng'."
+          x-jsonld:
+            "@id": erDeg:gps
+
+    EnergyResourceMeterAttributes:
+      description: >
+        Attributes for metering devices (type: METER).
+        CIM: Meter extends EndDevice (IEC 61968-9).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          properties:
+            meterType:
+              type: string
+              enum:
+                - AMR
+                - AMI
+                - Electromechanical
+                - Forward
+                - Reverse
+                - Bidirectional
+                - Prepaid
+                - NetMeter
+                - Other
+              description: Metering technology class.
+              x-jsonld:
+                "@id": erDeg:meterType
+            feeder:
+              type: string
+              description: Feeder identifier this meter is supplied from.
+              x-jsonld:
+                "@id": erDeg:feeder
+            bus:
+              type: string
+              description: Busbar identifier.
+              x-jsonld:
+                "@id": erDeg:bus
+            location:
+              description: Postal location of the meter.
+              x-jsonld:
+                "@id": erDeg:meterLocation
+            communicationTechnology:
+              type: string
+              enum:
+                - PLC
+                - RF_Mesh
+                - GPRS
+                - NB-IoT
+                - LoRa
+                - ZigBee
+                - Other
+              description: Communication technology used for AMI/AMR data collection.
+              x-jsonld:
+                "@id": erDeg:communicationTechnology
+
+    EnergyResourceGeneratorAttributes:
+      description: >
+        Attributes for generation assets.
+        CIM: GeneratingUnit subtypes (IEC 61970-302).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          properties:
+            nominalPowerKw:
+              type: number
+              minimum: 0
+              description: >
+                Nominal rated output power in kW.
+                CIM: GeneratingUnit.nominalP.
+                Use when distinct from ratedPowerKw (peak nameplate).
+              x-jsonld:
+                "@id": erDeg:nominalPowerKw
+            efficiency:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: >
+                Conversion efficiency in percent.
+                Particularly relevant for FUEL_CELL and CHP.
+              x-jsonld:
+                "@id": erDeg:efficiency
+
+    EnergyResourceStorageAttributes:
+      description: >
+        Attributes for energy storage assets.
+        CIM: BatteryUnit (IEC 61970-302), ElectricVehicleChargingStation (CIM17+).
+        storageCapacityKwh is ONLY defined on this attributes type.
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          properties:
+            storageCapacityKwh:
+              type: number
+              minimum: 0
+              description: >
+                Rated energy capacity in kWh.
+                CIM: BatteryUnit.ratedE.
+                (v1.1 field was energyCapacityKwh — renamed for clarity.)
+              x-jsonld:
+                "@id": erDeg:storageCapacityKwh
+            storageType:
+              type: string
+              enum:
+                - LithiumIon
+                - LeadAcid
+                - FlowBattery
+                - NaS
+                - NiCd
+                - Flywheel
+                - Other
+              description: Storage chemistry or technology type.
+              x-jsonld:
+                "@id": deg:storageType
+            stateOfHealthPct:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Battery state of health as percentage of original capacity.
+              x-jsonld:
+                "@id": erDeg:stateOfHealthPct
+            maxChargeRateKw:
+              type: number
+              minimum: 0
+              description: Maximum charge rate in kW.
+              x-jsonld:
+                "@id": erDeg:maxChargeRateKw
+            maxDischargeRateKw:
+              type: number
+              minimum: 0
+              description: Maximum discharge rate in kW.
+              x-jsonld:
+                "@id": erDeg:maxDischargeRateKw
+
+    EnergyResourceLoadAttributes:
+      description: >
+        Attributes for controllable electrical loads.
+        CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          properties:
+            controlProtocol:
+              type: string
+              enum:
+                - OpenADR_2.0b
+                - OCPP_2.0.1
+                - SunSpec_Modbus
+                - EEBus
+                - Modbus
+                - Other
+              description: Demand-response or load-control communication protocol.
+              x-jsonld:
+                "@id": erDeg:controlProtocol
+            loadCategory:
+              type: string
+              enum:
+                - Heating
+                - Cooling
+                - WaterHeating
+                - Lighting
+                - EV
+                - Industrial
+                - Other
+              description: Load category for aggregation and dispatch optimisation.
+              x-jsonld:
+                "@id": erDeg:loadCategory
+
+    EnergyResourceNetworkAttributes:
+      description: >
+        Attributes for distribution network topology elements.
+        CIM: PowerTransformer (DT), BusbarSection (BUS), Feeder (FEEDER),
+        Substation/custom (MICROGRID).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          properties:
+            nominalVoltageKv:
+              type: number
+              minimum: 0
+              description: >
+                Nominal voltage level in kV.
+                CIM: BaseVoltage.nominalVoltage.
+              x-jsonld:
+                "@id": erDeg:nominalVoltageKv
+            zone:
+              type: string
+              description: Operating zone or region identifier.
+              x-jsonld:
+                "@id": erDeg:zone
+            substationId:
+              type: string
+              description: Parent substation identifier.
+              x-jsonld:
+                "@id": erDeg:substationId
+            feederCode:
+              type: string
+              description: Feeder code per utility network records.
+              x-jsonld:
+                "@id": erDeg:feederCode
+
+    EnergyResourceMeter:
+      type: object
+      description: >
+        Metering device resource.
+        CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).
+      properties:
+        type:
+          type: string
+          const: METER
+          x-cim-class: cim:Meter
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceMeterAttributes"
+
+    EnergyResourceGenerator:
+      type: object
+      description: >
+        Electrical generation asset.
+        CIM GeneratingUnit subtypes (IEC 61970-302):
+          SOLAR_PV = cim:PhotovoltaicUnit (preferred over deprecated SOLAR)
+          WIND     = cim:WindGeneratingUnit
+          HYDRO    = cim:HydroGeneratingUnit
+          BIOGAS   = cim:ThermalGeneratingUnit (fuelType: biogas)
+          CHP      = cim:ThermalGeneratingUnit (combined heat and power)
+          FUEL_CELL = IEC 62933-2 (no direct CIM class)
+          SOLAR    = deprecated alias for SOLAR_PV
+      properties:
+        type:
+          type: string
+          enum:
+            - SOLAR_PV
+            - SOLAR
+            - WIND
+            - HYDRO
+            - BIOGAS
+            - CHP
+            - FUEL_CELL
+          x-cim-class: cim:GeneratingUnit
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceGeneratorAttributes"
+
+    EnergyResourceStorage:
+      type: object
+      description: >
+        Energy storage asset.
+        CIM PowerElectronicsUnit subtypes (IEC 61970-302):
+          BESS      = cim:BatteryUnit (preferred over deprecated BATTERY)
+          BATTERY   = deprecated alias for BESS
+          EV_CHARGER = cim:ElectricVehicleChargingStation (charge-only)
+          EV_V2G    = cim:ElectricVehicleChargingStation (bidirectional V2G)
+      properties:
+        type:
+          type: string
+          enum:
+            - BESS
+            - BATTERY
+            - EV_CHARGER
+            - EV_V2G
+          x-cim-class: cim:PowerElectronicsUnit
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceStorageAttributes"
+
+    EnergyResourceLoad:
+      type: object
+      description: >
+        Controllable electrical load.
+        CIM: cim:EnergyConsumer / cim:ConformLoad (IEC 61970-301).
+      properties:
+        type:
+          type: string
+          enum:
+            - SMART_HVAC
+            - SMART_WATER_HEATER
+            - CONTROLLABLE_LOAD
+          x-cim-class: cim:EnergyConsumer
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceLoadAttributes"
+
+    EnergyResourceNetwork:
+      type: object
+      description: >
+        Distribution network topology element.
+        CIM (IEC 61970-301):
+          DT       = cim:PowerTransformer
+          BUS      = cim:BusbarSection
+          FEEDER   = cim:Feeder (extends cim:EquipmentContainer)
+          MICROGRID = cim:Substation / custom
+      properties:
+        type:
+          type: string
+          enum:
+            - DT
+            - BUS
+            - FEEDER
+            - MICROGRID
+          x-cim-class: cim:ConnectivityNodeContainer
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceNetworkAttributes"
+
+    EnergyResource:
+      type: object
+      description: >
+        Composable energy resource, discriminated by 'type' into one of five
+        kinds. id and type are required. Topology is expressed via
+        subResources[] (children) and parentResources[] (parents, e.g. the
+        meter a DER sits behind).
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: >
+            Stable identifier. For METER: meter serial number.
+            For DERs: any stable scheme.
+          x-jsonld:
+            "@id": "@id"
+        subResources:
+          type: array
+          description: Child resource ids or inline EnergyResource objects.
+          items:
+            oneOf:
+              - type: string
+              - $ref: "#/components/schemas/EnergyResource"
+        parentResources:
+          type: array
+          description: Parent resource ids — e.g. the meter a DER sits behind.
+          items:
+            type: string
+      oneOf:
+        - $ref: "#/components/schemas/EnergyResourceMeter"
+        - $ref: "#/components/schemas/EnergyResourceGenerator"
+        - $ref: "#/components/schemas/EnergyResourceStorage"
+        - $ref: "#/components/schemas/EnergyResourceLoad"
+        - $ref: "#/components/schemas/EnergyResourceNetwork"
