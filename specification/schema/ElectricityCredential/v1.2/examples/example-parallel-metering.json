@@ -21,13 +21,13 @@
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-IMPORT-001",
           "type": "METER",
-          "attributes": {"meterGeneration": "AMI", "energyDirection": "Forward", "functions": ["DLMS_COSEM", "MaxDemand"], "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}},
+          "attributes": {"meterCapability": "AMI", "energyDirection": "Forward", "functions": ["DLMS_COSEM", "MaxDemand"], "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}},
           "parentResources": ["did:web:tpddl.delhi.gov.in:assets:feeder:DEL-SB-F08"]
         },
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:meter:MET-EXPORT-001",
           "type": "METER",
-          "attributes": {"meterGeneration": "AMI", "energyDirection": "Reverse", "functions": ["NetMetering", "DLMS_COSEM"], "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}}
+          "attributes": {"meterCapability": "AMI", "energyDirection": "Reverse", "functions": ["NetMetering", "DLMS_COSEM"], "gps": {"type": "Point", "coordinates": [77.2090, 28.6139]}}
         },
         {
           "id": "did:web:tpddl.delhi.gov.in:assets:solar-plant:ROOFTOP-SOLAR-001",

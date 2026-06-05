@@ -75,8 +75,8 @@ components:
       description: >
         Attributes for METER resources. Includes EnergyResourceCommonAttributes
         fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, gps)
-        plus meter-specific fields (meterType, feeder, bus, location,
-        communicationTechnology).
+        plus meter-specific fields (meterCapability, energyDirection, functions,
+        feeder, bus, location, communicationTechnology).
       x-jsonld:
         "@id": erDeg:attributes
       properties:
@@ -136,7 +136,7 @@ components:
 
         # ── Meter-specific attributes ────────────────────────────────────────
 
-        meterGeneration:
+        meterCapability:
           type: string
           enum:
             - Electromechanical
@@ -155,7 +155,7 @@ components:
             enabled/billingApproved → AMI).
           x-cim-class: cim:AmiBillingReadyKind
           x-jsonld:
-            "@id": erDeg:meterGeneration
+            "@id": erDeg:meterCapability
 
         energyDirection:
           type: string

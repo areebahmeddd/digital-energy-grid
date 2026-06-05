@@ -62,7 +62,7 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 
 | Field | Type | CIM / standard alignment | Description |
 |-------|------|--------------------------|-------------|
-| `meterGeneration` | enum | `AmiBillingReadyKind` (IEC 61968-9) | Communication/capability tier: `Electromechanical` · `CMRI` · `AMR` · `AMI` |
+| `meterCapability` | enum | `AmiBillingReadyKind` (IEC 61968-9) | Communication/capability tier: `Electromechanical` · `CMRI` · `AMR` · `AMI` |
 | `energyDirection` | enum | `FlowDirectionKind` (ESPI NAESB REQ.21) | `Forward` (default) · `Reverse` · `Bidirectional` · `Net` |
 | `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | Bag of active capabilities: `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` · `DLMS_COSEM` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
@@ -112,9 +112,9 @@ A single `customerNumber` can span arbitrary asset topologies.
 **Submetering** — building main meter + tenant sub-meters:
 ```json
 "energyResources": [
-  {"id": "MET-BLDG-001", "type": "METER",    "attributes": {"meterType": "AMI"}, "parentResources": ["BAN-NR-F22"]},
-  {"id": "MET-UNIT-101", "type": "METER",    "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
-  {"id": "MET-UNIT-102", "type": "METER",    "attributes": {"meterType": "AMR"}, "parentResources": ["MET-BLDG-001"]},
+  {"id": "MET-BLDG-001", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Forward"}, "parentResources": ["BAN-NR-F22"]},
+  {"id": "MET-UNIT-101", "type": "METER",    "attributes": {"meterCapability": "AMR", "energyDirection": "Forward"}, "parentResources": ["MET-BLDG-001"]},
+  {"id": "MET-UNIT-102", "type": "METER",    "attributes": {"meterCapability": "AMR", "energyDirection": "Forward"}, "parentResources": ["MET-BLDG-001"]},
   {"id": "ROOFTOP-101",  "type": "SOLAR_PV", "attributes": {"ratedPowerKw": 2},  "parentResources": ["MET-UNIT-101"]}
 ]
 ```
@@ -122,8 +122,8 @@ A single `customerNumber` can span arbitrary asset topologies.
 **Parallel metering** — import meter + export meter for solar FIT:
 ```json
 "energyResources": [
-  {"id": "MET-IMPORT", "type": "METER",    "attributes": {"meterType": "AMI"},     "parentResources": ["DEL-F08"]},
-  {"id": "MET-EXPORT", "type": "METER",    "attributes": {"meterType": "Reverse"}},
+  {"id": "MET-IMPORT", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Forward"},  "parentResources": ["DEL-F08"]},
+  {"id": "MET-EXPORT", "type": "METER",    "attributes": {"meterCapability": "AMI", "energyDirection": "Reverse", "functions": ["NetMetering"]}},
   {"id": "SOLAR-001",  "type": "SOLAR_PV", "attributes": {"ratedPowerKw": 5},      "parentResources": ["MET-EXPORT"]}
 ],
 "consumptionProfiles": [
@@ -170,7 +170,7 @@ A single `customerNumber` can span arbitrary asset topologies.
     "customerProfile": {
       "customerNumber": "UTIL-2025-001234567",
       "energyResources": [
-        {"id": "MET2025789456123", "type": "METER", "attributes": {"meterType": "AMI"}}
+        {"id": "MET2025789456123", "type": "METER", "attributes": {"meterCapability": "AMI"}}
       ]
     }
   }

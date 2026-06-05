@@ -77,7 +77,7 @@
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date", "description": "ISO 8601 date when this meter was commissioned." },
         "gps": { "$ref": "#/$defs/GeoJSONPoint", "description": "GeoJSON Point location of this meter. Coordinates are [longitude, latitude] per RFC 7946." },
-        "meterGeneration": {
+        "meterCapability": {
           "type": "string",
           "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
           "description": "Communication/automation generation. Electromechanical=induction disc, no comms. CMRI=static with manual optical-port read (India legacy). AMR=one-way automated read. AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9)."

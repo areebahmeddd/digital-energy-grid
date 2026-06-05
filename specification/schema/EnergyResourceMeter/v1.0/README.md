@@ -43,17 +43,19 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | string (lat,lng) | — | GPS coordinates |
+| `gps` | object (GeoJSON Point) | — | `{"type":"Point","coordinates":[lon,lat]}` — RFC 7946 |
 
 ### Meter-specific attributes
 
 | Field | Type | CIM | Description |
 |-------|------|-----|-------------|
-| `meterType` | enum | `EndDevice.amrSystem` | AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other |
+| `meterCapability` | enum | `AmiBillingReadyKind` (IEC 61968-9) | `Electromechanical` · `CMRI` · `AMR` · `AMI` |
+| `energyDirection` | enum | `FlowDirectionKind` (ESPI NAESB REQ.21) | `Forward` (default) · `Reverse` · `Bidirectional` · `Net` |
+| `functions` | array of enum | `EndDeviceFunction[0..*]` (IEC 61968-9) | `ToU` · `NetMetering` · `MaxDemand` · `LoadControl` · `TamperDetection` · `PowerQuality` · `EventLogging` · `DLMS_COSEM` |
 | `feeder` | string | — | Feeder identifier this meter is supplied from |
 | `bus` | string | — | Busbar identifier at the connection point |
-| `location` | object (beckn Location) | — | Postal/physical installation location |
-| `communicationTechnology` | enum | — | PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other |
+| `location` | object (beckn Location/2.0) | — | `geo` (GeoJSON Point) + `address` (PostalAddress) |
+| `communicationTechnology` | enum | — | `PLC` · `RF_Mesh` · `GPRS` · `NB-IoT` · `LoRa` · `ZigBee` · `Other` |
 
 ---
 
@@ -66,19 +68,18 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
   "attributes": {
     "make": "Landis+Gyr",
     "model": "E350",
-    "meterType": "AMI",
+    "meterCapability": "AMI",
+    "energyDirection": "Forward",
+    "functions": ["ToU", "MaxDemand", "DLMS_COSEM"],
     "ratedPowerKw": 10,
     "commissioningDate": "2022-04-01",
-    "gps": "12.9716,77.5946",
+    "gps": {"type": "Point", "coordinates": [77.5946, 12.9716]},
     "feeder": "FDR-BLR-042",
     "bus": "BUS-042-A",
     "communicationTechnology": "NB-IoT",
     "location": {
-      "address": "12, MG Road",
-      "city": { "name": "Bengaluru", "code": "BLR" },
-      "state": { "name": "Karnataka", "code": "KA" },
-      "country": { "code": "IN" },
-      "area_code": "560001"
+      "geo": {"type": "Point", "coordinates": [77.5946, 12.9716]},
+      "address": {"streetAddress": "12 MG Road", "addressLocality": "Bengaluru", "addressRegion": "Karnataka", "postalCode": "560001", "addressCountry": "IN"}
     }
   },
   "subResources": [],
