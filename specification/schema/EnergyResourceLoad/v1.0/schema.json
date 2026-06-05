@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceLoad/v1.0",
+  "title": "EnergyResourceLoad",
+  "description": "Typed schema for controllable load energy resources (smart HVAC, smart water heater, generic controllable load). These assets participate in demand-response and demand-flexibility programs. CIM: cim:EnergyConsumer / cim:ConformLoad (IEC 61970-301).",
+  "type": "object",
+  "required": ["id", "type"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>. Example: did:web:bescom.karnataka.gov.in:assets:load:HVAC-001"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["SMART_HVAC", "SMART_WATER_HEATER", "CONTROLLABLE_LOAD"],
+      "description": "Asset-class discriminator. CIM: EnergyConsumer / ConformLoad (IEC 61970-301)."
+    },
+    "attributes": {
+      "$ref": "#/$defs/EnergyResourceLoadAttributes"
+    },
+    "subResources": {
+      "type": "array",
+      "description": "Child resources (e.g. individual zones of an HVAC system). Each item is a bare id string or an inline EnergyResource object.",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#" }
+        ]
+      }
+    },
+    "parentResources": {
+      "type": "array",
+      "description": "ids of parent resources (e.g. the meter this load sits behind).",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "EnergyResourceLoadAttributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Attributes for controllable load resources. Includes common fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, gps) plus load-specific fields (controlProtocol, loadCategory).",
+      "properties": {
+        "make": { "type": "string", "description": "Manufacturer (free text)." },
+        "model": { "type": "string", "description": "Model number (free text)." },
+        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power draw, kW. CIM: GeneratingUnit.maxOperatingP." },
+        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
+        "commissioningDate": { "type": "string", "format": "date", "description": "ISO 8601 date when this load was commissioned." },
+        "gps": {
+          "type": "string",
+          "pattern": "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$",
+          "description": "GPS coordinates as 'lat,lng'."
+        },
+        "controlProtocol": {
+          "type": "string",
+          "enum": ["OpenADR_2.0b", "OCPP_2.0.1", "SunSpec_Modbus", "EEBus", "Modbus", "Other"],
+          "description": "Demand-response / control protocol supported by this load device."
+        },
+        "loadCategory": {
+          "type": "string",
+          "enum": ["Heating", "Cooling", "WaterHeating", "Lighting", "EV", "Industrial", "Other"],
+          "description": "Functional category of this load. CIM: ConformLoad.conformLoadSchedule / load classification."
+        }
+      }
+    }
+  }
+}
