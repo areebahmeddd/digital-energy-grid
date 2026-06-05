@@ -17,7 +17,9 @@
       "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
       "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.beckn.io/Quantity/context.jsonld",
+      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+      "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -202,6 +204,46 @@
       "participants": [
         { "role": "buyer", "participantId": "tpddl-north-delhi" },
         { "role": "seller", "participantId": "greenflex-agg" }
+      ],
+      "consideration": [
+        {
+          "id": "payment-term-pac-001",
+          "considerationAttributes": {
+            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "amount": { "currency": "INR", "value": 332.5 },
+            "settlementStatus": "COMPLETE",
+            "paymentTrigger": "ON_FULFILLMENT",
+            "payTo": { "accountHolderName": "GreenFlex Aggregator Pvt Ltd", "accountNumber": "4567890123456", "branchCode": "ICIC0002345", "bankName": "ICICI Bank" },
+            "acceptedPaymentMethods": ["BANK_TRANSFER"]
+          }
+        },
+        {
+          "id": "auto-revenue-flows",
+          "considerationAttributes": {
+            "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
+            "@type": "RevenueFlow",
+            "revenueFlows": [
+              { "role": "seller", "value": 332.5, "currency": "INR", "description": "PAC clearing payment to GreenFlex Aggregator" },
+              { "role": "buyer", "value": -332.5, "currency": "INR", "description": "PAC clearing cost to TPDDL North Delhi" }
+            ]
+          }
+        }
+      ],
+      "settlements": [
+        {
+          "id": "settlement-pac-001",
+          "considerationId": "payment-term-pac-001",
+          "status": "COMPLETE",
+          "settlementAttributes": {
+            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "settlementFor": "Demand flex PAC event 2026-06-15: 95 kWh curtailed at 3.5 INR/kWh",
+            "totalPayable": 332.5,
+            "paidAt": "2026-06-15T17:00:00Z",
+            "txnRef": "TXN-PAC-001-SETTLED"
+          }
+        }
       ]
     }
   }
