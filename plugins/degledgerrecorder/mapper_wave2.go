@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Side identifies which discom's ledgerUri to read from the payload.
+// Side identifies which discom's ledgerUrl to read from the payload.
 type Side string
 
 const (
@@ -235,12 +235,12 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 	return records, nil
 }
 
-// ExtractWave2DiscomLedgerUri returns the ledgerUri for the requested side from
-// `participants[role=buyerDiscom|sellerDiscom].participantAttributes.ledgerUri`.
-// Returns "" if the side is missing or has no ledgerUri.
-func ExtractWave2DiscomLedgerUri(payload *Wave2OnConfirmPayload, side Side) string {
+// ExtractWave2DiscomLedgerURL returns the ledgerUrl for the requested side from
+// `participants[role=buyerDiscom|sellerDiscom].participantAttributes.ledgerUrl`.
+// Returns "" if the side is missing or has no ledgerUrl.
+func ExtractWave2DiscomLedgerURL(payload *Wave2OnConfirmPayload, side Side) string {
 	part := findWave2Participant(payload.Message.Contract.Participants, string(side))
-	return wave2StringAttr(part, "ledgerUri")
+	return wave2StringAttr(part, "ledgerUrl")
 }
 
 // findWave2Participant returns the first participant entry matching the role.
@@ -478,7 +478,7 @@ func extractWave2IntervalIDs(offerAttrs map[string]interface{}) []int {
 // -------------------------
 
 // Wave2StatusPayload is the wave2 `status` request body. The contract carries
-// minimum id + participants (with ledgerUri) so the plugin can route to the
+// minimum id + participants (with ledgerUrl) so the plugin can route to the
 // right ledger without a cache lookup. Carries optional ack/error so
 // ShouldSkipCascade can stay symmetric across all three message shapes.
 type Wave2StatusPayload struct {
@@ -507,12 +507,12 @@ func ParseStatusWave2(body []byte) (*Wave2StatusPayload, error) {
 	return &payload, nil
 }
 
-// ExtractWave2StatusDiscomLedgerUri returns the ledgerUri for the given side
+// ExtractWave2StatusDiscomLedgerURL returns the ledgerUrl for the given side
 // from a wave2 status payload's participants array.
-func ExtractWave2StatusDiscomLedgerUri(payload *Wave2StatusPayload, side Side) string {
+func ExtractWave2StatusDiscomLedgerURL(payload *Wave2StatusPayload, side Side) string {
 	for i := range payload.Message.Contract.Participants {
 		if payload.Message.Contract.Participants[i].Role == string(side) {
-			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUri")
+			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUrl")
 		}
 	}
 	return ""
@@ -669,11 +669,11 @@ func timeseriesHasPerformanceData(ts map[string]interface{}) bool {
 	return false
 }
 
-// ExtractWave2OnStatusDiscomLedgerUri returns ledgerUri for the given side.
-func ExtractWave2OnStatusDiscomLedgerUri(payload *Wave2OnStatusPayload, side Side) string {
+// ExtractWave2OnStatusDiscomLedgerURL returns ledgerUrl for the given side.
+func ExtractWave2OnStatusDiscomLedgerURL(payload *Wave2OnStatusPayload, side Side) string {
 	for i := range payload.Message.Contract.Participants {
 		if payload.Message.Contract.Participants[i].Role == string(side) {
-			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUri")
+			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUrl")
 		}
 	}
 	return ""
@@ -692,7 +692,7 @@ func DeriveSenderHostFromWave2OnStatus(payload *Wave2OnStatusPayload, role strin
 }
 
 // ParticipantEndpointURI returns participants[role=<role>].participantAttributes.<key>,
-// or "" if missing. Used to look up bapUri/bppUri/ledgerUri for trading platforms
+// or "" if missing. Used to look up platformUrl/ledgerUrl for trading platforms
 // and discoms when rewriting context for a cascade sub-transaction.
 func ParticipantEndpointURI(participants []Wave2Participant, role, key string) string {
 	for i := range participants {

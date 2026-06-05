@@ -14,7 +14,6 @@ This plugin intercepts Beckn protocol messages and records or cascades them to t
 - Asynchronous operation for legacy writes and status/on_status cascades
 - Blocking Wave 2 Beckn `on_confirm` ledger writes before onward forwarding
 - Configurable role (BUYER, SELLER, BUYER_DISCOM, SELLER_DISCOM)
-- Idempotent requests using client reference
 - **Beckn-style signature authentication** (same as beckn-onix outgoing messages)
 - Detailed request/response logging for debugging
 
@@ -61,7 +60,7 @@ steps:
 | Option | Values | Description |
 |--------|--------|-------------|
 | `payloadShape` | `wave1`, `wave2` | Which on_confirm body the mapper expects. `wave1` = `beckn:Order`/`orderItems` (p2p-trading-ies-wave1). `wave2` = `message.contract.commitments` (p2p-trading-ies-wave2, P2PTrade/v2.0). |
-| `ledgerUriSource` | `config`, `payload` | Where to find the target ledger base URL. `config` reads `ledgerHost`. `payload` reads `participants[role=buyerDiscom\|sellerDiscom].participantAttributes.ledgerUri` from the on_confirm body — required for wave2 since the URI varies per discom. |
+| `ledgerUriSource` | `config`, `payload` | Where to find the target ledger base URL. `config` reads `ledgerHost`. `payload` reads `participants[role=buyerDiscom\|sellerDiscom].participantAttributes.ledgerUrl` from the on_confirm body — required for wave2 since the URL varies per discom. |
 | `ledgerApi` | `legacy_ledger`, `beckn` | API style. `legacy_ledger` POSTs to `<uri>/ledger/put` with the custom JSON body. `beckn` POSTs the original on_confirm verbatim (with rewritten context) to `<uri>/on_confirm` and expects a beckn ACK envelope wrapping the legacy ledger response. |
 
 #### Core Settings
@@ -81,12 +80,12 @@ steps:
 #### Per-call ledger URI from payload
 
 When `ledgerUriSource=payload`, the plugin picks the URI based on `role`:
-- `BUYER` → `participants[role=buyerDiscom].participantAttributes.ledgerUri`
-- `SELLER` → `participants[role=sellerDiscom].participantAttributes.ledgerUri`
+- `BUYER` → `participants[role=buyerDiscom].participantAttributes.ledgerUrl`
+- `SELLER` → `participants[role=sellerDiscom].participantAttributes.ledgerUrl`
 
 A platform instance (BAP or BPP) only writes to its own side's discom ledger. The same trade is logged in two ledgers (one per discom) at the system level, with each platform contacting only its own; if the two discoms share a TSP, both calls land at the same URL.
 
-The discom `ledgerUri` is carried via the [`DiscomLedgerProvider/v1.0`](../../specification/schema/DiscomLedgerProvider/v1.0/) schema.
+The discom `ledgerUrl` is carried via the [`DiscomLedgerProvider/v1.0`](../../specification/schema/DiscomLedgerProvider/v1.0/) schema.
 
 #### `ledgerApi: beckn` mode
 
@@ -109,9 +108,6 @@ The plugin then POSTs the rewritten body to `<discomLedgerUri>/bap/receiver/on_c
     "status":    "ACK",
     "messageId": "8153a419-35b1-4ec8-bd23-16fcff1b7964",
     "ledger":    { "success": true, "recordId": "rec-...", "creationTime": "...", "rowDigest": "sha256:..." }
-  },
-  "details": {
-    "message": "Records already exist; skipped duplicate on_confirm"
   }
 }
 ```
@@ -121,10 +117,6 @@ object. The inner `message.ledger` block carries the same fields the legacy
 `/ledger/put` API used to return; the plugin surfaces it identically so
 call-site logging stays uniform across the two modes.
 
-If `message.ledger.message` is empty (e.g. when the ledger skips a duplicate
-write), the plugin copies `details.message` into the ledger response so the
-success log always includes a human-readable reason.
-
 For Wave 2 `ledgerApi: beckn`, every Beckn send must receive HTTP 2xx with `message.status = "ACK"` (flat — no nested `ack` object). Network errors, timeouts, non-2xx responses, malformed bodies, missing ACK, and NACK are retried using `retryCount` and `retryMaxTTL`.
 
 Each send attempt waits up to `asyncTimeout` for ACK. `asyncTimeout` defaults to `5000` ms and is configurable in the plugin YAML. `retryBackoff` is only the wait between failed attempts and defaults to `5s`.
@@ -133,7 +125,7 @@ Each send attempt waits up to `asyncTimeout` for ACK. `asyncTimeout` defaults to
 retryBackoff: "5s"
 ```
 
-Wave 2 `on_confirm` is synchronous. The ONIX step returns `nil` only after the DISCOM ledger returns ACK. If the ledger write is still not ACKed after retry exhaustion, or the target `ledgerUri` cannot be resolved from the contract participants, the step returns an error and ONIX does not forward the original `on_confirm` to the next trading platform. On success, the log line includes the `message` field from the ledger response (or `details.message` when the ledger skips a duplicate).
+Wave 2 `on_confirm` is synchronous. The ONIX step returns `nil` only after the DISCOM ledger returns ACK. If the ledger write is still not ACKed after retry exhaustion, or the target `ledgerUrl` cannot be resolved from the contract participants, the step returns an error and ONIX does not forward the original `on_confirm` to the next trading platform.
 
 Wave 2 `status` and `on_status` cascades remain asynchronous. The plugin keeps the pending payload in memory only while retrying and removes it after ACK or final failure. If an async `on_status` cascade exhausts retries, the plugin sends a best-effort error `on_status` callback back to the original sender with `error.code = "DEG_ASYNC_ACK_TIMEOUT"`.
 
@@ -246,7 +238,7 @@ plugins:
     - id: degledgerrecorder
       config:
         payloadShape: wave2
-        ledgerUriSource: payload         # read from participants[role=*Discom].participantAttributes.ledgerUri
+        ledgerUriSource: payload         # read from participants[role=*Discom].participantAttributes.ledgerUrl
         ledgerApi: legacy_ledger         # flip to "beckn" once the TSP is upgraded
         # ledgerHost intentionally omitted — the URI comes from the payload
         role: "BUYER"                    # BUYER on BAP side reads buyerDiscom; SELLER on BPP reads sellerDiscom
@@ -266,7 +258,7 @@ The on_confirm payload must carry, in `message.contract.participants`:
     "@context": ".../specification/schema/DiscomLedgerProvider/v1.0/context.jsonld",
     "@type": "DiscomLedgerProvider",
     "utilityId": "BRPL-DL",
-    "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+    "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
   }
 }
 ```

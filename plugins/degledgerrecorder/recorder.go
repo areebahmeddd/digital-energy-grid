@@ -393,7 +393,7 @@ func (r *DEGLedgerRecorder) sendBecknOnConfirmAsync(parentCtx *model.StepContext
 
 // resolveWave2BaseURL picks the target ledger URL according to LedgerUriSource.
 // For payload mode, the side is determined by the configured role:
-// BUYER → buyerDiscom.ledgerUri, SELLER → sellerDiscom.ledgerUri.
+// BUYER → buyerDiscom.ledgerUrl, SELLER → sellerDiscom.ledgerUrl.
 func (r *DEGLedgerRecorder) resolveWave2BaseURL(payload *Wave2OnConfirmPayload) (string, error) {
 	switch r.config.LedgerUriSource {
 	case LedgerUriSourceConfig:
@@ -411,9 +411,9 @@ func (r *DEGLedgerRecorder) resolveWave2BaseURL(payload *Wave2OnConfirmPayload) 
 		default:
 			return "", fmt.Errorf("payload-sourced ledger URI requires role BUYER or SELLER, got %s", r.config.Role)
 		}
-		uri := ExtractWave2DiscomLedgerUri(payload, side)
+		uri := ExtractWave2DiscomLedgerURL(payload, side)
 		if uri == "" {
-			return "", fmt.Errorf("no ledgerUri found in participants[role=%s].participantAttributes", side)
+			return "", fmt.Errorf("no ledgerUrl found in participants[role=%s].participantAttributes", side)
 		}
 		return uri, nil
 	default:
@@ -488,7 +488,7 @@ func (r *DEGLedgerRecorder) handleOnStatus(ctx *model.StepContext) error {
 // handleStatus forwards an incoming wave2 beckn `status` request to the
 // appropriate discom ledger as a beckn `status` call. The ledger will
 // asynchronously call back with `on_status`.
-// SELLER role → sellerDiscom.ledgerUri; BUYER role → buyerDiscom.ledgerUri.
+// SELLER role → sellerDiscom.ledgerUrl; BUYER role → buyerDiscom.ledgerUrl.
 func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	log.Infof(ctx, "DEGLedgerRecorder: processing status (role=%s, ledgerApi=%s)", r.config.Role, r.config.LedgerApi)
 
@@ -522,10 +522,10 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 
 	ledgerHostBase := r.config.LedgerHost
 	if r.config.LedgerUriSource == LedgerUriSourcePayload {
-		ledgerHostBase = ExtractWave2StatusDiscomLedgerUri(payload, side)
+		ledgerHostBase = ExtractWave2StatusDiscomLedgerURL(payload, side)
 	}
 	if ledgerHostBase == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: no ledger URI resolved for status forwarding (role=%s, side=%s)", r.config.Role, side)
+		log.Warnf(ctx, "DEGLedgerRecorder: no ledgerUrl resolved for status forwarding (role=%s, side=%s)", r.config.Role, side)
 		return nil
 	}
 	// status is a REQUEST action; Beckn convention is requester=BAP, responder=BPP.
@@ -535,12 +535,12 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	// will land), and in context.bppUri the ledger's BPP-receiver endpoint.
 	ledgerEndpoint := BppReceiverEndpoint(ledgerHostBase)
 
-	// platformUri comes from participants[<own-role>].participantAttributes.platformUri.
+	// platformUrl comes from participants[<own-role>].participantAttributes.platformUrl.
 	parts := payload.Message.Contract.Participants
 	ownPlatformRole := wave2PlatformRole(r.config.Role)
-	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUri")
+	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUrl")
 	if ownPlatformURI == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s]; skipping status forward (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUrl not found in participants[%s]; skipping status forward (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
 	}
 	// Use participantId from the participants array for bapId/bppId so they are
@@ -569,7 +569,7 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	// must kick off the sub-transaction to the PEER's discom as well. In a normal
 	// 2-platform setup peerPlatformURI != ownPlatformURI and none of this runs.
 	peerRole := wave2PeerPlatformRole(r.config.Role)
-	if ParticipantEndpointURI(parts, peerRole, "platformUri") != ownPlatformURI {
+	if ParticipantEndpointURI(parts, peerRole, "platformUrl") != ownPlatformURI {
 		return nil // 2-platform topology — peer will handle its own discom
 	}
 
@@ -584,9 +584,9 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		return nil // both roles share one discom — already sent above
 	}
 
-	peerLedgerHost := ExtractWave2StatusDiscomLedgerUri(payload, peerDiscomSide)
+	peerLedgerHost := ExtractWave2StatusDiscomLedgerURL(payload, peerDiscomSide)
 	if peerLedgerHost == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledger URI not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
+		log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledgerUrl not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
 		return nil
 	}
 
@@ -663,9 +663,9 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	// (BPP-side of leg 5). The platform plays BPP-caller on both forwards.
 	parts := payload.Message.Contract.Participants
 	ownPlatformRole := wave2PlatformRole(r.config.Role)
-	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUri")
+	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUrl")
 	if ownPlatformURI == "" {
-		log.Warnf(ctx, "DEGLedgerRecorder: own platformUri not found in participants[%s] (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
+		log.Warnf(ctx, "DEGLedgerRecorder: own platformUrl not found in participants[%s] (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
 	}
 	ownBppEndpoint := BppCallerEndpoint(ownPlatformURI)
@@ -679,9 +679,9 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		// Rule 2a: our discom just computed its allocation — pass the on_status to
 		// the peer so the peer can in turn cascade to its own discom (Rule 2b).
 		peerRole := wave2PeerPlatformRole(r.config.Role)
-		peerPlatformURI := ParticipantEndpointURI(parts, peerRole, "platformUri")
+		peerPlatformURI := ParticipantEndpointURI(parts, peerRole, "platformUrl")
 		if peerPlatformURI == "" {
-			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUri not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
+			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUrl not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
 			return nil
 		}
 
@@ -704,9 +704,9 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 				log.Debugf(ctx, "DEGLedgerRecorder: prosumer: no performance data; skipping peer discom cascade (transaction_id=%s)", payload.Context.TransactionID)
 				return nil
 			}
-			peerDiscomHost := ExtractWave2OnStatusDiscomLedgerUri(payload, peerDiscomSide)
+			peerDiscomHost := ExtractWave2OnStatusDiscomLedgerURL(payload, peerDiscomSide)
 			if peerDiscomHost == "" {
-				log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledger URI not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
+				log.Warnf(ctx, "DEGLedgerRecorder: prosumer: peer discom ledgerUrl not found in payload participants (transaction_id=%s)", payload.Context.TransactionID)
 				return nil
 			}
 			peerDiscomEndpoint := BapReceiverEndpoint(peerDiscomHost)
@@ -739,7 +739,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		}
 		discomLedgerHost := r.config.LedgerHost
 		if r.config.LedgerUriSource == LedgerUriSourcePayload {
-			discomLedgerHost = ExtractWave2OnStatusDiscomLedgerUri(payload, ownDiscomSide)
+			discomLedgerHost = ExtractWave2OnStatusDiscomLedgerURL(payload, ownDiscomSide)
 		}
 		discomLedgerEndpoint := BapReceiverEndpoint(discomLedgerHost)
 		branch = "discom"

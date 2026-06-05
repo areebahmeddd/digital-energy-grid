@@ -34,7 +34,7 @@ const (
 // Sources for the target ledger URI.
 const (
 	LedgerUriSourceConfig  = "config"  // use plugin config ledgerHost
-	LedgerUriSourcePayload = "payload" // read participants[role=*Discom].participantAttributes.ledgerUri from payload
+	LedgerUriSourcePayload = "payload" // read participants[role=*Discom].participantAttributes.ledgerUrl from payload
 )
 
 // Ledger API styles the plugin can speak to.
@@ -51,7 +51,7 @@ type Config struct {
 
 	// LedgerUriSource determines where the target ledger URI comes from.
 	// Required. One of: "config" (uses LedgerHost), "payload" (reads
-	// participants[role=*Discom].participantAttributes.ledgerUri).
+	// participants[role=*Discom].participantAttributes.ledgerUrl).
 	LedgerUriSource string
 
 	// LedgerApi selects which API style the plugin speaks.

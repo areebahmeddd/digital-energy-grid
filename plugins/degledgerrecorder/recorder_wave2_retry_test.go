@@ -258,12 +258,12 @@ func sampleWave2Status(ledgerURI string) string {
 	        {
 	          "role": "sellerPlatform",
 	          "participantId": "sellerapp.example.com",
-	          "participantAttributes": {"platformUri": "http://sellerapp.example.com:9000"}
+	          "participantAttributes": {"platformUrl": "http://sellerapp.example.com:9000"}
 	        },
 	        {
 	          "role": "sellerDiscom",
 	          "participantId": "seller-discom-ledger.example.com",
-	          "participantAttributes": {"ledgerUri": "` + ledgerURI + `"}
+	          "participantAttributes": {"ledgerUrl": "` + ledgerURI + `"}
 	        }
 	      ]
 	    }
@@ -293,12 +293,12 @@ func sampleWave2OnStatus(targetLedgerURI, originalSenderURI string) string {
 	        {
 	          "role": "sellerPlatform",
 	          "participantId": "sellerapp.example.com",
-	          "participantAttributes": {"platformUri": "http://sellerapp.example.com:9000"}
+	          "participantAttributes": {"platformUrl": "http://sellerapp.example.com:9000"}
 	        },
 	        {
 	          "role": "sellerDiscom",
 	          "participantId": "seller-discom-ledger.example.com",
-	          "participantAttributes": {"ledgerUri": "` + targetLedgerURI + `"}
+	          "participantAttributes": {"ledgerUrl": "` + targetLedgerURI + `"}
 	        }
 	      ],
 	      "commitments": [

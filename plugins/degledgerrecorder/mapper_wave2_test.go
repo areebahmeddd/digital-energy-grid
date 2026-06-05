@@ -7,7 +7,7 @@ import (
 // Trimmed wave2 on_confirm body covering all the fields the mapper reads:
 // context (transactionId, bapId, bppId, timestamp), participants
 // (buyerPlatform/sellerPlatform with utilityId+meterId, buyerDiscom/sellerDiscom with
-// ledgerUri), and a single commitment with a seller-side delivery window.
+// ledgerUrl), and a single commitment with a seller-side delivery window.
 const sampleWave2OnConfirm = `{
   "context": {
     "networkId": "nfh.global/testnet-deg",
@@ -95,7 +95,7 @@ const sampleWave2OnConfirm = `{
           "participantAttributes": {
             "@type": "DiscomLedgerProvider",
             "utilityId": "BRPL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
           }
         },
         {
@@ -104,7 +104,7 @@ const sampleWave2OnConfirm = `{
           "participantAttributes": {
             "@type": "DiscomLedgerProvider",
             "utilityId": "TPDDL-DL",
-            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
           }
         }
       ]
@@ -195,30 +195,41 @@ func TestMapWave2ToLedgerRecord_FallsBackToContextWhenParticipantIDEmpty(t *test
 	}
 }
 
-func TestExtractWave2DiscomLedgerUri(t *testing.T) {
+func TestExtractWave2DiscomLedgerURL(t *testing.T) {
 	p, err := ParseOnConfirmWave2([]byte(sampleWave2OnConfirm))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if got := ExtractWave2DiscomLedgerUri(p, SideBuyer); got != "https://ies-p2p-energy-ledger.beckn.io" {
-		t.Errorf("buyerDiscom ledgerUri: got %q", got)
+	if got := ExtractWave2DiscomLedgerURL(p, SideBuyer); got != "https://ies-p2p-energy-ledger.beckn.io" {
+		t.Errorf("buyerDiscom ledgerUrl: got %q", got)
 	}
-	if got := ExtractWave2DiscomLedgerUri(p, SideSeller); got != "https://ies-p2p-energy-ledger.beckn.io" {
-		t.Errorf("sellerDiscom ledgerUri: got %q", got)
+	if got := ExtractWave2DiscomLedgerURL(p, SideSeller); got != "https://ies-p2p-energy-ledger.beckn.io" {
+		t.Errorf("sellerDiscom ledgerUrl: got %q", got)
 	}
 }
 
-func TestExtractWave2DiscomLedgerUri_MissingReturnsEmpty(t *testing.T) {
-	const noLedgerUri = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"role":"buyerDiscom","participantId":"x"}]}}}`
-	p, err := ParseOnConfirmWave2([]byte(noLedgerUri))
+func TestExtractWave2DiscomLedgerURL_MissingReturnsEmpty(t *testing.T) {
+	const noLedgerURL = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"role":"buyerDiscom","participantId":"x"}]}}}`
+	p, err := ParseOnConfirmWave2([]byte(noLedgerURL))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if got := ExtractWave2DiscomLedgerUri(p, SideBuyer); got != "" {
+	if got := ExtractWave2DiscomLedgerURL(p, SideBuyer); got != "" {
 		t.Errorf("expected empty, got %q", got)
 	}
-	if got := ExtractWave2DiscomLedgerUri(p, SideSeller); got != "" {
+	if got := ExtractWave2DiscomLedgerURL(p, SideSeller); got != "" {
 		t.Errorf("expected empty for missing side, got %q", got)
+	}
+}
+
+func TestExtractWave2DiscomLedgerURL_DoesNotReadLegacyLedgerUri(t *testing.T) {
+	const legacyOnly = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"role":"buyerDiscom","participantId":"x","participantAttributes":{"ledgerUri":"https://legacy.example.com"}}]}}}`
+	p, err := ParseOnConfirmWave2([]byte(legacyOnly))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if got := ExtractWave2DiscomLedgerURL(p, SideBuyer); got != "" {
+		t.Errorf("expected legacy ledgerUri to be ignored, got %q", got)
 	}
 }
 
