@@ -34,7 +34,7 @@ The contract names four conceptual actors. Only buyer and seller speak Beckn dir
 | [EnergyTradeOffer](../../specification/schema/EnergyTradeOffer/v2.0/) | `offerAttributes` | Pricing model, validity / delivery window |
 | [EnergyTradeDelivery](../../specification/schema/EnergyTradeDelivery/v2.0/) | `performance.performanceAttributes` | Delivery status, meter readings, settled qty |
 | [DEGContract](../../specification/schema/DEGContract/v2.0/) | `contractAttributes` | Roles, policy reference, computed revenueFlows |
-| [DiscomLedgerProvider](../../specification/schema/DiscomLedgerProvider/v1.0/) | `participants[role=buyerDiscom\|sellerDiscom].participantAttributes` | Discom ledger TSP identity — `utilityId` + `ledgerUri` so the `degledgerrecorder` plugin can pick the right ledger URL per discom from the payload |
+| [DiscomLedgerProvider](../../specification/schema/DiscomLedgerProvider/v1.0/) | `participants[role=buyerDiscom\|sellerDiscom].participantAttributes` | Discom ledger TSP identity — `utilityId` + `ledgerUrl` so the `degledgerrecorder` plugin can pick the right ledger URL per discom from the payload |
 
 ## Postman
 
@@ -61,8 +61,8 @@ Signature/registry lookups currently target `nfh.global/testnet-deg` via the `al
 ## Ledger recording
 
 On `on_confirm` both platforms write a trade record to their own discom's ledger TSP via the [`degledgerrecorder`](../../plugins/degledgerrecorder/) plugin:
-- BAP-Receiver runs the plugin with `role: BUYER` and reads `participants[role=buyerDiscom].participantAttributes.ledgerUri` from the payload.
-- BPP-Caller runs the plugin with `role: SELLER` and reads `participants[role=sellerDiscom].participantAttributes.ledgerUri` from the payload.
+- BAP-Receiver runs the plugin with `role: BUYER` and reads `participants[role=buyerDiscom].participantAttributes.ledgerUrl` from the payload.
+- BPP-Caller runs the plugin with `role: SELLER` and reads `participants[role=sellerDiscom].participantAttributes.ledgerUrl` from the payload.
 
 Both URIs are wired in the example payloads to the IES ledger service (`https://ies-p2p-energy-ledger.beckn.io`); two discoms MAY share a TSP — each platform still writes only to its own side.
 
