@@ -52,7 +52,7 @@ Inherited by all seven kinds via `allOf`. Does **not** include `storageCapacityK
 | `make` | string | — | Manufacturer name |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥0 | `GeneratingUnit.maxOperatingP` | Nameplate peak power kW — kept for backward compatibility; prefer `maxExportKw` for new payloads |
-| `maxImportKw` | number | `PowerElectronicsConnection.minP` / `GeneratingUnit.minOperatingP` | Min operating power kW; **negative = max discharge/export** (e.g. -5 for 5 kW BESS or V2G); 0 for unidirectional |
+| `maxImportKw` | number ≥0 | `PowerElectronicsConnection.maxP` (absorption) | Max power drawn from grid (absorbed/charged), kW. Always ≥0. For BESS: max charge rate. For EV_V2G: max charge rate. Omit or 0 for pure generators. |
 | `maxExportKw` | number ≥0 | `GeneratingUnit.maxOperatingP` / `PowerElectronicsConnection.maxP` | Max operating power kW (nameplate in principal direction); supersedes `ratedPowerKw` |
 | `telemetryProvider` | string | — | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date-time) | — | ISO 8601 commissioning date-time |
@@ -85,7 +85,7 @@ Inherited by all seven kinds via `allOf`. Does **not** include `storageCapacityK
 
 ### EnergyResourceStorage (type: `BESS`)
 
-Stationary battery. `storageCapacityKwh` is exclusive to this kind. Charge and discharge power limits are expressed via common attributes: `maxExportKw` (charge rate) and `maxImportKw` (discharge rate as a negative value, e.g. -5 for 5 kW discharge).
+Stationary battery. `storageCapacityKwh` is exclusive to this kind. Discharge rate: `maxExportKw` (≥0). Charge rate: `maxImportKw` (≥0). Both in common attributes.
 
 | Field | Type | CIM alignment | Description |
 |-------|------|---------------|-------------|
@@ -95,7 +95,7 @@ Stationary battery. `storageCapacityKwh` is exclusive to this kind. Charge and d
 
 ### EnergyResourceEVCharger (type: `EV_CHARGER` | `EV_V2G`)
 
-EV charging station (EVSE) — a **flexible load**, not a storage resource. The EV battery is the storage; the EVSE is the charge/discharge interface. `EV_V2G` is a specialisation of `EV_CHARGER` with bidirectional ISO 15118-20 / OCPP 2.1 BPT capability; express power range via common attributes: `maxExportKw` (charge) and `maxImportKw` (negative, V2G discharge).
+EV charging station (EVSE) — a **flexible load**, not a storage resource. The EV battery is storage; the EVSE is the charge/discharge interface. `EV_V2G` is a specialisation of `EV_CHARGER` with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. V2G discharge: `maxExportKw` (≥0). Charge rate: `maxImportKw` (≥0).
 
 | Field | Type | Standard | Description |
 |-------|------|----------|-------------|
@@ -212,10 +212,10 @@ A single `customerNumber` can span arbitrary asset topologies.
 
 | Change | v1.1 | v1.2 |
 |--------|------|------|
-| Power fields extended | `attributes.ratedPowerKw` | `ratedPowerKw` retained; add `attributes.maxExportKw` (preferred, ≥0) and `attributes.maxImportKw` (negative for discharge) |
+| Power fields extended | `attributes.ratedPowerKw` | `ratedPowerKw` retained; add `attributes.maxExportKw` (≥0, grid injection) and `attributes.maxImportKw` (≥0, grid absorption) |
 | Storage capacity field renamed | `attributes.energyCapacityKwh` | `attributes.storageCapacityKwh` |
 | EV kind separated from storage | `EnergyResourceStorage (EV_CHARGER, EV_V2G)` | new `EnergyResourceEVCharger` kind |
-| Storage charge/discharge rates | `maxChargeRateKw`, `maxDischargeRateKw` on storage | `maxExportKw` (charge) and `maxImportKw` (discharge, negative) in common attributes |
+| Storage charge/discharge rates | `maxChargeRateKw`, `maxDischargeRateKw` on storage | `maxExportKw` (discharge, ≥0) and `maxImportKw` (charge, ≥0) in common attributes |
 | SOLAR deprecated | `type: "SOLAR"` | `type: "SOLAR_PV"` (preferred) |
 | BATTERY deprecated | `type: "BATTERY"` | `type: "BESS"` (preferred) |
 | EnergyResource now typed | single flat schema | `oneOf` 7 composable kinds |

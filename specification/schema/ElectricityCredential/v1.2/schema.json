@@ -121,7 +121,7 @@
         },
         "EnergyResourceCommonAttributes": {
             "type": "object",
-            "description": "Base attributes shared by all EnergyResource kinds. maxImportKw/maxExportKw replace the former ratedPowerKw: maxExportKw is the nameplate rated power in the principal direction; maxImportKw can be negative to express discharge/export capacity (e.g. -5 for 5 kW BESS or V2G discharge). storageCapacityKwh belongs exclusively to EnergyResourceStorage.",
+            "description": "Base attributes shared by all EnergyResource kinds. maxExportKw (≥0) is max power injected to grid; maxImportKw (≥0) is max power drawn from grid. Both are non-negative directional fields. storageCapacityKwh belongs exclusively to EnergyResourceStorage.",
             "additionalProperties": true,
             "properties": {
                 "make": { "type": "string", "description": "Manufacturer name." },
@@ -209,7 +209,7 @@
             ]
         },
         "EnergyResourceStorageAttributes": {
-            "description": "Attributes for stationary energy storage assets (BESS). CIM: BatteryUnit (IEC 61970-302). storageCapacityKwh is ONLY on this attributes type. Charge/discharge power limits are expressed via maxExportKw (charge) and maxImportKw (discharge, as a negative value) in EnergyResourceCommonAttributes.",
+            "description": "Attributes for stationary energy storage assets (BESS). CIM: BatteryUnit (IEC 61970-302). storageCapacityKwh is ONLY on this attributes type. Discharge power: maxExportKw (≥0). Charge power: maxImportKw (≥0). Both in EnergyResourceCommonAttributes.",
             "allOf": [
                 { "$ref": "#/$defs/EnergyResourceCommonAttributes" },
                 {
@@ -236,7 +236,7 @@
             ]
         },
         "EnergyResourceEVChargerAttributes": {
-            "description": "Attributes for EV charging stations. EV_CHARGER is a flexible load — the EVSE hardware at the grid connection point, NOT a storage resource. EV_V2G is a specialisation of EV_CHARGER with bidirectional ISO 15118-20 / OCPP 2.1 BPT capability; express power limits via maxImportKw (negative, discharge) and maxExportKw (charge) in common attributes. CIM: ElectricVehicleChargingStation (CIM17+).",
+            "description": "Attributes for EV charging stations. EV_CHARGER is a flexible load — the EVSE hardware at the grid connection point, NOT a storage resource. EV_V2G is a specialisation of EV_CHARGER with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. V2G discharge: maxExportKw (≥0); charge: maxImportKw (≥0). CIM: ElectricVehicleChargingStation (CIM17+).",
             "allOf": [
                 { "$ref": "#/$defs/EnergyResourceCommonAttributes" },
                 {
@@ -381,7 +381,7 @@
         },
         "EnergyResourceEVCharger": {
             "type": "object",
-            "description": "EV charging station (EVSE). A flexible load — NOT a storage resource. The EV battery is the storage; the EVSE is the charge/discharge interface. EV_V2G is a specialisation of EV_CHARGER with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability; express power range with maxImportKw (negative, discharge) and maxExportKw (charge) in common attributes. CIM: ElectricVehicleChargingStation (CIM17+).",
+            "description": "EV charging station (EVSE). A flexible load — NOT a storage resource. The EV battery is storage; the EVSE is the charge/discharge interface. EV_V2G has ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. V2G discharge: maxExportKw (≥0); charge: maxImportKw (≥0). CIM: ElectricVehicleChargingStation (CIM17+).",
             "properties": {
                 "type": {
                     "type": "string",
@@ -422,7 +422,7 @@
         },
         "EnergyResource": {
             "type": "object",
-            "description": "Composable energy resource, discriminated by 'type' into one of seven kinds. id and type are required. All other attributes live in the kind-specific 'attributes' bag which inherits EnergyResourceCommonAttributes via allOf. maxImportKw/maxExportKw in common attributes replace the former ratedPowerKw. Only EnergyResourceStorage carries storageCapacityKwh. EV_CHARGER/EV_V2G are their own kind (not storage). INVERTER captures IEEE 1547 grid-support capabilities.",
+            "description": "Composable energy resource, discriminated by 'type' into one of seven kinds. id and type are required. All other attributes live in the 'attributes' bag which inherits EnergyResourceCommonAttributes via allOf. maxExportKw (≥0) and maxImportKw (≥0) replace the former ratedPowerKw. Only EnergyResourceStorage carries storageCapacityKwh. EV_CHARGER/EV_V2G are their own kind (not storage). INVERTER captures IEEE 1547 grid-support capabilities.",
             "required": ["id", "type"],
             "properties": {
                 "id": { "type": "string", "minLength": 1, "description": "Stable identifier. For METER: meter serial number. For DERs: any stable scheme." },
