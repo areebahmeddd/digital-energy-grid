@@ -13,35 +13,28 @@
       "@id": "deg:EnergyResource",
       "@type": "rdfs:Class",
       "rdfs:label": "Energy Resource",
-      "rdfs:comment": "Canonical energy-asset class. Top-level: id, type, attributes, subResources, parentResources."
+      "rdfs:comment": "Canonical energy-asset class. Inherits EnergyResourceCommon via allOf: id, type, make, model, maxImportKw, maxExportKw, energyCapacityKwh, telemetryProvider, commissioningDate, location, subResources, parentResources."
     },
     {
-      "@id": "deg:CommonResourceAttributes",
+      "@id": "deg:EnergyResourceCommon",
       "@type": "rdfs:Class",
-      "rdfs:label": "Common Resource Attributes",
-      "rdfs:comment": "Dimensioning fields shared across all resource types. Live inside EnergyResource.attributes."
+      "rdfs:label": "Energy Resource Common",
+      "rdfs:comment": "Base schema defining all common fields for EnergyResource types. Inherited via allOf."
     },
     {
       "@id": "deg:resourceType",
       "@type": "rdf:Property",
       "rdfs:label": "Resource Type",
-      "rdfs:comment": "Open-string asset class: METER, SOLAR, SOLAR_PV, WIND, HYDRO, BATTERY, BESS, EV_CHARGER, EV_V2G, CONTROLLABLE_LOAD, …",
-      "rdfs:domain": { "@id": "deg:EnergyResource" },
+      "rdfs:comment": "Asset class: METER, DT, BUS, FEEDER, SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL, BESS, EV_CHARGER, EV_V2G, INVERTER, SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD, MICROGRID. Deprecated: SOLAR (use SOLAR_PV), BATTERY (use BESS).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:string"
-    },
-    {
-      "@id": "deg:attributes",
-      "@type": "rdf:Property",
-      "rdfs:label": "Attributes",
-      "rdfs:comment": "Open attribute bag. Contains CommonResourceAttributes fields plus any type-specific fields.",
-      "rdfs:domain": { "@id": "deg:EnergyResource" }
     },
     {
       "@id": "deg:make",
       "@type": "rdf:Property",
       "rdfs:label": "Make",
       "rdfs:comment": "Manufacturer (free text).",
-      "rdfs:domain": { "@id": "deg:CommonResourceAttributes" },
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:string"
     },
     {
@@ -49,23 +42,39 @@
       "@type": "rdf:Property",
       "rdfs:label": "Model",
       "rdfs:comment": "Model (free text).",
-      "rdfs:domain": { "@id": "deg:CommonResourceAttributes" },
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:string"
     },
     {
       "@id": "deg:ratedPowerKw",
       "@type": "rdf:Property",
       "rdfs:label": "Rated Power (kW)",
-      "rdfs:comment": "Manufacturer-rated peak dispatchable power, kW.",
-      "rdfs:domain": { "@id": "deg:CommonResourceAttributes" },
+      "rdfs:comment": "Manufacturer-rated peak power in kW. Kept for backward compatibility. Prefer maxExportKw for new payloads.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": "xsd:decimal"
+    },
+    {
+      "@id": "deg:maxImportKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Max Import Power (kW)",
+      "rdfs:comment": "Maximum power drawn from the grid (absorbed/charged), kW. Always ≥0. For bidirectional resources (BESS, V2G) this is the max charge rate. CIM: PowerElectronicsConnection.maxP (absorption direction).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": "xsd:decimal"
+    },
+    {
+      "@id": "deg:maxExportKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Max Export Power (kW)",
+      "rdfs:comment": "Maximum power injected to the grid (generated/discharged), kW. Always ≥0. Supersedes ratedPowerKw. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection direction).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:decimal"
     },
     {
       "@id": "deg:energyCapacityKwh",
       "@type": "rdf:Property",
       "rdfs:label": "Energy Capacity (kWh)",
-      "rdfs:comment": "Rated stored-energy capacity, kWh. For storage-class resources.",
-      "rdfs:domain": { "@id": "deg:CommonResourceAttributes" },
+      "rdfs:comment": "Rated stored-energy capacity, kWh. For storage resources (BESS). CIM: BatteryUnit.ratedE.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:decimal"
     },
     {
@@ -73,48 +82,43 @@
       "@type": "rdf:Property",
       "rdfs:label": "Telemetry Provider",
       "rdfs:comment": "Vendor API / data source identifier for telemetry.",
-      "rdfs:domain": { "@id": "deg:CommonResourceAttributes" },
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Commissioning Date",
+      "rdfs:comment": "ISO 8601 date-time the asset was commissioned.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": "xsd:dateTime"
+    },
+    {
+      "@id": "deg:location",
+      "@type": "rdf:Property",
+      "rdfs:label": "Location",
+      "rdfs:comment": "Physical location of the asset: geo (GeoJSON geometry, coordinates [lon, lat]) + optional postal address. Applies to all resource types.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" }
     },
     {
       "@id": "deg:subResources",
       "@type": "rdf:Property",
       "rdfs:label": "Sub Resources",
-      "rdfs:comment": "Child resources (topology: downward). Each item is an id string or inline EnergyResource.",
-      "rdfs:domain": { "@id": "deg:EnergyResource" }
+      "rdfs:comment": "Child resources (topology: downward). Each item is an id string or inline EnergyResource. Recursive reference is valid in JSON Schema 2020-12.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" }
     },
     {
       "@id": "deg:parentResources",
       "@type": "rdf:Property",
       "rdfs:label": "Parent Resources",
-      "rdfs:comment": "Parent resource ids (topology: upward). String references only.",
-      "rdfs:domain": { "@id": "deg:EnergyResource" }
-    },
-    {
-      "@id": "deg:meterType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Meter Type",
-      "rdfs:comment": "Meter kind (Green Button / ESPI): AMR, AMI, Electromechanical, Forward, Reverse, Bidirectional, Prepaid, NetMeter, Other.",
-      "rdfs:range": "xsd:string"
-    },
-    {
-      "@id": "deg:gps",
-      "@type": "rdf:Property",
-      "rdfs:label": "GPS",
-      "rdfs:comment": "GPS coordinates of the asset as 'lat,lng'.",
-      "rdfs:range": "xsd:string"
-    },
-    {
-      "@id": "deg:meterLocation",
-      "@type": "rdf:Property",
-      "rdfs:label": "Meter Location",
-      "rdfs:comment": "Postal location of the meter (beckn Location shape)."
+      "rdfs:comment": "Parent resource ids (topology: upward). String references only to avoid cycles.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" }
     },
     {
       "@id": "deg:feeder",
       "@type": "rdf:Property",
       "rdfs:label": "Feeder",
-      "rdfs:comment": "Distribution feeder ID or name serving this meter.",
+      "rdfs:comment": "Distribution feeder ID or name serving this resource.",
       "rdfs:range": "xsd:string"
     },
     {

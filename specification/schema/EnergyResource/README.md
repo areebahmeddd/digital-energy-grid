@@ -2,7 +2,7 @@
 
 Canonical, technology-neutral class for any asset that produces, consumes, stores, or modulates energy — solar PV, wind, batteries / BESS, EVs and EVSE/V2G, controllable loads, the metering and connection points that anchor them, and aggregate sites that contain other resources.
 
-Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `EnergyResource` is one of the five core primitives at the neck of the hourglass — every higher-layer schema (P2P-trading, demand-flex, EV-charging, …) converges on this class to describe the assets a contract is about.
+`EnergyResource` is the shared asset-description class used by every DEG domain schema — P2P-trading, demand-flex, EV-charging, and ElectricityCredential all reference it to describe the physical asset a transaction or credential is about.
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyResource/v2.0`
 

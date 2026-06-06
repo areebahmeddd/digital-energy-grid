@@ -33,7 +33,9 @@ Each kind is also published as a **standalone reusable schema** in `specificatio
 |------|-------------------|------------------|-----------------------------|
 | `EnergyResourceMeter` | `EnergyResourceMeter/v1.0` | `METER` | `cim:Meter` / `cim:EndDevice` (IEC 61968-9) |
 | `EnergyResourceGenerator` | `EnergyResourceGenerator/v1.0` | `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` | `cim:GeneratingUnit` subtypes (IEC 61970-302) |
-| `EnergyResourceStorage` | `EnergyResourceStorage/v1.0` | `BESS`, `EV_CHARGER`, `EV_V2G` | `cim:BatteryUnit`, `cim:ElectricVehicleChargingStation` (IEC 61970-302) |
+| `EnergyResourceStorage` | `EnergyResourceStorage/v1.0` | `BESS` | `cim:BatteryUnit` (IEC 61970-302) |
+| `EnergyResourceEVCharger` | `EnergyResourceEVCharger/v1.0` | `EV_CHARGER`, `EV_V2G` | `cim:ElectricVehicleChargingStation` (CIM17+) |
+| `EnergyResourceInverter` | `EnergyResourceInverter/v1.0` | `INVERTER` | `cim:PowerElectronicsConnection` (IEC 61970-302) |
 | `EnergyResourceLoad` | `EnergyResourceLoad/v1.0` | `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` | `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301) |
 | `EnergyResourceNetwork` | `EnergyResourceNetwork/v1.0` | `DT`, `BUS`, `FEEDER`, `MICROGRID` | `cim:PowerTransformer`, `cim:BusbarSection`, `cim:Feeder`, `cim:Substation` (IEC 61970-301) |
 
@@ -43,16 +45,18 @@ Each kind is also published as a **standalone reusable schema** in `specificatio
 
 ## EnergyResourceCommonAttributes
 
-Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
+Inherited by all seven kinds via `allOf`. Does **not** include `storageCapacityKwh`.
 
 | Field | Type | CIM alignment | Description |
 |-------|------|---------------|-------------|
 | `make` | string | — | Manufacturer name |
 | `model` | string | — | Model number |
-| `ratedPowerKw` | number | `GeneratingUnit.maxOperatingP` | Nameplate peak power, kW |
+| `ratedPowerKw` | number ≥0 | `GeneratingUnit.maxOperatingP` | Nameplate peak power kW — kept for backward compatibility; prefer `maxExportKw` for new payloads |
+| `maxImportKw` | number | `PowerElectronicsConnection.minP` / `GeneratingUnit.minOperatingP` | Min operating power kW; **negative = max discharge/export** (e.g. -5 for 5 kW BESS or V2G); 0 for unidirectional |
+| `maxExportKw` | number ≥0 | `GeneratingUnit.maxOperatingP` / `PowerElectronicsConnection.maxP` | Max operating power kW (nameplate in principal direction); supersedes `ratedPowerKw` |
 | `telemetryProvider` | string | — | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date-time) | — | ISO 8601 commissioning date-time |
-| `location` | object | — | `geo` (GeoJSONGeometry) + optional `address` (PostalAddress) |
+| `location` | object | — | `geo` (GeoJSONGeometry, coordinates [lon, lat]) + optional `address` (PostalAddress) |
 
 ## Kind-specific attributes
 
@@ -79,15 +83,40 @@ Inherited by all five kinds. Does **not** include `storageCapacityKwh`.
 | `nominalPowerKw` | number | `GeneratingUnit.nominalP` | Nominal output power, kW (when distinct from peak) |
 | `efficiency` | number (0–100) | — | Conversion efficiency, % |
 
-### EnergyResourceStorage (type: `BESS` | `EV_CHARGER` | `EV_V2G`)
+### EnergyResourceStorage (type: `BESS`)
+
+Stationary battery. `storageCapacityKwh` is exclusive to this kind. Charge and discharge power limits are expressed via common attributes: `maxExportKw` (charge rate) and `maxImportKw` (discharge rate as a negative value, e.g. -5 for 5 kW discharge).
 
 | Field | Type | CIM alignment | Description |
 |-------|------|---------------|-------------|
 | `storageCapacityKwh` | number | `BatteryUnit.ratedE` | **Storage-only** — rated energy capacity, kWh |
 | `storageType` | enum | — | LithiumIon, LeadAcid, FlowBattery, NaS, NiCd, Flywheel, Other |
 | `stateOfHealthPct` | number (0–100) | — | Battery SoH as % of original capacity |
-| `maxChargeRateKw` | number | — | Maximum charge rate, kW |
-| `maxDischargeRateKw` | number | — | Maximum discharge rate, kW |
+
+### EnergyResourceEVCharger (type: `EV_CHARGER` | `EV_V2G`)
+
+EV charging station (EVSE) — a **flexible load**, not a storage resource. The EV battery is the storage; the EVSE is the charge/discharge interface. `EV_V2G` is a specialisation of `EV_CHARGER` with bidirectional ISO 15118-20 / OCPP 2.1 BPT capability; express power range via common attributes: `maxExportKw` (charge) and `maxImportKw` (negative, V2G discharge).
+
+| Field | Type | Standard | Description |
+|-------|------|----------|-------------|
+| `connectorType` | enum | IEC 62196 / CCS | Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other |
+| `controlProtocol` | enum | OCPP / ISO 15118 | OCPP_1.6, OCPP_2.0.1, OCPP_2.1, ISO_15118_2, ISO_15118_20, Other |
+| `v2xProtocol` | enum | ISO 15118-20 | CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other — present for EV_V2G only |
+
+### EnergyResourceInverter (type: `INVERTER`)
+
+Grid-connected power-electronics converter without a dedicated fuel source. Captures reactive-power and frequency-support capabilities per IEEE 1547-2018 and SunSpec DER Models 702–714. Use cases: standalone battery inverters, VPP aggregation points, grid-forming inverters for microgrid islanding.
+
+| Field | Type | Standard | Description |
+|-------|------|----------|-------------|
+| `ratedApparentPowerKva` | number | SunSpec 702 `maxVA` | Rated apparent power, kVA |
+| `maxReactivePowerKvar` | number | IEEE 1547 / SunSpec `maxVar` | Max reactive power injection (leading), kVAr |
+| `minReactivePowerKvar` | number | SunSpec `maxVarNeg` | Max reactive power absorption (lagging); usually negative |
+| `rideThroughCategory` | enum | IEEE 1547-2018 | CategoryI / CategoryII / CategoryIII |
+| `operatingMode` | enum | CIM `inverterMode` | GridFollowing / GridForming / Standby |
+| `voltVarEnabled` | boolean | IEEE 2030.5 `opModVoltVar` | Volt-VAr curve active |
+| `freqDroopEnabled` | boolean | SunSpec Model 711 | Frequency-Watt droop active |
+| `enterServiceRampTimeSec` | number | SunSpec 703 `ESRmpTms` | Ramp-up time after reconnect, seconds |
 
 ### EnergyResourceLoad (type: `SMART_HVAC` | `SMART_WATER_HEATER` | `CONTROLLABLE_LOAD`)
 
@@ -183,12 +212,16 @@ A single `customerNumber` can span arbitrary asset topologies.
 
 | Change | v1.1 | v1.2 |
 |--------|------|------|
+| Power fields extended | `attributes.ratedPowerKw` | `ratedPowerKw` retained; add `attributes.maxExportKw` (preferred, ≥0) and `attributes.maxImportKw` (negative for discharge) |
 | Storage capacity field renamed | `attributes.energyCapacityKwh` | `attributes.storageCapacityKwh` |
+| EV kind separated from storage | `EnergyResourceStorage (EV_CHARGER, EV_V2G)` | new `EnergyResourceEVCharger` kind |
+| Storage charge/discharge rates | `maxChargeRateKw`, `maxDischargeRateKw` on storage | `maxExportKw` (charge) and `maxImportKw` (discharge, negative) in common attributes |
 | SOLAR deprecated | `type: "SOLAR"` | `type: "SOLAR_PV"` (preferred) |
 | BATTERY deprecated | `type: "BATTERY"` | `type: "BESS"` (preferred) |
-| EnergyResource now typed | single flat schema | `oneOf` 5 composable kinds |
+| EnergyResource now typed | single flat schema | `oneOf` 7 composable kinds |
 | storageCapacityKwh scope | on EnergyResourceCommonAttributes | exclusive to EnergyResourceStorage |
-| New storage fields | — | `stateOfHealthPct`, `maxChargeRateKw`, `maxDischargeRateKw` |
+| New EV kind | — | `EnergyResourceEVCharger` with `connectorType`, `controlProtocol`, `v2xProtocol` |
+| New inverter kind | — | `EnergyResourceInverter` with `ratedApparentPowerKva`, `rideThroughCategory`, `operatingMode`, `voltVarEnabled`, `freqDroopEnabled`, etc. |
 | New generator fields | — | `nominalPowerKw`, `efficiency` |
 | New meter fields | — | `communicationTechnology` |
 | New network fields | — | `nominalVoltageKv`, `zone`, `substationId`, `feederCode` |
