@@ -4,96 +4,49 @@ info:
   version: 2.0.0
   description: >
     Canonical, technology-neutral class for any asset that produces,
-    consumes, stores, or modulates energy — solar PV, wind, hydro,
-    biogas, CHP, fuel cells, batteries / BESS, EVs and EVSE/V2G,
-    inverters, controllable loads (HVAC, water heaters, …), and the
-    metering points / connection points / feeders that anchor them.
+    consumes, stores, or modulates energy.
 
-    Structure
-    ─────────
-    EnergyResource inherits all fields from EnergyResourceCommon via
-    allOf. Type-specific fields are set directly at the top level —
-    no nested attributes bag.
+    Architecture
+    ────────────
+    EnergyResourceCommonAttributes defines common dimensioning fields
+    (make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+    commissioningDate, location) shared by all resource kinds.
 
-    EnergyResourceCommon defines:
-      id              — stable identifier
-      type            — asset class enum
-      make / model    — manufacturer info
-      maxImportKw      — min operating power (negative = max discharge/export)
-      maxExportKw      — max operating power (generation / charge)
-      energyCapacityKwh — storage capacity (omit for pure-flow resources)
-      telemetryProvider — vendor API / data source for telemetry
-      commissioningDate — ISO 8601 commissioning date-time
-      location        — physical location (GeoJSON + postal address)
-      subResources    — child resource ids or inline objects (topology)
+    EnergyResourceCommon is the base envelope inherited by every kind via allOf:
+      id            — stable identifier
+      type          — asset class discriminator
+      subResources  — child resource ids or inline objects (topology)
       parentResources — parent resource ids (topology)
+      attributes    — allOf [EnergyResourceCommonAttributes] + open bag
+
+    Seven typed kinds each do allOf [EnergyResourceCommon] and refine the
+    attributes bag with kind-specific fields:
+      EnergyResourceMeter     (METER)
+      EnergyResourceGenerator (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL)
+      EnergyResourceBESS      (BESS)
+      EnergyResourceEVCharger (EV_CHARGER, EV_V2G)
+      EnergyResourceInverter  (INVERTER)
+      EnergyResourceLoad      (SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD)
+      EnergyResourceNetwork   (DT, BUS, FEEDER, MICROGRID)
+
+    EnergyResource is the discriminated union: oneOf [all seven kinds].
+    Domain profiles reference individual kinds for targeted validation.
 
 components:
   schemas:
 
-    EnergyResourceCommon:
+    # ── Common attribute base (goes inside attributes bag) ────────────────
+
+    EnergyResourceCommonAttributes:
       type: object
       additionalProperties: true
       description: >
-        Base schema for all EnergyResource types. All fields are optional
-        at the schema level — domain profiles enforce their own constraints.
-        Inherited via allOf by EnergyResource and any profile-defined subtypes.
+        Dimensioning and provenance fields shared by all resource kinds.
+        Live inside each kind's attributes bag. No field is required at
+        the schema level.
       x-tags:
         - energy-resource
       properties:
-
-        id:
-          type: string
-          description: >
-            Stable identifier for this resource. For METER resources the
-            meter serial number is conventional. Any stable scheme that
-            is locally unique within the payload works.
-          example: "MET2025789456123"
-          x-jsonld:
-            "@id": "@id"
-
-        type:
-          type: string
-          description: >
-            Asset class. Grid infrastructure: METER, DT (distribution
-            transformer), BUS, FEEDER. Generation DERs: SOLAR_PV, WIND,
-            HYDRO, BIOGAS, CHP, FUEL_CELL. Storage: BESS.
-            EV charging: EV_CHARGER, EV_V2G (EV_V2G is a specialisation of
-            EV_CHARGER with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability;
-            set both maxImportKw (charging) and maxExportKw (V2G discharge);
-            EV_CHARGER is a flexible load — NOT a storage resource).
-            Power electronics: INVERTER (grid-connected converter for
-            reactive-power and frequency-support services per IEEE 1547 /
-            SunSpec DER Models 702–714; typical fields: ratedApparentPowerKva,
-            maxReactivePowerKvar, rideThroughCategory, operatingMode,
-            voltVarEnabled, freqDroopEnabled).
-            Flexible loads: SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD.
-            System: MICROGRID. Deprecated aliases: SOLAR (use SOLAR_PV),
-            BATTERY (use BESS).
-          enum:
-            - METER
-            - DT
-            - BUS
-            - FEEDER
-            - SOLAR_PV
-            - WIND
-            - HYDRO
-            - BIOGAS
-            - CHP
-            - FUEL_CELL
-            - BESS
-            - EV_CHARGER
-            - EV_V2G
-            - INVERTER
-            - SMART_HVAC
-            - SMART_WATER_HEATER
-            - CONTROLLABLE_LOAD
-            - MICROGRID
-            - SOLAR
-            - BATTERY
-          example: "SOLAR_PV"
-          x-jsonld:
-            "@id": deg:resourceType
 
         make:
           type: string
@@ -117,41 +70,30 @@ components:
           x-jsonld:
             "@id": deg:ratedPowerKw
 
-        maxImportKw:
-          type: number
-          minimum: 0
-          description: >
-            Maximum power this resource draws from the grid (absorbs / charges), kW.
-            Always ≥0. Set for loads, storage charging, and EV charging.
-            Omit or set to 0 for pure generators (solar, wind).
-            For bidirectional resources (BESS, V2G) this is the max charge rate.
-            CIM: PowerElectronicsConnection.maxP (absorption direction).
-          x-jsonld:
-            "@id": deg:maxImportKw
-
         maxExportKw:
           type: number
           minimum: 0
           description: >
-            Maximum power this resource injects to the grid (generates / discharges), kW.
-            Always ≥0. Set for generators (solar, wind, CHP) and discharging storage.
-            Omit or set to 0 for pure loads.
-            For bidirectional resources (BESS, V2G) this is the max discharge rate.
-            Supersedes ratedPowerKw. CIM: GeneratingUnit.maxOperatingP /
-            PowerElectronicsConnection.maxP (injection direction).
+            Maximum power this resource injects to the grid (generates /
+            discharges), kW. Always ≥0. Set for generators (SOLAR_PV, WIND,
+            CHP) and discharging storage. For bidirectional resources (BESS,
+            V2G) this is the max discharge rate. Supersedes ratedPowerKw.
+            CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
+            (injection direction).
           x-jsonld:
             "@id": deg:maxExportKw
 
-        energyCapacityKwh:
+        maxImportKw:
           type: number
           minimum: 0
           description: >
-            Rated stored-energy capacity, kWh. Populate for resources
-            with on-site storage (BESS). For EV resources this is the
-            usable battery capacity. Omit for pure-flow resources (solar,
-            wind, loads, network elements, inverters).
+            Maximum power this resource draws from the grid (absorbs /
+            charges), kW. Always ≥0. Set for loads, charging storage, and
+            EV chargers. For bidirectional resources (BESS, V2G) this is
+            the max charge rate. Omit or 0 for pure generators.
+            CIM: PowerElectronicsConnection.maxP (absorption direction).
           x-jsonld:
-            "@id": deg:energyCapacityKwh
+            "@id": deg:maxImportKw
 
         telemetryProvider:
           type: string
@@ -169,34 +111,26 @@ components:
         location:
           type: object
           description: >
-            Physical location of the asset (beckn Location shape).
-            geo (required) is a GeoJSON geometry with coordinates
-            [longitude, latitude] per RFC 7946. address (optional) is a
-            schema.org PostalAddress-aligned object. Applies to all
-            resource types, not only meters.
+            Physical location of the asset (beckn Location shape). geo
+            (required) is a GeoJSON geometry with coordinates [longitude,
+            latitude] per RFC 7946. address (optional) is a schema.org
+            PostalAddress-aligned object.
           additionalProperties: true
+          required:
+            - geo
           properties:
             geo:
               type: object
-              description: GeoJSON geometry. Coordinates are [longitude, latitude].
-              required:
-                - type
+              required: [type]
               additionalProperties: true
               properties:
                 type:
                   type: string
                   enum: [Point, Polygon, LineString, MultiPoint, MultiPolygon, MultiLineString]
-                coordinates:
-                  type: array
-                  description: For a Point — [longitude, latitude].
-                bbox:
-                  type: array
-                  minItems: 4
-                  maxItems: 4
-                  items: { type: number }
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
             address:
               type: object
-              description: Postal address (schema.org PostalAddress-aligned).
               additionalProperties: false
               properties:
                 streetAddress:   { type: string }
@@ -208,14 +142,40 @@ components:
           x-jsonld:
             "@id": deg:location
 
+    # ── Common envelope (inherited by every kind) ─────────────────────────
+
+    EnergyResourceCommon:
+      type: object
+      additionalProperties: true
+      description: >
+        Envelope schema inherited by every typed EnergyResource kind via allOf.
+        Defines the top-level fields common to all kinds: id, type, topology,
+        and the attributes bag (allOf EnergyResourceCommonAttributes).
+      x-tags:
+        - energy-resource
+      properties:
+
+        id:
+          type: string
+          description: >
+            Stable identifier for this resource. For METER resources the
+            meter serial number is conventional.
+          example: "MET2025789456123"
+          x-jsonld:
+            "@id": "@id"
+
+        type:
+          type: string
+          description: Asset class discriminator. See individual kind schemas for constrained enums.
+          x-jsonld:
+            "@id": deg:resourceType
+
         subResources:
           type: array
           description: >
-            Topology — child resources. Each item is EITHER a bare id
-            string (reference to a sibling EnergyResource in the same
-            payload) OR an inline-nested EnergyResource object.
-            Note: inline items use a recursive $ref, which is valid in
-            JSON Schema 2020-12 and OpenAPI 3.1.
+            Topology — child resources. Each item is EITHER a bare id string
+            (reference to a sibling EnergyResource) OR an inline EnergyResource
+            object. Uses a recursive $ref which is valid in JSON Schema 2020-12.
           items:
             oneOf:
               - type: string
@@ -228,34 +188,332 @@ components:
         parentResources:
           type: array
           description: >
-            Upward topology — ids of parent resources (e.g. the meter
-            this DER sits behind). String references only — inlining
-            parents would create a definitional cycle.
+            Upward topology — ids of parent resources (e.g. the meter this
+            DER sits behind). String references only; inlining parents would
+            create a definitional cycle.
           items:
             type: string
-            description: id of a parent EnergyResource.
           x-jsonld:
             "@id": deg:parentResources
 
-    EnergyResource:
-      description: >
-        Canonical energy-asset class. Inherits all common fields from
-        EnergyResourceCommon via allOf. Additional type-specific fields
-        are set directly at the top level (additionalProperties: true).
+        attributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Attribute bag. Contains EnergyResourceCommonAttributes (make,
+            model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+            commissioningDate, location) plus kind-specific fields defined
+            by each typed subschema.
+          allOf:
+            - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+          x-jsonld:
+            "@id": deg:attributes
 
-        Domain profiles add type-specific fields at the top level, for example:
-          METER:        meterCapability, energyDirection, functions, feeder, bus,
-                        communicationTechnology, applicationProtocol
-          BESS:         storageCapacityKwh, storageType, stateOfHealthPct
-          EV_CHARGER:   connectorType, controlProtocol
-          EV_V2G:       connectorType, controlProtocol, v2xProtocol
-          INVERTER:     ratedApparentPowerKva, maxReactivePowerKvar,
-                        minReactivePowerKvar, rideThroughCategory, operatingMode,
-                        voltVarEnabled, freqDroopEnabled, enterServiceRampTimeSec
-          SOLAR_PV/WIND: efficiency, nominalPowerKw
+    # ── Typed kinds ───────────────────────────────────────────────────────
+
+    EnergyResourceMeter:
+      description: >
+        Metering device. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).
       allOf:
         - $ref: "#/components/schemas/EnergyResourceCommon"
-      additionalProperties: true
+        - type: object
+          properties:
+            type:
+              type: string
+              const: METER
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                meterCapability:
+                  type: string
+                  enum: [Electromechanical, CMRI, AMR, AMI]
+                  description: >
+                    Communication/automation generation. Electromechanical=induction disc.
+                    CMRI=static optical-port read. AMR=one-way automated read.
+                    AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9).
+                energyDirection:
+                  type: string
+                  enum: [Forward, Reverse, Bidirectional, Net]
+                  default: Forward
+                  description: >
+                    Energy flow direction. Forward=import (default). Reverse=export.
+                    Bidirectional=separate registers. Net=algebraically netted.
+                    CIM: FlowDirectionKind (ESPI NAESB REQ.21).
+                functions:
+                  type: array
+                  uniqueItems: true
+                  description: Bag of active capabilities (IEC 61968-9 EndDeviceFunction[0..*]).
+                  items:
+                    type: string
+                    enum: [ToU, NetMetering, MaxDemand, LoadControl, TamperDetection, PowerQuality, EventLogging]
+                feeder:
+                  type: string
+                  description: Feeder identifier this meter is supplied from.
+                bus:
+                  type: string
+                  description: Busbar identifier.
+                communicationTechnology:
+                  type: string
+                  enum: [PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other]
+                  description: Last-mile (physical layer) communication technology.
+                applicationProtocol:
+                  type: string
+                  enum: [DLMS_COSEM, ANSI_C12_18, IEC_61850, Modbus, Other]
+                  description: Application-layer protocol for meter data.
+
+    EnergyResourceGenerator:
+      description: >
+        Electrical generation asset. CIM GeneratingUnit subtypes (IEC 61970-302):
+        SOLAR_PV=PhotovoltaicUnit, WIND=WindGeneratingUnit,
+        HYDRO=HydroGeneratingUnit, BIOGAS/CHP=ThermalGeneratingUnit,
+        FUEL_CELL=IEC 62933-2. SOLAR is deprecated — use SOLAR_PV.
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL, SOLAR]
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                nominalPowerKw:
+                  type: number
+                  minimum: 0
+                  description: >
+                    Nominal rated output power in kW when distinct from peak.
+                    CIM: GeneratingUnit.nominalP.
+                efficiency:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  description: Conversion efficiency, %. Relevant for FUEL_CELL and CHP.
+
+    EnergyResourceBESS:
+      description: >
+        Stationary battery energy storage system. storageCapacityKwh is
+        exclusive to this kind. CIM: BatteryUnit (IEC 61970-302).
+        BATTERY is deprecated — use BESS.
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [BESS, BATTERY]
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                storageCapacityKwh:
+                  type: number
+                  minimum: 0
+                  description: >
+                    Rated energy capacity in kWh. Exclusive to this kind.
+                    CIM: BatteryUnit.ratedE.
+                storageType:
+                  type: string
+                  enum: [LithiumIon, LeadAcid, FlowBattery, NaS, NiCd, Flywheel, Other]
+                  description: Storage chemistry or technology type.
+                stateOfHealthPct:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  description: Battery state of health as % of original capacity.
+
+    EnergyResourceEVCharger:
+      description: >
+        EV charging station (EVSE). A flexible load — NOT a storage resource.
+        The EV battery is storage; the EVSE is the charge/discharge interface.
+        EV_V2G is a specialisation of EV_CHARGER with ISO 15118-20 / OCPP 2.1
+        BPT bidirectional capability. Express power via maxImportKw (charge)
+        and maxExportKw (V2G discharge) in common attributes.
+        CIM: ElectricVehicleChargingStation (CIM17+).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [EV_CHARGER, EV_V2G]
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                connectorType:
+                  type: string
+                  enum: [Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other]
+                  description: >
+                    Physical connector standard. Type1/Type2: IEC 62196.
+                    CCS1/CCS2: Combined Charging System. NACS: North American
+                    Charging Standard (J3400).
+                controlProtocol:
+                  type: string
+                  enum: [OCPP_1.6, OCPP_2.0.1, OCPP_2.1, ISO_15118_2, ISO_15118_20, Other]
+                  description: EVSE control and smart-charging protocol.
+                v2xProtocol:
+                  type: string
+                  enum: [CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other]
+                  description: >
+                    Vehicle-to-Grid / V2X protocol. Present only for EV_V2G
+                    resources.
+
+    EnergyResourceInverter:
+      description: >
+        Grid-connected power-electronics converter without a dedicated fuel
+        source. Captures reactive-power and frequency-support capabilities
+        per IEEE 1547-2018 and SunSpec DER Models 702–714. Use cases:
+        standalone battery inverters, VPP aggregation points, grid-forming
+        inverters for microgrid islanding.
+        CIM: PowerElectronicsConnection (IEC 61970-302).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              const: INVERTER
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                ratedApparentPowerKva:
+                  type: number
+                  minimum: 0
+                  description: Rated apparent power, kVA. SunSpec Model 702 maxVA.
+                maxReactivePowerKvar:
+                  type: number
+                  minimum: 0
+                  description: >
+                    Max reactive power injection (leading / over-excited), kVAr.
+                    SunSpec Model 702 maxVar.
+                minReactivePowerKvar:
+                  type: number
+                  description: >
+                    Max reactive power absorption (lagging / under-excited), kVAr.
+                    Usually negative. SunSpec Model 702 maxVarNeg.
+                rideThroughCategory:
+                  type: string
+                  enum: [CategoryI, CategoryII, CategoryIII]
+                  description: >
+                    IEEE 1547-2018 abnormal operating performance category.
+                    CategoryI: basic. CategoryII: enhanced (distribution DER).
+                    CategoryIII: advanced (large / transmission-connected DER).
+                operatingMode:
+                  type: string
+                  enum: [GridFollowing, GridForming, Standby]
+                  description: >
+                    Inverter grid-interaction mode. GridFollowing: synchronises
+                    to existing voltage/frequency (typical DER). GridForming:
+                    establishes V/f reference (microgrid islanding).
+                    CIM: PowerElectronicsConnection.inverterMode.
+                voltVarEnabled:
+                  type: boolean
+                  description: >
+                    Volt-VAr curve active (autonomous reactive power vs. voltage).
+                    IEEE 2030.5 opModVoltVar / SunSpec Model 705.
+                freqDroopEnabled:
+                  type: boolean
+                  description: >
+                    Frequency-Watt droop active (active power vs. frequency
+                    deviation). SunSpec Model 711 / IEEE 1547 Freq-Watt.
+                enterServiceRampTimeSec:
+                  type: number
+                  minimum: 0
+                  description: >
+                    Ramp-up time in seconds after reconnection.
+                    SunSpec Model 703 ESRmpTms.
+
+    EnergyResourceLoad:
+      description: >
+        Controllable electrical load.
+        CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD]
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                controlProtocol:
+                  type: string
+                  enum: [OpenADR_2.0b, OCPP_2.0.1, SunSpec_Modbus, EEBus, Modbus, Other]
+                  description: Demand-response or load-control protocol.
+                loadCategory:
+                  type: string
+                  enum: [Heating, Cooling, WaterHeating, Lighting, EV, Industrial, Other]
+                  description: Load category for aggregation and dispatch optimisation.
+
+    EnergyResourceNetwork:
+      description: >
+        Distribution network topology element. CIM: DT=PowerTransformer,
+        BUS=BusbarSection, FEEDER=Feeder, MICROGRID=Substation/custom
+        (IEC 61970-301).
+      allOf:
+        - $ref: "#/components/schemas/EnergyResourceCommon"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [DT, BUS, FEEDER, MICROGRID]
+            attributes:
+              allOf:
+                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+              type: object
+              additionalProperties: true
+              properties:
+                nominalVoltageKv:
+                  type: number
+                  minimum: 0
+                  description: Nominal voltage level, kV. CIM: BaseVoltage.nominalVoltage.
+                zone:
+                  type: string
+                  description: Operating zone or region identifier.
+                substationId:
+                  type: string
+                  description: Parent substation identifier.
+                feederCode:
+                  type: string
+                  description: Feeder code per utility network records.
+
+    # ── Union entry point ─────────────────────────────────────────────────
+
+    EnergyResource:
+      description: >
+        Discriminated union of all typed EnergyResource kinds. Dispatched by
+        the 'type' field. Each kind inherits EnergyResourceCommon (id, type,
+        subResources, parentResources, attributes) via allOf and refines the
+        attributes bag with kind-specific fields.
+
+        For P2P-trading: minimal usage is {id, type}.
+        For demand-flex and credentials: add attributes fields as needed.
+        For targeted validation: $ref the specific kind directly.
+      oneOf:
+        - $ref: "#/components/schemas/EnergyResourceMeter"
+        - $ref: "#/components/schemas/EnergyResourceGenerator"
+        - $ref: "#/components/schemas/EnergyResourceBESS"
+        - $ref: "#/components/schemas/EnergyResourceEVCharger"
+        - $ref: "#/components/schemas/EnergyResourceInverter"
+        - $ref: "#/components/schemas/EnergyResourceLoad"
+        - $ref: "#/components/schemas/EnergyResourceNetwork"
       x-tags:
         - energy-trade
         - p2p-trading
