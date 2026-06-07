@@ -2,10 +2,10 @@
   "@context": {
     "@version": 1.1,
     "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg": "https://schema.beckn.io/deg#",
-    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "deg":   "https://schema.beckn.io/deg#",
+    "rdf":   "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "schema": "https://schema.org/"
   },
   "@graph": [
@@ -14,58 +14,8 @@
       "@type": "rdfs:Class",
       "rdfs:label": "EnergyResource — Generator",
       "rdfs:comment": "A generation DER energy resource (solar PV, wind, hydro, biogas, CHP, fuel cell). CIM: GeneratingUnit and subtypes (IEC 61970-301).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#GeneratingUnit" }
-    },
-    {
-      "@id": "erDeg:resourceType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Resource type",
-      "rdfs:comment": "Asset-class discriminator. Values: SOLAR_PV, SOLAR (deprecated alias), WIND, HYDRO, BIOGAS, CHP, FUEL_CELL.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:make",
-      "@type": "rdf:Property",
-      "rdfs:label": "Manufacturer",
-      "rdfs:comment": "Manufacturer name of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:model",
-      "@type": "rdf:Property",
-      "rdfs:label": "Model",
-      "rdfs:comment": "Model number of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:ratedPowerKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Rated power (kW)",
-      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. CIM: GeneratingUnit.maxOperatingP.",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" },
-      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#GeneratingUnit.maxOperatingP" }
-    },
-    {
-      "@id": "erDeg:telemetryProvider",
-      "@type": "rdf:Property",
-      "rdfs:label": "Telemetry provider",
-      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "deg:commissioningDate",
-      "@type": "rdf:Property",
-      "rdfs:label": "Commissioning date",
-      "rdfs:comment": "ISO 8601 date when the asset was commissioned.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:gps",
-      "@type": "rdf:Property",
-      "rdfs:label": "GPS coordinates",
-      "rdfs:comment": "GPS coordinates of the asset as 'lat,lng' decimal string.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
     },
     {
       "@id": "erDeg:nominalPowerKw",
@@ -83,20 +33,6 @@
       "rdfs:comment": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP resources.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
       "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:subResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Sub-resources",
-      "rdfs:comment": "Child resources in the topology tree.",
-      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceGenerator" }
-    },
-    {
-      "@id": "erDeg:parentResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Parent resources",
-      "rdfs:comment": "ids of parent resources (e.g. the meter this DER sits behind).",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
     }
   ]
 }

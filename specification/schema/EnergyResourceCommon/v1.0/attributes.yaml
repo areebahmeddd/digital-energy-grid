@@ -103,36 +103,8 @@ components:
             "@id": deg:commissioningDate
 
         location:
-          type: object
-          description: >
-            Physical location of the asset (beckn Location shape). geo
-            (required) is a GeoJSON geometry with coordinates [longitude,
-            latitude] per RFC 7946. address (optional) is a schema.org
-            PostalAddress-aligned object.
-          additionalProperties: true
-          required:
-            - geo
-          properties:
-            geo:
-              type: object
-              required: [type]
-              additionalProperties: true
-              properties:
-                type:
-                  type: string
-                  enum: [Point, Polygon, LineString, MultiPoint, MultiPolygon, MultiLineString, GeometryCollection]
-                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
-                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
-            address:
-              type: object
-              additionalProperties: false
-              properties:
-                streetAddress:   { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion:   { type: string }
-                postalCode:      { type: string }
-                addressCountry:  { type: string, description: "ISO 3166-1 alpha-2 or country name." }
+          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          description: Physical location of this asset.
           x-jsonld:
             "@id": deg:location
 

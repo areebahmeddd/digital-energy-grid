@@ -1,0 +1,19 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg": "https://schema.beckn.io/deg#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "MeterServiceProfile": {
+      "@id": "deg:MeterServiceProfile"
+    },
+    "meterId":                { "@id": "deg:meterId" },
+    "sanctionedLoadKw":       { "@id": "deg:sanctionedLoadKw",       "@type": "xsd:decimal" },
+    "sanctionedExportLoadKw": { "@id": "deg:sanctionedExportLoadKw", "@type": "xsd:decimal" },
+    "billingCycleDay":        { "@id": "deg:billingCycleDay",        "@type": "xsd:integer" },
+    "contractMaxDemandKw":    { "@id": "deg:contractMaxDemandKw",    "@type": "xsd:decimal" },
+    "tariffCategoryCode":     { "@id": "deg:tariffCategoryCode" },
+    "premisesType":           { "@id": "deg:premisesType" },
+    "connectionType":         { "@id": "deg:connectionType" },
+    "paymentMode":            { "@id": "deg:paymentMode" }
+  }
+}

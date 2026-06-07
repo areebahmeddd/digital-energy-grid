@@ -16,57 +16,8 @@
       "@type": "rdfs:Class",
       "rdfs:label": "EnergyResource — Meter",
       "rdfs:comment": "A metering-point energy resource. Anchors DER sub-resources in the topology tree. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#Meter" }
-    },
-    {
-      "@id": "erDeg:resourceType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Resource type discriminator",
-      "rdfs:comment": "Asset-class discriminator. For EnergyResourceMeter the value is always METER.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:make",
-      "@type": "rdf:Property",
-      "rdfs:label": "Manufacturer",
-      "rdfs:comment": "Manufacturer name of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:model",
-      "@type": "rdf:Property",
-      "rdfs:label": "Model",
-      "rdfs:comment": "Model number of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:ratedPowerKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Rated power (kW)",
-      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. CIM: GeneratingUnit.maxOperatingP.",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:telemetryProvider",
-      "@type": "rdf:Property",
-      "rdfs:label": "Telemetry provider",
-      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "deg:commissioningDate",
-      "@type": "rdf:Property",
-      "rdfs:label": "Commissioning date",
-      "rdfs:comment": "ISO 8601 date when the asset was commissioned.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:gps",
-      "@type": "rdf:Property",
-      "rdfs:label": "GPS location",
-      "rdfs:comment": "GeoJSON Point geometry (RFC 7946) for the asset location. Coordinates are [longitude, latitude].",
-      "schema:rangeIncludes": { "@id": "schema:GeoCoordinates" }
     },
     {
       "@id": "erDeg:meterCapability",
@@ -122,14 +73,6 @@
       "schema:rangeIncludes": { "@id": "xsd:string" }
     },
     {
-      "@id": "erDeg:meterLocation",
-      "@type": "rdf:Property",
-      "rdfs:label": "Meter location",
-      "rdfs:comment": "Physical location of the meter installation per beckn Location/2.0 (GeoJSON Point + PostalAddress).",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
-      "schema:rangeIncludes": { "@id": "schema:Place" }
-    },
-    {
       "@id": "erDeg:communicationTechnology",
       "@type": "rdf:Property",
       "rdfs:label": "Communication technology",
@@ -148,20 +91,6 @@
         { "@id": "https://webstore.iec.ch/en/publication/67916" },
         { "@id": "https://www.nema.org/standards/view/ANSI-C12-18" }
       ]
-    },
-    {
-      "@id": "erDeg:subResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Sub-resources",
-      "rdfs:comment": "Child resources in the topology tree (DERs, storage, loads behind this meter).",
-      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceMeter" }
-    },
-    {
-      "@id": "erDeg:parentResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Parent resources",
-      "rdfs:comment": "ids of parent resources (feeder, substation) this meter belongs to.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
     }
   ]
 }

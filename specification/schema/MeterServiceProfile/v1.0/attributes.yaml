@@ -1,0 +1,111 @@
+openapi: 3.1.1
+info:
+  title: MeterServiceProfile
+  version: 1.0.0
+  description: |
+    Tariff, regulatory load, and connection profile for a single meter
+    connection point. Links to a METER resource via meterId.
+
+    Aligns with CIM UsagePoint (IEC 61968-9): sanctionedLoadKw maps to
+    UsagePoint.ratedCurrent × voltage, tariffCategoryCode to UsagePoint.serviceCategory,
+    connectionType to UsagePoint.phaseCode, paymentMode to ESPI AmiBillingReadyKind.
+
+    Used by ElectricityCredential/v1.2 consumptionProfiles[].
+    Formerly called ConsumptionProfile — that alias is preserved for backward compatibility.
+
+    Canonical IRI: https://schema.beckn.io/MeterServiceProfile/v1.0
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    MeterServiceProfile:
+      $id: https://schema.beckn.io/MeterServiceProfile/v1.0#/components/schemas/MeterServiceProfile
+      type: object
+      description: >
+        Tariff and regulatory load profile for one meter connection point.
+        meterId links to a METER entry in energyResources[].
+        CIM: UsagePoint (IEC 61968-9).
+      required:
+        - meterId
+        - sanctionedLoadKw
+        - tariffCategoryCode
+      x-tags:
+        - electricity
+        - credential
+        - tariff
+        - meter
+      x-jsonld:
+        "@id": deg:MeterServiceProfile
+      properties:
+        meterId:
+          type: string
+          minLength: 1
+          description: Matches the id of a METER entry in customerProfile.energyResources[].
+          x-jsonld:
+            "@id": deg:meterId
+        sanctionedLoadKw:
+          type: number
+          minimum: 0.5
+          maximum: 10000
+          description: Sanctioned/approved import load in kW. CIM: UsagePoint.ratedCurrent × voltage.
+          x-jsonld:
+            "@id": deg:sanctionedLoadKw
+        sanctionedExportLoadKw:
+          type: number
+          minimum: 0
+          description: Sanctioned/approved grid export limit in kW.
+          x-jsonld:
+            "@id": deg:sanctionedExportLoadKw
+        billingCycleDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: Day of month on which the billing cycle resets.
+          x-jsonld:
+            "@id": deg:billingCycleDay
+        contractMaxDemandKw:
+          type: number
+          minimum: 0
+          description: Maximum demand contracted with the utility for this connection, in kW.
+          x-jsonld:
+            "@id": deg:contractMaxDemandKw
+        tariffCategoryCode:
+          type: string
+          minLength: 1
+          description: Billing/tariff category code assigned by the utility. CIM: UsagePoint.serviceCategory.
+          x-jsonld:
+            "@id": deg:tariffCategoryCode
+        premisesType:
+          type: string
+          enum:
+            - Residential
+            - Commercial
+            - Industrial
+            - Agricultural
+          description: Type of premises at the metering point.
+          x-jsonld:
+            "@id": deg:premisesType
+        connectionType:
+          type: string
+          enum:
+            - Single-phase
+            - Three-phase
+          description: Electrical connection type. CIM: UsagePoint.phaseCode.
+          x-jsonld:
+            "@id": deg:connectionType
+        paymentMode:
+          type: string
+          enum:
+            - POSTPAID
+            - PREPAID
+          description: >
+            Billing/payment modality. POSTPAID: consume now, pay later. PREPAID: pay-before-use.
+            Administrative — placed on the profile (not the meter) because it can change via
+            firmware without hardware replacement. CIM: ESPI AmiBillingReadyKind (IEC 61968-9).
+          x-jsonld:
+            "@id": deg:paymentMode

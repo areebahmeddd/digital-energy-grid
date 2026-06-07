@@ -2,10 +2,10 @@
   "@context": {
     "@version": 1.1,
     "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg": "https://schema.beckn.io/deg#",
-    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "deg":   "https://schema.beckn.io/deg#",
+    "rdf":   "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "schema": "https://schema.org/"
   },
   "@graph": [
@@ -14,57 +14,8 @@
       "@type": "rdfs:Class",
       "rdfs:label": "EnergyResource — Storage",
       "rdfs:comment": "A storage DER energy resource (BESS, EV charger, V2G). CIM: BatteryUnit and ElectricVehicleChargingStation (IEC 61970-302).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-302.ttl#BatteryUnit" }
-    },
-    {
-      "@id": "erDeg:resourceType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Resource type",
-      "rdfs:comment": "Asset-class discriminator. Values: BESS, BATTERY (deprecated alias), EV_CHARGER, EV_V2G.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:make",
-      "@type": "rdf:Property",
-      "rdfs:label": "Manufacturer",
-      "rdfs:comment": "Manufacturer name of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:model",
-      "@type": "rdf:Property",
-      "rdfs:label": "Model",
-      "rdfs:comment": "Model number of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:ratedPowerKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Rated power (kW)",
-      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. CIM: GeneratingUnit.maxOperatingP.",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:telemetryProvider",
-      "@type": "rdf:Property",
-      "rdfs:label": "Telemetry provider",
-      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "deg:commissioningDate",
-      "@type": "rdf:Property",
-      "rdfs:label": "Commissioning date",
-      "rdfs:comment": "ISO 8601 date when the asset was commissioned.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:gps",
-      "@type": "rdf:Property",
-      "rdfs:label": "GPS coordinates",
-      "rdfs:comment": "GPS coordinates of the asset as 'lat,lng' decimal string.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
     },
     {
       "@id": "erDeg:storageCapacityKwh",
@@ -90,36 +41,6 @@
       "rdfs:comment": "Battery state-of-health as a percentage (0–100).",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
       "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:maxChargeRateKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Max charge rate (kW)",
-      "rdfs:comment": "Maximum charge rate in kilowatts.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:maxDischargeRateKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Max discharge rate (kW)",
-      "rdfs:comment": "Maximum discharge rate in kilowatts.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:subResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Sub-resources",
-      "rdfs:comment": "Child resources in the topology tree.",
-      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceStorage" }
-    },
-    {
-      "@id": "erDeg:parentResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Parent resources",
-      "rdfs:comment": "ids of parent resources (e.g. the meter this DER sits behind).",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
     }
   ]
 }
