@@ -1,0 +1,33 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg":   "https://schema.beckn.io/deg#",
+    "erDeg": "https://schema.beckn.io/erDeg#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#",
+    "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
+
+    "EnergyResourceCommon": {
+      "@id": "deg:EnergyResourceCommon"
+    },
+    "EnergyResourceCommonAttributes": {
+      "@id": "deg:EnergyResourceCommonAttributes"
+    },
+
+    "id":              { "@id": "@id" },
+    "type":            { "@id": "deg:resourceType" },
+    "subResources":    { "@id": "deg:subResources",    "@container": "@set" },
+    "parentResources": { "@id": "deg:parentResources", "@container": "@set" },
+    "attributes":      { "@id": "deg:attributes" },
+
+    "make":              { "@id": "deg:make" },
+    "model":             { "@id": "deg:model" },
+    "ratedPowerKw":      { "@id": "deg:ratedPowerKw",      "@type": "xsd:decimal" },
+    "maxExportKw":       { "@id": "deg:maxExportKw",       "@type": "xsd:decimal" },
+    "maxImportKw":       { "@id": "deg:maxImportKw",       "@type": "xsd:decimal" },
+    "telemetryProvider": { "@id": "deg:telemetryProvider" },
+    "commissioningDate": { "@id": "deg:commissioningDate",  "@type": "xsd:dateTime" },
+    "location":          { "@id": "deg:location" },
+    "geo":               { "@id": "deg:geo" },
+    "address":           { "@id": "deg:address" }
+  }
+}

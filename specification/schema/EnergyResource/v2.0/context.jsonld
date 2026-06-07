@@ -13,27 +13,54 @@
     "id":   "@id",
     "type": { "@id": "deg:resourceType", "@type": "xsd:string" },
 
-    "attributes": {
-      "@id": "deg:attributes",
-      "@type": "@id",
-      "@context": {
-        "make":              { "@id": "deg:make",              "@type": "xsd:string"  },
-        "model":             { "@id": "deg:model",             "@type": "xsd:string"  },
-        "ratedPowerKw":      { "@id": "deg:ratedPowerKw",      "@type": "xsd:decimal" },
-        "energyCapacityKwh": { "@id": "deg:energyCapacityKwh", "@type": "xsd:decimal" },
-        "telemetryProvider": { "@id": "deg:telemetryProvider", "@type": "xsd:string"  },
-        "meterType":         { "@id": "deg:meterType",         "@type": "xsd:string"  },
-        "gps":               { "@id": "deg:gps",               "@type": "xsd:string"  },
-        "meterLocation":     { "@id": "deg:meterLocation",     "@type": "@id"         },
-        "feeder":            { "@id": "deg:feeder",            "@type": "xsd:string"  },
-        "bus":               { "@id": "deg:bus",               "@type": "xsd:string"  },
-        "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:string"  },
-        "storageType":       { "@id": "deg:storageType",       "@type": "xsd:string"  }
-      }
-    },
-
     "subResources":    { "@id": "deg:subResources",    "@container": "@list" },
-    "parentResources": { "@id": "deg:parentResources", "@container": "@list" }
+    "parentResources": { "@id": "deg:parentResources", "@container": "@list" },
+
+    "attributes": { "@id": "deg:attributes" },
+
+    "make":              { "@id": "deg:make",              "@type": "xsd:string"   },
+    "model":             { "@id": "deg:model",             "@type": "xsd:string"   },
+    "ratedPowerKw":      { "@id": "deg:ratedPowerKw",      "@type": "xsd:decimal"  },
+    "maxImportKw":       { "@id": "deg:maxImportKw",       "@type": "xsd:decimal"  },
+    "maxExportKw":       { "@id": "deg:maxExportKw",       "@type": "xsd:decimal"  },
+    "telemetryProvider": { "@id": "deg:telemetryProvider", "@type": "xsd:string"   },
+    "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
+    "location":          { "@id": "deg:location",          "@type": "@id"          },
+
+    "meterCapability":         { "@id": "deg:meterCapability",         "@type": "xsd:string"  },
+    "energyDirection":         { "@id": "deg:energyDirection",         "@type": "xsd:string"  },
+    "functions":               { "@id": "deg:functions",               "@container": "@list"  },
+    "feeder":                  { "@id": "deg:feeder",                  "@type": "xsd:string"  },
+    "bus":                     { "@id": "deg:bus",                     "@type": "xsd:string"  },
+    "communicationTechnology": { "@id": "deg:communicationTechnology", "@type": "xsd:string"  },
+    "applicationProtocol":     { "@id": "deg:applicationProtocol",     "@type": "xsd:string"  },
+
+    "nominalPowerKw": { "@id": "deg:nominalPowerKw", "@type": "xsd:decimal" },
+    "efficiency":     { "@id": "deg:efficiency",     "@type": "xsd:decimal" },
+
+    "storageCapacityKwh": { "@id": "deg:storageCapacityKwh", "@type": "xsd:decimal" },
+    "storageType":        { "@id": "deg:storageType",        "@type": "xsd:string"  },
+    "stateOfHealthPct":   { "@id": "deg:stateOfHealthPct",   "@type": "xsd:decimal" },
+
+    "connectorType":   { "@id": "deg:connectorType",   "@type": "xsd:string" },
+    "controlProtocol": { "@id": "deg:controlProtocol", "@type": "xsd:string" },
+    "v2xProtocol":     { "@id": "deg:v2xProtocol",     "@type": "xsd:string" },
+
+    "ratedApparentPowerKva":  { "@id": "deg:ratedApparentPowerKva",  "@type": "xsd:decimal" },
+    "maxReactivePowerKvar":   { "@id": "deg:maxReactivePowerKvar",   "@type": "xsd:decimal" },
+    "minReactivePowerKvar":   { "@id": "deg:minReactivePowerKvar",   "@type": "xsd:decimal" },
+    "rideThroughCategory":    { "@id": "deg:rideThroughCategory",    "@type": "xsd:string"  },
+    "operatingMode":          { "@id": "deg:operatingMode",          "@type": "xsd:string"  },
+    "voltVarEnabled":         { "@id": "deg:voltVarEnabled",         "@type": "xsd:boolean" },
+    "freqDroopEnabled":       { "@id": "deg:freqDroopEnabled",       "@type": "xsd:boolean" },
+    "enterServiceRampTimeSec":{ "@id": "deg:enterServiceRampTimeSec","@type": "xsd:decimal" },
+
+    "loadCategory": { "@id": "deg:loadCategory", "@type": "xsd:string" },
+
+    "nominalVoltageKv": { "@id": "deg:nominalVoltageKv", "@type": "xsd:decimal" },
+    "zone":             { "@id": "deg:zone",             "@type": "xsd:string"  },
+    "substationId":     { "@id": "deg:substationId",     "@type": "xsd:string"  },
+    "feederCode":       { "@id": "deg:feederCode",       "@type": "xsd:string"  }
   },
   "@graph": []
 }

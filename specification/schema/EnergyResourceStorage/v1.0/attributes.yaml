@@ -3,205 +3,104 @@ info:
   title: EnergyResourceStorage
   version: 1.0.0
   description: |
-    Typed attribute schema for storage DER energy resources.
+    Typed attribute schema for stationary battery energy storage resources.
 
     CIM alignment (IEC 61970-302):
-      BESS        → cim:BatteryUnit
-      BATTERY     → cim:BatteryUnit (deprecated alias for BESS)
-      EV_CHARGER  → cim:ElectricVehicleChargingStation (unidirectional)
-      EV_V2G      → cim:ElectricVehicleChargingStation (bidirectional V2G capable)
+      BESS   → cim:BatteryUnit
+      BATTERY → cim:BatteryUnit (deprecated alias; use BESS)
 
-    BATTERY is a deprecated alias for BESS; new payloads should use BESS.
-    EV_V2G represents a bidirectional vehicle-to-grid capable EV charger.
+    EV charging stations (EV_CHARGER, EV_V2G) are a separate kind —
+    see EnergyResourceEVCharger/v1.0.
 
-    Note: storageCapacityKwh in this schema replaces energyCapacityKwh
-    used in EnergyResource v1.1.
+    storageCapacityKwh replaces energyCapacityKwh from EnergyResource v1.1.
+    maxExportKw (discharge rate, ≥0) and maxImportKw (charge rate, ≥0)
+    replace maxDischargeRateKw / maxChargeRateKw.
+
+    Common attributes (make, model, ratedPowerKw, maxExportKw, maxImportKw,
+    telemetryProvider, commissioningDate, location) are inherited from
+    EnergyResourceCommon/v1.0 via allOf.
 
 components:
   schemas:
 
     EnergyResourceStorage:
-      type: object
-      required: [id, type]
-      additionalProperties: false
       description: >
-        A storage DER energy resource (BESS, EV charger, V2G). Corresponds to
-        cim:BatteryUnit and cim:ElectricVehicleChargingStation (IEC 61970-302).
+        A stationary battery energy storage resource (BESS).
+        Corresponds to cim:BatteryUnit (IEC 61970-302).
+        EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G).
       x-tags:
         - energy-resource
         - energy
         - deg
         - storage
         - bess
-        - ev
       x-jsonld:
         "@context": ./context.jsonld
         "@type": EnergyResourceStorage
-      properties:
-        id:
-          type: string
-          description: >
-            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
-            e.g. did:web:bescom.karnataka.gov.in:assets:bess:BESS-001
-          example: "did:web:bescom.karnataka.gov.in:assets:bess:BESS-001"
-          x-jsonld:
-            "@id": "@id"
-        type:
-          type: string
-          enum:
-            - BESS
-            - BATTERY
-            - EV_CHARGER
-            - EV_V2G
-          description: >
-            Asset-class discriminator. BATTERY is a deprecated alias for BESS;
-            new payloads should use BESS. EV_V2G denotes a bidirectional
-            vehicle-to-grid capable EV charger.
-            CIM: BESS/BATTERY → BatteryUnit,
-            EV_CHARGER/EV_V2G → ElectricVehicleChargingStation (IEC 61970-302).
-          x-cim-class: cim:BatteryUnit
-          x-jsonld:
-            "@id": erDeg:resourceType
-        attributes:
-          $ref: "#/components/schemas/EnergyResourceStorageAttributes"
-        subResources:
-          type: array
-          description: >
-            Child resources (e.g. battery modules, charger ports). Each item is a
-            bare id string or an inline EnergyResourceStorage object.
-          items:
-            oneOf:
-              - type: string
-                description: id of a sibling EnergyResource in the same payload.
-              - $ref: "#/components/schemas/EnergyResourceStorage"
-                description: Inline nested resource.
-        parentResources:
-          type: array
-          description: >
-            ids of parent resources (e.g. the meter this DER sits behind).
-            String references only.
-          items:
-            type: string
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum:
+                - BESS
+                - BATTERY
+              description: >
+                Asset-class discriminator. BATTERY is a deprecated alias for BESS;
+                new payloads should use BESS.
+                CIM: cim:BatteryUnit (IEC 61970-302).
+                EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G).
+              x-cim-class: cim:BatteryUnit
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceStorageAttributes"
 
     EnergyResourceStorageAttributes:
-      type: object
-      additionalProperties: true
       description: >
-        Attributes for storage DER resources. Includes EnergyResourceCommonAttributes
-        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location)
-        plus storage-specific fields (storageCapacityKwh, storageType,
-        stateOfHealthPct, maxChargeRateKw, maxDischargeRateKw).
+        Attributes for BESS resources. Common fields (make, model, ratedPowerKw,
+        maxExportKw, maxImportKw, telemetryProvider, commissioningDate, location)
+        are inherited from EnergyResourceCommonAttributes via allOf.
+        Only storage-specific fields are defined here.
       x-jsonld:
         "@id": erDeg:attributes
-      properties:
-
-        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
-        make:
-          type: string
-          description: Manufacturer (free text).
-          x-jsonld:
-            "@id": erDeg:make
-
-        model:
-          type: string
-          description: Model number (free text).
-          x-jsonld:
-            "@id": erDeg:model
-
-        ratedPowerKw:
-          type: number
-          minimum: 0
-          description: >
-            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
-          x-jsonld:
-            "@id": erDeg:ratedPowerKw
-
-        telemetryProvider:
-          type: string
-          description: Vendor API / data source identifier for telemetry.
-          x-jsonld:
-            "@id": erDeg:telemetryProvider
-
-        commissioningDate:
-          type: string
-          format: date-time
-          description: ISO 8601 date-time when this storage asset was commissioned.
-          x-jsonld:
-            "@id": deg:commissioningDate
-
-        location:
-          type: object
-          description: >
-            Physical location of this asset per beckn Location/2.0.
-            geo (required) is a GeoJSON geometry; address is a postal address.
-          required: [geo]
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
           properties:
-            geo:
-              type: object
-              description: GeoJSON geometry — coordinates are [longitude, latitude].
-              required: [type]
-              properties:
-                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
-                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
-                geometries: { type: array }
-                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
-              additionalProperties: true
-            address:
-              type: object
-              additionalProperties: false
-              description: schema.org PostalAddress fields.
-              properties:
-                streetAddress: { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion: { type: string }
-                postalCode: { type: string }
-                addressCountry: { type: string }
-          x-jsonld:
-            "@id": erDeg:location
 
-        # ── Storage-specific attributes ──────────────────────────────────────
-        storageCapacityKwh:
-          type: number
-          minimum: 0
-          description: >
-            Rated stored-energy capacity, kWh. CIM: BatteryUnit.ratedE.
-            Replaces energyCapacityKwh used in EnergyResource v1.1.
-          x-jsonld:
-            "@id": erDeg:storageCapacityKwh
+            # ── Storage-specific attributes ────────────────────────────────────
 
-        storageType:
-          type: string
-          enum:
-            - LithiumIon
-            - LeadAcid
-            - FlowBattery
-            - NaS
-            - NiCd
-            - Flywheel
-            - Other
-          description: Battery storage technology type.
-          x-jsonld:
-            "@id": erDeg:storageType
+            storageCapacityKwh:
+              type: number
+              minimum: 0
+              description: >
+                Rated stored-energy capacity, kWh. CIM: BatteryUnit.ratedE.
+                Replaces energyCapacityKwh used in EnergyResource v1.1.
+              x-jsonld:
+                "@id": erDeg:storageCapacityKwh
 
-        stateOfHealthPct:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Battery state-of-health as a percentage (0–100).
-          x-jsonld:
-            "@id": erDeg:stateOfHealthPct
+            storageType:
+              type: string
+              enum:
+                - LithiumIon
+                - LeadAcid
+                - FlowBattery
+                - NaS
+                - NiCd
+                - Flywheel
+                - Other
+              description: Battery storage technology type.
+              x-jsonld:
+                "@id": erDeg:storageType
 
-        maxChargeRateKw:
-          type: number
-          minimum: 0
-          description: Maximum charge rate, kW.
-          x-jsonld:
-            "@id": erDeg:maxChargeRateKw
-
-        maxDischargeRateKw:
-          type: number
-          minimum: 0
-          description: Maximum discharge rate, kW.
-          x-jsonld:
-            "@id": erDeg:maxDischargeRateKw
+            stateOfHealthPct:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Battery state-of-health as a percentage (0–100).
+              x-jsonld:
+                "@id": erDeg:stateOfHealthPct

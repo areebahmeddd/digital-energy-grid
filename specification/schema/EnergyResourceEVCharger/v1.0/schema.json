@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceEVCharger/v1.0",
+  "title": "EnergyResourceEVCharger",
+  "description": "Typed schema for EV charging station energy resources (EV_CHARGER, EV_V2G). EV_CHARGER is a flexible load (EVSE hardware), not storage. EV_V2G adds Vehicle-to-Grid capability per ISO 15118-20 / OCPP 2.1 BPT. CIM: ElectricVehicleChargingStation (CIM17+). Common fields inherited from EnergyResourceCommon/v1.0.",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["EV_CHARGER", "EV_V2G"],
+          "description": "Asset-class discriminator. EV_CHARGER: unidirectional or AC bidirectional EVSE. EV_V2G: Vehicle-to-Grid capable EVSE with ISO 15118-20 / OCPP 2.1 BPT support."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceEVChargerAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceEVChargerAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attributes for EV_CHARGER and EV_V2G resources. Common fields inherited. EVSE-specific fields below.",
+          "properties": {
+            "connectorType": {
+              "type": "string",
+              "enum": ["Type1", "Type2", "CCS1", "CCS2", "CHAdeMO", "GB_T", "NACS", "Other"],
+              "description": "Physical connector standard. Type1: IEC 62196-2 Type 1 (J1772). Type2: IEC 62196-2 Type 2 (Mennekes). CCS1/CCS2: Combined Charging System. CHAdeMO: DC fast charge with V2G support. GB_T: GB/T 20234 (China). NACS: SAE J3400."
+            },
+            "controlProtocol": {
+              "type": "string",
+              "enum": ["OCPP_1.6", "OCPP_2.0.1", "OCPP_2.1", "ISO_15118_2", "ISO_15118_20", "Other"],
+              "description": "EVSE control and smart-charging protocol. OCPP_2.1 adds ISO 15118-20 BPT. ISO_15118_20: V2G communication interface with bidirectional power transfer."
+            },
+            "v2xProtocol": {
+              "type": "string",
+              "enum": ["CHAdeMO_V2G", "CCS_BPT", "ISO_15118_20_AC_BPT", "ISO_15118_20_DC_BPT", "Other"],
+              "description": "Vehicle-to-Grid / V2X protocol. Present only for EV_V2G resources."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

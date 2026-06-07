@@ -1,0 +1,159 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceInverter
+  version: 1.0.0
+  description: |
+    Typed attribute schema for grid-connected power-electronics inverter
+    energy resources (type = INVERTER).
+
+    An INVERTER resource is a grid-connected power-electronics converter
+    without a dedicated fuel source. It captures reactive-power and
+    frequency-support capabilities per IEEE 1547-2018 and SunSpec DER
+    Models 702–714.
+
+    Typical use cases:
+      - Standalone battery inverters
+      - Virtual power plant (VPP) aggregation points
+      - Grid-forming inverters for microgrid islanding
+      - Reactive power compensation (STATCOM-like)
+
+    CIM alignment: PowerElectronicsConnection (IEC 61970-302).
+
+    Common attributes (make, model, ratedPowerKw, maxExportKw, maxImportKw,
+    telemetryProvider, commissioningDate, location) are inherited from
+    EnergyResourceCommon/v1.0 via allOf.
+
+components:
+  schemas:
+
+    EnergyResourceInverter:
+      description: >
+        A grid-connected power-electronics inverter energy resource. Captures
+        IEEE 1547-2018 ride-through categories, operating mode, and reactive /
+        frequency-support capabilities.
+        CIM: PowerElectronicsConnection (IEC 61970-302).
+      x-tags:
+        - energy-resource
+        - inverter
+        - energy
+        - deg
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceInverter
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              const: "INVERTER"
+              description: >
+                Asset-class discriminator. Must be "INVERTER".
+                CIM: PowerElectronicsConnection (IEC 61970-302).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceInverterAttributes"
+
+    EnergyResourceInverterAttributes:
+      description: >
+        Attributes for INVERTER resources. Common fields (make, model,
+        ratedPowerKw, maxExportKw, maxImportKw, telemetryProvider,
+        commissioningDate, location) are inherited from
+        EnergyResourceCommonAttributes via allOf. Only IEEE 1547-2018 /
+        SunSpec DER Model inverter-specific fields are defined here.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            # ── Inverter-specific attributes (IEEE 1547 / SunSpec) ────────────
+
+            ratedApparentPowerKva:
+              type: number
+              minimum: 0
+              description: >
+                Rated apparent power in kVA.
+                SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS.
+              x-jsonld:
+                "@id": erDeg:ratedApparentPowerKva
+
+            maxReactivePowerKvar:
+              type: number
+              minimum: 0
+              description: >
+                Maximum reactive power injection (leading / over-excited), kVAr.
+                SunSpec Model 702 maxVar.
+                CIM: PowerElectronicsConnection.maxQ.
+              x-jsonld:
+                "@id": erDeg:maxReactivePowerKvar
+
+            minReactivePowerKvar:
+              type: number
+              description: >
+                Maximum reactive power absorption (lagging / under-excited), kVAr.
+                Usually expressed as a negative value (e.g. -4 for 4 kVAr absorption).
+                SunSpec Model 702 maxVarNeg.
+                CIM: PowerElectronicsConnection.minQ.
+              x-jsonld:
+                "@id": erDeg:minReactivePowerKvar
+
+            rideThroughCategory:
+              type: string
+              enum: [CategoryI, CategoryII, CategoryIII]
+              description: >
+                IEEE 1547-2018 abnormal operating performance category.
+                Defines voltage and frequency ride-through requirements.
+                CategoryI: basic — suitable for small DER with low grid impact.
+                CategoryII: enhanced — for distribution-connected DER where
+                  ride-through improves system reliability.
+                CategoryIII: advanced — for large or transmission-connected DER
+                  where grid support during disturbances is critical.
+              x-jsonld:
+                "@id": erDeg:rideThroughCategory
+
+            operatingMode:
+              type: string
+              enum: [GridFollowing, GridForming, Standby]
+              description: >
+                Inverter grid-interaction mode.
+                GridFollowing: synchronises phase angle and frequency to existing
+                  grid voltage/frequency reference (PLL-based; typical for DER).
+                GridForming: establishes its own V/f reference without external
+                  synchronisation — enables microgrid islanding and black-start.
+                Standby: inverter energised but not injecting real power.
+                CIM: PowerElectronicsConnection.inverterMode.
+              x-jsonld:
+                "@id": erDeg:operatingMode
+
+            voltVarEnabled:
+              type: boolean
+              description: >
+                Volt-VAr curve active — autonomous reactive power response as a
+                function of terminal voltage. IEEE 2030.5 opModVoltVar /
+                SunSpec Model 705 (Volt-VAr).
+              x-jsonld:
+                "@id": erDeg:voltVarEnabled
+
+            freqDroopEnabled:
+              type: boolean
+              description: >
+                Frequency-Watt droop active — active power output reduced
+                proportionally to over-frequency deviation.
+                SunSpec Model 711 (Freq-Watt) / IEEE 1547-2018 Frequency-Watt.
+              x-jsonld:
+                "@id": erDeg:freqDroopEnabled
+
+            enterServiceRampTimeSec:
+              type: number
+              minimum: 0
+              description: >
+                Time in seconds to ramp from 0 to rated power after reconnection
+                to the grid. Controls inrush on re-energisation.
+                SunSpec Model 703 ESRmpTms.
+              x-jsonld:
+                "@id": erDeg:enterServiceRampTimeSec

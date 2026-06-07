@@ -1,0 +1,116 @@
+{
+  "@context": {
+    "deg":   "https://schema.beckn.io/deg#",
+    "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#",
+    "owl":   "http://www.w3.org/2002/07/owl#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyResourceCommon",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResourceCommon",
+      "rdfs:comment": "Structural envelope shared by all typed EnergyResource kinds. Defines id, type, topology, and the attributes bag."
+    },
+    {
+      "@id": "deg:EnergyResourceCommonAttributes",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResourceCommonAttributes",
+      "rdfs:comment": "Attribute bag base inherited by all EnergyResource kind attributes objects. Contains make, model, ratedPowerKw, maxExportKw, maxImportKw, telemetryProvider, commissioningDate, location."
+    },
+    {
+      "@id": "deg:resourceType",
+      "@type": "rdf:Property",
+      "rdfs:label": "resourceType",
+      "rdfs:comment": "Asset class discriminator string (METER, SOLAR_PV, BESS, EV_CHARGER, etc.).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:subResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "subResources",
+      "rdfs:comment": "Child resource ids or inline EnergyResource objects (downward topology).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" }
+    },
+    {
+      "@id": "deg:parentResources",
+      "@type": "rdf:Property",
+      "rdfs:label": "parentResources",
+      "rdfs:comment": "Ids of parent resources (upward topology). String references only.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:attributes",
+      "@type": "rdf:Property",
+      "rdfs:label": "attributes",
+      "rdfs:comment": "Attribute bag object on a resource. Contains common attributes plus kind-specific fields.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:range": { "@id": "deg:EnergyResourceCommonAttributes" }
+    },
+    {
+      "@id": "deg:make",
+      "@type": "rdf:Property",
+      "rdfs:label": "make",
+      "rdfs:comment": "Manufacturer name (free text).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:model",
+      "@type": "rdf:Property",
+      "rdfs:label": "model",
+      "rdfs:comment": "Model number (free text).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:ratedPowerKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "ratedPowerKw",
+      "rdfs:comment": "Manufacturer-rated peak power in kW. Kept for backward compatibility; prefer maxExportKw.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:maxExportKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "maxExportKw",
+      "rdfs:comment": "Maximum power injected to the grid (discharge / generation), kW. Always ≥0.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:maxImportKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "maxImportKw",
+      "rdfs:comment": "Maximum power drawn from the grid (charge / load), kW. Always ≥0.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:telemetryProvider",
+      "@type": "rdf:Property",
+      "rdfs:label": "telemetryProvider",
+      "rdfs:comment": "Vendor API / data source identifier for telemetry.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "commissioningDate",
+      "rdfs:comment": "ISO 8601 date-time the asset was commissioned.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range": { "@id": "xsd:dateTime" }
+    },
+    {
+      "@id": "deg:location",
+      "@type": "rdf:Property",
+      "rdfs:label": "location",
+      "rdfs:comment": "Physical location of the asset (beckn Location shape with GeoJSON geo and postal address).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" }
+    }
+  ]
+}

@@ -4,83 +4,85 @@ info:
   version: 2.0.0
   description: >
     Canonical, technology-neutral class for any asset that produces,
-    consumes, stores, or modulates energy — solar PV, wind, hydro,
-    biogas, CHP, fuel cells, batteries / BESS, EVs and EVSE/V2G,
-    controllable loads (HVAC, water heaters, …), and the metering
-    points / connection points / feeders that anchor them.
+    consumes, stores, or modulates energy.
 
-    Structure
-    ─────────
-    EnergyResource has exactly four top-level fields:
-      id            — stable identifier (meter serial number for METER resources)
-      type          — open-string asset class (METER, SOLAR, BATTERY, …)
-      subResources  — child resource ids or inline objects (topology)
-      parentResources — parent resource ids (topology)
+    Architecture
+    ────────────
+    EnergyResourceCommon (envelope: id, type, subResources, parentResources,
+    attributes) and EnergyResourceCommonAttributes (attribute bag base: make,
+    model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+    commissioningDate, location) are defined in EnergyResourceCommon/v1.0.
+    All seven kinds inherit them via allOf external $ref.
 
-    Everything else — dimensioning, physical location, type-specific data —
-    lives in the `attributes` bag. CommonResourceAttributes defines the
-    sub-schema for the fields shared across all resource types
-    (make, model, ratedPowerKw, energyCapacityKwh, telemetryProvider).
-    The bag is open-ended; any domain may add further fields.
+    Seven typed kinds each inherit EnergyResourceCommon via allOf and
+    refine the attributes bag with kind-specific fields:
+      EnergyResourceMeter     (METER)
+      EnergyResourceGenerator (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL)
+      EnergyResourceStorage   (BESS)
+      EnergyResourceEVCharger (EV_CHARGER, EV_V2G)
+      EnergyResourceInverter  (INVERTER)
+      EnergyResourceLoad      (SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD)
+      EnergyResourceNetwork   (DT, BUS, FEEDER, MICROGRID)
+
+    EnergyResource is the discriminated union: oneOf [all seven kinds].
+    Domain profiles reference individual kinds for targeted validation.
 
 components:
   schemas:
 
-    CommonResourceAttributes:
-      type: object
-      description: >
-        Dimensioning fields common to all EnergyResource types.
-        These live inside EnergyResource.attributes alongside any
-        type-specific fields. No field is required.
-      additionalProperties: true
-      x-tags:
-        - energy-resource
-      properties:
+    # ── Canonical kind aliases ────────────────────────────────────────────
+    # Each kind lives in its own specification/schema/<Kind>/v1.0/ folder
+    # and is published to schema.beckn.io/<Kind>/v1.0.
+    # Common base schemas (EnergyResourceCommon, EnergyResourceCommonAttributes)
+    # live at schema.beckn.io/EnergyResourceCommon/v1.0 and are referenced
+    # directly by the kind schemas — not re-aliased here.
 
-        make:
-          type: string
-          description: Manufacturer (free text).
-          x-jsonld:
-            "@id": deg:make
+    EnergyResourceMeter:
+      $ref: "https://schema.beckn.io/EnergyResourceMeter/v1.0#/components/schemas/EnergyResourceMeter"
 
-        model:
-          type: string
-          description: Model (free text).
-          x-jsonld:
-            "@id": deg:model
+    EnergyResourceGenerator:
+      $ref: "https://schema.beckn.io/EnergyResourceGenerator/v1.0#/components/schemas/EnergyResourceGenerator"
 
-        ratedPowerKw:
-          type: number
-          minimum: 0
-          description: Manufacturer-rated peak dispatchable power, kW.
-          x-jsonld:
-            "@id": deg:ratedPowerKw
+    EnergyResourceStorage:
+      $ref: "https://schema.beckn.io/EnergyResourceStorage/v1.0#/components/schemas/EnergyResourceStorage"
 
-        energyCapacityKwh:
-          type: number
-          minimum: 0
-          description: >
-            Rated stored-energy capacity, kWh. Populated for storage-class
-            resources (BATTERY, BESS, EV). Omit for pure-flow resources.
-          x-jsonld:
-            "@id": deg:energyCapacityKwh
+    EnergyResourceEVCharger:
+      $ref: "https://schema.beckn.io/EnergyResourceEVCharger/v1.0#/components/schemas/EnergyResourceEVCharger"
 
-        telemetryProvider:
-          type: string
-          description: Vendor API / data source identifier for telemetry.
-          x-jsonld:
-            "@id": deg:telemetryProvider
+    EnergyResourceInverter:
+      $ref: "https://schema.beckn.io/EnergyResourceInverter/v1.0#/components/schemas/EnergyResourceInverter"
+
+    EnergyResourceLoad:
+      $ref: "https://schema.beckn.io/EnergyResourceLoad/v1.0#/components/schemas/EnergyResourceLoad"
+
+    EnergyResourceNetwork:
+      $ref: "https://schema.beckn.io/EnergyResourceNetwork/v1.0#/components/schemas/EnergyResourceNetwork"
+
+    # ── Union entry point ─────────────────────────────────────────────────
 
     EnergyResource:
-      type: object
-      additionalProperties: false
       description: >
-        Canonical energy-asset class. Exactly four top-level fields:
-        id, type, subResources, parentResources. All other attributes
-        — dimensioning, location, type-specific data — live in `attributes`.
+        Discriminated union of all typed EnergyResource kinds. Dispatched by
+        the 'type' field. Each kind lives in its own schema at
+        schema.beckn.io/<Kind>/v1.0 and is referenced above.
 
-        No field is required at the schema level. Domain profiles enforce
-        their own cross-field rules.
+        EnergyResourceCommon (id, type, subResources, parentResources,
+        attributes) and EnergyResourceCommonAttributes (make, model,
+        maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+        commissioningDate, location) are defined in EnergyResourceCommon/v1.0
+        and inherited by all kinds via allOf external $ref.
+
+        For P2P-trading: minimal usage is {id, type}.
+        For demand-flex and credentials: add attributes fields as needed.
+        For targeted validation: $ref the specific kind directly.
+      oneOf:
+        - $ref: "#/components/schemas/EnergyResourceMeter"
+        - $ref: "#/components/schemas/EnergyResourceGenerator"
+        - $ref: "#/components/schemas/EnergyResourceStorage"
+        - $ref: "#/components/schemas/EnergyResourceEVCharger"
+        - $ref: "#/components/schemas/EnergyResourceInverter"
+        - $ref: "#/components/schemas/EnergyResourceLoad"
+        - $ref: "#/components/schemas/EnergyResourceNetwork"
       x-tags:
         - energy-trade
         - p2p-trading
@@ -90,175 +92,3 @@ components:
       x-jsonld:
         "@context": ./context.jsonld
         "@type": EnergyResource
-      properties:
-
-        id:
-          type: string
-          description: >
-            Stable identifier for this resource. For METER resources the
-            meter serial number is conventional. Any stable scheme that
-            is locally unique within the payload works.
-          example: "MET2025789456123"
-          x-jsonld:
-            "@id": "@id"
-
-        type:
-          type: string
-          description: >
-            Asset class. Grid infrastructure: METER, DT (distribution
-            transformer), BUS, FEEDER. Generation DERs: SOLAR, SOLAR_PV,
-            WIND, HYDRO, BIOGAS, CHP, FUEL_CELL. Storage: BATTERY, BESS.
-            Flexible loads: EV_CHARGER, EV_V2G, SMART_HVAC,
-            SMART_WATER_HEATER, CONTROLLABLE_LOAD. System: MICROGRID.
-          enum:
-            - METER
-            - DT
-            - BUS
-            - FEEDER
-            - SOLAR
-            - SOLAR_PV
-            - WIND
-            - HYDRO
-            - BIOGAS
-            - CHP
-            - FUEL_CELL
-            - BATTERY
-            - BESS
-            - EV_CHARGER
-            - EV_V2G
-            - SMART_HVAC
-            - SMART_WATER_HEATER
-            - CONTROLLABLE_LOAD
-            - MICROGRID
-          example: "METER"
-          x-jsonld:
-            "@id": deg:resourceType
-
-        attributes:
-          description: >
-            Attribute bag containing all non-topological properties of this
-            resource. CommonResourceAttributes (make, model, ratedPowerKw,
-            energyCapacityKwh, telemetryProvider) are the common fields
-            present across all resource types. Additional type-specific
-            fields (meterType, feeder, commissioningDate, storageType, VIN,
-            …) are placed here alongside them.
-
-            For METER resources: meterType, gps, location, feeder, bus.
-            For generation DERs: commissioningDate, and generation-type info.
-            For storage DERs: storageType, commissioningDate.
-            For EV resources: vin, chargingProtocol.
-          type: object
-          additionalProperties: true
-          allOf:
-            - $ref: "#/components/schemas/CommonResourceAttributes"
-          properties:
-
-            # ── Common (from CommonResourceAttributes) ────────────────
-            make:
-              type: string
-              x-jsonld:
-                "@id": deg:make
-            model:
-              type: string
-              x-jsonld:
-                "@id": deg:model
-            ratedPowerKw:
-              type: number
-              minimum: 0
-              x-jsonld:
-                "@id": deg:ratedPowerKw
-            energyCapacityKwh:
-              type: number
-              minimum: 0
-              x-jsonld:
-                "@id": deg:energyCapacityKwh
-            telemetryProvider:
-              type: string
-              x-jsonld:
-                "@id": deg:telemetryProvider
-
-            # ── Meter-specific (type = METER) ─────────────────────────
-            meterType:
-              type: string
-              enum:
-                - AMR
-                - AMI
-                - Electromechanical
-                - Forward
-                - Reverse
-                - Bidirectional
-                - Prepaid
-                - NetMeter
-                - Other
-              description: Meter kind classification (Green Button / ESPI).
-              x-jsonld:
-                "@id": deg:meterType
-
-            gps:
-              type: string
-              pattern: "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
-              description: GPS coordinates of the asset as 'lat,lng'.
-              x-jsonld:
-                "@id": deg:gps
-
-            location:
-              type: object
-              description: >
-                Postal location of the meter (beckn Location shape).
-                Use when the physical location differs from the customer's
-                registered installation address.
-              additionalProperties: true
-              properties:
-                address: { type: string }
-                city:
-                  type: object
-                  properties:
-                    name: { type: string }
-                    code: { type: string }
-                district: { type: string }
-                state:
-                  type: object
-                  properties:
-                    name: { type: string }
-                    code: { type: string }
-                country:
-                  type: object
-                  properties:
-                    name: { type: string }
-                    code: { type: string, pattern: "^[A-Z]{2}$" }
-                area_code: { type: string }
-                gps: { type: string }
-                openLocationCode: { type: string }
-              x-jsonld:
-                "@id": deg:meterLocation
-
-          x-jsonld:
-            "@id": deg:attributes
-
-        subResources:
-          type: array
-          description: >
-            Topology — child resources. Each item is EITHER a bare `id`
-            string (reference to a sibling EnergyResource in the same
-            payload) OR an inline-nested EnergyResource object.
-          items:
-            oneOf:
-              - type: string
-                description: id of a sibling EnergyResource.
-              - $ref: "#/components/schemas/EnergyResource"
-                description: Inline-nested EnergyResource.
-          x-jsonld:
-            "@id": deg:subResources
-
-        parentResources:
-          type: array
-          description: >
-            Upward topology — `id`s of parent resources (e.g. the meter
-            this DER sits behind). String references only — parents are
-            always enumerated elsewhere in the same payload; inlining
-            them here would create a definitional cycle.
-          items:
-            type: string
-            description: id of a parent EnergyResource.
-          x-jsonld:
-            "@id": deg:parentResources
