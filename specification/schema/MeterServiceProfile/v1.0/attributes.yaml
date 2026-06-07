@@ -52,7 +52,7 @@ components:
           type: number
           minimum: 0.5
           maximum: 10000
-          description: Sanctioned/approved import load in kW. CIM: UsagePoint.ratedCurrent × voltage.
+          description: "Sanctioned/approved import load in kW. CIM: UsagePoint.ratedCurrent × voltage."
           x-jsonld:
             "@id": deg:sanctionedLoadKw
         sanctionedExportLoadKw:
@@ -77,7 +77,7 @@ components:
         tariffCategoryCode:
           type: string
           minLength: 1
-          description: Billing/tariff category code assigned by the utility. CIM: UsagePoint.serviceCategory.
+          description: "Billing/tariff category code assigned by the utility. CIM: UsagePoint.serviceCategory."
           x-jsonld:
             "@id": deg:tariffCategoryCode
         premisesType:
@@ -95,7 +95,7 @@ components:
           enum:
             - Single-phase
             - Three-phase
-          description: Electrical connection type. CIM: UsagePoint.phaseCode.
+          description: "Electrical connection type. CIM: UsagePoint.phaseCode."
           x-jsonld:
             "@id": deg:connectionType
         paymentMode:
