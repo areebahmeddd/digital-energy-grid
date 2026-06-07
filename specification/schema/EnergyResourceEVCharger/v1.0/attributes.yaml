@@ -1,0 +1,209 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceEVCharger
+  version: 1.0.0
+  description: |
+    Typed attribute schema for EV charging station energy resources
+    (type = EV_CHARGER or EV_V2G).
+
+    EV_CHARGER is the EVSE (Electric Vehicle Supply Equipment) hardware
+    at the grid connection point. It is a flexible load — NOT a storage
+    resource. The EV battery is storage; the EVSE is the charge/discharge
+    interface.
+
+    EV_V2G is a specialisation of EV_CHARGER with Vehicle-to-Grid
+    capability per ISO 15118-20 / OCPP 2.1 BPT. For EV_V2G, set both
+    maxImportKw (charge rate, ≥0) and maxExportKw (V2G discharge rate, ≥0)
+    in the attributes bag.
+
+    CIM alignment: ElectricVehicleChargingStation (CIM17+).
+
+components:
+  schemas:
+
+    EnergyResourceEVCharger:
+      type: object
+      required: [id, type]
+      additionalProperties: false
+      description: >
+        An EV charging station (EVSE) energy resource. A flexible load at the
+        grid connection point. EV_V2G adds bidirectional capability.
+        CIM: ElectricVehicleChargingStation (CIM17+).
+      x-tags:
+        - energy-resource
+        - ev-charger
+        - energy
+        - deg
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceEVCharger
+      properties:
+        id:
+          type: string
+          description: >
+            IES asset DID. Format: did:web:<domain>:assets:evse:<local-id>
+            e.g. did:web:utility.com:assets:evse:EVSE-001
+          example: "did:web:utility.com:assets:evse:EVSE-001"
+          x-jsonld:
+            "@id": "@id"
+        type:
+          type: string
+          enum: [EV_CHARGER, EV_V2G]
+          description: >
+            Asset-class discriminator. EV_CHARGER: unidirectional or AC
+            bidirectional EVSE. EV_V2G: Vehicle-to-Grid capable EVSE with
+            ISO 15118-20 / OCPP 2.1 BPT support.
+          x-jsonld:
+            "@id": erDeg:resourceType
+        attributes:
+          $ref: "#/components/schemas/EnergyResourceEVChargerAttributes"
+        subResources:
+          type: array
+          description: Child resources (e.g. smart-load sub-circuits). Each item is a bare id string or inline resource.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource.
+              - $ref: "#/components/schemas/EnergyResourceEVCharger"
+                description: Inline nested resource.
+        parentResources:
+          type: array
+          description: ids of parent resources (e.g. the meter this EVSE is behind).
+          items:
+            type: string
+
+    EnergyResourceEVChargerAttributes:
+      type: object
+      additionalProperties: true
+      description: >
+        Attributes for EV_CHARGER and EV_V2G resources. Includes
+        EnergyResourceCommonAttributes fields (make, model, maxExportKw,
+        maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate,
+        location) plus EVSE-specific fields.
+      x-jsonld:
+        "@id": erDeg:attributes
+      properties:
+
+        # ── Common attributes (EnergyResourceCommonAttributes) ────────────
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": erDeg:make
+
+        model:
+          type: string
+          description: Model number (free text).
+          x-jsonld:
+            "@id": erDeg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power, kW. Kept for backward
+            compatibility. Prefer maxImportKw for new payloads.
+          x-jsonld:
+            "@id": erDeg:ratedPowerKw
+
+        maxImportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum charge power drawn from the grid, kW. Always ≥0.
+            CIM: PowerElectronicsConnection.maxP (absorption direction).
+          x-jsonld:
+            "@id": erDeg:maxImportKw
+
+        maxExportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum V2G discharge power injected to the grid, kW. Always ≥0.
+            Set for EV_V2G only; omit or 0 for unidirectional EV_CHARGER.
+            CIM: PowerElectronicsConnection.maxP (injection direction).
+          x-jsonld:
+            "@id": erDeg:maxExportKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": erDeg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time when this EVSE was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        location:
+          type: object
+          description: >
+            Physical location of this asset per beckn Location/2.0.
+            geo (required) is a GeoJSON geometry; address is a postal address.
+          required: [geo]
+          properties:
+            geo:
+              type: object
+              required: [type]
+              properties:
+                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+              additionalProperties: true
+            address:
+              type: object
+              additionalProperties: false
+              properties:
+                streetAddress:   { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion:   { type: string }
+                postalCode:      { type: string }
+                addressCountry:  { type: string }
+          x-jsonld:
+            "@id": erDeg:location
+
+        # ── EV charger-specific attributes ───────────────────────────────
+
+        connectorType:
+          type: string
+          enum: [Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other]
+          description: >
+            Physical connector standard.
+            Type1: IEC 62196-2 Type 1 (J1772, single-phase AC, North America/Japan).
+            Type2: IEC 62196-2 Type 2 (Mennekes, single/three-phase AC, Europe).
+            CCS1: Combined Charging System with Type 1 inlet (DC fast charge, North America).
+            CCS2: Combined Charging System with Type 2 inlet (DC fast charge, Europe).
+            CHAdeMO: CHAdeMO Association DC fast charge; supports V2G.
+            GB_T: Chinese standard GB/T 20234 (AC and DC).
+            NACS: North American Charging Standard / SAE J3400.
+          x-jsonld:
+            "@id": erDeg:connectorType
+
+        controlProtocol:
+          type: string
+          enum: [OCPP_1.6, OCPP_2.0.1, OCPP_2.1, ISO_15118_2, ISO_15118_20, Other]
+          description: >
+            EVSE control and smart-charging protocol.
+            OCPP_1.6 / OCPP_2.0.1 / OCPP_2.1: Open Charge Point Protocol
+            (OCA). OCPP 2.1 adds ISO 15118-20 integration and BPT.
+            ISO_15118_2: V2G communication interface (AC/DC, no V2G).
+            ISO_15118_20: V2G communication interface with BPT (V2G capable).
+          x-jsonld:
+            "@id": erDeg:controlProtocol
+
+        v2xProtocol:
+          type: string
+          enum: [CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other]
+          description: >
+            Vehicle-to-Grid / V2X protocol. Present only for EV_V2G resources.
+            CHAdeMO_V2G: CHAdeMO V2G (CHAdeMO 2.0 / 3.0).
+            CCS_BPT: CCS Bidirectional Power Transfer (DIN SPEC / upcoming SAE).
+            ISO_15118_20_AC_BPT: ISO 15118-20 AC bidirectional.
+            ISO_15118_20_DC_BPT: ISO 15118-20 DC bidirectional.
+          x-jsonld:
+            "@id": erDeg:v2xProtocol

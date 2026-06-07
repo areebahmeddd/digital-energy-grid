@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceEVCharger/v1.0",
+  "title": "EnergyResourceEVCharger",
+  "description": "Typed schema for EV charging station energy resources (type = EV_CHARGER or EV_V2G). EV_CHARGER is a flexible load at the grid connection point — NOT a storage resource. EV_V2G is a specialisation with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. CIM: ElectricVehicleChargingStation (CIM17+).",
+  "type": "object",
+  "required": ["id", "type"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "IES asset DID. Format: did:web:<domain>:assets:evse:<local-id>. Example: did:web:utility.com:assets:evse:EVSE-001"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["EV_CHARGER", "EV_V2G"],
+      "description": "Asset-class discriminator. EV_CHARGER: unidirectional or AC bidirectional EVSE. EV_V2G: Vehicle-to-Grid capable EVSE (ISO 15118-20 / OCPP 2.1 BPT)."
+    },
+    "attributes": {
+      "$ref": "#/$defs/EnergyResourceEVChargerAttributes"
+    },
+    "subResources": {
+      "type": "array",
+      "description": "Child resources. Each item is a bare id string or an inline EnergyResourceEVCharger object.",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#" }
+        ]
+      }
+    },
+    "parentResources": {
+      "type": "array",
+      "description": "ids of parent resources (e.g. the meter this EVSE is behind).",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "GeoJSONGeometry": {
+      "type": "object",
+      "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326).",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
+        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
+        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
+        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
+      },
+      "additionalProperties": true
+    },
+    "Address": {
+      "type": "object",
+      "description": "schema.org PostalAddress per beckn Address/2.0.",
+      "additionalProperties": false,
+      "properties": {
+        "streetAddress": { "type": "string" },
+        "extendedAddress": { "type": "string" },
+        "addressLocality": { "type": "string" },
+        "addressRegion": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "addressCountry": { "type": "string" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address.",
+      "required": ["geo"],
+      "properties": {
+        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
+        "address": { "$ref": "#/$defs/Address" }
+      }
+    },
+    "EnergyResourceEVChargerAttributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Attributes for EV_CHARGER and EV_V2G resources. Includes common fields (make, model, maxImportKw, maxExportKw, ratedPowerKw, telemetryProvider, commissioningDate, location) plus EVSE-specific fields.",
+      "properties": {
+        "make": { "type": "string", "description": "Manufacturer (free text)." },
+        "model": { "type": "string", "description": "Model number (free text)." },
+        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. Kept for backward compatibility. Prefer maxImportKw." },
+        "maxImportKw": { "type": "number", "minimum": 0, "description": "Maximum charge power drawn from the grid, kW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
+        "maxExportKw": { "type": "number", "minimum": 0, "description": "Maximum V2G discharge power injected to the grid, kW. Always ≥0. Set for EV_V2G; omit or 0 for unidirectional EV_CHARGER. CIM: PowerElectronicsConnection.maxP (injection)." },
+        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
+        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this EVSE was commissioned." },
+        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
+        "connectorType": {
+          "type": "string",
+          "enum": ["Type1", "Type2", "CCS1", "CCS2", "CHAdeMO", "GB_T", "NACS", "Other"],
+          "description": "Physical connector standard. Type1/Type2: IEC 62196. CCS1/CCS2: Combined Charging System (DC fast). CHAdeMO: CHAdeMO Association (DC, supports V2G). GB_T: Chinese GB/T 20234. NACS: North American Charging Standard (SAE J3400)."
+        },
+        "controlProtocol": {
+          "type": "string",
+          "enum": ["OCPP_1.6", "OCPP_2.0.1", "OCPP_2.1", "ISO_15118_2", "ISO_15118_20", "Other"],
+          "description": "EVSE control and smart-charging protocol. OCPP 2.1 adds ISO 15118-20 integration and BPT. ISO_15118_20 enables Plug-and-Charge and V2G."
+        },
+        "v2xProtocol": {
+          "type": "string",
+          "enum": ["CHAdeMO_V2G", "CCS_BPT", "ISO_15118_20_AC_BPT", "ISO_15118_20_DC_BPT", "Other"],
+          "description": "V2G / V2X protocol. Present only for EV_V2G resources. CHAdeMO_V2G: CHAdeMO 2.0/3.0. CCS_BPT: CCS bidirectional. ISO_15118_20_AC/DC_BPT: ISO 15118-20 AC or DC bidirectional power transfer."
+        }
+      }
+    }
+  }
+}
