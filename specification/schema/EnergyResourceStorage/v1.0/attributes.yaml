@@ -3,19 +3,18 @@ info:
   title: EnergyResourceStorage
   version: 1.0.0
   description: |
-    Typed attribute schema for storage DER energy resources.
+    Typed attribute schema for stationary battery energy storage resources.
 
     CIM alignment (IEC 61970-302):
-      BESS        → cim:BatteryUnit
-      BATTERY     → cim:BatteryUnit (deprecated alias for BESS)
-      EV_CHARGER  → cim:ElectricVehicleChargingStation (unidirectional)
-      EV_V2G      → cim:ElectricVehicleChargingStation (bidirectional V2G capable)
+      BESS   → cim:BatteryUnit
+      BATTERY → cim:BatteryUnit (deprecated alias; use BESS)
 
-    BATTERY is a deprecated alias for BESS; new payloads should use BESS.
-    EV_V2G represents a bidirectional vehicle-to-grid capable EV charger.
+    EV charging stations (EV_CHARGER, EV_V2G) are a separate kind —
+    see EnergyResourceEVCharger/v1.0.
 
-    Note: storageCapacityKwh in this schema replaces energyCapacityKwh
-    used in EnergyResource v1.1.
+    storageCapacityKwh replaces energyCapacityKwh from EnergyResource v1.1.
+    maxExportKw (discharge rate, ≥0) and maxImportKw (charge rate, ≥0)
+    replace maxDischargeRateKw / maxChargeRateKw.
 
 components:
   schemas:
@@ -51,14 +50,11 @@ components:
           enum:
             - BESS
             - BATTERY
-            - EV_CHARGER
-            - EV_V2G
           description: >
             Asset-class discriminator. BATTERY is a deprecated alias for BESS;
-            new payloads should use BESS. EV_V2G denotes a bidirectional
-            vehicle-to-grid capable EV charger.
-            CIM: BESS/BATTERY → BatteryUnit,
-            EV_CHARGER/EV_V2G → ElectricVehicleChargingStation (IEC 61970-302).
+            new payloads should use BESS.
+            CIM: cim:BatteryUnit (IEC 61970-302).
+            EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G).
           x-cim-class: cim:BatteryUnit
           x-jsonld:
             "@id": erDeg:resourceType
@@ -87,10 +83,10 @@ components:
       type: object
       additionalProperties: true
       description: >
-        Attributes for storage DER resources. Includes EnergyResourceCommonAttributes
-        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location)
-        plus storage-specific fields (storageCapacityKwh, storageType,
-        stateOfHealthPct, maxChargeRateKw, maxDischargeRateKw).
+        Attributes for BESS resources. Includes EnergyResourceCommonAttributes
+        fields (make, model, maxExportKw, maxImportKw, ratedPowerKw,
+        telemetryProvider, commissioningDate, location) plus storage-specific
+        fields (storageCapacityKwh, storageType, stateOfHealthPct).
       x-jsonld:
         "@id": erDeg:attributes
       properties:
@@ -112,9 +108,28 @@ components:
           type: number
           minimum: 0
           description: >
-            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
+            Manufacturer-rated peak power, kW. Kept for backward compatibility.
+            Prefer maxExportKw for new payloads.
           x-jsonld:
             "@id": erDeg:ratedPowerKw
+
+        maxExportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum discharge power injected to the grid, kW. Always ≥0.
+            CIM: BatteryUnit / PowerElectronicsConnection.maxP (injection direction).
+          x-jsonld:
+            "@id": erDeg:maxExportKw
+
+        maxImportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum charge power drawn from the grid, kW. Always ≥0.
+            CIM: BatteryUnit / PowerElectronicsConnection.maxP (absorption direction).
+          x-jsonld:
+            "@id": erDeg:maxImportKw
 
         telemetryProvider:
           type: string
@@ -192,16 +207,3 @@ components:
           x-jsonld:
             "@id": erDeg:stateOfHealthPct
 
-        maxChargeRateKw:
-          type: number
-          minimum: 0
-          description: Maximum charge rate, kW.
-          x-jsonld:
-            "@id": erDeg:maxChargeRateKw
-
-        maxDischargeRateKw:
-          type: number
-          minimum: 0
-          description: Maximum discharge rate, kW.
-          x-jsonld:
-            "@id": erDeg:maxDischargeRateKw

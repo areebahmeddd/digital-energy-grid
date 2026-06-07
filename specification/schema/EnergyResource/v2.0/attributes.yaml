@@ -209,299 +209,46 @@ components:
           x-jsonld:
             "@id": deg:attributes
 
-    # ── Typed kinds ───────────────────────────────────────────────────────
+    # ── Canonical kind aliases ────────────────────────────────────────────
+    # Each kind lives in its own specification/schema/<Kind>/v1.0/ folder
+    # and is published to schema.beckn.io/<Kind>/v1.0.
+    # EnergyResource/v2.0 owns EnergyResourceCommon and EnergyResourceCommonAttributes;
+    # the kind schemas are the authoritative source for type-specific attributes.
 
     EnergyResourceMeter:
-      description: >
-        Metering device. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              const: METER
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                meterCapability:
-                  type: string
-                  enum: [Electromechanical, CMRI, AMR, AMI]
-                  description: >
-                    Communication/automation generation. Electromechanical=induction disc.
-                    CMRI=static optical-port read. AMR=one-way automated read.
-                    AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9).
-                energyDirection:
-                  type: string
-                  enum: [Forward, Reverse, Bidirectional, Net]
-                  default: Forward
-                  description: >
-                    Energy flow direction. Forward=import (default). Reverse=export.
-                    Bidirectional=separate registers. Net=algebraically netted.
-                    CIM: FlowDirectionKind (ESPI NAESB REQ.21).
-                functions:
-                  type: array
-                  uniqueItems: true
-                  description: Bag of active capabilities (IEC 61968-9 EndDeviceFunction[0..*]).
-                  items:
-                    type: string
-                    enum: [ToU, NetMetering, MaxDemand, LoadControl, TamperDetection, PowerQuality, EventLogging]
-                feeder:
-                  type: string
-                  description: Feeder identifier this meter is supplied from.
-                bus:
-                  type: string
-                  description: Busbar identifier.
-                communicationTechnology:
-                  type: string
-                  enum: [PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other]
-                  description: Last-mile (physical layer) communication technology.
-                applicationProtocol:
-                  type: string
-                  enum: [DLMS_COSEM, ANSI_C12_18, IEC_61850, Modbus, Other]
-                  description: Application-layer protocol for meter data.
+      $ref: "https://schema.beckn.io/EnergyResourceMeter/v1.0#/components/schemas/EnergyResourceMeter"
 
     EnergyResourceGenerator:
-      description: >
-        Electrical generation asset. CIM GeneratingUnit subtypes (IEC 61970-302):
-        SOLAR_PV=PhotovoltaicUnit, WIND=WindGeneratingUnit,
-        HYDRO=HydroGeneratingUnit, BIOGAS/CHP=ThermalGeneratingUnit,
-        FUEL_CELL=IEC 62933-2. SOLAR is deprecated — use SOLAR_PV.
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL, SOLAR]
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                nominalPowerKw:
-                  type: number
-                  minimum: 0
-                  description: >
-                    Nominal rated output power in kW when distinct from peak.
-                    CIM: GeneratingUnit.nominalP.
-                efficiency:
-                  type: number
-                  minimum: 0
-                  maximum: 100
-                  description: Conversion efficiency, %. Relevant for FUEL_CELL and CHP.
+      $ref: "https://schema.beckn.io/EnergyResourceGenerator/v1.0#/components/schemas/EnergyResourceGenerator"
 
-    EnergyResourceBESS:
-      description: >
-        Stationary battery energy storage system. storageCapacityKwh is
-        exclusive to this kind. CIM: BatteryUnit (IEC 61970-302).
-        BATTERY is deprecated — use BESS.
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [BESS, BATTERY]
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                storageCapacityKwh:
-                  type: number
-                  minimum: 0
-                  description: >
-                    Rated energy capacity in kWh. Exclusive to this kind.
-                    CIM: BatteryUnit.ratedE.
-                storageType:
-                  type: string
-                  enum: [LithiumIon, LeadAcid, FlowBattery, NaS, NiCd, Flywheel, Other]
-                  description: Storage chemistry or technology type.
-                stateOfHealthPct:
-                  type: number
-                  minimum: 0
-                  maximum: 100
-                  description: Battery state of health as % of original capacity.
+    EnergyResourceStorage:
+      $ref: "https://schema.beckn.io/EnergyResourceStorage/v1.0#/components/schemas/EnergyResourceStorage"
 
     EnergyResourceEVCharger:
-      description: >
-        EV charging station (EVSE). A flexible load — NOT a storage resource.
-        The EV battery is storage; the EVSE is the charge/discharge interface.
-        EV_V2G is a specialisation of EV_CHARGER with ISO 15118-20 / OCPP 2.1
-        BPT bidirectional capability. Express power via maxImportKw (charge)
-        and maxExportKw (V2G discharge) in common attributes.
-        CIM: ElectricVehicleChargingStation (CIM17+).
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [EV_CHARGER, EV_V2G]
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                connectorType:
-                  type: string
-                  enum: [Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other]
-                  description: >
-                    Physical connector standard. Type1/Type2: IEC 62196.
-                    CCS1/CCS2: Combined Charging System. NACS: North American
-                    Charging Standard (J3400).
-                controlProtocol:
-                  type: string
-                  enum: [OCPP_1.6, OCPP_2.0.1, OCPP_2.1, ISO_15118_2, ISO_15118_20, Other]
-                  description: EVSE control and smart-charging protocol.
-                v2xProtocol:
-                  type: string
-                  enum: [CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other]
-                  description: >
-                    Vehicle-to-Grid / V2X protocol. Present only for EV_V2G
-                    resources.
+      $ref: "https://schema.beckn.io/EnergyResourceEVCharger/v1.0#/components/schemas/EnergyResourceEVCharger"
 
     EnergyResourceInverter:
-      description: >
-        Grid-connected power-electronics converter without a dedicated fuel
-        source. Captures reactive-power and frequency-support capabilities
-        per IEEE 1547-2018 and SunSpec DER Models 702–714. Use cases:
-        standalone battery inverters, VPP aggregation points, grid-forming
-        inverters for microgrid islanding.
-        CIM: PowerElectronicsConnection (IEC 61970-302).
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              const: INVERTER
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                ratedApparentPowerKva:
-                  type: number
-                  minimum: 0
-                  description: Rated apparent power, kVA. SunSpec Model 702 maxVA.
-                maxReactivePowerKvar:
-                  type: number
-                  minimum: 0
-                  description: >
-                    Max reactive power injection (leading / over-excited), kVAr.
-                    SunSpec Model 702 maxVar.
-                minReactivePowerKvar:
-                  type: number
-                  description: >
-                    Max reactive power absorption (lagging / under-excited), kVAr.
-                    Usually negative. SunSpec Model 702 maxVarNeg.
-                rideThroughCategory:
-                  type: string
-                  enum: [CategoryI, CategoryII, CategoryIII]
-                  description: >
-                    IEEE 1547-2018 abnormal operating performance category.
-                    CategoryI: basic. CategoryII: enhanced (distribution DER).
-                    CategoryIII: advanced (large / transmission-connected DER).
-                operatingMode:
-                  type: string
-                  enum: [GridFollowing, GridForming, Standby]
-                  description: >
-                    Inverter grid-interaction mode. GridFollowing: synchronises
-                    to existing voltage/frequency (typical DER). GridForming:
-                    establishes V/f reference (microgrid islanding).
-                    CIM: PowerElectronicsConnection.inverterMode.
-                voltVarEnabled:
-                  type: boolean
-                  description: >
-                    Volt-VAr curve active (autonomous reactive power vs. voltage).
-                    IEEE 2030.5 opModVoltVar / SunSpec Model 705.
-                freqDroopEnabled:
-                  type: boolean
-                  description: >
-                    Frequency-Watt droop active (active power vs. frequency
-                    deviation). SunSpec Model 711 / IEEE 1547 Freq-Watt.
-                enterServiceRampTimeSec:
-                  type: number
-                  minimum: 0
-                  description: >
-                    Ramp-up time in seconds after reconnection.
-                    SunSpec Model 703 ESRmpTms.
+      $ref: "https://schema.beckn.io/EnergyResourceInverter/v1.0#/components/schemas/EnergyResourceInverter"
 
     EnergyResourceLoad:
-      description: >
-        Controllable electrical load.
-        CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD]
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                controlProtocol:
-                  type: string
-                  enum: [OpenADR_2.0b, OCPP_2.0.1, SunSpec_Modbus, EEBus, Modbus, Other]
-                  description: Demand-response or load-control protocol.
-                loadCategory:
-                  type: string
-                  enum: [Heating, Cooling, WaterHeating, Lighting, EV, Industrial, Other]
-                  description: Load category for aggregation and dispatch optimisation.
+      $ref: "https://schema.beckn.io/EnergyResourceLoad/v1.0#/components/schemas/EnergyResourceLoad"
 
     EnergyResourceNetwork:
-      description: >
-        Distribution network topology element. CIM: DT=PowerTransformer,
-        BUS=BusbarSection, FEEDER=Feeder, MICROGRID=Substation/custom
-        (IEC 61970-301).
-      allOf:
-        - $ref: "#/components/schemas/EnergyResourceCommon"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [DT, BUS, FEEDER, MICROGRID]
-            attributes:
-              allOf:
-                - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-              type: object
-              additionalProperties: true
-              properties:
-                nominalVoltageKv:
-                  type: number
-                  minimum: 0
-                  description: Nominal voltage level, kV. CIM: BaseVoltage.nominalVoltage.
-                zone:
-                  type: string
-                  description: Operating zone or region identifier.
-                substationId:
-                  type: string
-                  description: Parent substation identifier.
-                feederCode:
-                  type: string
-                  description: Feeder code per utility network records.
+      $ref: "https://schema.beckn.io/EnergyResourceNetwork/v1.0#/components/schemas/EnergyResourceNetwork"
 
     # ── Union entry point ─────────────────────────────────────────────────
 
     EnergyResource:
       description: >
         Discriminated union of all typed EnergyResource kinds. Dispatched by
-        the 'type' field. Each kind inherits EnergyResourceCommon (id, type,
-        subResources, parentResources, attributes) via allOf and refines the
-        attributes bag with kind-specific fields.
+        the 'type' field. Each kind lives in its own schema at
+        schema.beckn.io/<Kind>/v1.0 and is referenced above.
+
+        EnergyResourceCommon (id, type, subResources, parentResources,
+        attributes) and EnergyResourceCommonAttributes (make, model,
+        maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+        commissioningDate, location) are defined in this schema and inherited
+        by all kinds.
 
         For P2P-trading: minimal usage is {id, type}.
         For demand-flex and credentials: add attributes fields as needed.
@@ -509,7 +256,7 @@ components:
       oneOf:
         - $ref: "#/components/schemas/EnergyResourceMeter"
         - $ref: "#/components/schemas/EnergyResourceGenerator"
-        - $ref: "#/components/schemas/EnergyResourceBESS"
+        - $ref: "#/components/schemas/EnergyResourceStorage"
         - $ref: "#/components/schemas/EnergyResourceEVCharger"
         - $ref: "#/components/schemas/EnergyResourceInverter"
         - $ref: "#/components/schemas/EnergyResourceLoad"

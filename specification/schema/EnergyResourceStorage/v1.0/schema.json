@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.0",
   "title": "EnergyResourceStorage",
-  "description": "Typed schema for storage DER energy resources (BESS, EV charger, V2G). CIM: BESS/BATTERY → cim:BatteryUnit, EV_CHARGER/EV_V2G → cim:ElectricVehicleChargingStation (IEC 61970-302). BATTERY is a deprecated alias for BESS. EV_V2G denotes a bidirectional vehicle-to-grid capable charger. storageCapacityKwh is exclusive to this kind (replaces energyCapacityKwh from EnergyResource v1.1).",
+  "description": "Typed schema for stationary battery energy storage resources (BESS). CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. EV charging stations (EV_CHARGER, EV_V2G) moved to EnergyResourceEVCharger/v1.0. storageCapacityKwh is exclusive to this kind. maxExportKw (discharge, ≥0) and maxImportKw (charge, ≥0) replace maxDischargeRateKw / maxChargeRateKw.",
   "type": "object",
   "required": ["id", "type"],
   "additionalProperties": false,
@@ -14,8 +14,8 @@
     },
     "type": {
       "type": "string",
-      "enum": ["BESS", "BATTERY", "EV_CHARGER", "EV_V2G"],
-      "description": "Asset-class discriminator. BATTERY is deprecated; use BESS. EV_V2G is bidirectional V2G capable. CIM: BESS/BATTERY → BatteryUnit, EV_CHARGER/EV_V2G → ElectricVehicleChargingStation (IEC 61970-302)."
+      "enum": ["BESS", "BATTERY"],
+      "description": "Asset-class discriminator. BATTERY is deprecated; use BESS. CIM: cim:BatteryUnit (IEC 61970-302). EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G)."
     },
     "attributes": {
       "$ref": "#/$defs/EnergyResourceStorageAttributes"
@@ -74,11 +74,13 @@
     "EnergyResourceStorageAttributes": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Attributes for storage DER resources. Includes common fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location) plus storage-specific fields (storageCapacityKwh, storageType, stateOfHealthPct, maxChargeRateKw, maxDischargeRateKw).",
+      "description": "Attributes for BESS resources. Includes common fields (make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate, location) plus storage-specific fields (storageCapacityKwh, storageType, stateOfHealthPct).",
       "properties": {
         "make": { "type": "string", "description": "Manufacturer (free text)." },
         "model": { "type": "string", "description": "Model number (free text)." },
-        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP." },
+        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. Kept for backward compatibility. Prefer maxExportKw." },
+        "maxExportKw": { "type": "number", "minimum": 0, "description": "Maximum discharge power injected to the grid, kW. Always ≥0. CIM: BatteryUnit / PowerElectronicsConnection.maxP (injection)." },
+        "maxImportKw": { "type": "number", "minimum": 0, "description": "Maximum charge power drawn from the grid, kW. Always ≥0. CIM: BatteryUnit / PowerElectronicsConnection.maxP (absorption)." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this storage asset was commissioned." },
         "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
@@ -97,16 +99,6 @@
           "minimum": 0,
           "maximum": 100,
           "description": "Battery state-of-health as a percentage (0–100)."
-        },
-        "maxChargeRateKw": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum charge rate, kW."
-        },
-        "maxDischargeRateKw": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum discharge rate, kW."
         }
       }
     }

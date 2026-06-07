@@ -287,10 +287,10 @@ components:
         subResources[] (children) and parentResources[] (parents, e.g. the
         meter a DER sits behind).
 
-        Common attribute change: ratedPowerKw is replaced by maxImportKw
-        and maxExportKw in EnergyResourceCommonAttributes. maxExportKw is
-        the nameplate power in the principal direction (≥0). maxImportKw can
-        be negative to express discharge/export capacity (V2G, BESS).
+        maxExportKw (≥0) and maxImportKw (≥0) replace ratedPowerKw in
+        EnergyResourceCommonAttributes. Both are non-negative directional
+        fields: maxExportKw = max power injected to grid; maxImportKw = max
+        power drawn from grid.
 
         EV_CHARGER and EV_V2G are their own kind (EnergyResourceEVCharger),
         not grouped with storage. INVERTER is a new kind for grid-connected
