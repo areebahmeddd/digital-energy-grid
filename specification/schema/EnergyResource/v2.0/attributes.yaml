@@ -8,22 +8,23 @@ info:
 
     Architecture
     ────────────
-    EnergyResourceCommonAttributes defines common dimensioning fields
-    (make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
-    commissioningDate, location) shared by all resource kinds.
+    EnergyResourceCommon (envelope) and EnergyResourceCommonAttributes
+    (attributes bag base) are defined in EnergyResourceCommon/v1.0 and
+    aliased here for tooling convenience.
 
-    EnergyResourceCommon is the base envelope inherited by every kind via allOf:
-      id            — stable identifier
-      type          — asset class discriminator
-      subResources  — child resource ids or inline objects (topology)
-      parentResources — parent resource ids (topology)
-      attributes    — allOf [EnergyResourceCommonAttributes] + open bag
+    EnergyResourceCommonAttributes holds shared dimensioning fields:
+      make, model, maxExportKw, maxImportKw, ratedPowerKw,
+      telemetryProvider, commissioningDate, location.
 
-    Seven typed kinds each do allOf [EnergyResourceCommon] and refine the
-    attributes bag with kind-specific fields:
+    EnergyResourceCommon is the structural envelope:
+      id, type, subResources, parentResources,
+      attributes (allOf EnergyResourceCommonAttributes).
+
+    Seven typed kinds each inherit EnergyResourceCommon via allOf and
+    refine the attributes bag with kind-specific fields:
       EnergyResourceMeter     (METER)
       EnergyResourceGenerator (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL)
-      EnergyResourceBESS      (BESS)
+      EnergyResourceStorage   (BESS)
       EnergyResourceEVCharger (EV_CHARGER, EV_V2G)
       EnergyResourceInverter  (INVERTER)
       EnergyResourceLoad      (SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD)
@@ -35,179 +36,14 @@ info:
 components:
   schemas:
 
-    # ── Common attribute base (goes inside attributes bag) ────────────────
+    # ── Common base schemas — defined in EnergyResourceCommon/v1.0 ────────
+    # Aliased here so tooling resolving EnergyResource/v2.0 can reach them.
 
     EnergyResourceCommonAttributes:
-      type: object
-      additionalProperties: true
-      description: >
-        Dimensioning and provenance fields shared by all resource kinds.
-        Live inside each kind's attributes bag. No field is required at
-        the schema level.
-      x-tags:
-        - energy-resource
-      properties:
-
-        make:
-          type: string
-          description: Manufacturer (free text).
-          x-jsonld:
-            "@id": deg:make
-
-        model:
-          type: string
-          description: Model (free text).
-          x-jsonld:
-            "@id": deg:model
-
-        ratedPowerKw:
-          type: number
-          minimum: 0
-          description: >
-            Manufacturer-rated peak power in kW (nameplate value in the
-            principal direction). Kept for backward compatibility.
-            Prefer maxExportKw for new payloads.
-          x-jsonld:
-            "@id": deg:ratedPowerKw
-
-        maxExportKw:
-          type: number
-          minimum: 0
-          description: >
-            Maximum power this resource injects to the grid (generates /
-            discharges), kW. Always ≥0. Set for generators (SOLAR_PV, WIND,
-            CHP) and discharging storage. For bidirectional resources (BESS,
-            V2G) this is the max discharge rate. Supersedes ratedPowerKw.
-            CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
-            (injection direction).
-          x-jsonld:
-            "@id": deg:maxExportKw
-
-        maxImportKw:
-          type: number
-          minimum: 0
-          description: >
-            Maximum power this resource draws from the grid (absorbs /
-            charges), kW. Always ≥0. Set for loads, charging storage, and
-            EV chargers. For bidirectional resources (BESS, V2G) this is
-            the max charge rate. Omit or 0 for pure generators.
-            CIM: PowerElectronicsConnection.maxP (absorption direction).
-          x-jsonld:
-            "@id": deg:maxImportKw
-
-        telemetryProvider:
-          type: string
-          description: Vendor API / data source identifier for telemetry.
-          x-jsonld:
-            "@id": deg:telemetryProvider
-
-        commissioningDate:
-          type: string
-          format: date-time
-          description: ISO 8601 date-time the asset was commissioned.
-          x-jsonld:
-            "@id": deg:commissioningDate
-
-        location:
-          type: object
-          description: >
-            Physical location of the asset (beckn Location shape). geo
-            (required) is a GeoJSON geometry with coordinates [longitude,
-            latitude] per RFC 7946. address (optional) is a schema.org
-            PostalAddress-aligned object.
-          additionalProperties: true
-          required:
-            - geo
-          properties:
-            geo:
-              type: object
-              required: [type]
-              additionalProperties: true
-              properties:
-                type:
-                  type: string
-                  enum: [Point, Polygon, LineString, MultiPoint, MultiPolygon, MultiLineString]
-                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
-                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
-            address:
-              type: object
-              additionalProperties: false
-              properties:
-                streetAddress:   { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion:   { type: string }
-                postalCode:      { type: string }
-                addressCountry:  { type: string, description: "ISO 3166-1 alpha-2 or country name." }
-          x-jsonld:
-            "@id": deg:location
-
-    # ── Common envelope (inherited by every kind) ─────────────────────────
+      $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
 
     EnergyResourceCommon:
-      type: object
-      additionalProperties: true
-      description: >
-        Envelope schema inherited by every typed EnergyResource kind via allOf.
-        Defines the top-level fields common to all kinds: id, type, topology,
-        and the attributes bag (allOf EnergyResourceCommonAttributes).
-      x-tags:
-        - energy-resource
-      properties:
-
-        id:
-          type: string
-          description: >
-            Stable identifier for this resource. For METER resources the
-            meter serial number is conventional.
-          example: "MET2025789456123"
-          x-jsonld:
-            "@id": "@id"
-
-        type:
-          type: string
-          description: Asset class discriminator. See individual kind schemas for constrained enums.
-          x-jsonld:
-            "@id": deg:resourceType
-
-        subResources:
-          type: array
-          description: >
-            Topology — child resources. Each item is EITHER a bare id string
-            (reference to a sibling EnergyResource) OR an inline EnergyResource
-            object. Uses a recursive $ref which is valid in JSON Schema 2020-12.
-          items:
-            oneOf:
-              - type: string
-                description: id of a sibling EnergyResource.
-              - $ref: "#/components/schemas/EnergyResource"
-                description: Inline-nested EnergyResource.
-          x-jsonld:
-            "@id": deg:subResources
-
-        parentResources:
-          type: array
-          description: >
-            Upward topology — ids of parent resources (e.g. the meter this
-            DER sits behind). String references only; inlining parents would
-            create a definitional cycle.
-          items:
-            type: string
-          x-jsonld:
-            "@id": deg:parentResources
-
-        attributes:
-          type: object
-          additionalProperties: true
-          description: >
-            Attribute bag. Contains EnergyResourceCommonAttributes (make,
-            model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
-            commissioningDate, location) plus kind-specific fields defined
-            by each typed subschema.
-          allOf:
-            - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
-          x-jsonld:
-            "@id": deg:attributes
+      $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
 
     # ── Canonical kind aliases ────────────────────────────────────────────
     # Each kind lives in its own specification/schema/<Kind>/v1.0/ folder

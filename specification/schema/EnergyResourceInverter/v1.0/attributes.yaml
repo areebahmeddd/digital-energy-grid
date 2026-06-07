@@ -19,13 +19,14 @@ info:
 
     CIM alignment: PowerElectronicsConnection (IEC 61970-302).
 
+    Common attributes (make, model, ratedPowerKw, maxExportKw, maxImportKw,
+    telemetryProvider, commissioningDate, location) are inherited from
+    EnergyResourceCommon/v1.0 via allOf.
+
 components:
   schemas:
 
     EnergyResourceInverter:
-      type: object
-      required: [id, type]
-      additionalProperties: false
       description: >
         A grid-connected power-electronics inverter energy resource. Captures
         IEEE 1547-2018 ride-through categories, operating mode, and reactive /
@@ -39,220 +40,120 @@ components:
       x-jsonld:
         "@context": ./context.jsonld
         "@type": EnergyResourceInverter
-      properties:
-        id:
-          type: string
-          description: >
-            IES asset DID. Format: did:web:<domain>:assets:inverter:<local-id>
-            e.g. did:web:utility.com:assets:inverter:INV-001
-          example: "did:web:utility.com:assets:inverter:INV-001"
-          x-jsonld:
-            "@id": "@id"
-        type:
-          type: string
-          const: "INVERTER"
-          description: >
-            Asset-class discriminator. Must be "INVERTER".
-            CIM: PowerElectronicsConnection (IEC 61970-302).
-          x-jsonld:
-            "@id": erDeg:resourceType
-        attributes:
-          $ref: "#/components/schemas/EnergyResourceInverterAttributes"
-        subResources:
-          type: array
-          description: Child resources. Each item is a bare id string or inline resource.
-          items:
-            oneOf:
-              - type: string
-                description: id of a sibling EnergyResource.
-              - $ref: "#/components/schemas/EnergyResourceInverter"
-                description: Inline nested resource.
-        parentResources:
-          type: array
-          description: ids of parent resources (e.g. the meter this inverter is behind).
-          items:
-            type: string
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              const: "INVERTER"
+              description: >
+                Asset-class discriminator. Must be "INVERTER".
+                CIM: PowerElectronicsConnection (IEC 61970-302).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceInverterAttributes"
 
     EnergyResourceInverterAttributes:
-      type: object
-      additionalProperties: true
       description: >
-        Attributes for INVERTER resources. Includes
-        EnergyResourceCommonAttributes fields (make, model, maxExportKw,
-        maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate,
-        location) plus IEEE 1547-2018 / SunSpec DER Model inverter-specific
-        fields.
+        Attributes for INVERTER resources. Common fields (make, model,
+        ratedPowerKw, maxExportKw, maxImportKw, telemetryProvider,
+        commissioningDate, location) are inherited from
+        EnergyResourceCommonAttributes via allOf. Only IEEE 1547-2018 /
+        SunSpec DER Model inverter-specific fields are defined here.
       x-jsonld:
         "@id": erDeg:attributes
-      properties:
-
-        # ── Common attributes (EnergyResourceCommonAttributes) ────────────
-
-        make:
-          type: string
-          description: Manufacturer (free text).
-          x-jsonld:
-            "@id": erDeg:make
-
-        model:
-          type: string
-          description: Model number (free text).
-          x-jsonld:
-            "@id": erDeg:model
-
-        ratedPowerKw:
-          type: number
-          minimum: 0
-          description: >
-            Manufacturer-rated peak active power, kW. Kept for backward
-            compatibility. Prefer maxExportKw for new payloads.
-          x-jsonld:
-            "@id": erDeg:ratedPowerKw
-
-        maxExportKw:
-          type: number
-          minimum: 0
-          description: >
-            Maximum active power injected to the grid, kW. Always ≥0.
-            CIM: PowerElectronicsConnection.maxP (injection direction).
-            SunSpec Model 702 maxW.
-          x-jsonld:
-            "@id": erDeg:maxExportKw
-
-        maxImportKw:
-          type: number
-          minimum: 0
-          description: >
-            Maximum active power absorbed from the grid, kW. Always ≥0.
-            Set for four-quadrant inverters (grid-forming or storage-backed).
-            CIM: PowerElectronicsConnection.maxP (absorption direction).
-          x-jsonld:
-            "@id": erDeg:maxImportKw
-
-        telemetryProvider:
-          type: string
-          description: Vendor API / data source identifier for telemetry.
-          x-jsonld:
-            "@id": erDeg:telemetryProvider
-
-        commissioningDate:
-          type: string
-          format: date-time
-          description: ISO 8601 date-time when this inverter was commissioned.
-          x-jsonld:
-            "@id": deg:commissioningDate
-
-        location:
-          type: object
-          description: >
-            Physical location of this asset per beckn Location/2.0.
-            geo (required) is a GeoJSON geometry; address is a postal address.
-          required: [geo]
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
           properties:
-            geo:
-              type: object
-              required: [type]
-              properties:
-                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
-                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
-                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
-              additionalProperties: true
-            address:
-              type: object
-              additionalProperties: false
-              properties:
-                streetAddress:   { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion:   { type: string }
-                postalCode:      { type: string }
-                addressCountry:  { type: string }
-          x-jsonld:
-            "@id": erDeg:location
 
-        # ── Inverter-specific attributes (IEEE 1547 / SunSpec) ────────────
+            # ── Inverter-specific attributes (IEEE 1547 / SunSpec) ────────────
 
-        ratedApparentPowerKva:
-          type: number
-          minimum: 0
-          description: >
-            Rated apparent power in kVA.
-            SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS.
-          x-jsonld:
-            "@id": erDeg:ratedApparentPowerKva
+            ratedApparentPowerKva:
+              type: number
+              minimum: 0
+              description: >
+                Rated apparent power in kVA.
+                SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS.
+              x-jsonld:
+                "@id": erDeg:ratedApparentPowerKva
 
-        maxReactivePowerKvar:
-          type: number
-          minimum: 0
-          description: >
-            Maximum reactive power injection (leading / over-excited), kVAr.
-            SunSpec Model 702 maxVar.
-            CIM: PowerElectronicsConnection.maxQ.
-          x-jsonld:
-            "@id": erDeg:maxReactivePowerKvar
+            maxReactivePowerKvar:
+              type: number
+              minimum: 0
+              description: >
+                Maximum reactive power injection (leading / over-excited), kVAr.
+                SunSpec Model 702 maxVar.
+                CIM: PowerElectronicsConnection.maxQ.
+              x-jsonld:
+                "@id": erDeg:maxReactivePowerKvar
 
-        minReactivePowerKvar:
-          type: number
-          description: >
-            Maximum reactive power absorption (lagging / under-excited), kVAr.
-            Usually expressed as a negative value (e.g. -4 for 4 kVAr absorption).
-            SunSpec Model 702 maxVarNeg.
-            CIM: PowerElectronicsConnection.minQ.
-          x-jsonld:
-            "@id": erDeg:minReactivePowerKvar
+            minReactivePowerKvar:
+              type: number
+              description: >
+                Maximum reactive power absorption (lagging / under-excited), kVAr.
+                Usually expressed as a negative value (e.g. -4 for 4 kVAr absorption).
+                SunSpec Model 702 maxVarNeg.
+                CIM: PowerElectronicsConnection.minQ.
+              x-jsonld:
+                "@id": erDeg:minReactivePowerKvar
 
-        rideThroughCategory:
-          type: string
-          enum: [CategoryI, CategoryII, CategoryIII]
-          description: >
-            IEEE 1547-2018 abnormal operating performance category.
-            Defines voltage and frequency ride-through requirements.
-            CategoryI: basic — suitable for small DER with low grid impact.
-            CategoryII: enhanced — for distribution-connected DER where
-              ride-through improves system reliability.
-            CategoryIII: advanced — for large or transmission-connected DER
-              where grid support during disturbances is critical.
-          x-jsonld:
-            "@id": erDeg:rideThroughCategory
+            rideThroughCategory:
+              type: string
+              enum: [CategoryI, CategoryII, CategoryIII]
+              description: >
+                IEEE 1547-2018 abnormal operating performance category.
+                Defines voltage and frequency ride-through requirements.
+                CategoryI: basic — suitable for small DER with low grid impact.
+                CategoryII: enhanced — for distribution-connected DER where
+                  ride-through improves system reliability.
+                CategoryIII: advanced — for large or transmission-connected DER
+                  where grid support during disturbances is critical.
+              x-jsonld:
+                "@id": erDeg:rideThroughCategory
 
-        operatingMode:
-          type: string
-          enum: [GridFollowing, GridForming, Standby]
-          description: >
-            Inverter grid-interaction mode.
-            GridFollowing: synchronises phase angle and frequency to existing
-              grid voltage/frequency reference (PLL-based; typical for DER).
-            GridForming: establishes its own V/f reference without external
-              synchronisation — enables microgrid islanding and black-start.
-            Standby: inverter energised but not injecting real power.
-            CIM: PowerElectronicsConnection.inverterMode.
-          x-jsonld:
-            "@id": erDeg:operatingMode
+            operatingMode:
+              type: string
+              enum: [GridFollowing, GridForming, Standby]
+              description: >
+                Inverter grid-interaction mode.
+                GridFollowing: synchronises phase angle and frequency to existing
+                  grid voltage/frequency reference (PLL-based; typical for DER).
+                GridForming: establishes its own V/f reference without external
+                  synchronisation — enables microgrid islanding and black-start.
+                Standby: inverter energised but not injecting real power.
+                CIM: PowerElectronicsConnection.inverterMode.
+              x-jsonld:
+                "@id": erDeg:operatingMode
 
-        voltVarEnabled:
-          type: boolean
-          description: >
-            Volt-VAr curve active — autonomous reactive power response as a
-            function of terminal voltage. IEEE 2030.5 opModVoltVar /
-            SunSpec Model 705 (Volt-VAr).
-          x-jsonld:
-            "@id": erDeg:voltVarEnabled
+            voltVarEnabled:
+              type: boolean
+              description: >
+                Volt-VAr curve active — autonomous reactive power response as a
+                function of terminal voltage. IEEE 2030.5 opModVoltVar /
+                SunSpec Model 705 (Volt-VAr).
+              x-jsonld:
+                "@id": erDeg:voltVarEnabled
 
-        freqDroopEnabled:
-          type: boolean
-          description: >
-            Frequency-Watt droop active — active power output reduced
-            proportionally to over-frequency deviation.
-            SunSpec Model 711 (Freq-Watt) / IEEE 1547-2018 Frequency-Watt.
-          x-jsonld:
-            "@id": erDeg:freqDroopEnabled
+            freqDroopEnabled:
+              type: boolean
+              description: >
+                Frequency-Watt droop active — active power output reduced
+                proportionally to over-frequency deviation.
+                SunSpec Model 711 (Freq-Watt) / IEEE 1547-2018 Frequency-Watt.
+              x-jsonld:
+                "@id": erDeg:freqDroopEnabled
 
-        enterServiceRampTimeSec:
-          type: number
-          minimum: 0
-          description: >
-            Time in seconds to ramp from 0 to rated power after reconnection
-            to the grid. Controls inrush on re-energisation.
-            SunSpec Model 703 ESRmpTms.
-          x-jsonld:
-            "@id": erDeg:enterServiceRampTimeSec
+            enterServiceRampTimeSec:
+              type: number
+              minimum: 0
+              description: >
+                Time in seconds to ramp from 0 to rated power after reconnection
+                to the grid. Controls inrush on re-energisation.
+                SunSpec Model 703 ESRmpTms.
+              x-jsonld:
+                "@id": erDeg:enterServiceRampTimeSec

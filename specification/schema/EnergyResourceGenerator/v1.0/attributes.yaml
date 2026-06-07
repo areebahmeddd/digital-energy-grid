@@ -16,13 +16,14 @@ info:
 
     SOLAR is a deprecated alias for SOLAR_PV; new payloads should use SOLAR_PV.
 
+    Common attributes (make, model, ratedPowerKw, maxExportKw, maxImportKw,
+    telemetryProvider, commissioningDate, location) are inherited from
+    EnergyResourceCommon/v1.0 via allOf.
+
 components:
   schemas:
 
     EnergyResourceGenerator:
-      type: object
-      required: [id, type]
-      additionalProperties: false
       description: >
         A generation DER energy resource (solar PV, wind, hydro, biogas, CHP,
         fuel cell). Corresponds to GeneratingUnit and its CIM subtypes
@@ -36,147 +37,64 @@ components:
       x-jsonld:
         "@context": ./context.jsonld
         "@type": EnergyResourceGenerator
-      properties:
-        id:
-          type: string
-          description: >
-            IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>
-            e.g. did:web:bescom.karnataka.gov.in:assets:solar:SOL-001
-          example: "did:web:bescom.karnataka.gov.in:assets:solar:SOL-001"
-          x-jsonld:
-            "@id": "@id"
-        type:
-          type: string
-          enum:
-            - SOLAR_PV
-            - SOLAR
-            - WIND
-            - HYDRO
-            - BIOGAS
-            - CHP
-            - FUEL_CELL
-          description: >
-            Asset-class discriminator. SOLAR is a deprecated alias for SOLAR_PV;
-            new payloads should use SOLAR_PV.
-            CIM classes: SOLAR_PV/SOLAR → PhotovoltaicUnit,
-            WIND → WindGeneratingUnit, HYDRO → HydroGeneratingUnit,
-            BIOGAS/CHP → ThermalGeneratingUnit, FUEL_CELL → IEC 62933-2.
-          x-cim-class: cim:GeneratingUnit
-          x-jsonld:
-            "@id": erDeg:resourceType
-        attributes:
-          $ref: "#/components/schemas/EnergyResourceGeneratorAttributes"
-        subResources:
-          type: array
-          description: >
-            Child resources (e.g. inverters, tracking units). Each item is a
-            bare id string or an inline EnergyResourceGenerator object.
-          items:
-            oneOf:
-              - type: string
-                description: id of a sibling EnergyResource in the same payload.
-              - $ref: "#/components/schemas/EnergyResourceGenerator"
-                description: Inline nested resource.
-        parentResources:
-          type: array
-          description: >
-            ids of parent resources (e.g. the meter this DER sits behind).
-            String references only.
-          items:
-            type: string
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum:
+                - SOLAR_PV
+                - SOLAR
+                - WIND
+                - HYDRO
+                - BIOGAS
+                - CHP
+                - FUEL_CELL
+              description: >
+                Asset-class discriminator. SOLAR is a deprecated alias for SOLAR_PV;
+                new payloads should use SOLAR_PV.
+                CIM classes: SOLAR_PV/SOLAR → PhotovoltaicUnit,
+                WIND → WindGeneratingUnit, HYDRO → HydroGeneratingUnit,
+                BIOGAS/CHP → ThermalGeneratingUnit, FUEL_CELL → IEC 62933-2.
+              x-cim-class: cim:GeneratingUnit
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceGeneratorAttributes"
 
     EnergyResourceGeneratorAttributes:
-      type: object
-      additionalProperties: true
       description: >
-        Attributes for generation DER resources. Includes EnergyResourceCommonAttributes
-        fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location)
-        plus generator-specific fields (nominalPowerKw, efficiency).
+        Attributes for generation DER resources. Common fields (make, model,
+        ratedPowerKw, maxExportKw, maxImportKw, telemetryProvider, commissioningDate,
+        location) are inherited from EnergyResourceCommonAttributes via allOf.
+        Only generator-specific fields are defined here.
       x-jsonld:
         "@id": erDeg:attributes
-      properties:
-
-        # ── Common attributes (EnergyResourceCommonAttributes) ──────────────
-        make:
-          type: string
-          description: Manufacturer (free text).
-          x-jsonld:
-            "@id": erDeg:make
-
-        model:
-          type: string
-          description: Model number (free text).
-          x-jsonld:
-            "@id": erDeg:model
-
-        ratedPowerKw:
-          type: number
-          minimum: 0
-          description: >
-            Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP.
-          x-jsonld:
-            "@id": erDeg:ratedPowerKw
-
-        telemetryProvider:
-          type: string
-          description: Vendor API / data source identifier for telemetry.
-          x-jsonld:
-            "@id": erDeg:telemetryProvider
-
-        commissioningDate:
-          type: string
-          format: date-time
-          description: ISO 8601 date-time when this generator was commissioned.
-          x-jsonld:
-            "@id": deg:commissioningDate
-
-        location:
-          type: object
-          description: >
-            Physical location of this asset per beckn Location/2.0.
-            geo (required) is a GeoJSON geometry; address is a postal address.
-          required: [geo]
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
           properties:
-            geo:
-              type: object
-              description: GeoJSON geometry — coordinates are [longitude, latitude].
-              required: [type]
-              properties:
-                type: { type: string, enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection] }
-                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
-                geometries: { type: array }
-                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
-              additionalProperties: true
-            address:
-              type: object
-              additionalProperties: false
-              description: schema.org PostalAddress fields.
-              properties:
-                streetAddress: { type: string }
-                extendedAddress: { type: string }
-                addressLocality: { type: string }
-                addressRegion: { type: string }
-                postalCode: { type: string }
-                addressCountry: { type: string }
-          x-jsonld:
-            "@id": erDeg:location
 
-        # ── Generator-specific attributes ────────────────────────────────────
-        nominalPowerKw:
-          type: number
-          minimum: 0
-          description: >
-            Nominal (nameplate) power output, kW. CIM: GeneratingUnit.nominalP.
-            Typically equals the DC STC rating for solar PV.
-          x-jsonld:
-            "@id": erDeg:nominalPowerKw
+            # ── Generator-specific attributes ────────────────────────────────
 
-        efficiency:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: >
-            Conversion efficiency as a percentage (0–100). Most relevant for
-            FUEL_CELL and CHP resources.
-          x-jsonld:
-            "@id": erDeg:efficiency
+            nominalPowerKw:
+              type: number
+              minimum: 0
+              description: >
+                Nominal (nameplate) power output, kW. CIM: GeneratingUnit.nominalP.
+                Typically equals the DC STC rating for solar PV.
+              x-jsonld:
+                "@id": erDeg:nominalPowerKw
+
+            efficiency:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: >
+                Conversion efficiency as a percentage (0–100). Most relevant for
+                FUEL_CELL and CHP resources.
+              x-jsonld:
+                "@id": erDeg:efficiency

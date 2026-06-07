@@ -2,119 +2,66 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceMeter/v1.0",
   "title": "EnergyResourceMeter",
-  "description": "Typed schema for metering-point energy resources (type = METER). CIM: cim:Meter / cim:EndDevice (IEC 61968-9). A METER anchors all DER sub-resources topologically and carries the physical installation location, feeder/bus references, and communication technology.",
-  "type": "object",
-  "required": ["id", "type"],
-  "additionalProperties": false,
-  "properties": {
-    "id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "IES asset DID. Format: did:web:<discom-domain>:assets:meter:<local-id>. Example: did:web:bescom.karnataka.gov.in:assets:meter:MET-001"
-    },
-    "type": {
-      "type": "string",
-      "const": "METER",
-      "description": "Asset-class discriminator. Must be \"METER\". CIM: cim:Meter (IEC 61968-9 EndDevice subtype)."
-    },
-    "attributes": {
-      "$ref": "#/$defs/EnergyResourceMeterAttributes"
-    },
-    "subResources": {
-      "type": "array",
-      "description": "Child resources behind this meter (DERs, storage, loads). Each item is a bare id string or an inline EnergyResource object.",
-      "items": {
-        "oneOf": [
-          { "type": "string", "minLength": 1 },
-          { "$ref": "#" }
-        ]
+  "description": "Typed schema for metering-point energy resources (type = METER). CIM: cim:Meter / cim:EndDevice (IEC 61968-9). Common fields inherited from EnergyResourceCommon/v1.0.",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "METER",
+          "description": "Asset-class discriminator. Must be \"METER\". CIM: cim:Meter (IEC 61968-9 EndDevice subtype)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceMeterAttributes" }
       }
-    },
-    "parentResources": {
-      "type": "array",
-      "description": "ids of parent resources (e.g. feeder or substation this meter is supplied from).",
-      "items": { "type": "string", "minLength": 1 }
     }
-  },
+  ],
   "$defs": {
-    "GeoJSONGeometry": {
-      "type": "object",
-      "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326). For a point: {type: 'Point', coordinates: [lon, lat]}.",
-      "required": ["type"],
-      "properties": {
-        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
-        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
-        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
-        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
-      },
-      "additionalProperties": true
-    },
-    "Address": {
-      "type": "object",
-      "description": "schema.org PostalAddress per beckn Address/2.0.",
-      "additionalProperties": false,
-      "properties": {
-        "streetAddress": { "type": "string" },
-        "extendedAddress": { "type": "string" },
-        "addressLocality": { "type": "string" },
-        "addressRegion": { "type": "string" },
-        "postalCode": { "type": "string" },
-        "addressCountry": { "type": "string" }
-      }
-    },
-    "Location": {
-      "type": "object",
-      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
-      "required": ["geo"],
-      "properties": {
-        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
-        "address": { "$ref": "#/$defs/Address" }
-      }
-    },
     "EnergyResourceMeterAttributes": {
-      "type": "object",
-      "additionalProperties": true,
-      "description": "Attributes for METER resources. Includes common fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location) plus meter-specific fields.",
-      "properties": {
-        "make": { "type": "string", "description": "Manufacturer (free text)." },
-        "model": { "type": "string", "description": "Model number (free text)." },
-        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP." },
-        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
-        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this meter was commissioned." },
-        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
-        "meterCapability": {
-          "type": "string",
-          "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
-          "description": "Communication/automation generation. Electromechanical=induction disc, no comms. CMRI=static with manual optical-port read (India legacy). AMR=one-way automated read. AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9)."
-        },
-        "energyDirection": {
-          "type": "string",
-          "enum": ["Forward", "Reverse", "Bidirectional", "Net"],
-          "default": "Forward",
-          "description": "Energy flow direction metered. Forward=import only (default). Reverse=export only. Bidirectional=import and export in separate registers. Net=algebraically netted register. CIM: FlowDirectionKind (ESPI NAESB REQ.21)."
-        },
-        "functions": {
-          "type": "array",
-          "uniqueItems": true,
-          "description": "Bag of optional capabilities active on this meter, per IEC 61968-9 EndDeviceFunction[0..*] pattern. Multiple values valid simultaneously.",
-          "items": {
-            "type": "string",
-            "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging"]
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attributes for METER resources. Common fields inherited. Meter-specific fields below.",
+          "properties": {
+            "meterCapability": {
+              "type": "string",
+              "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
+              "description": "Communication/automation generation. Electromechanical=induction disc, no comms. CMRI=static with manual optical-port read (India legacy). AMR=one-way automated read. AMI=two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9)."
+            },
+            "energyDirection": {
+              "type": "string",
+              "enum": ["Forward", "Reverse", "Bidirectional", "Net"],
+              "default": "Forward",
+              "description": "Energy flow direction metered. Forward=import only (default). Reverse=export only. Bidirectional=import and export in separate registers. Net=algebraically netted register. CIM: FlowDirectionKind (ESPI NAESB REQ.21)."
+            },
+            "functions": {
+              "type": "array",
+              "uniqueItems": true,
+              "description": "Bag of optional capabilities active on this meter, per IEC 61968-9 EndDeviceFunction[0..*] pattern.",
+              "items": {
+                "type": "string",
+                "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging"]
+              }
+            },
+            "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
+            "bus": { "type": "string", "description": "Busbar identifier at the meter's connection point." },
+            "communicationTechnology": {
+              "type": "string",
+              "enum": ["PLC", "RF_Mesh", "GPRS", "NB-IoT", "LoRa", "ZigBee", "Other"],
+              "description": "Last-mile (physical layer) communication technology used by this meter's head-end system."
+            },
+            "applicationProtocol": {
+              "type": "string",
+              "enum": ["DLMS_COSEM", "ANSI_C12_18", "IEC_61850", "Modbus", "Other"],
+              "description": "Application-layer protocol used to read/communicate meter data. DLMS_COSEM: IEC 62056 (mandatory for India AMI per BIS IS 16444). ANSI_C12_18: North American optical-port / table-data model. IEC_61850: substation automation. Modbus: legacy industrial."
+            }
           }
-        },
-        "feeder": { "type": "string", "description": "Feeder identifier this meter is supplied from." },
-        "bus": { "type": "string", "description": "Busbar identifier at the meter's connection point." },
-        "communicationTechnology": {
-          "type": "string",
-          "enum": ["PLC", "RF_Mesh", "GPRS", "NB-IoT", "LoRa", "ZigBee", "Other"],
-          "description": "Last-mile (physical layer) communication technology used by this meter's head-end system."
-        },
-        "applicationProtocol": {
-          "type": "string",
-          "enum": ["DLMS_COSEM", "ANSI_C12_18", "IEC_61850", "Modbus", "Other"],
-          "description": "Application-layer protocol used to read/communicate meter data. DLMS_COSEM: IEC 62056 (mandatory for India AMI per BIS IS 16444). ANSI_C12_18: North American optical-port / table-data model. IEC_61850: substation automation / smart grid. Modbus: legacy industrial. Orthogonal to communicationTechnology (physical layer)."
         }
-      }
+      ]
     }
   }
 }

@@ -2,105 +2,50 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.0",
   "title": "EnergyResourceStorage",
-  "description": "Typed schema for stationary battery energy storage resources (BESS). CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. EV charging stations (EV_CHARGER, EV_V2G) moved to EnergyResourceEVCharger/v1.0. storageCapacityKwh is exclusive to this kind. maxExportKw (discharge, ≥0) and maxImportKw (charge, ≥0) replace maxDischargeRateKw / maxChargeRateKw.",
-  "type": "object",
-  "required": ["id", "type"],
-  "additionalProperties": false,
-  "properties": {
-    "id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>. Example: did:web:bescom.karnataka.gov.in:assets:bess:BESS-001"
-    },
-    "type": {
-      "type": "string",
-      "enum": ["BESS", "BATTERY"],
-      "description": "Asset-class discriminator. BATTERY is deprecated; use BESS. CIM: cim:BatteryUnit (IEC 61970-302). EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G)."
-    },
-    "attributes": {
-      "$ref": "#/$defs/EnergyResourceStorageAttributes"
-    },
-    "subResources": {
-      "type": "array",
-      "description": "Child resources (e.g. battery modules, charger ports). Each item is a bare id string or an inline EnergyResource object.",
-      "items": {
-        "oneOf": [
-          { "type": "string", "minLength": 1 },
-          { "$ref": "#" }
-        ]
-      }
-    },
-    "parentResources": {
-      "type": "array",
-      "description": "ids of parent resources (e.g. the meter this DER sits behind).",
-      "items": { "type": "string", "minLength": 1 }
-    }
-  },
-  "$defs": {
-    "GeoJSONGeometry": {
+  "description": "Typed schema for stationary battery energy storage resources (BESS). CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. EV charging stations (EV_CHARGER, EV_V2G) moved to EnergyResourceEVCharger/v1.0. storageCapacityKwh is exclusive to this kind. Common fields inherited from EnergyResourceCommon/v1.0.",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    {
       "type": "object",
-      "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326). For a point: {type: 'Point', coordinates: [lon, lat]}.",
-      "required": ["type"],
+      "required": ["id", "type"],
       "properties": {
-        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
-        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
-        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
-        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
-      },
-      "additionalProperties": true
-    },
-    "Address": {
-      "type": "object",
-      "description": "schema.org PostalAddress per beckn Address/2.0.",
-      "additionalProperties": false,
-      "properties": {
-        "streetAddress": { "type": "string" },
-        "extendedAddress": { "type": "string" },
-        "addressLocality": { "type": "string" },
-        "addressRegion": { "type": "string" },
-        "postalCode": { "type": "string" },
-        "addressCountry": { "type": "string" }
-      }
-    },
-    "Location": {
-      "type": "object",
-      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
-      "required": ["geo"],
-      "properties": {
-        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
-        "address": { "$ref": "#/$defs/Address" }
-      }
-    },
-    "EnergyResourceStorageAttributes": {
-      "type": "object",
-      "additionalProperties": true,
-      "description": "Attributes for BESS resources. Includes common fields (make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate, location) plus storage-specific fields (storageCapacityKwh, storageType, stateOfHealthPct).",
-      "properties": {
-        "make": { "type": "string", "description": "Manufacturer (free text)." },
-        "model": { "type": "string", "description": "Model number (free text)." },
-        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. Kept for backward compatibility. Prefer maxExportKw." },
-        "maxExportKw": { "type": "number", "minimum": 0, "description": "Maximum discharge power injected to the grid, kW. Always ≥0. CIM: BatteryUnit / PowerElectronicsConnection.maxP (injection)." },
-        "maxImportKw": { "type": "number", "minimum": 0, "description": "Maximum charge power drawn from the grid, kW. Always ≥0. CIM: BatteryUnit / PowerElectronicsConnection.maxP (absorption)." },
-        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
-        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this storage asset was commissioned." },
-        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
-        "storageCapacityKwh": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Rated stored-energy capacity, kWh. CIM: BatteryUnit.ratedE. Exclusive to EnergyResourceStorage — replaces energyCapacityKwh from EnergyResource v1.1."
-        },
-        "storageType": {
+        "type": {
           "type": "string",
-          "enum": ["LithiumIon", "LeadAcid", "FlowBattery", "NaS", "NiCd", "Flywheel", "Other"],
-          "description": "Battery storage technology type."
+          "enum": ["BESS", "BATTERY"],
+          "description": "Asset-class discriminator. BATTERY is deprecated; use BESS. CIM: cim:BatteryUnit (IEC 61970-302). EV charging stations use EnergyResourceEVCharger (EV_CHARGER, EV_V2G)."
         },
-        "stateOfHealthPct": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "Battery state-of-health as a percentage (0–100)."
-        }
+        "attributes": { "$ref": "#/$defs/EnergyResourceStorageAttributes" }
       }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceStorageAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attributes for BESS resources. Common fields inherited. Storage-specific fields below.",
+          "properties": {
+            "storageCapacityKwh": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Rated stored-energy capacity, kWh. CIM: BatteryUnit.ratedE. Exclusive to EnergyResourceStorage — replaces energyCapacityKwh from EnergyResource v1.1."
+            },
+            "storageType": {
+              "type": "string",
+              "enum": ["LithiumIon", "LeadAcid", "FlowBattery", "NaS", "NiCd", "Flywheel", "Other"],
+              "description": "Battery storage technology type."
+            },
+            "stateOfHealthPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Battery state-of-health as a percentage (0–100)."
+            }
+          }
+        }
+      ]
     }
   }
 }

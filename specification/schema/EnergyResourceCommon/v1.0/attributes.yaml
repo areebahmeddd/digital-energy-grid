@@ -1,0 +1,207 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceCommon
+  version: 1.0.0
+  description: |
+    Canonical base schemas shared by all typed EnergyResource kinds.
+
+    EnergyResourceCommonAttributes — the attributes bag base:
+      make, model, ratedPowerKw, maxExportKw, maxImportKw,
+      telemetryProvider, commissioningDate, location.
+      No field is required at this level; kind schemas may add required fields.
+
+    EnergyResourceCommon — the structural envelope inherited by every kind:
+      id, type, subResources, parentResources, attributes (allOf EnergyResourceCommonAttributes).
+
+    All seven EnergyResource kind schemas inherit these via allOf:
+      EnergyResourceMeter, EnergyResourceGenerator, EnergyResourceStorage,
+      EnergyResourceEVCharger, EnergyResourceInverter, EnergyResourceLoad,
+      EnergyResourceNetwork.
+
+    Canonical IRI: https://schema.beckn.io/EnergyResourceCommon/v1.0
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    # ── Attribute bag base — inherited by every kind's attributes object ──
+
+    EnergyResourceCommonAttributes:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes
+      type: object
+      additionalProperties: true
+      description: >
+        Dimensioning and provenance fields shared by all resource kinds.
+        Inherited inside each kind's attributes bag via allOf. No field is
+        required at this level.
+      x-tags:
+        - energy-resource
+      properties:
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": deg:make
+
+        model:
+          type: string
+          description: Model (free text).
+          x-jsonld:
+            "@id": deg:model
+
+        ratedPowerKw:
+          type: number
+          minimum: 0
+          description: >
+            Manufacturer-rated peak power in kW (nameplate value in the
+            principal direction). Kept for backward compatibility.
+            Prefer maxExportKw for new payloads.
+          x-jsonld:
+            "@id": deg:ratedPowerKw
+
+        maxExportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum power this resource injects to the grid (generates /
+            discharges), kW. Always ≥0. Set for generators (SOLAR_PV, WIND,
+            CHP) and discharging storage. For bidirectional resources (BESS,
+            V2G) this is the max discharge rate. Supersedes ratedPowerKw.
+            CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
+            (injection direction).
+          x-jsonld:
+            "@id": deg:maxExportKw
+
+        maxImportKw:
+          type: number
+          minimum: 0
+          description: >
+            Maximum power this resource draws from the grid (absorbs /
+            charges), kW. Always ≥0. Set for loads, charging storage, and
+            EV chargers. For bidirectional resources (BESS, V2G) this is
+            the max charge rate. Omit or 0 for pure generators.
+            CIM: PowerElectronicsConnection.maxP (absorption direction).
+          x-jsonld:
+            "@id": deg:maxImportKw
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": deg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time the asset was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        location:
+          type: object
+          description: >
+            Physical location of the asset (beckn Location shape). geo
+            (required) is a GeoJSON geometry with coordinates [longitude,
+            latitude] per RFC 7946. address (optional) is a schema.org
+            PostalAddress-aligned object.
+          additionalProperties: true
+          required:
+            - geo
+          properties:
+            geo:
+              type: object
+              required: [type]
+              additionalProperties: true
+              properties:
+                type:
+                  type: string
+                  enum: [Point, Polygon, LineString, MultiPoint, MultiPolygon, MultiLineString, GeometryCollection]
+                coordinates: { type: array, description: "For a Point: [longitude, latitude]." }
+                bbox: { type: array, minItems: 4, maxItems: 4, items: { type: number } }
+            address:
+              type: object
+              additionalProperties: false
+              properties:
+                streetAddress:   { type: string }
+                extendedAddress: { type: string }
+                addressLocality: { type: string }
+                addressRegion:   { type: string }
+                postalCode:      { type: string }
+                addressCountry:  { type: string, description: "ISO 3166-1 alpha-2 or country name." }
+          x-jsonld:
+            "@id": deg:location
+
+    # ── Structural envelope — inherited by every kind schema ─────────────
+
+    EnergyResourceCommon:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon
+      type: object
+      additionalProperties: true
+      description: >
+        Structural envelope inherited by every typed EnergyResource kind via
+        allOf. Defines top-level fields common to all kinds: id, type,
+        topology (subResources, parentResources), and the attributes bag.
+      x-tags:
+        - energy-resource
+      properties:
+
+        id:
+          type: string
+          description: >
+            Stable identifier for this resource. For METER resources the
+            meter serial number is conventional.
+          example: "did:web:bescom.karnataka.gov.in:assets:meter:MET-001"
+          x-jsonld:
+            "@id": "@id"
+
+        type:
+          type: string
+          description: >
+            Asset class discriminator. Constrained to a kind-specific enum or
+            const in each typed kind schema.
+          x-jsonld:
+            "@id": deg:resourceType
+
+        subResources:
+          type: array
+          description: >
+            Topology — child resources. Each item is EITHER a bare id string
+            (reference to a sibling EnergyResource) OR an inline EnergyResource
+            object.
+          items:
+            oneOf:
+              - type: string
+                description: id of a sibling EnergyResource.
+              - $ref: "https://schema.beckn.io/EnergyResource/v2.0#/components/schemas/EnergyResource"
+                description: Inline-nested EnergyResource.
+          x-jsonld:
+            "@id": deg:subResources
+
+        parentResources:
+          type: array
+          description: >
+            Upward topology — ids of parent resources (e.g. the meter this
+            DER sits behind). String references only; inlining parents would
+            create a definitional cycle.
+          items:
+            type: string
+          x-jsonld:
+            "@id": deg:parentResources
+
+        attributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Attribute bag. Inherits EnergyResourceCommonAttributes (make,
+            model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+            commissioningDate, location) via allOf plus kind-specific fields
+            defined by each typed subschema.
+          allOf:
+            - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+          x-jsonld:
+            "@id": deg:attributes

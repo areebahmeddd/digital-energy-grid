@@ -2,98 +2,45 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceGenerator/v1.0",
   "title": "EnergyResourceGenerator",
-  "description": "Typed schema for generation DER energy resources (solar PV, wind, hydro, biogas, CHP, fuel cell). CIM: GeneratingUnit and subtypes — SOLAR_PV/SOLAR → PhotovoltaicUnit, WIND → WindGeneratingUnit, HYDRO → HydroGeneratingUnit, BIOGAS/CHP → ThermalGeneratingUnit (IEC 61970-301/302). SOLAR is a deprecated alias for SOLAR_PV.",
-  "type": "object",
-  "required": ["id", "type"],
-  "additionalProperties": false,
-  "properties": {
-    "id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "IES asset DID. Format: did:web:<discom-domain>:assets:<asset-class>:<local-id>. Example: did:web:bescom.karnataka.gov.in:assets:solar:SOL-001"
-    },
-    "type": {
-      "type": "string",
-      "enum": ["SOLAR_PV", "SOLAR", "WIND", "HYDRO", "BIOGAS", "CHP", "FUEL_CELL"],
-      "description": "Asset-class discriminator. SOLAR is deprecated; use SOLAR_PV. CIM: PhotovoltaicUnit, WindGeneratingUnit, HydroGeneratingUnit, ThermalGeneratingUnit (IEC 61970-302)."
-    },
-    "attributes": {
-      "$ref": "#/$defs/EnergyResourceGeneratorAttributes"
-    },
-    "subResources": {
-      "type": "array",
-      "description": "Child resources (e.g. inverters, tracking units). Each item is a bare id string or an inline EnergyResource object.",
-      "items": {
-        "oneOf": [
-          { "type": "string", "minLength": 1 },
-          { "$ref": "#" }
-        ]
-      }
-    },
-    "parentResources": {
-      "type": "array",
-      "description": "ids of parent resources (e.g. the meter this DER sits behind).",
-      "items": { "type": "string", "minLength": 1 }
-    }
-  },
-  "$defs": {
-    "GeoJSONGeometry": {
+  "description": "Typed schema for generation DER energy resources (solar PV, wind, hydro, biogas, CHP, fuel cell). CIM: GeneratingUnit and subtypes — SOLAR_PV/SOLAR → PhotovoltaicUnit, WIND → WindGeneratingUnit, HYDRO → HydroGeneratingUnit, BIOGAS/CHP → ThermalGeneratingUnit (IEC 61970-301/302). SOLAR is a deprecated alias for SOLAR_PV. Common fields inherited from EnergyResourceCommon/v1.0.",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    {
       "type": "object",
-      "description": "GeoJSON geometry per RFC 7946 / beckn GeoJSONGeometry/v2.0. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326). For a point: {type: 'Point', coordinates: [lon, lat]}.",
-      "required": ["type"],
+      "required": ["id", "type"],
       "properties": {
-        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
-        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
-        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
-        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
-      },
-      "additionalProperties": true
-    },
-    "Address": {
-      "type": "object",
-      "description": "schema.org PostalAddress per beckn Address/2.0.",
-      "additionalProperties": false,
-      "properties": {
-        "streetAddress": { "type": "string" },
-        "extendedAddress": { "type": "string" },
-        "addressLocality": { "type": "string" },
-        "addressRegion": { "type": "string" },
-        "postalCode": { "type": "string" },
-        "addressCountry": { "type": "string" }
-      }
-    },
-    "Location": {
-      "type": "object",
-      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
-      "required": ["geo"],
-      "properties": {
-        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
-        "address": { "$ref": "#/$defs/Address" }
-      }
-    },
-    "EnergyResourceGeneratorAttributes": {
-      "type": "object",
-      "additionalProperties": true,
-      "description": "Attributes for generation DER resources. Includes common fields (make, model, ratedPowerKw, telemetryProvider, commissioningDate, location) plus generator-specific fields (nominalPowerKw, efficiency).",
-      "properties": {
-        "make": { "type": "string", "description": "Manufacturer (free text)." },
-        "model": { "type": "string", "description": "Model number (free text)." },
-        "ratedPowerKw": { "type": "number", "minimum": 0, "description": "Manufacturer-rated peak power, kW. CIM: GeneratingUnit.maxOperatingP." },
-        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
-        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time when this generator was commissioned." },
-        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." },
-        "nominalPowerKw": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Nominal (nameplate) power output, kW. CIM: GeneratingUnit.nominalP. Typically equals DC STC rating for solar PV."
+        "type": {
+          "type": "string",
+          "enum": ["SOLAR_PV", "SOLAR", "WIND", "HYDRO", "BIOGAS", "CHP", "FUEL_CELL"],
+          "description": "Asset-class discriminator. SOLAR is deprecated; use SOLAR_PV. CIM: PhotovoltaicUnit, WindGeneratingUnit, HydroGeneratingUnit, ThermalGeneratingUnit (IEC 61970-302)."
         },
-        "efficiency": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 100,
-          "description": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP resources."
-        }
+        "attributes": { "$ref": "#/$defs/EnergyResourceGeneratorAttributes" }
       }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceGeneratorAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attributes for generation DER resources. Common fields inherited. Generator-specific fields below.",
+          "properties": {
+            "nominalPowerKw": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Nominal (nameplate) power output, kW. CIM: GeneratingUnit.nominalP. Typically equals DC STC rating for solar PV."
+            },
+            "efficiency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP resources."
+            }
+          }
+        }
+      ]
     }
   }
 }
