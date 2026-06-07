@@ -37,6 +37,8 @@ info:
     energyResources[*].type enum "SOLAR"   → deprecated; use SOLAR_PV
     energyResources[*].type enum "BATTERY" → deprecated; use BESS
 
+    consumptionProfiles[] items are now MeterServiceProfile (formerly ConsumptionProfile).
+
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
   - url: https://schema.beckn.io
@@ -145,85 +147,11 @@ components:
             "@id": deg:subjectId
 
     ConsumptionProfile:
-      type: object
+      $ref: "https://schema.beckn.io/MeterServiceProfile/v1.0#/components/schemas/MeterServiceProfile"
       description: >
         Tariff and regulatory load profile for one meter connection.
-        meterId links to a METER entry's id in energyResources[].
-      required:
-        - meterId
-        - sanctionedLoadKw
-        - tariffCategoryCode
-      x-jsonld:
-        "@id": deg:ConsumptionProfile
-      properties:
-        meterId:
-          type: string
-          minLength: 1
-          description: Matches the id of a METER entry in customerProfile.energyResources[].
-          x-jsonld:
-            "@id": deg:meterId
-        sanctionedLoadKw:
-          type: number
-          minimum: 0.5
-          maximum: 10000
-          description: Sanctioned/approved electrical load in kW.
-          x-jsonld:
-            "@id": deg:sanctionedLoadKw
-        sanctionedExportLoadKw:
-          type: number
-          minimum: 0
-          description: Sanctioned/approved grid export limit in kW.
-          x-jsonld:
-            "@id": deg:sanctionedExportLoadKw
-        billingCycleDay:
-          type: integer
-          minimum: 1
-          maximum: 31
-          description: Day of month on which the billing cycle resets.
-          x-jsonld:
-            "@id": deg:billingCycleDay
-        contractMaxDemandKw:
-          type: number
-          minimum: 0
-          description: Maximum demand contracted with the utility for this connection, in kW.
-          x-jsonld:
-            "@id": deg:contractMaxDemandKw
-        tariffCategoryCode:
-          type: string
-          minLength: 1
-          description: Billing/tariff category code assigned by the utility.
-          x-jsonld:
-            "@id": deg:tariffCategoryCode
-        premisesType:
-          type: string
-          enum:
-            - Residential
-            - Commercial
-            - Industrial
-            - Agricultural
-          x-jsonld:
-            "@id": deg:premisesType
-        connectionType:
-          type: string
-          enum:
-            - Single-phase
-            - Three-phase
-          x-jsonld:
-            "@id": deg:connectionType
-        paymentMode:
-          type: string
-          enum:
-            - POSTPAID
-            - PREPAID
-          description: >
-            Billing/payment modality for this connection. POSTPAID: standard
-            credit-based (consume now, pay later). PREPAID: pay-before-use;
-            supply is disconnected when credit is exhausted. Administrative
-            attribute — placed here (not on the meter) because it can change
-            via firmware without hardware replacement. Aligns with ESPI
-            AmiBillingReadyKind on UsagePoint (IEC 61968-9).
-          x-jsonld:
-            "@id": deg:paymentMode
+        meterId links to a METER entry in customerProfile.energyResources[].
+        Alias for MeterServiceProfile/v1.0 — kept for backward compatibility.
 
     CustomerDetails:
       type: object
