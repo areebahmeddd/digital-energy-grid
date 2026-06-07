@@ -8,17 +8,11 @@ info:
 
     Architecture
     ────────────
-    EnergyResourceCommon (envelope) and EnergyResourceCommonAttributes
-    (attributes bag base) are defined in EnergyResourceCommon/v1.0 and
-    aliased here for tooling convenience.
-
-    EnergyResourceCommonAttributes holds shared dimensioning fields:
-      make, model, maxExportKw, maxImportKw, ratedPowerKw,
-      telemetryProvider, commissioningDate, location.
-
-    EnergyResourceCommon is the structural envelope:
-      id, type, subResources, parentResources,
-      attributes (allOf EnergyResourceCommonAttributes).
+    EnergyResourceCommon (envelope: id, type, subResources, parentResources,
+    attributes) and EnergyResourceCommonAttributes (attribute bag base: make,
+    model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
+    commissioningDate, location) are defined in EnergyResourceCommon/v1.0.
+    All seven kinds inherit them via allOf external $ref.
 
     Seven typed kinds each inherit EnergyResourceCommon via allOf and
     refine the attributes bag with kind-specific fields:
@@ -36,20 +30,12 @@ info:
 components:
   schemas:
 
-    # ── Common base schemas — defined in EnergyResourceCommon/v1.0 ────────
-    # Aliased here so tooling resolving EnergyResource/v2.0 can reach them.
-
-    EnergyResourceCommonAttributes:
-      $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommonAttributes"
-
-    EnergyResourceCommon:
-      $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.0#/components/schemas/EnergyResourceCommon"
-
     # ── Canonical kind aliases ────────────────────────────────────────────
     # Each kind lives in its own specification/schema/<Kind>/v1.0/ folder
     # and is published to schema.beckn.io/<Kind>/v1.0.
-    # EnergyResource/v2.0 owns EnergyResourceCommon and EnergyResourceCommonAttributes;
-    # the kind schemas are the authoritative source for type-specific attributes.
+    # Common base schemas (EnergyResourceCommon, EnergyResourceCommonAttributes)
+    # live at schema.beckn.io/EnergyResourceCommon/v1.0 and are referenced
+    # directly by the kind schemas — not re-aliased here.
 
     EnergyResourceMeter:
       $ref: "https://schema.beckn.io/EnergyResourceMeter/v1.0#/components/schemas/EnergyResourceMeter"
@@ -83,8 +69,8 @@ components:
         EnergyResourceCommon (id, type, subResources, parentResources,
         attributes) and EnergyResourceCommonAttributes (make, model,
         maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider,
-        commissioningDate, location) are defined in this schema and inherited
-        by all kinds.
+        commissioningDate, location) are defined in EnergyResourceCommon/v1.0
+        and inherited by all kinds via allOf external $ref.
 
         For P2P-trading: minimal usage is {id, type}.
         For demand-flex and credentials: add attributes fields as needed.
