@@ -8,31 +8,22 @@
       "@id": "erDeg:EnergyResourceInverter",
       "@context": {
         "@version": 1.1,
-        "resourceType": { "@id": "erDeg:resourceType", "@type": "xsd:string" },
         "attributes": {
-          "@id": "erDeg:attributes",
-          "@type": "@id",
+          "@id": "deg:attributes",
           "@context": {
-            "make":                    { "@id": "erDeg:make",                    "@type": "xsd:string"   },
-            "model":                   { "@id": "erDeg:model",                   "@type": "xsd:string"   },
-            "ratedPowerKw":            { "@id": "erDeg:ratedPowerKw",            "@type": "xsd:decimal"  },
-            "maxExportKw":             { "@id": "erDeg:maxExportKw",             "@type": "xsd:decimal"  },
-            "maxImportKw":             { "@id": "erDeg:maxImportKw",             "@type": "xsd:decimal"  },
-            "telemetryProvider":       { "@id": "erDeg:telemetryProvider",       "@type": "xsd:string"   },
-            "commissioningDate":       { "@id": "deg:commissioningDate",         "@type": "xsd:dateTime" },
-            "location":                { "@id": "erDeg:location",                "@type": "@id"          },
-            "ratedApparentPowerKva":   { "@id": "erDeg:ratedApparentPowerKva",   "@type": "xsd:decimal"  },
-            "maxReactivePowerKvar":    { "@id": "erDeg:maxReactivePowerKvar",    "@type": "xsd:decimal"  },
-            "minReactivePowerKvar":    { "@id": "erDeg:minReactivePowerKvar",    "@type": "xsd:decimal"  },
-            "rideThroughCategory":     { "@id": "erDeg:rideThroughCategory",     "@type": "xsd:string"   },
-            "operatingMode":           { "@id": "erDeg:operatingMode",           "@type": "xsd:string"   },
-            "voltVarEnabled":          { "@id": "erDeg:voltVarEnabled",          "@type": "xsd:boolean"  },
-            "freqDroopEnabled":        { "@id": "erDeg:freqDroopEnabled",        "@type": "xsd:boolean"  },
-            "enterServiceRampTimeSec": { "@id": "erDeg:enterServiceRampTimeSec", "@type": "xsd:decimal"  }
+            "@import": "https://schema.beckn.io/EnergyResourceCommon/v1.0/attributes-context.jsonld",
+            "ratedApparentPowerKva":   { "@id": "erDeg:ratedApparentPowerKva",   "@type": "xsd:decimal" },
+            "maxReactivePowerKvar":    { "@id": "erDeg:maxReactivePowerKvar",    "@type": "xsd:decimal" },
+            "minReactivePowerKvar":    { "@id": "erDeg:minReactivePowerKvar",    "@type": "xsd:decimal" },
+            "rideThroughCategory":     { "@id": "erDeg:rideThroughCategory",     "@type": "xsd:string"  },
+            "operatingMode":           { "@id": "erDeg:operatingMode",           "@type": "xsd:string"  },
+            "voltVarEnabled":          { "@id": "erDeg:voltVarEnabled",          "@type": "xsd:boolean" },
+            "freqDroopEnabled":        { "@id": "erDeg:freqDroopEnabled",        "@type": "xsd:boolean" },
+            "enterServiceRampTimeSec": { "@id": "erDeg:enterServiceRampTimeSec", "@type": "xsd:decimal" }
           }
         },
-        "subResources":    { "@id": "erDeg:subResources",    "@container": "@list" },
-        "parentResources": { "@id": "erDeg:parentResources", "@container": "@list" }
+        "subResources":    { "@id": "deg:subResources",    "@container": "@set" },
+        "parentResources": { "@id": "deg:parentResources", "@container": "@set" }
       }
     }
   }

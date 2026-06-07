@@ -15,71 +15,8 @@
       "@id": "erDeg:EnergyResourceEVCharger",
       "@type": "rdfs:Class",
       "rdfs:label": "EnergyResource — EV Charger",
-      "rdfs:comment": "An EV charging station (EVSE) energy resource. A flexible load at the grid connection point — NOT a storage resource. EV_V2G is a specialisation with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. CIM: ElectricVehicleChargingStation (CIM17+)."
-    },
-    {
-      "@id": "erDeg:resourceType",
-      "@type": "rdf:Property",
-      "rdfs:label": "Resource type discriminator",
-      "rdfs:comment": "Asset-class discriminator. For EnergyResourceEVCharger: EV_CHARGER or EV_V2G.",
-      "rdfs:domain": { "@id": "erDeg:EnergyResourceEVCharger" },
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:make",
-      "@type": "rdf:Property",
-      "rdfs:label": "Manufacturer",
-      "rdfs:comment": "Manufacturer name of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:model",
-      "@type": "rdf:Property",
-      "rdfs:label": "Model",
-      "rdfs:comment": "Model number of the energy resource.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:ratedPowerKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Rated power (kW)",
-      "rdfs:comment": "Manufacturer-rated peak power in kilowatts. Kept for backward compatibility. Prefer maxImportKw for EV chargers.",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:maxImportKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Max import power (kW)",
-      "rdfs:comment": "Maximum charge power drawn from the grid, kW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption direction).",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:maxExportKw",
-      "@type": "rdf:Property",
-      "rdfs:label": "Max export power (kW)",
-      "rdfs:comment": "Maximum V2G discharge power injected to the grid, kW. Always ≥0. Set for EV_V2G. CIM: PowerElectronicsConnection.maxP (injection direction).",
-      "schema:rangeIncludes": { "@id": "xsd:decimal" }
-    },
-    {
-      "@id": "erDeg:telemetryProvider",
-      "@type": "rdf:Property",
-      "rdfs:label": "Telemetry provider",
-      "rdfs:comment": "Vendor API or data source identifier for telemetry.",
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "deg:commissioningDate",
-      "@type": "rdf:Property",
-      "rdfs:label": "Commissioning date",
-      "rdfs:comment": "ISO 8601 date-time when the asset was commissioned.",
-      "schema:rangeIncludes": { "@id": "xsd:dateTime" }
-    },
-    {
-      "@id": "erDeg:location",
-      "@type": "rdf:Property",
-      "rdfs:label": "Location",
-      "rdfs:comment": "Physical location per beckn Location/2.0: geo (GeoJSON Point, coordinates [lon, lat]) + optional postal address.",
-      "schema:rangeIncludes": { "@id": "schema:Place" }
+      "rdfs:comment": "An EV charging station (EVSE) energy resource. A flexible load at the grid connection point — NOT a storage resource. EV_V2G is a specialisation with ISO 15118-20 / OCPP 2.1 BPT bidirectional capability. CIM: ElectricVehicleChargingStation (CIM17+).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" }
     },
     {
       "@id": "erDeg:connectorType",
@@ -103,20 +40,6 @@
       "rdfs:label": "V2X protocol",
       "rdfs:comment": "Vehicle-to-Grid / V2X protocol. Present only for EV_V2G resources. CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceEVCharger" },
-      "schema:rangeIncludes": { "@id": "xsd:string" }
-    },
-    {
-      "@id": "erDeg:subResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Sub-resources",
-      "rdfs:comment": "Child resources in the topology tree.",
-      "schema:rangeIncludes": { "@id": "erDeg:EnergyResourceEVCharger" }
-    },
-    {
-      "@id": "erDeg:parentResources",
-      "@type": "rdf:Property",
-      "rdfs:label": "Parent resources",
-      "rdfs:comment": "ids of parent resources (e.g. the meter this EVSE is behind).",
       "schema:rangeIncludes": { "@id": "xsd:string" }
     }
   ]

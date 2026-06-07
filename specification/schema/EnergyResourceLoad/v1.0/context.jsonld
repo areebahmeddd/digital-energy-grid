@@ -2,29 +2,22 @@
   "@context": {
     "@version": 1.1,
     "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg": "https://schema.beckn.io/deg#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "deg":   "https://schema.beckn.io/deg#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "EnergyResourceLoad": {
       "@id": "erDeg:EnergyResourceLoad",
       "@context": {
         "@version": 1.1,
-        "resourceType": { "@id": "erDeg:resourceType", "@type": "xsd:string" },
         "attributes": {
-          "@id": "erDeg:attributes",
-          "@type": "@id",
+          "@id": "deg:attributes",
           "@context": {
-            "make": { "@id": "erDeg:make", "@type": "xsd:string" },
-            "model": { "@id": "erDeg:model", "@type": "xsd:string" },
-            "ratedPowerKw": { "@id": "erDeg:ratedPowerKw", "@type": "xsd:decimal" },
-            "telemetryProvider": { "@id": "erDeg:telemetryProvider", "@type": "xsd:string" },
-            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
-            "location":          { "@id": "erDeg:location",        "@type": "@id"         },
+            "@import": "https://schema.beckn.io/EnergyResourceCommon/v1.0/attributes-context.jsonld",
             "controlProtocol": { "@id": "erDeg:controlProtocol", "@type": "xsd:string" },
-            "loadCategory": { "@id": "erDeg:loadCategory", "@type": "xsd:string" }
+            "loadCategory":    { "@id": "erDeg:loadCategory",    "@type": "xsd:string" }
           }
         },
-        "subResources": { "@id": "erDeg:subResources", "@container": "@list" },
-        "parentResources": { "@id": "erDeg:parentResources", "@container": "@list" }
+        "subResources":    { "@id": "deg:subResources",    "@container": "@set" },
+        "parentResources": { "@id": "deg:parentResources", "@container": "@set" }
       }
     }
   }

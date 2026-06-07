@@ -4,41 +4,6 @@
   "title": "EnergyResourceCommon",
   "description": "Canonical base schemas shared by all typed EnergyResource kinds. Contains EnergyResourceCommon (structural envelope: id, type, subResources, parentResources, attributes) and EnergyResourceCommonAttributes (attributes bag base: make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate, location).",
   "$defs": {
-    "GeoJSONGeometry": {
-      "type": "object",
-      "description": "GeoJSON geometry per RFC 7946. Coordinates are [longitude, latitude] in WGS-84 (EPSG:4326).",
-      "required": ["type"],
-      "properties": {
-        "type": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon", "GeometryCollection"] },
-        "coordinates": { "type": "array", "description": "For a Point: [longitude, latitude]." },
-        "geometries": { "type": "array", "items": { "$ref": "#/$defs/GeoJSONGeometry" } },
-        "bbox": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
-      },
-      "additionalProperties": true
-    },
-    "Address": {
-      "type": "object",
-      "description": "schema.org PostalAddress per beckn Address/2.0.",
-      "additionalProperties": false,
-      "properties": {
-        "streetAddress": { "type": "string" },
-        "extendedAddress": { "type": "string" },
-        "addressLocality": { "type": "string" },
-        "addressRegion": { "type": "string" },
-        "postalCode": { "type": "string" },
-        "addressCountry": { "type": "string", "description": "ISO 3166-1 alpha-2 or country name." }
-      }
-    },
-    "Location": {
-      "type": "object",
-      "description": "Physical location per beckn Location/2.0. geo (required) is a GeoJSONGeometry; address (optional) is a postal address. Coordinates are [longitude, latitude] per RFC 7946.",
-      "required": ["geo"],
-      "additionalProperties": true,
-      "properties": {
-        "geo": { "$ref": "#/$defs/GeoJSONGeometry" },
-        "address": { "$ref": "#/$defs/Address" }
-      }
-    },
     "EnergyResourceCommonAttributes": {
       "$anchor": "EnergyResourceCommonAttributes",
       "type": "object",
@@ -52,7 +17,7 @@
         "maxImportKw": { "type": "number", "minimum": 0, "description": "Maximum power drawn from the grid (absorbs / charges), kW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
-        "location": { "$ref": "#/$defs/Location", "description": "Physical location of this asset." }
+        "location": { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
       }
     },
     "EnergyResourceCommon": {

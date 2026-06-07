@@ -1,0 +1,91 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg":    "https://schema.beckn.io/deg#",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "deg:MeterServiceProfile",
+      "@type": "rdfs:Class",
+      "rdfs:label": "MeterServiceProfile",
+      "rdfs:comment": "Tariff, regulatory load, and connection profile for a single meter connection point. CIM: UsagePoint (IEC 61968-9). Formerly ConsumptionProfile in ElectricityCredential.",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#UsagePoint" }
+    },
+    {
+      "@id": "deg:meterId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter ID",
+      "rdfs:comment": "References the id of the METER entry in energyResources[].",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:sanctionedLoadKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned load (kW)",
+      "rdfs:comment": "Sanctioned/approved import load in kilowatts. CIM: UsagePoint connection limits.",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:sanctionedExportLoadKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Sanctioned export load (kW)",
+      "rdfs:comment": "Sanctioned/approved grid export limit in kilowatts.",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:billingCycleDay",
+      "@type": "rdf:Property",
+      "rdfs:label": "Billing cycle day",
+      "rdfs:comment": "Day of the month on which the billing cycle resets (1–31).",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:integer" }
+    },
+    {
+      "@id": "deg:contractMaxDemandKw",
+      "@type": "rdf:Property",
+      "rdfs:label": "Contract max demand (kW)",
+      "rdfs:comment": "Maximum demand contracted with the utility for this connection, in kilowatts.",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "deg:tariffCategoryCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Tariff category code",
+      "rdfs:comment": "Billing/tariff category code assigned by the utility. CIM: UsagePoint.serviceCategory.",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:premisesType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Premises type",
+      "rdfs:comment": "Type of premises at the metering point (Residential, Commercial, Industrial, Agricultural).",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:connectionType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Connection type",
+      "rdfs:comment": "Electrical connection type (Single-phase, Three-phase). CIM: UsagePoint.phaseCode.",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "deg:paymentMode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Payment mode",
+      "rdfs:comment": "Billing/payment modality (POSTPAID, PREPAID). Administrative attribute. CIM: ESPI AmiBillingReadyKind (IEC 61968-9).",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}
