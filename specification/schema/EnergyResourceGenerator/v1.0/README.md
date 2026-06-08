@@ -1,6 +1,6 @@
 # EnergyResourceGenerator v1.0
 
-**Schema ID:** `https://schema.beckn.io/deg/EnergyResource/EnergyResourceGenerator/v1.0`
+**Schema ID:** `https://schema.beckn.io/EnergyResourceGenerator/v1.0`
 **CIM:** `cim:GeneratingUnit` and subtypes (IEC 61970-301/302)
 **Status:** Current
 
@@ -10,7 +10,7 @@
 
 `EnergyResourceGenerator` is the typed attribute schema for generation DER energy resources. It covers solar PV, wind, hydro, biogas, CHP, and fuel cell assets.
 
-This schema is one of five composable `EnergyResource` kinds extracted from `ElectricityCredential v1.2`.
+This schema is one of seven composable `EnergyResource` kinds in `ElectricityCredential/v1.2`.
 
 ---
 
@@ -47,9 +47,11 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `make` | string | — | Manufacturer |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power, kW |
+| `maxExportKw` | number ≥ 0 | — | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥ 0 | — | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | string (lat,lng) | — | GPS coordinates |
+| `location` | object | — | `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Generator-specific attributes
 
