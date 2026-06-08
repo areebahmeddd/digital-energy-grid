@@ -1,6 +1,6 @@
 # EnergyResourceNetwork v1.0
 
-**Schema ID:** `https://schema.beckn.io/deg/EnergyResource/EnergyResourceNetwork/v1.0`
+**Schema ID:** `https://schema.beckn.io/EnergyResourceNetwork/v1.0`
 **CIM:** `cim:PowerTransformer`, `cim:BusbarSection`, `cim:Feeder`, `cim:Substation` (IEC 61970-301)
 **Status:** Current
 
@@ -10,7 +10,7 @@
 
 `EnergyResourceNetwork` is the typed attribute schema for grid-network infrastructure energy resources. It covers distribution transformers, busbars, feeders, and microgrids — the topology containers that anchor metering points and DER resources in the asset graph.
 
-This schema is one of five composable `EnergyResource` kinds extracted from `ElectricityCredential v1.2`.
+This schema is one of seven composable `EnergyResource` kinds in `ElectricityCredential/v1.2`.
 
 ---
 
@@ -44,9 +44,11 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `make` | string | — | Manufacturer |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak capacity, kW |
+| `maxExportKw` | number ≥ 0 | — | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥ 0 | — | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | string (lat,lng) | — | GPS coordinates |
+| `location` | object | — | `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Network-specific attributes
 

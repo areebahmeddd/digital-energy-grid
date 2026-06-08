@@ -2,7 +2,7 @@
 
 Typed energy resource schema for controllable load DERs: smart HVAC, smart water heaters, and generic controllable loads participating in demand-response and demand-flexibility programs.
 
-Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `EnergyResourceLoad` is one of the five composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
+`EnergyResourceLoad` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyResourceLoad/v1.0`
 
@@ -39,9 +39,11 @@ Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `
 | `make` | string | Manufacturer name |
 | `model` | string | Model number |
 | `ratedPowerKw` | number ≥0 | Nameplate peak power draw, kW |
+| `maxExportKw` | number ≥0 | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥0 | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date) | ISO 8601 commissioning date |
-| `gps` | string | `"lat,lng"` coordinates |
+| `location` | object | Physical location — `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Load-specific
 

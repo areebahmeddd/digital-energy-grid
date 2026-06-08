@@ -1,6 +1,6 @@
 # EnergyResourceStorage v1.0
 
-**Schema ID:** `https://schema.beckn.io/deg/EnergyResource/EnergyResourceStorage/v1.0`
+**Schema ID:** `https://schema.beckn.io/EnergyResourceStorage/v1.0`
 **CIM:** `cim:BatteryUnit`, `cim:ElectricVehicleChargingStation` (IEC 61970-302)
 **Status:** Current
 
@@ -10,7 +10,7 @@
 
 `EnergyResourceStorage` is the typed attribute schema for storage DER energy resources. It covers battery energy storage systems (BESS), EV chargers, and bidirectional V2G-capable EV chargers.
 
-This schema is one of five composable `EnergyResource` kinds extracted from `ElectricityCredential v1.2`.
+This schema is one of seven composable `EnergyResource` kinds in `ElectricityCredential/v1.2`.
 
 > **Migration note:** `storageCapacityKwh` replaces `energyCapacityKwh` used in `EnergyResource v1.1`.
 
@@ -46,9 +46,11 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `make` | string | — | Manufacturer |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power, kW |
+| `maxExportKw` | number ≥ 0 | — | Maximum grid export capacity, kW (≡ max discharge for BESS) |
+| `maxImportKw` | number ≥ 0 | — | Maximum grid import capacity, kW (≡ max charge for BESS) |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | string (lat,lng) | — | GPS coordinates |
+| `location` | object | — | `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Storage-specific attributes
 

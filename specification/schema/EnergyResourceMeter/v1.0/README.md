@@ -1,6 +1,6 @@
 # EnergyResourceMeter v1.0
 
-**Schema ID:** `https://schema.beckn.io/deg/EnergyResource/EnergyResourceMeter/v1.0`
+**Schema ID:** `https://schema.beckn.io/EnergyResourceMeter/v1.0`
 **CIM:** `cim:Meter` extends `cim:EndDevice` (IEC 61968-9)
 **Status:** Current
 
@@ -10,7 +10,7 @@
 
 `EnergyResourceMeter` is the typed attribute schema for metering-point energy resources (`type = "METER"`). It anchors all DER sub-resources behind it in the topology tree and carries the physical installation location, feeder/bus references, and communication technology.
 
-This schema is one of five composable `EnergyResource` kinds extracted from `ElectricityCredential v1.2`.
+This schema is one of seven composable `EnergyResource` kinds in `ElectricityCredential/v1.2`.
 
 ---
 
@@ -41,6 +41,8 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `make` | string | — | Manufacturer |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power, kW |
+| `maxExportKw` | number ≥ 0 | — | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥ 0 | — | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date-time) | — | Date-time commissioned |
 | `location` | object (beckn Location/2.0) | — | `geo` (GeoJSONGeometry) + `address` (PostalAddress) |
