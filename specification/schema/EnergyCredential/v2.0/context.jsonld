@@ -7,7 +7,7 @@
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.beckn.io/core/v2.0/",
-    "deg": "https://schema.beckn.io/deg/EnergyCredential/v2.0/",
+    "deg": "https://schema.beckn.io/deg#",
     "EnergyCredential": "deg:EnergyCredential",
     "issuer": "schema:issuer",
     "issuanceDate": "schema:dateCreated",
