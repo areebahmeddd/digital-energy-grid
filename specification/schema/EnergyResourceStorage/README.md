@@ -2,7 +2,7 @@
 
 Typed energy resource schema for storage DERs: battery energy storage systems (BESS), EV chargers, and vehicle-to-grid (V2G) capable chargers.
 
-Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `EnergyResourceStorage` is one of the five composable kinds that make up `EnergyResource` in the `ElectricityCredential`. It is the **only** kind that carries `storageCapacityKwh`.
+`EnergyResourceStorage` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`. It is the **only** kind that carries `storageCapacityKwh`.
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyResourceStorage/v1.0`
 
@@ -40,9 +40,11 @@ Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `
 | `make` | string | Manufacturer name |
 | `model` | string | Model number |
 | `ratedPowerKw` | number ≥0 | Nameplate peak power, kW |
+| `maxExportKw` | number ≥0 | Maximum grid export capacity, kW (≡ max discharge for BESS) |
+| `maxImportKw` | number ≥0 | Maximum grid import capacity, kW (≡ max charge for BESS) |
 | `telemetryProvider` | string | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date) | ISO 8601 commissioning date |
-| `gps` | string | `"lat,lng"` coordinates |
+| `location` | object | Physical location — `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Storage-specific
 

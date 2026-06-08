@@ -2,7 +2,7 @@
 
 Typed energy resource schema for generation DERs: solar PV, wind, hydro, biogas, CHP, and fuel cell assets.
 
-Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `EnergyResourceGenerator` is one of the five composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
+`EnergyResourceGenerator` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
 **Canonical IRI:** `https://schema.beckn.io/EnergyResourceGenerator/v1.0`
 
@@ -43,9 +43,11 @@ Per the [DEG Hourglass architecture](https://github.com/beckn/DEG/issues/119), `
 | `make` | string | Manufacturer name |
 | `model` | string | Model number |
 | `ratedPowerKw` | number ≥0 | Nameplate peak power, kW. CIM: `GeneratingUnit.maxOperatingP` |
+| `maxExportKw` | number ≥0 | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥0 | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date) | ISO 8601 commissioning date |
-| `gps` | string | `"lat,lng"` coordinates |
+| `location` | object | Physical location — `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Generator-specific
 

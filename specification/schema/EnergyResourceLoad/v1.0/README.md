@@ -1,6 +1,6 @@
 # EnergyResourceLoad v1.0
 
-**Schema ID:** `https://schema.beckn.io/deg/EnergyResource/EnergyResourceLoad/v1.0`
+**Schema ID:** `https://schema.beckn.io/EnergyResourceLoad/v1.0`
 **CIM:** `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301)
 **Status:** Current
 
@@ -10,7 +10,7 @@
 
 `EnergyResourceLoad` is the typed attribute schema for controllable load energy resources. It covers smart HVAC systems, smart water heaters, and generic controllable loads that participate in demand-response and demand-flexibility programs.
 
-This schema is one of five composable `EnergyResource` kinds extracted from `ElectricityCredential v1.2`.
+This schema is one of seven composable `EnergyResource` kinds in `ElectricityCredential/v1.2`.
 
 ---
 
@@ -43,9 +43,11 @@ This schema is one of five composable `EnergyResource` kinds extracted from `Ele
 | `make` | string | — | Manufacturer |
 | `model` | string | — | Model number |
 | `ratedPowerKw` | number ≥ 0 | `GeneratingUnit.maxOperatingP` | Rated peak power draw, kW |
+| `maxExportKw` | number ≥ 0 | — | Maximum grid export capacity, kW |
+| `maxImportKw` | number ≥ 0 | — | Maximum grid import capacity, kW |
 | `telemetryProvider` | string | — | Telemetry vendor / API identifier |
 | `commissioningDate` | string (ISO 8601 date) | — | Date commissioned |
-| `gps` | string (lat,lng) | — | GPS coordinates |
+| `location` | object | — | `{geo: GeoJSONGeometry, address: Address}` |
 
 ### Load-specific attributes
 
