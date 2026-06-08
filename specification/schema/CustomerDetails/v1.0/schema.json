@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/CustomerDetails/v1.0",
+  "title": "CustomerDetails v1.0",
+  "description": "PII identity and address details for a utility service customer. fullName appears ONLY here. CIM: cim:Customer (IEC 61968-1).",
+  "$defs": {
+    "CustomerDetails": {
+      "$anchor": "CustomerDetails",
+      "type": "object",
+      "required": ["fullName", "installationAddress", "serviceConnectionDate"],
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Full name of the customer as per ID proof."
+        },
+        "installationAddress": {
+          "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location",
+          "description": "Physical location of the metered installation. geo (GeoJSON Point) required; address (PostalAddress) optional."
+        },
+        "serviceConnectionDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time the service connection was activated (ISO 8601 with timezone offset)."
+        }
+      }
+    }
+  }
+}

@@ -72,64 +72,12 @@ components:
               x-jsonld:
                 "@id": deg:customerProfile
             customerDetails:
+              $ref: "https://schema.beckn.io/CustomerDetails/v1.0#/components/schemas/CustomerDetails"
               description: >
-                Customer personal and address information. Kept inline because
-                installationAddress here follows the rich beckn Location shape,
-                broader than the address shape in UtilityCustomerCredential.
+                PII section — fullName, installationAddress (beckn Location/2.0),
+                serviceConnectionDate. Defined in CustomerDetails/v1.0.
               x-jsonld:
                 "@id": deg:customerDetails
-              type: object
-              required:
-                - fullName
-                - installationAddress
-                - serviceConnectionDate
-              properties:
-                fullName:
-                  type: string
-                  description: Full name of the customer as per ID proof.
-                installationAddress:
-                  type: object
-                  description: Physical location of the installation. Follows the beckn Location schema.
-                  required:
-                    - address
-                    - area_code
-                    - country
-                  properties:
-                    address:
-                      type: string
-                    city:
-                      type: object
-                      properties:
-                        name: { type: string }
-                        code: { type: string }
-                    district:
-                      type: string
-                    state:
-                      type: object
-                      properties:
-                        name: { type: string }
-                        code: { type: string }
-                    country:
-                      type: object
-                      required: [code]
-                      properties:
-                        name: { type: string }
-                        code:
-                          type: string
-                          pattern: "^[A-Z]{2}$"
-                          description: ISO 3166-1 alpha-2 country code.
-                    area_code:
-                      type: string
-                    gps:
-                      type: string
-                      description: "GPS coordinates as 'lat,lng' string."
-                    openLocationCode:
-                      type: string
-                      description: Open Location Code (OLC) for the installation.
-                serviceConnectionDate:
-                  type: string
-                  format: date-time
-                  description: Date and time the electricity connection was activated (with timezone offset).
             consumptionProfiles:
               description: >
                 Connection and consumption characteristics for load management
