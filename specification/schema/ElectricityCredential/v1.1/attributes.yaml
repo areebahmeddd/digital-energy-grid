@@ -232,31 +232,8 @@ components:
             "@id": deg:billingCycleDay
 
     CustomerDetails:
-      type: object
+      $ref: "https://schema.beckn.io/CustomerDetails/v1.0#/components/schemas/CustomerDetails"
       description: >
-        PII section. fullName appears ONLY here — never in customerProfile
-        or any resource entry.
-      required:
-        - fullName
-        - installationAddress
-        - serviceConnectionDate
-      x-jsonld:
-        "@id": deg:customerDetails
-      properties:
-        fullName:
-          type: string
-          description: Full name of the customer as per ID proof.
-        installationAddress:
-          type: object
-          description: "Physical location per beckn Location/v2.0. geo (GeoJSONGeometry) is required; address (beckn Address/v2.0) is optional."
-          required:
-            - geo
-          properties:
-            geo:
-              $ref: 'https://schema.beckn.io/GeoJSONGeometry/v2.0/attributes.yaml#/components/schemas/GeoJSONGeometry'
-            address:
-              $ref: 'https://schema.beckn.io/Address/v2.0/attributes.yaml#/components/schemas/Address'
-        serviceConnectionDate:
-          type: string
-          format: date-time
-          description: Date and time the connection was activated (with timezone offset).
+        PII section — fullName, installationAddress, serviceConnectionDate.
+        fullName appears ONLY here — never in customerProfile or resource entries.
+        Defined in CustomerDetails/v1.0.

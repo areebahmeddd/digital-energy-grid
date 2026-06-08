@@ -1,0 +1,76 @@
+openapi: 3.1.1
+info:
+  title: CustomerDetails
+  version: 1.0.0
+  description: |
+    PII identity and address details for a utility service customer.
+
+    Contains the personally-identifiable information that is kept separate
+    from the non-PII CustomerProfile. fullName appears ONLY here — never
+    in customerProfile or any resource entry.
+
+    CIM alignment (IEC 61968-1):
+      CustomerDetails → cim:Customer
+      fullName        → cim:Customer.name
+      serviceConnectionDate → cim:ServiceLocation.firstAddressDetail (activation date)
+      installationAddress   → cim:ServiceLocation
+
+    Canonical IRI: https://schema.beckn.io/CustomerDetails/v1.0
+
+    Used by ElectricityCredential/v1.2 credentialSubject.customerDetails.
+    May be reused by any utility credential that carries customer PII.
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    CustomerDetails:
+      $id: https://schema.beckn.io/CustomerDetails/v1.0#/components/schemas/CustomerDetails
+      type: object
+      description: >
+        PII identity and address details for a utility customer.
+        fullName appears ONLY here — never in customerProfile or resource entries.
+        CIM: cim:Customer (IEC 61968-1).
+      required:
+        - fullName
+        - installationAddress
+        - serviceConnectionDate
+      x-tags:
+        - customer
+        - pii
+        - credential
+        - electricity
+        - deg
+      x-jsonld:
+        "@id": deg:CustomerDetails
+      properties:
+
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Full name of the customer as per ID proof.
+          x-jsonld:
+            "@id": schema:name
+
+        installationAddress:
+          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          description: >
+            Physical location of the metered installation. geo (GeoJSON Point,
+            coordinates [longitude, latitude]) is required; address
+            (schema.org PostalAddress fields) is optional.
+          x-jsonld:
+            "@id": deg:installationAddress
+
+        serviceConnectionDate:
+          type: string
+          format: date-time
+          description: >
+            Date and time the service connection was activated, with timezone
+            offset (ISO 8601). CIM: ServiceLocation activation date.
+          x-jsonld:
+            "@id": deg:serviceConnectionDate

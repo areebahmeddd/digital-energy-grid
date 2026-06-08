@@ -1,0 +1,35 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg":    "https://schema.beckn.io/deg#",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "deg:CustomerDetails",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Customer Details",
+      "rdfs:comment": "PII identity and address details for a utility service customer. CIM: cim:Customer (IEC 61968-1).",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-1.ttl#Customer" }
+    },
+    {
+      "@id": "deg:serviceConnectionDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Service connection date",
+      "rdfs:comment": "Date and time the utility service connection was activated. ISO 8601 with timezone offset.",
+      "rdfs:domain": { "@id": "deg:CustomerDetails" },
+      "schema:rangeIncludes": { "@id": "xsd:dateTime" }
+    },
+    {
+      "@id": "deg:installationAddress",
+      "@type": "rdf:Property",
+      "rdfs:label": "Installation address",
+      "rdfs:comment": "Physical location of the metered installation. CIM: cim:ServiceLocation (IEC 61968-1).",
+      "rdfs:domain": { "@id": "deg:CustomerDetails" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-1.ttl#ServiceLocation" }
+    }
+  ]
+}
