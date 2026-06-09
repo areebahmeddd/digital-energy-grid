@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/IdRef/v1.0",
+  "$defs": {
+    "IdRef": {
+      "$anchor": "IdRef",
+      "type": "object",
+      "required": ["issuedBy", "subjectId"],
+      "properties": {
+        "issuedBy":  { "type": "string", "format": "uri" },
+        "subjectId": { "type": "string", "pattern": "^[A-Za-z0-9._-]+:[A-Za-z0-9X_-]+$" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

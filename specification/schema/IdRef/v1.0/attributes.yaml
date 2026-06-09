@@ -1,0 +1,44 @@
+openapi: 3.1.1
+info:
+  title: IdRef
+  version: 1.0.0
+  description: >
+    Reusable identity reference linking an issuing authority (DID or URI) to a
+    subject identifier within that authority's namespace. Used as an optional
+    field in customer profiles to cross-reference a utility customer account to
+    an external identity such as a national registry or regulatory body.
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    IdRef:
+      $id: https://schema.beckn.io/IdRef/v1.0
+      title: IdRef
+      type: object
+      description: >
+        External identity reference. issuedBy is the DID or URI of the
+        authority; subjectId is the subject's identifier within that authority's
+        namespace, using the format authority-domain:id-value.
+      required:
+        - issuedBy
+        - subjectId
+      x-jsonld:
+        "@id": deg:IdRef
+      properties:
+        issuedBy:
+          type: string
+          format: uri
+          description: DID or URI of the issuing authority.
+          x-jsonld:
+            "@id": deg:issuedBy
+        subjectId:
+          type: string
+          pattern: "^[A-Za-z0-9._-]+:[A-Za-z0-9X_-]+$"
+          description: Subject identifier in authority-domain:id-value format.
+          x-jsonld:
+            "@id": deg:subjectId

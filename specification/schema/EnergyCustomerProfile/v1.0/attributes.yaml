@@ -44,18 +44,6 @@ components:
             - Other
           description: Type of electricity meter installed.
         idRef:
-          type: object
-          description: Reusable identity reference linking an issuing authority (DID) to a subject identifier.
-          required:
-            - issuedBy
-            - subjectId
-          properties:
-            issuedBy:
-              type: string
-              format: uri
-              description: DID or URI of the issuing authority.
-            subjectId:
-              type: string
-              minLength: 1
-              description: Identifier within the authority's system (e.g., regulatory registration number).
+          $ref: "https://schema.beckn.io/IdRef/v1.0#/components/schemas/IdRef"
+          description: External identity reference for the customer. Defined in IdRef/v1.0.
       additionalProperties: false

@@ -104,26 +104,10 @@ components:
           x-jsonld:
             "@id": deg:customerNumber
         idRef:
-          type: object
-          description: External identity reference for the customer.
-          required:
-            - issuedBy
-            - subjectId
+          $ref: "https://schema.beckn.io/IdRef/v1.0#/components/schemas/IdRef"
+          description: External identity reference for the customer. Defined in IdRef/v1.0.
           x-jsonld:
             "@id": deg:idRef
-          properties:
-            issuedBy:
-              type: string
-              format: uri
-              description: DID of the authority that issued the identity.
-              x-jsonld:
-                "@id": deg:issuedBy
-            subjectId:
-              type: string
-              pattern: "^[A-Za-z0-9._-]+:[A-Za-z0-9X_-]+$"
-              description: Subject identifier in authority-domain:id-value format.
-              x-jsonld:
-                "@id": deg:subjectId
         energyResources:
           type: array
           minItems: 1

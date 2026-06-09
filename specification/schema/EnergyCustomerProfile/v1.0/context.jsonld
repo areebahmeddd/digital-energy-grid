@@ -26,16 +26,7 @@
             "@id": "deg:idRef",
             "@type": "@id",
             "@context": {
-                "@version": 1.1,
-                "@protected": true,
-                "issuedBy": {
-                    "@id": "deg:issuedBy",
-                    "@type": "@id"
-                },
-                "subjectId": {
-                    "@id": "deg:subjectId",
-                    "@type": "xsd:string"
-                }
+                "@import": "https://schema.beckn.io/IdRef/v1.0/context.jsonld"
             }
         }
     }
