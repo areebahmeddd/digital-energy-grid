@@ -1,0 +1,32 @@
+{
+  "@context": {
+    "deg":  "https://schema.beckn.io/deg#",
+    "rdf":  "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":  "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:IdRef",
+      "@type": "rdfs:Class",
+      "rdfs:label": "IdRef",
+      "rdfs:comment": "An external identity reference linking an issuing authority to a subject identifier within that authority's namespace."
+    },
+    {
+      "@id": "deg:issuedBy",
+      "@type": "rdf:Property",
+      "rdfs:label": "issuedBy",
+      "rdfs:domain": { "@id": "deg:IdRef" },
+      "rdfs:range":  { "@id": "rdfs:Resource" },
+      "rdfs:comment": "DID or URI of the authority that issued the identity."
+    },
+    {
+      "@id": "deg:subjectId",
+      "@type": "rdf:Property",
+      "rdfs:label": "subjectId",
+      "rdfs:domain": { "@id": "deg:IdRef" },
+      "rdfs:range":  { "@id": "xsd:string" },
+      "rdfs:comment": "Subject identifier in authority-domain:id-value format."
+    }
+  ]
+}
