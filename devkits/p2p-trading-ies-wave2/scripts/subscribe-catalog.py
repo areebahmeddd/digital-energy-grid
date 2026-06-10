@@ -48,7 +48,7 @@ RECORD_ID = os.environ["RECORD_ID"]
 # Constants
 # ---------------------------------------------------------------------------
 CATALOG_URL = "https://fabric.nfh.global/beckn/catalog/subscription"
-DISCOVER_URL = "https://34.14.221.66.sslip.io/catalog/push"
+DISCOVER_URL = "https://34.93.165.42.sslip.io/catalog/push"
 NETWORK_ID = "nfh.global/testnet-deg"
 
 # ---------------------------------------------------------------------------
