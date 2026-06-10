@@ -8,7 +8,7 @@
 set -euo pipefail
 
 catalogServiceUrl="https://fabric.nfh.global/beckn/catalog/subscription"
-discoverServiceUrl="https://34.14.221.66.sslip.io/catalog/push"
+discoverServiceUrl="https://34.93.165.42.sslip.io/catalog/push"
 networkID="nfh.global/testnet-deg"
 
 curl --location "$catalogServiceUrl" \
