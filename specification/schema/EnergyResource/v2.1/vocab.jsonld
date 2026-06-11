@@ -49,7 +49,7 @@
     { "@id": "deg:nominalPower", "@type": "rdf:Property", "rdfs:label": "Nominal Power", "rdfs:domain": {"@id": "deg:EnergyResourceGenerator"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Nameplate nominal power. Typical unit: KiloW. Replaces nominalPowerKw." },
     { "@id": "deg:efficiency",   "@type": "rdf:Property", "rdfs:label": "Efficiency (%)", "rdfs:domain": {"@id": "deg:EnergyResourceGenerator"}, "schema:rangeIncludes": {"@id": "xsd:decimal"} },
 
-    { "@id": "deg:storageCapacity", "@type": "rdf:Property", "rdfs:label": "Storage Capacity", "rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Rated stored-energy capacity. Typical unit: KiloW-HR. Replaces storageCapacityKwh." },
+    { "@id": "deg:storageCapacity", "@type": "rdf:Property", "rdfs:label": "Storage Capacity", "rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Rated stored-energy capacity. Typical unit: kWh. Replaces storageCapacityKwh." },
     { "@id": "deg:storageType",     "@type": "rdf:Property", "rdfs:label": "Storage Type",     "rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
     { "@id": "deg:stateOfHealthPct","@type": "rdf:Property", "rdfs:label": "State of Health (%)","rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "schema:rangeIncludes": {"@id": "xsd:decimal"} },
 
@@ -58,8 +58,8 @@
     { "@id": "deg:v2xProtocol",     "@type": "rdf:Property", "rdfs:label": "V2X Protocol",     "rdfs:domain": {"@id": "deg:EnergyResourceEVCharger"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
 
     { "@id": "deg:ratedApparentPower",     "@type": "rdf:Property", "rdfs:label": "Rated Apparent Power", "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Rated apparent power. Typical unit: KiloV-A. Replaces ratedApparentPowerKva." },
-    { "@id": "deg:maxReactivePower",       "@type": "rdf:Property", "rdfs:label": "Max Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power injection. Typical unit: KiloV-A_Reactive. Replaces maxReactivePowerKvar." },
-    { "@id": "deg:minReactivePower",       "@type": "rdf:Property", "rdfs:label": "Min Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power absorption. Typical unit: KiloV-A_Reactive. Replaces minReactivePowerKvar." },
+    { "@id": "deg:maxReactivePower",       "@type": "rdf:Property", "rdfs:label": "Max Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power injection. Typical unit: kVAR. Replaces maxReactivePowerKvar." },
+    { "@id": "deg:minReactivePower",       "@type": "rdf:Property", "rdfs:label": "Min Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power absorption. Typical unit: kVAR. Replaces minReactivePowerKvar." },
     { "@id": "deg:rideThroughCategory",    "@type": "rdf:Property", "rdfs:label": "Ride-Through Category","rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
     { "@id": "deg:operatingMode",          "@type": "rdf:Property", "rdfs:label": "Operating Mode",       "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
     { "@id": "deg:voltVarEnabled",         "@type": "rdf:Property", "rdfs:label": "Volt-VAr Enabled",     "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:boolean"} },

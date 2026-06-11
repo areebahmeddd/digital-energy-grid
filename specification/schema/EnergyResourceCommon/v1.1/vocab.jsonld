@@ -25,7 +25,7 @@
       "@id": "deg:ratedPower",
       "@type": "rdf:Property",
       "rdfs:label": "Rated Power",
-      "rdfs:comment": "Manufacturer-rated peak power as a QuantitativeValue. Typical unit: qudt:KiloW. Kept for backward compatibility — prefer maxExport. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.",
+      "rdfs:comment": "Manufacturer-rated peak power as a QuantitativeValue. Typical unit: kW. Kept for backward compatibility — prefer maxExport. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.",
       "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
     },
@@ -33,7 +33,7 @@
       "@id": "deg:maxExport",
       "@type": "rdf:Property",
       "rdfs:label": "Max Export",
-      "rdfs:comment": "Maximum power injected to the grid (generates/discharges) as a QuantitativeValue. Typical unit: qudt:KiloW. Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection).",
+      "rdfs:comment": "Maximum power injected to the grid (generates/discharges) as a QuantitativeValue. Typical unit: kW. Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection).",
       "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
     },
@@ -41,7 +41,7 @@
       "@id": "deg:maxImport",
       "@type": "rdf:Property",
       "rdfs:label": "Max Import",
-      "rdfs:comment": "Maximum power drawn from the grid (absorbs/charges) as a QuantitativeValue. Typical unit: qudt:KiloW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption).",
+      "rdfs:comment": "Maximum power drawn from the grid (absorbs/charges) as a QuantitativeValue. Typical unit: kW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption).",
       "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
     },

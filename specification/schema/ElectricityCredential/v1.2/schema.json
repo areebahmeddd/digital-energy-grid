@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/beckn/DEG/blob/main/specification/schema/ElectricityCredential/v1.2/schema.json",
     "title": "ElectricityCredential v1.2",
-    "description": "Bundled (self-contained) JSON Schema for ElectricityCredential v1.2. All power and capacity fields use QuantitativeValue {value, unit} connected to QUDT via JSON-LD context. Renamed: ratedPowerKw→ratedPower, maxExportKw→maxExport, maxImportKw→maxImport, nominalPowerKw→nominalPower, storageCapacityKwh→storageCapacity, ratedApparentPowerKva→ratedApparentPower, maxReactivePowerKvar→maxReactivePower, minReactivePowerKvar→minReactivePower, nominalVoltageKv→nominalVoltage; sanctionedLoadKw→sanctionedLoad, contractMaxDemandKw→contractMaxDemand. Subschemas: EnergyResource/v2.1, EnergyResourceCommon/v1.1, MeterServiceProfile/v1.1.",
+    "description": "Bundled (self-contained) JSON Schema for ElectricityCredential v1.2. All power and capacity fields use QuantitativeValue {value, unit} with short unit aliases (W, kW, MW, kWh, MWh, kVA, MVA, kVAR, MVAR, V, kV) mapped to QUDT IRIs via JSON-LD context. Renamed from v1.1: ratedPowerKw→ratedPower, maxExportKw→maxExport, maxImportKw→maxImport, nominalPowerKw→nominalPower, storageCapacityKwh→storageCapacity, ratedApparentPowerKva→ratedApparentPower, maxReactivePowerKvar→maxReactivePower, minReactivePowerKvar→minReactivePower, nominalVoltageKv→nominalVoltage, sanctionedLoadKw→sanctionedLoad, contractMaxDemandKw→contractMaxDemand. Subschemas: EnergyResource/v2.1, EnergyResourceCommon/v1.1, MeterServiceProfile/v1.1.",
     "type": "object",
     "required": ["@context", "id", "type", "issuer", "validFrom", "credentialSubject"],
     "properties": {
@@ -66,15 +66,59 @@
         }
     },
     "$defs": {
-        "QuantitativeValue": {
-            "$anchor": "QuantitativeValue",
+        "QVPower": {
+            "$anchor": "QVPower",
             "type": "object",
+            "description": "Active power quantity. unit: W | kW | MW — mapped to QUDT IRIs via JSON-LD context.",
             "required": ["value", "unit"],
             "additionalProperties": false,
-            "description": "A numeric value with an explicit unit. Corresponds to qudt:QuantitativeValue. unit strings are QUDT unit codes (e.g. KiloW, KiloW-HR, KiloV-A, KiloV-A_Reactive, KiloV).",
             "properties": {
                 "value": { "type": "number" },
-                "unit":  { "type": "string" }
+                "unit":  { "type": "string", "enum": ["W", "kW", "MW"] }
+            }
+        },
+        "QVEnergy": {
+            "$anchor": "QVEnergy",
+            "type": "object",
+            "description": "Stored-energy quantity. unit: kWh | MWh.",
+            "required": ["value", "unit"],
+            "additionalProperties": false,
+            "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string", "enum": ["kWh", "MWh"] }
+            }
+        },
+        "QVApparentPower": {
+            "$anchor": "QVApparentPower",
+            "type": "object",
+            "description": "Apparent power quantity. unit: kVA | MVA.",
+            "required": ["value", "unit"],
+            "additionalProperties": false,
+            "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string", "enum": ["kVA", "MVA"] }
+            }
+        },
+        "QVReactivePower": {
+            "$anchor": "QVReactivePower",
+            "type": "object",
+            "description": "Reactive power quantity. unit: kVAR | MVAR. Value may be negative for absorption.",
+            "required": ["value", "unit"],
+            "additionalProperties": false,
+            "properties": {
+                "value": { "type": "number" },
+                "unit":  { "type": "string", "enum": ["kVAR", "MVAR"] }
+            }
+        },
+        "QVVoltage": {
+            "$anchor": "QVVoltage",
+            "type": "object",
+            "description": "Voltage quantity. unit: V | kV.",
+            "required": ["value", "unit"],
+            "additionalProperties": false,
+            "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string", "enum": ["V", "kV"] }
             }
         },
         "IdRef": {
@@ -106,7 +150,7 @@
         },
         "ConsumptionProfile": {
             "$ref": "https://schema.beckn.io/MeterServiceProfile/v1.1#MeterServiceProfile",
-            "description": "Tariff and regulatory load profile per meter connection. Uses MeterServiceProfile/v1.1 (sanctionedLoad, contractMaxDemand as QuantitativeValue)."
+            "description": "Tariff and regulatory load profile per meter connection. Uses MeterServiceProfile/v1.1 (sanctionedLoad, contractMaxDemand as QVPower)."
         },
         "CustomerDetails": {
             "$ref": "https://schema.beckn.io/CustomerDetails/v1.0#CustomerDetails",
@@ -114,22 +158,22 @@
         },
         "EnergyResourceCommonAttributes": {
             "type": "object",
-            "description": "Base attributes shared by all EnergyResource kinds. ratedPower, maxExport, maxImport are QuantitativeValue {value, unit}. Typical unit: KiloW.",
+            "description": "Base attributes shared by all EnergyResource kinds. ratedPower, maxExport, maxImport are QVPower {value, unit: W|kW|MW}.",
             "additionalProperties": true,
             "properties": {
                 "make":  { "type": "string", "description": "Manufacturer name." },
                 "model": { "type": "string", "description": "Model number or name." },
                 "ratedPower": {
-                    "description": "Manufacturer-rated power. Typical unit: KiloW. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.",
-                    "$ref": "#/$defs/QuantitativeValue"
+                    "description": "Manufacturer-rated power. unit: W | kW | MW. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.",
+                    "$ref": "#/$defs/QVPower"
                 },
                 "maxImport": {
-                    "description": "Maximum power drawn from the grid (absorbs/charges). Typical unit: KiloW. Always positive value. CIM: PowerElectronicsConnection.maxP (absorption direction).",
-                    "$ref": "#/$defs/QuantitativeValue"
+                    "description": "Maximum power drawn from the grid (absorbs/charges). unit: W | kW | MW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption direction).",
+                    "$ref": "#/$defs/QVPower"
                 },
                 "maxExport": {
-                    "description": "Maximum power injected to the grid (generates/discharges). Typical unit: KiloW. Always positive value. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection direction).",
-                    "$ref": "#/$defs/QuantitativeValue"
+                    "description": "Maximum power injected to the grid (generates/discharges). unit: W | kW | MW. Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection direction).",
+                    "$ref": "#/$defs/QVPower"
                 },
                 "telemetryProvider": { "type": "string", "description": "Vendor API or data-source identifier for telemetry." },
                 "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
@@ -182,8 +226,8 @@
                     "type": "object",
                     "properties": {
                         "nominalPower": {
-                            "description": "Nominal rated output power. Typical unit: KiloW. CIM: GeneratingUnit.nominalP.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Nominal (nameplate) power output. unit: W | kW | MW. CIM: GeneratingUnit.nominalP.",
+                            "$ref": "#/$defs/QVPower"
                         },
                         "efficiency": {
                             "type": "number",
@@ -203,8 +247,8 @@
                     "type": "object",
                     "properties": {
                         "storageCapacity": {
-                            "description": "Rated stored-energy capacity. Typical unit: KiloW-HR. CIM: BatteryUnit.ratedE.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Rated stored-energy capacity. unit: kWh | MWh. CIM: BatteryUnit.ratedE.",
+                            "$ref": "#/$defs/QVEnergy"
                         },
                         "storageType": {
                             "type": "string",
@@ -251,16 +295,16 @@
                     "type": "object",
                     "properties": {
                         "ratedApparentPower": {
-                            "description": "Rated apparent power. Typical unit: KiloV-A. SunSpec Model 702 maxVA.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Rated apparent power. unit: kVA | MVA. SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS.",
+                            "$ref": "#/$defs/QVApparentPower"
                         },
                         "maxReactivePower": {
-                            "description": "Max reactive power injection (leading). Typical unit: KiloV-A_Reactive. SunSpec Model 702 maxVar.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Max reactive power injection (leading / over-excited). unit: kVAR | MVAR. Always ≥0. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ.",
+                            "$ref": "#/$defs/QVReactivePower"
                         },
                         "minReactivePower": {
-                            "description": "Max reactive power absorption (lagging). Typical unit: KiloV-A_Reactive. Value typically negative. SunSpec Model 702 maxVarNeg.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Max reactive power absorption (lagging / under-excited). unit: kVAR | MVAR. Value typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ.",
+                            "$ref": "#/$defs/QVReactivePower"
                         },
                         "rideThroughCategory": {
                             "type": "string",
@@ -305,8 +349,8 @@
                     "type": "object",
                     "properties": {
                         "nominalVoltage": {
-                            "description": "Nominal operating voltage. Typical unit: KiloV. CIM: BaseVoltage.nominalVoltage.",
-                            "$ref": "#/$defs/QuantitativeValue"
+                            "description": "Nominal operating voltage. unit: V | kV. CIM: BaseVoltage.nominalVoltage.",
+                            "$ref": "#/$defs/QVVoltage"
                         },
                         "zone": { "type": "string" },
                         "substationId": { "type": "string" },

@@ -6,12 +6,12 @@ info:
     Canonical base schemas shared by all typed EnergyResource kinds.
 
     v1.1 change: power fields now use QuantitativeValue {value, unit}:
-      ratedPowerKw   → ratedPower   (typical unit: KiloW)
-      maxExportKw    → maxExport    (typical unit: KiloW)
-      maxImportKw    → maxImport    (typical unit: KiloW)
+      ratedPowerKw   → ratedPower   (typical unit: kW)
+      maxExportKw    → maxExport    (typical unit: kW)
+      maxImportKw    → maxImport    (typical unit: kW)
 
     The unit field holds a QUDT unit code that expands to a full IRI in
-    the JSON-LD context via qudt:unit (e.g. "KiloW" →
+    the JSON-LD context via qudt:unit (e.g. "kW" →
     http://qudt.org/vocab/unit/KiloW).
 
     EnergyResourceCommonAttributes — the attributes bag base.
@@ -32,7 +32,7 @@ components:
       type: object
       description: >
         A dimensioned quantity. value is the numeric magnitude; unit is a QUDT
-        unit code (e.g. KiloW, KiloW-HR, KiloV-A, KiloV-A_Reactive, KiloV).
+        unit alias (e.g. kW, kWh, kVA, kVAR, kV). Mapped to QUDT IRIs via JSON-LD context.
         The JSON-LD context maps this to qudt:QuantitativeValue with qudt:value
         and qudt:unit, expanding unit to http://qudt.org/vocab/unit/<unit>.
       required: [value, unit]
@@ -44,9 +44,9 @@ components:
         unit:
           type: string
           description: >
-            QUDT unit code. Common values: KiloW (kilowatt), KiloW-HR
-            (kilowatt-hour), KiloV-A (kilovolt-ampere),
-            KiloV-A_Reactive (kVAr), KiloV (kilovolt).
+            Unit alias — one of: W, kW, MW (power); kWh, MWh (energy);
+            kVA, MVA (apparent power); kVAR, MVAR (reactive power);
+            V, kV (voltage). Mapped to QUDT IRIs via JSON-LD context.
 
     EnergyResourceCommonAttributes:
       $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes
@@ -76,7 +76,7 @@ components:
           $ref: "#/components/schemas/QuantitativeValue"
           description: >
             Manufacturer-rated peak power (nameplate value in principal direction).
-            Typical unit: KiloW. Kept for backward compatibility — prefer maxExport.
+            Typical unit: kW. Kept for backward compatibility — prefer maxExport.
             CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.
           x-jsonld:
             "@id": deg:ratedPower
@@ -85,7 +85,7 @@ components:
           $ref: "#/components/schemas/QuantitativeValue"
           description: >
             Maximum power this resource injects to the grid (generates/discharges).
-            Typical unit: KiloW. Always ≥0. For bidirectional resources (BESS, V2G)
+            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
             this is the max discharge rate. Supersedes ratedPower.
             CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
             (injection direction).
@@ -96,7 +96,7 @@ components:
           $ref: "#/components/schemas/QuantitativeValue"
           description: >
             Maximum power this resource draws from the grid (absorbs/charges).
-            Typical unit: KiloW. Always ≥0. For bidirectional resources (BESS, V2G)
+            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
             this is the max charge rate.
             CIM: PowerElectronicsConnection.maxP (absorption direction).
           x-jsonld:

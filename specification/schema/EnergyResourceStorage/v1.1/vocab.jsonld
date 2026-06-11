@@ -22,7 +22,7 @@
       "@id": "erDeg:storageCapacity",
       "@type": "rdf:Property",
       "rdfs:label": "Storage Capacity",
-      "rdfs:comment": "Rated stored-energy capacity as a QuantitativeValue. Typical unit: qudt:KiloW-HR. CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.",
+      "rdfs:comment": "Rated stored-energy capacity as a QuantitativeValue. Typical unit: kWh. CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-302.ttl#BatteryUnit.ratedE" }

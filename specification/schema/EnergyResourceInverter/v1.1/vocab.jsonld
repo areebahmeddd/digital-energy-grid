@@ -31,7 +31,7 @@
       "@id": "erDeg:maxReactivePower",
       "@type": "rdf:Property",
       "rdfs:label": "Max Reactive Power",
-      "rdfs:comment": "Maximum reactive power injection (leading) as a QuantitativeValue. Typical unit: qudt:KiloV-A_Reactive. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ. Replaces maxReactivePowerKvar from v1.0.",
+      "rdfs:comment": "Maximum reactive power injection (leading) as a QuantitativeValue. Typical unit: kVAR. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ. Replaces maxReactivePowerKvar from v1.0.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceInverter" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-302.ttl#PowerElectronicsConnection.maxQ" }
@@ -40,7 +40,7 @@
       "@id": "erDeg:minReactivePower",
       "@type": "rdf:Property",
       "rdfs:label": "Min Reactive Power",
-      "rdfs:comment": "Maximum reactive power absorption (lagging) as a QuantitativeValue. Typical unit: qudt:KiloV-A_Reactive. Value is typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ. Replaces minReactivePowerKvar from v1.0.",
+      "rdfs:comment": "Maximum reactive power absorption (lagging) as a QuantitativeValue. Typical unit: kVAR. Value is typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ. Replaces minReactivePowerKvar from v1.0.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceInverter" },
       "rdfs:range":  { "@id": "qudt:QuantitativeValue" },
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-302.ttl#PowerElectronicsConnection.minQ" }
