@@ -1,64 +1,30 @@
 {
-  "@context": {
-    "@version": 1.1,
-    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg":   "https://schema.beckn.io/deg#",
-    "qudt":  "http://qudt.org/schema/qudt/",
-    "xsd":   "http://www.w3.org/2001/XMLSchema#",
-    "EnergyResourceNetwork": {
-      "@id": "erDeg:EnergyResourceNetwork",
-      "@context": {
-        "@version": 1.1,
-        "attributes": {
-          "@id": "deg:attributes",
-          "@context": {
-            "make":              { "@id": "deg:make" },
-            "model":             { "@id": "deg:model" },
-            "telemetryProvider": { "@id": "deg:telemetryProvider" },
-            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
-            "location":          { "@id": "deg:location" },
-            "geo":               { "@id": "deg:geo" },
-            "address":           { "@id": "deg:address" },
-            "ratedPower": {
-              "@id": "deg:ratedPower",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "maxExport": {
-              "@id": "deg:maxExport",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "maxImport": {
-              "@id": "deg:maxImport",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "nominalVoltage": {
-              "@id": "erDeg:nominalVoltage",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "zone":         { "@id": "erDeg:zone",         "@type": "xsd:string" },
-            "substationId": { "@id": "erDeg:substationId", "@type": "xsd:string" },
-            "feederCode":   { "@id": "erDeg:feederCode",   "@type": "xsd:string" }
+  "@context": [
+    "https://schema.beckn.io/EnergyResourceCommon/v1.1/context.jsonld",
+    {
+      "@version": 1.1,
+      "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+      "EnergyResourceNetwork": {
+        "@id": "erDeg:EnergyResourceNetwork",
+        "@context": {
+          "attributes": {
+            "@id": "deg:attributes",
+            "@context": {
+              "nominalVoltage": {
+                "@id": "erDeg:nominalVoltage",
+                "@context": {
+                  "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
+                  "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
+                  "@vocab": "http://qudt.org/vocab/unit/"
+                }
+              },
+              "zone":         { "@id": "erDeg:zone",         "@type": "xsd:string" },
+              "substationId": { "@id": "erDeg:substationId", "@type": "xsd:string" },
+              "feederCode":   { "@id": "erDeg:feederCode",   "@type": "xsd:string" }
+            }
           }
-        },
-        "subResources":    { "@id": "deg:subResources",    "@container": "@set" },
-        "parentResources": { "@id": "deg:parentResources", "@container": "@set" }
+        }
       }
     }
-  }
+  ]
 }

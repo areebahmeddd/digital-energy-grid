@@ -1,56 +1,22 @@
 {
-  "@context": {
-    "@version": 1.1,
-    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg":   "https://schema.beckn.io/deg#",
-    "qudt":  "http://qudt.org/schema/qudt/",
-    "xsd":   "http://www.w3.org/2001/XMLSchema#",
-    "EnergyResourceEVCharger": {
-      "@id": "erDeg:EnergyResourceEVCharger",
-      "@context": {
-        "@version": 1.1,
-        "attributes": {
-          "@id": "deg:attributes",
-          "@context": {
-            "make":              { "@id": "deg:make" },
-            "model":             { "@id": "deg:model" },
-            "telemetryProvider": { "@id": "deg:telemetryProvider" },
-            "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
-            "location":          { "@id": "deg:location" },
-            "geo":               { "@id": "deg:geo" },
-            "address":           { "@id": "deg:address" },
-            "ratedPower": {
-              "@id": "deg:ratedPower",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "maxExport": {
-              "@id": "deg:maxExport",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "maxImport": {
-              "@id": "deg:maxImport",
-              "@context": {
-                "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
-                "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
-                "@vocab": "http://qudt.org/vocab/unit/"
-              }
-            },
-            "connectorType":   { "@id": "erDeg:connectorType",   "@type": "xsd:string" },
-            "controlProtocol": { "@id": "erDeg:controlProtocol", "@type": "xsd:string" },
-            "v2xProtocol":     { "@id": "erDeg:v2xProtocol",     "@type": "xsd:string" }
+  "@context": [
+    "https://schema.beckn.io/EnergyResourceCommon/v1.1/context.jsonld",
+    {
+      "@version": 1.1,
+      "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+      "EnergyResourceEVCharger": {
+        "@id": "erDeg:EnergyResourceEVCharger",
+        "@context": {
+          "attributes": {
+            "@id": "deg:attributes",
+            "@context": {
+              "connectorType":   { "@id": "erDeg:connectorType",   "@type": "xsd:string" },
+              "controlProtocol": { "@id": "erDeg:controlProtocol", "@type": "xsd:string" },
+              "v2xProtocol":     { "@id": "erDeg:v2xProtocol",     "@type": "xsd:string" }
+            }
           }
-        },
-        "subResources":    { "@id": "deg:subResources",    "@container": "@set" },
-        "parentResources": { "@id": "deg:parentResources", "@container": "@set" }
+        }
       }
     }
-  }
+  ]
 }
