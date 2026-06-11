@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.1",
+  "title": "EnergyResourceStorage",
+  "description": "Typed schema for stationary battery energy storage resources (BESS). v1.1: storageCapacityKwh → storageCapacity (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS.",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["BESS", "BATTERY"],
+          "description": "Asset-class discriminator. BATTERY is deprecated; use BESS. CIM: cim:BatteryUnit (IEC 61970-302)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceStorageAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceStorageAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "storageCapacity": {
+              "type": "object",
+              "required": ["value", "unit"],
+              "additionalProperties": false,
+              "description": "Rated stored-energy capacity. Typical unit: KiloW-HR. CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.",
+              "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string" }
+              }
+            },
+            "storageType": {
+              "type": "string",
+              "enum": ["LithiumIon", "LeadAcid", "FlowBattery", "NaS", "NiCd", "Flywheel", "Other"],
+              "description": "Battery storage technology type."
+            },
+            "stateOfHealthPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Battery state-of-health as a percentage (0–100)."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

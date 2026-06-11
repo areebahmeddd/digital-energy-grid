@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/MeterServiceProfile/v1.1",
+  "title": "MeterServiceProfile",
+  "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} instead of unit-suffixed scalars. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility.",
+  "$defs": {
+    "QuantitativeValue": {
+      "$anchor": "QuantitativeValue",
+      "type": "object",
+      "description": "A dimensioned quantity with a numeric value and a QUDT unit code (e.g. KiloW, KiloW-HR, KiloV-A, KiloV).",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "description": "Numeric magnitude." },
+        "unit":  { "type": "string", "description": "QUDT unit code. Common values: KiloW (kilowatt), KiloW-HR (kilowatt-hour), KiloV-A (kilovolt-ampere), KiloV-A_Reactive (kVAr), KiloV (kilovolt)." }
+      }
+    },
+    "MeterServiceProfile": {
+      "$anchor": "MeterServiceProfile",
+      "type": "object",
+      "description": "Tariff and regulatory load profile for one meter connection. meterId matches the id of a METER entry in energyResources[].",
+      "required": ["meterId", "sanctionedLoad", "tariffCategoryCode"],
+      "properties": {
+        "meterId":              { "type": "string", "minLength": 1, "description": "Matches the id of a METER entry in customerProfile.energyResources[]." },
+        "sanctionedLoad":       { "$ref": "#/$defs/QuantitativeValue", "description": "Sanctioned/approved import load. Typical unit: KiloW. CIM: UsagePoint.ratedCurrent × voltage." },
+        "sanctionedExportLoad": { "$ref": "#/$defs/QuantitativeValue", "description": "Sanctioned/approved grid export limit. Typical unit: KiloW." },
+        "billingCycleDay":      { "type": "integer", "minimum": 1, "maximum": 31, "description": "Day of month the billing cycle resets." },
+        "contractMaxDemand":    { "$ref": "#/$defs/QuantitativeValue", "description": "Maximum demand contracted with the utility. Typical unit: KiloW." },
+        "tariffCategoryCode":   { "type": "string", "minLength": 1, "description": "Billing/tariff category code assigned by the utility." },
+        "premisesType":         { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
+        "connectionType":       { "type": "string", "enum": ["Single-phase", "Three-phase"], "description": "Electrical connection type. CIM: UsagePoint.phaseCode." },
+        "paymentMode":          { "type": "string", "enum": ["POSTPAID", "PREPAID"], "description": "Billing/payment modality. Administrative — placed on the profile not the meter. CIM: ESPI AmiBillingReadyKind." }
+      }
+    }
+  }
+}

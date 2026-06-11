@@ -1,0 +1,71 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceGenerator
+  version: 1.1.0
+  description: |
+    Typed attribute schema for generation DER energy resources.
+    v1.1: nominalPowerKw → nominalPower (QuantitativeValue {value, unit});
+    inherits EnergyResourceCommon/v1.1.
+    CIM: GeneratingUnit subtypes (IEC 61970-301/302).
+    SOLAR is a deprecated alias for SOLAR_PV.
+
+components:
+  schemas:
+
+    EnergyResourceGenerator:
+      description: >
+        A generation DER energy resource (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP,
+        FUEL_CELL). CIM: GeneratingUnit subtypes (IEC 61970-301).
+      x-tags: [energy-resource, energy, deg, generation, der]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceGenerator
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum: [SOLAR_PV, SOLAR, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL]
+              description: >
+                Asset-class discriminator. SOLAR is deprecated — use SOLAR_PV.
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceGeneratorAttributes"
+
+    EnergyResourceGeneratorAttributes:
+      description: >
+        Attributes for generation DER resources. Common fields inherited from
+        EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            nominalPower:
+              type: object
+              required: [value, unit]
+              additionalProperties: false
+              description: >
+                Nominal (nameplate) power output. Typical unit: KiloW.
+                CIM: GeneratingUnit.nominalP. Use when distinct from maxExport (peak).
+              properties:
+                value: { type: number, minimum: 0 }
+                unit:  { type: string }
+              x-jsonld:
+                "@id": erDeg:nominalPower
+
+            efficiency:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: >
+                Conversion efficiency as a percentage (0–100). Most relevant for
+                FUEL_CELL and CHP resources.
+              x-jsonld:
+                "@id": erDeg:efficiency

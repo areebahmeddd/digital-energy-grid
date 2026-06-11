@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceNetwork/v1.1",
+  "title": "EnergyResourceNetwork",
+  "description": "Typed schema for grid-network infrastructure energy resources. v1.1: nominalVoltageKv → nominalVoltage (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["DT", "BUS", "FEEDER", "MICROGRID"],
+          "description": "Asset-class discriminator. DT → PowerTransformer, BUS → BusbarSection, FEEDER → Feeder (EquipmentContainer), MICROGRID → Substation / microgrid container (IEC 61970-301)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceNetworkAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceNetworkAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "nominalVoltage": {
+              "type": "object",
+              "required": ["value", "unit"],
+              "additionalProperties": false,
+              "description": "Nominal operating voltage. Typical unit: KiloV. CIM: BaseVoltage.nominalVoltage. Replaces nominalVoltageKv from v1.0.",
+              "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string" }
+              }
+            },
+            "zone": {
+              "type": "string",
+              "description": "Operating zone or region identifier used by the utility."
+            },
+            "substationId": {
+              "type": "string",
+              "description": "Parent substation identifier per utility records."
+            },
+            "feederCode": {
+              "type": "string",
+              "description": "Feeder code per utility records. Relevant for FEEDER and DT resources."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

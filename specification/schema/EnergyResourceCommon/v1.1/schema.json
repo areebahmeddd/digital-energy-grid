@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceCommon/v1.1",
+  "title": "EnergyResourceCommon",
+  "description": "Canonical base schemas shared by all typed EnergyResource kinds. v1.1: power fields use QuantitativeValue {value, unit} — ratedPower, maxExport, maxImport replace ratedPowerKw, maxExportKw, maxImportKw. Contains EnergyResourceCommonAttributes (attribute bag base) and EnergyResourceCommon (structural envelope).",
+  "$defs": {
+    "QuantitativeValue": {
+      "$anchor": "QuantitativeValue",
+      "type": "object",
+      "description": "A dimensioned quantity with a numeric value and a QUDT unit code.",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "description": "Numeric magnitude." },
+        "unit":  { "type": "string", "description": "QUDT unit code, e.g. KiloW, KiloW-HR, KiloV-A, KiloV-A_Reactive, KiloV." }
+      }
+    },
+    "EnergyResourceCommonAttributes": {
+      "$anchor": "EnergyResourceCommonAttributes",
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dimensioning and provenance fields shared by all resource kinds. Inherited inside each kind's attributes bag via allOf. No field is required at this level.",
+      "properties": {
+        "make":              { "type": "string", "description": "Manufacturer (free text)." },
+        "model":             { "type": "string", "description": "Model (free text)." },
+        "ratedPower":        { "$ref": "#/$defs/QuantitativeValue", "description": "Manufacturer-rated peak power. Typical unit: KiloW. Kept for backward compatibility — prefer maxExport for new payloads. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower." },
+        "maxExport":         { "$ref": "#/$defs/QuantitativeValue", "description": "Maximum power injected to the grid (generates/discharges). Typical unit: KiloW. Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection)." },
+        "maxImport":         { "$ref": "#/$defs/QuantitativeValue", "description": "Maximum power drawn from the grid (absorbs/charges). Typical unit: KiloW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
+        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
+        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
+        "location":          { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
+      }
+    },
+    "EnergyResourceCommon": {
+      "$anchor": "EnergyResourceCommon",
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Structural envelope inherited by every typed EnergyResource kind via allOf. Defines id, type, topology (subResources, parentResources), and the attributes bag.",
+      "properties": {
+        "id":   { "type": "string", "description": "Stable identifier for this resource. For METER resources the meter serial number is conventional.", "example": "did:web:bescom.karnataka.gov.in:assets:meter:MET-001" },
+        "type": { "type": "string", "description": "Asset class discriminator. Constrained to a kind-specific enum or const in each typed kind schema." },
+        "subResources": {
+          "type": "array",
+          "description": "Topology — child resources. Each item is a bare id string or an inline EnergyResource object.",
+          "items": {
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              { "$ref": "https://schema.beckn.io/EnergyResource/v2.1#/components/schemas/EnergyResource" }
+            ]
+          }
+        },
+        "parentResources": { "type": "array", "description": "Upward topology — ids of parent resources.", "items": { "type": "string", "minLength": 1 } },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attribute bag. Inherits EnergyResourceCommonAttributes via allOf plus kind-specific fields.",
+          "allOf": [ { "$ref": "#/$defs/EnergyResourceCommonAttributes" } ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg":  "https://schema.beckn.io/deg/EnergyResource/",
+    "deg":    "https://schema.beckn.io/deg#",
+    "qudt":   "http://qudt.org/schema/qudt/",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceNetwork",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Network",
+      "rdfs:comment": "A grid-network infrastructure energy resource (DT, BUS, FEEDER, MICROGRID). v1.1: nominalVoltage is qudt:QuantitativeValue. CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#EquipmentContainer" }
+    },
+    {
+      "@id": "erDeg:nominalVoltage",
+      "@type": "rdf:Property",
+      "rdfs:label": "Nominal Voltage",
+      "rdfs:comment": "Nominal operating voltage as a QuantitativeValue. Typical unit: qudt:KiloV. CIM: BaseVoltage.nominalVoltage. Replaces nominalVoltageKv from v1.0.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#BaseVoltage.nominalVoltage" }
+    },
+    {
+      "@id": "erDeg:zone",
+      "@type": "rdf:Property",
+      "rdfs:label": "Zone",
+      "rdfs:comment": "Operating zone or region identifier used by the utility.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:substationId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Substation ID",
+      "rdfs:comment": "Parent substation identifier per utility records.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:feederCode",
+      "@type": "rdf:Property",
+      "rdfs:label": "Feeder Code",
+      "rdfs:comment": "Feeder code per utility records. Relevant for FEEDER and DT resources.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceNetwork" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

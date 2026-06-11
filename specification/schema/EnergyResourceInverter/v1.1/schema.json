@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceInverter/v1.1",
+  "title": "EnergyResourceInverter",
+  "description": "Typed schema for grid-connected power-electronics inverter energy resources (type = INVERTER). v1.1: ratedApparentPowerKva → ratedApparentPower, maxReactivePowerKvar → maxReactivePower, minReactivePowerKvar → minReactivePower (all QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: PowerElectronicsConnection (IEC 61970-302).",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "INVERTER",
+          "description": "Asset-class discriminator. Must be \"INVERTER\". CIM: PowerElectronicsConnection (IEC 61970-302)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceInverterAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceInverterAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "ratedApparentPower": {
+              "type": "object",
+              "required": ["value", "unit"],
+              "additionalProperties": false,
+              "description": "Rated apparent power. Typical unit: KiloV-A. SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS. Replaces ratedApparentPowerKva from v1.0.",
+              "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string" }
+              }
+            },
+            "maxReactivePower": {
+              "type": "object",
+              "required": ["value", "unit"],
+              "additionalProperties": false,
+              "description": "Maximum reactive power injection (leading / over-excited). Typical unit: KiloV-A_Reactive. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ. Replaces maxReactivePowerKvar from v1.0.",
+              "properties": {
+                "value": { "type": "number", "minimum": 0 },
+                "unit":  { "type": "string" }
+              }
+            },
+            "minReactivePower": {
+              "type": "object",
+              "required": ["value", "unit"],
+              "additionalProperties": false,
+              "description": "Maximum reactive power absorption (lagging / under-excited). Typical unit: KiloV-A_Reactive. Value is typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ. Replaces minReactivePowerKvar from v1.0.",
+              "properties": {
+                "value": { "type": "number" },
+                "unit":  { "type": "string" }
+              }
+            },
+            "rideThroughCategory": {
+              "type": "string",
+              "enum": ["CategoryI", "CategoryII", "CategoryIII"],
+              "description": "IEEE 1547-2018 abnormal operating performance category. CategoryI: basic. CategoryII: enhanced for distribution-connected DER. CategoryIII: advanced for large/transmission-connected DER."
+            },
+            "operatingMode": {
+              "type": "string",
+              "enum": ["GridFollowing", "GridForming", "Standby"],
+              "description": "Inverter grid-interaction mode. GridFollowing: PLL-based sync. GridForming: own V/f reference (microgrid islanding). Standby: energised but not injecting. CIM: PowerElectronicsConnection.inverterMode."
+            },
+            "voltVarEnabled": {
+              "type": "boolean",
+              "description": "Volt-VAr curve active. IEEE 2030.5 opModVoltVar / SunSpec Model 705."
+            },
+            "freqDroopEnabled": {
+              "type": "boolean",
+              "description": "Frequency-Watt droop active. SunSpec Model 711 / IEEE 1547-2018 Frequency-Watt."
+            },
+            "enterServiceRampTimeSec": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Seconds to ramp from 0 to rated power after reconnection. SunSpec Model 703 ESRmpTms."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

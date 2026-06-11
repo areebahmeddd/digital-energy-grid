@@ -1,0 +1,79 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceStorage
+  version: 1.1.0
+  description: |
+    Typed attribute schema for stationary battery energy storage resources (BESS).
+    v1.1: storageCapacityKwh → storageCapacity (QuantitativeValue {value, unit});
+    inherits EnergyResourceCommon/v1.1.
+    CIM: BatteryUnit (IEC 61970-302).
+    BATTERY is a deprecated alias for BESS.
+
+components:
+  schemas:
+
+    EnergyResourceStorage:
+      description: >
+        A stationary battery energy storage resource (BESS).
+        CIM: BatteryUnit (IEC 61970-302).
+      x-tags: [energy-resource, energy, deg, storage, bess, battery]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceStorage
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum: [BESS, BATTERY]
+              description: >
+                Asset-class discriminator. BATTERY is deprecated — use BESS.
+                CIM: BatteryUnit (IEC 61970-302).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceStorageAttributes"
+
+    EnergyResourceStorageAttributes:
+      description: >
+        Attributes for BESS resources. Common fields (make, model,
+        ratedPower, maxExport, maxImport, telemetryProvider,
+        commissioningDate, location) are inherited from
+        EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            storageCapacity:
+              type: object
+              required: [value, unit]
+              additionalProperties: false
+              description: >
+                Rated stored-energy capacity. Typical unit: KiloW-HR.
+                CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.
+              properties:
+                value: { type: number, minimum: 0 }
+                unit:  { type: string }
+              x-jsonld:
+                "@id": erDeg:storageCapacity
+
+            storageType:
+              type: string
+              enum: [LithiumIon, LeadAcid, FlowBattery, NaS, NiCd, Flywheel, Other]
+              description: Battery storage technology type.
+              x-jsonld:
+                "@id": erDeg:storageType
+
+            stateOfHealthPct:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Battery state-of-health as a percentage (0–100).
+              x-jsonld:
+                "@id": erDeg:stateOfHealthPct

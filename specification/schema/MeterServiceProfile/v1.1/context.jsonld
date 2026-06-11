@@ -1,0 +1,42 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg":  "https://schema.beckn.io/deg#",
+    "qudt": "http://qudt.org/schema/qudt/",
+    "xsd":  "http://www.w3.org/2001/XMLSchema#",
+
+    "MeterServiceProfile": { "@id": "deg:MeterServiceProfile" },
+
+    "meterId":            { "@id": "deg:meterId" },
+    "tariffCategoryCode": { "@id": "deg:tariffCategoryCode" },
+    "premisesType":       { "@id": "deg:premisesType" },
+    "connectionType":     { "@id": "deg:connectionType" },
+    "paymentMode":        { "@id": "deg:paymentMode" },
+    "billingCycleDay":    { "@id": "deg:billingCycleDay", "@type": "xsd:integer" },
+
+    "sanctionedLoad": {
+      "@id": "deg:sanctionedLoad",
+      "@context": {
+        "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
+        "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
+        "@vocab": "http://qudt.org/vocab/unit/"
+      }
+    },
+    "sanctionedExportLoad": {
+      "@id": "deg:sanctionedExportLoad",
+      "@context": {
+        "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
+        "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
+        "@vocab": "http://qudt.org/vocab/unit/"
+      }
+    },
+    "contractMaxDemand": {
+      "@id": "deg:contractMaxDemand",
+      "@context": {
+        "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
+        "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
+        "@vocab": "http://qudt.org/vocab/unit/"
+      }
+    }
+  }
+}

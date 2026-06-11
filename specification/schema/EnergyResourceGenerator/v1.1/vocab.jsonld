@@ -1,0 +1,39 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg":  "https://schema.beckn.io/deg/EnergyResource/",
+    "deg":    "https://schema.beckn.io/deg#",
+    "qudt":   "http://qudt.org/schema/qudt/",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceGenerator",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Generator",
+      "rdfs:comment": "A generation DER energy resource (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL). v1.1: nominalPower is qudt:QuantitativeValue. CIM: GeneratingUnit subtypes (IEC 61970-301).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#GeneratingUnit" }
+    },
+    {
+      "@id": "erDeg:nominalPower",
+      "@type": "rdf:Property",
+      "rdfs:label": "Nominal Power",
+      "rdfs:comment": "Nameplate nominal power output as a QuantitativeValue. Typical unit: qudt:KiloW. CIM: GeneratingUnit.nominalP.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#GeneratingUnit.nominalP" }
+    },
+    {
+      "@id": "erDeg:efficiency",
+      "@type": "rdf:Property",
+      "rdfs:label": "Efficiency (%)",
+      "rdfs:comment": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP resources.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "deg":    "https://schema.beckn.io/deg#",
+    "qudt":   "http://qudt.org/schema/qudt/",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "deg:EnergyResourceCommonAttributes",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource Common Attributes",
+      "rdfs:comment": "Base attribute bag shared by all EnergyResource kinds via allOf. v1.1: ratedPower, maxExport, maxImport are qudt:QuantitativeValue objects."
+    },
+    {
+      "@id": "deg:EnergyResourceCommon",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Energy Resource Common",
+      "rdfs:comment": "Structural envelope inherited by every typed EnergyResource kind. Defines id, type, subResources, parentResources, attributes."
+    },
+    {
+      "@id": "deg:ratedPower",
+      "@type": "rdf:Property",
+      "rdfs:label": "Rated Power",
+      "rdfs:comment": "Manufacturer-rated peak power as a QuantitativeValue. Typical unit: qudt:KiloW. Kept for backward compatibility — prefer maxExport. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
+    },
+    {
+      "@id": "deg:maxExport",
+      "@type": "rdf:Property",
+      "rdfs:label": "Max Export",
+      "rdfs:comment": "Maximum power injected to the grid (generates/discharges) as a QuantitativeValue. Typical unit: qudt:KiloW. Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
+    },
+    {
+      "@id": "deg:maxImport",
+      "@type": "rdf:Property",
+      "rdfs:label": "Max Import",
+      "rdfs:comment": "Maximum power drawn from the grid (absorbs/charges) as a QuantitativeValue. Typical unit: qudt:KiloW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
+    },
+    {
+      "@id": "deg:make",
+      "@type": "rdf:Property",
+      "rdfs:label": "Make",
+      "rdfs:comment": "Manufacturer (free text).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:model",
+      "@type": "rdf:Property",
+      "rdfs:label": "Model",
+      "rdfs:comment": "Model (free text).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:telemetryProvider",
+      "@type": "rdf:Property",
+      "rdfs:label": "Telemetry Provider",
+      "rdfs:comment": "Vendor API / data source identifier for telemetry.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:commissioningDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Commissioning Date",
+      "rdfs:comment": "ISO 8601 date-time the asset was commissioned.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  "xsd:dateTime"
+    }
+  ]
+}
