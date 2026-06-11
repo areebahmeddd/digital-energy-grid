@@ -27,14 +27,8 @@
           "additionalProperties": true,
           "properties": {
             "storageCapacity": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Rated stored-energy capacity. Typical unit: KiloW-HR. CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.",
-              "properties": {
-                "value": { "type": "number", "minimum": 0 },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVEnergy",
+              "description": "Rated stored-energy capacity. unit: kWh | MWh. CIM: BatteryUnit.ratedE."
             },
             "storageType": {
               "type": "string",

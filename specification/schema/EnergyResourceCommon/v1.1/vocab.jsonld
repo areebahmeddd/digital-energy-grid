@@ -13,7 +13,7 @@
       "@id": "deg:EnergyResourceCommonAttributes",
       "@type": "rdfs:Class",
       "rdfs:label": "Energy Resource Common Attributes",
-      "rdfs:comment": "Base attribute bag shared by all EnergyResource kinds via allOf. v1.1: ratedPower, maxExport, maxImport are qudt:QuantitativeValue objects."
+      "rdfs:comment": "Base attribute bag shared by all EnergyResource kinds via allOf. v1.1: ratedPower, maxExport, maxImport are qudt:QuantitativeValue objects. Unit aliases defined in context: W=qudt:W, kW=qudt:KiloW, MW=qudt:MegaW, kWh=qudt:KiloW-HR, MWh=qudt:MegaW-HR, kVA=qudt:KiloV-A, MVA=qudt:MegaV-A, kVAR=qudt:KiloV-A_Reactive, MVAR=qudt:MegaV-A_Reactive, V=qudt:V, kV=qudt:KiloV."
     },
     {
       "@id": "deg:EnergyResourceCommon",

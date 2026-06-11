@@ -9,6 +9,18 @@
     "beckn":   "https://schema.beckn.io/core/v2.0/",
     "deg":     "https://schema.beckn.io/deg#",
 
+    "W":    "http://qudt.org/vocab/unit/W",
+    "kW":   "http://qudt.org/vocab/unit/KiloW",
+    "MW":   "http://qudt.org/vocab/unit/MegaW",
+    "kWh":  "http://qudt.org/vocab/unit/KiloW-HR",
+    "MWh":  "http://qudt.org/vocab/unit/MegaW-HR",
+    "kVA":  "http://qudt.org/vocab/unit/KiloV-A",
+    "MVA":  "http://qudt.org/vocab/unit/MegaV-A",
+    "kVAR": "http://qudt.org/vocab/unit/KiloV-A_Reactive",
+    "MVAR": "http://qudt.org/vocab/unit/MegaV-A_Reactive",
+    "V":    "http://qudt.org/vocab/unit/V",
+    "kV":   "http://qudt.org/vocab/unit/KiloV",
+
     "EnergyResource": "deg:EnergyResource",
 
     "id":   "@id",

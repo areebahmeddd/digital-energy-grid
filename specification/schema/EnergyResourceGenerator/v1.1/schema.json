@@ -27,14 +27,8 @@
           "additionalProperties": true,
           "properties": {
             "nominalPower": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Nominal (nameplate) power output. Typical unit: KiloW. CIM: GeneratingUnit.nominalP.",
-              "properties": {
-                "value": { "type": "number", "minimum": 0 },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVPower",
+              "description": "Nominal (nameplate) power output. unit: W | kW | MW. CIM: GeneratingUnit.nominalP."
             },
             "efficiency": {
               "type": "number",

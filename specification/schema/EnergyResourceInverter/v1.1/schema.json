@@ -27,34 +27,16 @@
           "additionalProperties": true,
           "properties": {
             "ratedApparentPower": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Rated apparent power. Typical unit: KiloV-A. SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS. Replaces ratedApparentPowerKva from v1.0.",
-              "properties": {
-                "value": { "type": "number", "minimum": 0 },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVApparentPower",
+              "description": "Rated apparent power. unit: kVA | MVA. SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS."
             },
             "maxReactivePower": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Maximum reactive power injection (leading / over-excited). Typical unit: KiloV-A_Reactive. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ. Replaces maxReactivePowerKvar from v1.0.",
-              "properties": {
-                "value": { "type": "number", "minimum": 0 },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVReactivePower",
+              "description": "Maximum reactive power injection (leading / over-excited). unit: kVAR | MVAR. Always ≥0. SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ."
             },
             "minReactivePower": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Maximum reactive power absorption (lagging / under-excited). Typical unit: KiloV-A_Reactive. Value is typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ. Replaces minReactivePowerKvar from v1.0.",
-              "properties": {
-                "value": { "type": "number" },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVReactivePower",
+              "description": "Maximum reactive power absorption (lagging / under-excited). unit: kVAR | MVAR. Value typically negative. SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ."
             },
             "rideThroughCategory": {
               "type": "string",

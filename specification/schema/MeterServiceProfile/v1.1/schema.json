@@ -2,17 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/MeterServiceProfile/v1.1",
   "title": "MeterServiceProfile",
-  "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} instead of unit-suffixed scalars. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility.",
+  "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} with short unit aliases (W, kW, MW) mapped to QUDT IRIs. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility.",
   "$defs": {
-    "QuantitativeValue": {
-      "$anchor": "QuantitativeValue",
+    "QVPower": {
+      "$anchor": "QVPower",
       "type": "object",
-      "description": "A dimensioned quantity with a numeric value and a QUDT unit code (e.g. KiloW, KiloW-HR, KiloV-A, KiloV).",
+      "description": "Active power quantity. unit must be one of: W (watt), kW (kilowatt), MW (megawatt).",
       "required": ["value", "unit"],
       "additionalProperties": false,
       "properties": {
-        "value": { "type": "number", "description": "Numeric magnitude." },
-        "unit":  { "type": "string", "description": "QUDT unit code. Common values: KiloW (kilowatt), KiloW-HR (kilowatt-hour), KiloV-A (kilovolt-ampere), KiloV-A_Reactive (kVAr), KiloV (kilovolt)." }
+        "value": { "type": "number" },
+        "unit":  { "type": "string", "enum": ["W", "kW", "MW"] }
       }
     },
     "MeterServiceProfile": {
@@ -22,10 +22,10 @@
       "required": ["meterId", "sanctionedLoad", "tariffCategoryCode"],
       "properties": {
         "meterId":              { "type": "string", "minLength": 1, "description": "Matches the id of a METER entry in customerProfile.energyResources[]." },
-        "sanctionedLoad":       { "$ref": "#/$defs/QuantitativeValue", "description": "Sanctioned/approved import load. Typical unit: KiloW. CIM: UsagePoint.ratedCurrent × voltage." },
-        "sanctionedExportLoad": { "$ref": "#/$defs/QuantitativeValue", "description": "Sanctioned/approved grid export limit. Typical unit: KiloW." },
+        "sanctionedLoad":       { "$ref": "#/$defs/QVPower", "description": "Sanctioned/approved import load. unit: W | kW | MW. CIM: UsagePoint.ratedCurrent × voltage." },
+        "sanctionedExportLoad": { "$ref": "#/$defs/QVPower", "description": "Sanctioned/approved grid export limit. unit: W | kW | MW." },
         "billingCycleDay":      { "type": "integer", "minimum": 1, "maximum": 31, "description": "Day of month the billing cycle resets." },
-        "contractMaxDemand":    { "$ref": "#/$defs/QuantitativeValue", "description": "Maximum demand contracted with the utility. Typical unit: KiloW." },
+        "contractMaxDemand":    { "$ref": "#/$defs/QVPower", "description": "Maximum demand contracted with the utility. unit: W | kW | MW." },
         "tariffCategoryCode":   { "type": "string", "minLength": 1, "description": "Billing/tariff category code assigned by the utility." },
         "premisesType":         { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
         "connectionType":       { "type": "string", "enum": ["Single-phase", "Three-phase"], "description": "Electrical connection type. CIM: UsagePoint.phaseCode." },

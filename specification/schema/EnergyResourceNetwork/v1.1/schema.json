@@ -27,14 +27,8 @@
           "additionalProperties": true,
           "properties": {
             "nominalVoltage": {
-              "type": "object",
-              "required": ["value", "unit"],
-              "additionalProperties": false,
-              "description": "Nominal operating voltage. Typical unit: KiloV. CIM: BaseVoltage.nominalVoltage. Replaces nominalVoltageKv from v1.0.",
-              "properties": {
-                "value": { "type": "number", "minimum": 0 },
-                "unit":  { "type": "string" }
-              }
+              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVVoltage",
+              "description": "Nominal operating voltage. unit: V | kV. CIM: BaseVoltage.nominalVoltage."
             },
             "zone": {
               "type": "string",
