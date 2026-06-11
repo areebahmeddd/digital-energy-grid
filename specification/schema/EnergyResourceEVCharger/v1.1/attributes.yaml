@@ -1,0 +1,75 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceEVCharger
+  version: 1.1.0
+  description: |
+    Typed attribute schema for EV charging station energy resources.
+    v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport
+    as QuantitativeValue {value, unit}).
+    CIM: ElectricVehicleChargingStation (CIM17+).
+
+components:
+  schemas:
+
+    EnergyResourceEVCharger:
+      description: >
+        An EV charging station (EVSE) energy resource. EV_V2G adds
+        bidirectional Vehicle-to-Grid capability per ISO 15118-20 / OCPP 2.1 BPT.
+        CIM: ElectricVehicleChargingStation (CIM17+).
+      x-tags: [energy-resource, ev-charger, energy, deg]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceEVCharger
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum: [EV_CHARGER, EV_V2G]
+              description: >
+                Asset-class discriminator. EV_CHARGER: EVSE hardware.
+                EV_V2G: Vehicle-to-Grid capable EVSE with ISO 15118-20 / OCPP 2.1 BPT.
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceEVChargerAttributes"
+
+    EnergyResourceEVChargerAttributes:
+      description: >
+        Attributes for EV_CHARGER and EV_V2G resources. Common fields (make, model,
+        ratedPower, maxExport, maxImport, telemetryProvider, commissioningDate,
+        location) are inherited from EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            connectorType:
+              type: string
+              enum: [Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other]
+              description: >
+                Physical connector standard.
+                Type1: IEC 62196-2 Type 1 (J1772). Type2: IEC 62196-2 Type 2 (Mennekes).
+                CCS1/CCS2: Combined Charging System DC fast charge.
+                CHAdeMO: CHAdeMO DC fast charge. GB_T: GB/T 20234. NACS: SAE J3400.
+              x-jsonld:
+                "@id": erDeg:connectorType
+
+            controlProtocol:
+              type: string
+              enum: [OCPP_1.6, OCPP_2.0.1, OCPP_2.1, ISO_15118_2, ISO_15118_20, Other]
+              description: EVSE control and smart-charging protocol.
+              x-jsonld:
+                "@id": erDeg:controlProtocol
+
+            v2xProtocol:
+              type: string
+              enum: [CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other]
+              description: Vehicle-to-Grid / V2X protocol. Present only for EV_V2G resources.
+              x-jsonld:
+                "@id": erDeg:v2xProtocol

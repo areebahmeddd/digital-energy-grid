@@ -1,0 +1,182 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceCommon
+  version: 1.1.0
+  description: |
+    Canonical base schemas shared by all typed EnergyResource kinds.
+
+    v1.1 change: power fields now use QuantitativeValue {value, unit}:
+      ratedPowerKw   → ratedPower   (typical unit: kW)
+      maxExportKw    → maxExport    (typical unit: kW)
+      maxImportKw    → maxImport    (typical unit: kW)
+
+    The unit field holds a QUDT unit code that expands to a full IRI in
+    the JSON-LD context via qudt:unit (e.g. "kW" →
+    http://qudt.org/vocab/unit/KiloW).
+
+    EnergyResourceCommonAttributes — the attributes bag base.
+    EnergyResourceCommon — the structural envelope inherited by every kind.
+
+    Canonical IRI: https://schema.beckn.io/EnergyResourceCommon/v1.1
+
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: https://schema.beckn.io
+    description: Canonical schema registry
+paths: {}
+components:
+  schemas:
+
+    QuantitativeValue:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QuantitativeValue
+      type: object
+      description: >
+        A dimensioned quantity. value is the numeric magnitude; unit is a QUDT
+        unit alias (e.g. kW, kWh, kVA, kVAR, kV). Mapped to QUDT IRIs via JSON-LD context.
+        The JSON-LD context maps this to qudt:QuantitativeValue with qudt:value
+        and qudt:unit, expanding unit to http://qudt.org/vocab/unit/<unit>.
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+          description: Numeric magnitude.
+        unit:
+          type: string
+          description: >
+            Unit alias — one of: W, kW, MW (power); kWh, MWh (energy);
+            kVA, MVA (apparent power); kVAR, MVAR (reactive power);
+            V, kV (voltage). Mapped to QUDT IRIs via JSON-LD context.
+
+    EnergyResourceCommonAttributes:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes
+      type: object
+      additionalProperties: true
+      description: >
+        Dimensioning and provenance fields shared by all resource kinds.
+        Inherited inside each kind's attributes bag via allOf.
+        No field is required at this level.
+      x-tags:
+        - energy-resource
+      properties:
+
+        make:
+          type: string
+          description: Manufacturer (free text).
+          x-jsonld:
+            "@id": deg:make
+
+        model:
+          type: string
+          description: Model (free text).
+          x-jsonld:
+            "@id": deg:model
+
+        ratedPower:
+          $ref: "#/components/schemas/QuantitativeValue"
+          description: >
+            Manufacturer-rated peak power (nameplate value in principal direction).
+            Typical unit: kW. Kept for backward compatibility — prefer maxExport.
+            CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.
+          x-jsonld:
+            "@id": deg:ratedPower
+
+        maxExport:
+          $ref: "#/components/schemas/QuantitativeValue"
+          description: >
+            Maximum power this resource injects to the grid (generates/discharges).
+            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
+            this is the max discharge rate. Supersedes ratedPower.
+            CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
+            (injection direction).
+          x-jsonld:
+            "@id": deg:maxExport
+
+        maxImport:
+          $ref: "#/components/schemas/QuantitativeValue"
+          description: >
+            Maximum power this resource draws from the grid (absorbs/charges).
+            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
+            this is the max charge rate.
+            CIM: PowerElectronicsConnection.maxP (absorption direction).
+          x-jsonld:
+            "@id": deg:maxImport
+
+        telemetryProvider:
+          type: string
+          description: Vendor API / data source identifier for telemetry.
+          x-jsonld:
+            "@id": deg:telemetryProvider
+
+        commissioningDate:
+          type: string
+          format: date-time
+          description: ISO 8601 date-time the asset was commissioned.
+          x-jsonld:
+            "@id": deg:commissioningDate
+
+        location:
+          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          description: Physical location of this asset.
+          x-jsonld:
+            "@id": deg:location
+
+    EnergyResourceCommon:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon
+      type: object
+      additionalProperties: true
+      description: >
+        Structural envelope inherited by every typed EnergyResource kind via
+        allOf. Defines top-level fields common to all kinds: id, type,
+        topology (subResources, parentResources), and the attributes bag.
+      x-tags:
+        - energy-resource
+      properties:
+
+        id:
+          type: string
+          description: >
+            Stable identifier for this resource. For METER resources the
+            meter serial number is conventional.
+          example: "did:web:bescom.karnataka.gov.in:assets:meter:MET-001"
+          x-jsonld:
+            "@id": "@id"
+
+        type:
+          type: string
+          description: >
+            Asset class discriminator. Constrained to a kind-specific enum or
+            const in each typed kind schema.
+          x-jsonld:
+            "@id": deg:resourceType
+
+        subResources:
+          type: array
+          description: >
+            Topology — child resources. Each item is EITHER a bare id string
+            OR an inline EnergyResource object.
+          items:
+            oneOf:
+              - type: string
+              - $ref: "https://schema.beckn.io/EnergyResource/v2.1#/components/schemas/EnergyResource"
+          x-jsonld:
+            "@id": deg:subResources
+
+        parentResources:
+          type: array
+          description: Upward topology — ids of parent resources.
+          items:
+            type: string
+          x-jsonld:
+            "@id": deg:parentResources
+
+        attributes:
+          type: object
+          additionalProperties: true
+          description: >
+            Attribute bag. Inherits EnergyResourceCommonAttributes via allOf
+            plus kind-specific fields.
+          allOf:
+            - $ref: "#/components/schemas/EnergyResourceCommonAttributes"
+          x-jsonld:
+            "@id": deg:attributes

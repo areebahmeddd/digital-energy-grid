@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceLoad/v1.1",
+  "title": "EnergyResourceLoad",
+  "description": "Typed schema for controllable load energy resources. v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport as QuantitativeValue). CIM: EnergyConsumer / ConformLoad (IEC 61970-301).",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["SMART_HVAC", "SMART_WATER_HEATER", "CONTROLLABLE_LOAD"],
+          "description": "Asset-class discriminator. CIM: EnergyConsumer / ConformLoad (IEC 61970-301)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceLoadAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceLoadAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "controlProtocol": {
+              "type": "string",
+              "enum": ["OpenADR_2.0b", "OCPP_2.0.1", "SunSpec_Modbus", "EEBus", "Modbus", "Other"],
+              "description": "Demand-response / control protocol supported by this load device."
+            },
+            "loadCategory": {
+              "type": "string",
+              "enum": ["Heating", "Cooling", "WaterHeating", "Lighting", "EV", "Industrial", "Other"],
+              "description": "Functional category of this load. CIM: ConformLoad classification."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

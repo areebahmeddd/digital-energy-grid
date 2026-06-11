@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceCommon/v1.1",
+  "title": "EnergyResourceCommon",
+  "description": "Canonical base schemas shared by all typed EnergyResource kinds. v1.1: power fields use QuantitativeValue {value, unit} with short unit aliases (kW, MW, kWh, kVA, kVAR, kV) mapped to QUDT IRIs via JSON-LD context. Contains typed QV variants (QVPower, QVEnergy, QVApparentPower, QVReactivePower, QVVoltage), EnergyResourceCommonAttributes, and EnergyResourceCommon.",
+  "$defs": {
+    "QVPower": {
+      "$anchor": "QVPower",
+      "type": "object",
+      "description": "Active power quantity. unit must be one of: W (watt), kW (kilowatt), MW (megawatt).",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number" },
+        "unit":  { "type": "string", "enum": ["W", "kW", "MW"] }
+      }
+    },
+    "QVEnergy": {
+      "$anchor": "QVEnergy",
+      "type": "object",
+      "description": "Stored-energy quantity. unit must be one of: kWh (kilowatt-hour), MWh (megawatt-hour).",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "type": "string", "enum": ["kWh", "MWh"] }
+      }
+    },
+    "QVApparentPower": {
+      "$anchor": "QVApparentPower",
+      "type": "object",
+      "description": "Apparent power quantity. unit must be one of: kVA (kilovolt-ampere), MVA (megavolt-ampere).",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "type": "string", "enum": ["kVA", "MVA"] }
+      }
+    },
+    "QVReactivePower": {
+      "$anchor": "QVReactivePower",
+      "type": "object",
+      "description": "Reactive power quantity. unit must be one of: kVAR (kilovolt-ampere reactive), MVAR (megavolt-ampere reactive). Value may be negative for absorption.",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number" },
+        "unit":  { "type": "string", "enum": ["kVAR", "MVAR"] }
+      }
+    },
+    "QVVoltage": {
+      "$anchor": "QVVoltage",
+      "type": "object",
+      "description": "Voltage quantity. unit must be one of: V (volt), kV (kilovolt).",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "type": "string", "enum": ["V", "kV"] }
+      }
+    },
+    "EnergyResourceCommonAttributes": {
+      "$anchor": "EnergyResourceCommonAttributes",
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dimensioning and provenance fields shared by all resource kinds. Inherited inside each kind's attributes bag via allOf. No field is required at this level.",
+      "properties": {
+        "make":              { "type": "string", "description": "Manufacturer (free text)." },
+        "model":             { "type": "string", "description": "Model (free text)." },
+        "ratedPower":        { "$ref": "#/$defs/QVPower",  "description": "Manufacturer-rated peak power. CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower." },
+        "maxExport":         { "$ref": "#/$defs/QVPower",  "description": "Maximum power injected to the grid (generates/discharges). Always ≥0. CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP (injection)." },
+        "maxImport":         { "$ref": "#/$defs/QVPower",  "description": "Maximum power drawn from the grid (absorbs/charges). Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
+        "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
+        "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
+        "location":          { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
+      }
+    },
+    "EnergyResourceCommon": {
+      "$anchor": "EnergyResourceCommon",
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Structural envelope inherited by every typed EnergyResource kind via allOf. Defines id, type, topology (subResources, parentResources), and the attributes bag.",
+      "properties": {
+        "id":   { "type": "string", "description": "Stable identifier for this resource. For METER resources the meter serial number is conventional.", "example": "did:web:bescom.karnataka.gov.in:assets:meter:MET-001" },
+        "type": { "type": "string", "description": "Asset class discriminator. Constrained to a kind-specific enum or const in each typed kind schema." },
+        "subResources": {
+          "type": "array",
+          "description": "Topology — child resources. Each item is a bare id string or an inline EnergyResource object.",
+          "items": {
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              { "$ref": "https://schema.beckn.io/EnergyResource/v2.1#/components/schemas/EnergyResource" }
+            ]
+          }
+        },
+        "parentResources": { "type": "array", "description": "Upward topology — ids of parent resources.", "items": { "type": "string", "minLength": 1 } },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attribute bag. Inherits EnergyResourceCommonAttributes via allOf plus kind-specific fields.",
+          "allOf": [ { "$ref": "#/$defs/EnergyResourceCommonAttributes" } ]
+        }
+      }
+    }
+  }
+}

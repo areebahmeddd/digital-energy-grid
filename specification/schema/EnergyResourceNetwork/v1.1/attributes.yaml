@@ -1,0 +1,84 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceNetwork
+  version: 1.1.0
+  description: |
+    Typed attribute schema for grid-network infrastructure energy resources.
+    v1.1: nominalVoltageKv → nominalVoltage (QuantitativeValue {value, unit});
+    inherits EnergyResourceCommon/v1.1.
+    CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).
+
+components:
+  schemas:
+
+    EnergyResourceNetwork:
+      description: >
+        A grid-network infrastructure energy resource (distribution transformer,
+        busbar, feeder, or microgrid). Topology containers that anchor metering
+        points and DER resources.
+        CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).
+      x-tags: [energy-resource, energy, deg, network, grid]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceNetwork
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum: [DT, BUS, FEEDER, MICROGRID]
+              description: >
+                Asset-class discriminator. DT → PowerTransformer, BUS → BusbarSection,
+                FEEDER → Feeder (EquipmentContainer), MICROGRID → Substation /
+                microgrid container (IEC 61970-301).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceNetworkAttributes"
+
+    EnergyResourceNetworkAttributes:
+      description: >
+        Attributes for grid-network infrastructure resources. Common fields (make,
+        model, ratedPower, maxExport, maxImport, telemetryProvider, commissioningDate,
+        location) are inherited from EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            nominalVoltage:
+              type: object
+              required: [value, unit]
+              additionalProperties: false
+              description: >
+                Nominal operating voltage. Typical unit: KiloV.
+                CIM: BaseVoltage.nominalVoltage.
+                Replaces nominalVoltageKv from v1.0.
+              properties:
+                value: { type: number, minimum: 0 }
+                unit:  { type: string }
+              x-jsonld:
+                "@id": erDeg:nominalVoltage
+
+            zone:
+              type: string
+              description: Operating zone or region identifier used by the utility.
+              x-jsonld:
+                "@id": erDeg:zone
+
+            substationId:
+              type: string
+              description: Parent substation identifier per utility records.
+              x-jsonld:
+                "@id": erDeg:substationId
+
+            feederCode:
+              type: string
+              description: Feeder code per utility records. Relevant for FEEDER and DT resources.
+              x-jsonld:
+                "@id": erDeg:feederCode

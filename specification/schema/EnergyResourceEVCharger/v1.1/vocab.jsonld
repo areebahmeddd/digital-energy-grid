@@ -1,0 +1,37 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg":  "https://schema.beckn.io/deg/EnergyResource/",
+    "deg":    "https://schema.beckn.io/deg#",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceEVCharger",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — EV Charger",
+      "rdfs:comment": "An EV charging station (EVSE) energy resource. v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport as QuantitativeValue). CIM: ElectricVehicleChargingStation (CIM17+).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#ElectricVehicleChargingStation" }
+    },
+    {
+      "@id": "erDeg:connectorType",
+      "@type": "rdf:Property",
+      "rdfs:label": "Connector Type",
+      "rdfs:comment": "Physical connector standard (Type1, Type2, CCS1, CCS2, CHAdeMO, GB_T, NACS, Other). IEC 62196-2 / SAE J3400.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceEVCharger" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:v2xProtocol",
+      "@type": "rdf:Property",
+      "rdfs:label": "V2X Protocol",
+      "rdfs:comment": "Vehicle-to-Grid / V2X protocol for EV_V2G resources (CHAdeMO_V2G, CCS_BPT, ISO_15118_20_AC_BPT, ISO_15118_20_DC_BPT, Other).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceEVCharger" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

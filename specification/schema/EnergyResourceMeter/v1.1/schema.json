@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.beckn.io/EnergyResourceMeter/v1.1",
+  "title": "EnergyResourceMeter",
+  "description": "Typed schema for metering-point energy resources (type = METER). v1.1: inherits EnergyResourceCommon/v1.1 so common power fields (ratedPower, maxExport, maxImport) are now QuantitativeValue objects. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).",
+  "allOf": [
+    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "METER",
+          "description": "Asset-class discriminator. Must be \"METER\". CIM: cim:Meter (IEC 61968-9 EndDevice subtype)."
+        },
+        "attributes": { "$ref": "#/$defs/EnergyResourceMeterAttributes" }
+      }
+    }
+  ],
+  "$defs": {
+    "EnergyResourceMeterAttributes": {
+      "allOf": [
+        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Attributes for METER resources. Common power fields inherited from EnergyResourceCommon/v1.1.",
+          "properties": {
+            "meterCapability": {
+              "type": "string",
+              "enum": ["Electromechanical", "CMRI", "AMR", "AMI"],
+              "description": "Communication/automation generation. CIM: AmiBillingReadyKind (IEC 61968-9)."
+            },
+            "energyDirection": {
+              "type": "string",
+              "enum": ["Forward", "Reverse", "Bidirectional", "Net"],
+              "default": "Forward",
+              "description": "Energy flow direction. CIM: FlowDirectionKind (ESPI NAESB REQ.21)."
+            },
+            "functions": {
+              "type": "array",
+              "uniqueItems": true,
+              "description": "Active meter capabilities per IEC 61968-9 EndDeviceFunction[0..*].",
+              "items": { "type": "string", "enum": ["ToU", "NetMetering", "MaxDemand", "LoadControl", "TamperDetection", "PowerQuality", "EventLogging"] }
+            },
+            "feeder":                  { "type": "string", "description": "Feeder identifier this meter is supplied from." },
+            "bus":                     { "type": "string", "description": "Busbar identifier." },
+            "communicationTechnology": { "type": "string", "enum": ["PLC", "RF_Mesh", "GPRS", "NB-IoT", "LoRa", "ZigBee", "Other"] },
+            "applicationProtocol":     { "type": "string", "enum": ["DLMS_COSEM", "ANSI_C12_18", "IEC_61850", "Modbus", "Other"] }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,62 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceLoad
+  version: 1.1.0
+  description: |
+    Typed attribute schema for controllable load energy resources.
+    v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport
+    as QuantitativeValue {value, unit}).
+    CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
+
+components:
+  schemas:
+
+    EnergyResourceLoad:
+      description: >
+        A controllable load energy resource (smart HVAC, smart water heater,
+        or generic controllable load). CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
+      x-tags: [energy-resource, energy, deg, load, demand-response]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceLoad
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              enum: [SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD]
+              description: >
+                Asset-class discriminator. CIM: EnergyConsumer / ConformLoad (IEC 61970-301).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceLoadAttributes"
+
+    EnergyResourceLoadAttributes:
+      description: >
+        Attributes for controllable load resources. Common fields (make, model,
+        ratedPower, maxExport, maxImport, telemetryProvider, commissioningDate,
+        location) are inherited from EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            controlProtocol:
+              type: string
+              enum: [OpenADR_2.0b, OCPP_2.0.1, SunSpec_Modbus, EEBus, Modbus, Other]
+              description: Demand-response / control protocol supported by this load device.
+              x-jsonld:
+                "@id": erDeg:controlProtocol
+
+            loadCategory:
+              type: string
+              enum: [Heating, Cooling, WaterHeating, Lighting, EV, Industrial, Other]
+              description: Functional category of this load. CIM: ConformLoad classification.
+              x-jsonld:
+                "@id": erDeg:loadCategory

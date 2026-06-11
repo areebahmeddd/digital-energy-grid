@@ -1,0 +1,26 @@
+{
+  "@context": [
+    "https://schema.beckn.io/EnergyResourceCommon/v1.1/context.jsonld",
+    {
+      "@version": 1.1,
+      "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+      "EnergyResourceMeter": {
+        "@id": "erDeg:EnergyResourceMeter",
+        "@context": {
+          "attributes": {
+            "@id": "deg:attributes",
+            "@context": {
+              "meterCapability":         { "@id": "erDeg:meterCapability",         "@type": "xsd:string" },
+              "energyDirection":         { "@id": "erDeg:energyDirection",         "@type": "xsd:string" },
+              "functions":               { "@id": "erDeg:meterFunctions",          "@container": "@set" },
+              "feeder":                  { "@id": "erDeg:feeder",                  "@type": "xsd:string" },
+              "bus":                     { "@id": "erDeg:bus",                     "@type": "xsd:string" },
+              "communicationTechnology": { "@id": "erDeg:communicationTechnology", "@type": "xsd:string" },
+              "applicationProtocol":     { "@id": "erDeg:applicationProtocol",     "@type": "xsd:string" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

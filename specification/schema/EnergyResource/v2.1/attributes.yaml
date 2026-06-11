@@ -1,0 +1,75 @@
+openapi: 3.1.1
+info:
+  title: EnergyResource — Resource Attributes (v2.1)
+  version: 2.1.0
+  description: >
+    Canonical, technology-neutral class for any asset that produces,
+    consumes, stores, or modulates energy.
+
+    v2.1 changes
+    ────────────
+    All power and capacity fields now use QuantitativeValue {value, unit}
+    instead of unit-embedded names. Renamed fields:
+      ratedPowerKw → ratedPower (in EnergyResourceCommon/v1.1)
+      maxExportKw  → maxExport  (in EnergyResourceCommon/v1.1)
+      maxImportKw  → maxImport  (in EnergyResourceCommon/v1.1)
+      nominalPowerKw         → nominalPower     (Generator)
+      storageCapacityKwh     → storageCapacity  (Storage)
+      ratedApparentPowerKva  → ratedApparentPower (Inverter)
+      maxReactivePowerKvar   → maxReactivePower   (Inverter)
+      minReactivePowerKvar   → minReactivePower   (Inverter)
+      nominalVoltageKv       → nominalVoltage     (Network)
+    All seven kind schemas now reference EnergyResourceCommon/v1.1.
+
+components:
+  schemas:
+
+    EnergyResourceMeter:
+      $ref: "https://schema.beckn.io/EnergyResourceMeter/v1.1#/components/schemas/EnergyResourceMeter"
+
+    EnergyResourceGenerator:
+      $ref: "https://schema.beckn.io/EnergyResourceGenerator/v1.1#/components/schemas/EnergyResourceGenerator"
+
+    EnergyResourceStorage:
+      $ref: "https://schema.beckn.io/EnergyResourceStorage/v1.1#/components/schemas/EnergyResourceStorage"
+
+    EnergyResourceEVCharger:
+      $ref: "https://schema.beckn.io/EnergyResourceEVCharger/v1.1#/components/schemas/EnergyResourceEVCharger"
+
+    EnergyResourceInverter:
+      $ref: "https://schema.beckn.io/EnergyResourceInverter/v1.1#/components/schemas/EnergyResourceInverter"
+
+    EnergyResourceLoad:
+      $ref: "https://schema.beckn.io/EnergyResourceLoad/v1.1#/components/schemas/EnergyResourceLoad"
+
+    EnergyResourceNetwork:
+      $ref: "https://schema.beckn.io/EnergyResourceNetwork/v1.1#/components/schemas/EnergyResourceNetwork"
+
+    EnergyResource:
+      description: >
+        Discriminated union of all typed EnergyResource kinds. Dispatched by
+        the 'type' field. Each kind lives in its own schema at
+        schema.beckn.io/<Kind>/v1.1.
+
+        EnergyResourceCommon (id, type, subResources, parentResources,
+        attributes) and EnergyResourceCommonAttributes (make, model,
+        ratedPower, maxExport, maxImport, telemetryProvider,
+        commissioningDate, location) are defined in EnergyResourceCommon/v1.1
+        and inherited by all kinds via allOf external $ref.
+      oneOf:
+        - $ref: "#/components/schemas/EnergyResourceMeter"
+        - $ref: "#/components/schemas/EnergyResourceGenerator"
+        - $ref: "#/components/schemas/EnergyResourceStorage"
+        - $ref: "#/components/schemas/EnergyResourceEVCharger"
+        - $ref: "#/components/schemas/EnergyResourceInverter"
+        - $ref: "#/components/schemas/EnergyResourceLoad"
+        - $ref: "#/components/schemas/EnergyResourceNetwork"
+      x-tags:
+        - energy-trade
+        - p2p-trading
+        - demand-flex
+        - item
+        - energy-resource
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResource

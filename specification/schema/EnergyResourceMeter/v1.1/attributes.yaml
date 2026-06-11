@@ -1,0 +1,106 @@
+openapi: 3.1.1
+info:
+  title: EnergyResourceMeter
+  version: 1.1.0
+  description: |
+    Typed attribute schema for metering-point energy resources (type = METER).
+    v1.1: inherits EnergyResourceCommon/v1.1 — common power fields (ratedPower,
+    maxExport, maxImport) are now QuantitativeValue {value, unit} objects.
+    CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).
+
+components:
+  schemas:
+
+    EnergyResourceMeter:
+      description: >
+        A metering-point energy resource. Anchors all DER sub-resources behind
+        it in the topology tree. CIM: cim:Meter (IEC 61968-9).
+      x-tags: [energy-resource, energy, deg, meter]
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": EnergyResourceMeter
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+        - type: object
+          required: [id, type]
+          properties:
+            type:
+              type: string
+              const: "METER"
+              description: Asset-class discriminator. Must be "METER". CIM cim:Meter (IEC 61968-9).
+              x-jsonld:
+                "@id": erDeg:resourceType
+            attributes:
+              $ref: "#/components/schemas/EnergyResourceMeterAttributes"
+
+    EnergyResourceMeterAttributes:
+      description: >
+        Attributes for METER resources. Common power fields (ratedPower, maxExport,
+        maxImport, make, model, telemetryProvider, commissioningDate, location)
+        inherited from EnergyResourceCommon/v1.1 via allOf.
+      x-jsonld:
+        "@id": erDeg:attributes
+      allOf:
+        - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+        - type: object
+          additionalProperties: true
+          properties:
+
+            meterCapability:
+              type: string
+              enum: [Electromechanical, CMRI, AMR, AMI]
+              description: >
+                Communication/automation generation. Electromechanical: induction-disc.
+                CMRI: manual optical-port (India legacy). AMR: one-way automated read.
+                AMI: two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9).
+              x-jsonld:
+                "@id": erDeg:meterCapability
+
+            energyDirection:
+              type: string
+              enum: [Forward, Reverse, Bidirectional, Net]
+              default: Forward
+              description: >
+                Energy flow direction metered at this point. CIM: FlowDirectionKind
+                (ESPI NAESB REQ.21).
+              x-jsonld:
+                "@id": erDeg:energyDirection
+
+            functions:
+              type: array
+              uniqueItems: true
+              description: Active meter capabilities per IEC 61968-9 EndDeviceFunction[0..*].
+              items:
+                type: string
+                enum: [ToU, NetMetering, MaxDemand, LoadControl, TamperDetection, PowerQuality, EventLogging]
+              x-jsonld:
+                "@id": erDeg:meterFunctions
+
+            feeder:
+              type: string
+              description: Feeder identifier this meter is supplied from.
+              x-jsonld:
+                "@id": erDeg:feeder
+
+            bus:
+              type: string
+              description: Busbar identifier at the meter's connection point.
+              x-jsonld:
+                "@id": erDeg:bus
+
+            communicationTechnology:
+              type: string
+              enum: [PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other]
+              description: Last-mile physical-layer communication technology.
+              x-jsonld:
+                "@id": erDeg:communicationTechnology
+
+            applicationProtocol:
+              type: string
+              enum: [DLMS_COSEM, ANSI_C12_18, IEC_61850, Modbus, Other]
+              description: >
+                Application-layer protocol for meter data. DLMS_COSEM: IEC 62056,
+                mandatory for India AMI per BIS IS 16444. ANSI_C12_18: North American.
+                Orthogonal to communicationTechnology (physical layer).
+              x-jsonld:
+                "@id": erDeg:applicationProtocol

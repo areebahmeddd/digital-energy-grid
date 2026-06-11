@@ -1,0 +1,22 @@
+{
+  "@context": [
+    "https://schema.beckn.io/EnergyResourceCommon/v1.1/context.jsonld",
+    {
+      "@version": 1.1,
+      "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+      "EnergyResourceEVCharger": {
+        "@id": "erDeg:EnergyResourceEVCharger",
+        "@context": {
+          "attributes": {
+            "@id": "deg:attributes",
+            "@context": {
+              "connectorType":   { "@id": "erDeg:connectorType",   "@type": "xsd:string" },
+              "controlProtocol": { "@id": "erDeg:controlProtocol", "@type": "xsd:string" },
+              "v2xProtocol":     { "@id": "erDeg:v2xProtocol",     "@type": "xsd:string" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

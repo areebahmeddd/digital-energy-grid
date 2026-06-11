@@ -1,0 +1,29 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg":  "https://schema.beckn.io/deg/EnergyResource/",
+    "deg":    "https://schema.beckn.io/deg#",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceLoad",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Load",
+      "rdfs:comment": "A controllable load energy resource (SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD). v1.1: inherits EnergyResourceCommon/v1.1. CIM: EnergyConsumer / ConformLoad (IEC 61970-301).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61970-301.ttl#ConformLoad" }
+    },
+    {
+      "@id": "erDeg:loadCategory",
+      "@type": "rdf:Property",
+      "rdfs:label": "Load Category",
+      "rdfs:comment": "Functional category of this load (Heating, Cooling, WaterHeating, Lighting, EV, Industrial, Other). CIM: ConformLoad classification.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceLoad" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

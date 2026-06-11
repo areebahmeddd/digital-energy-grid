@@ -1,0 +1,79 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "erDeg":  "https://schema.beckn.io/deg/EnergyResource/",
+    "deg":    "https://schema.beckn.io/deg#",
+    "rdf":    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":   "http://www.w3.org/2000/01/rdf-schema#",
+    "owl":    "http://www.w3.org/2002/07/owl#",
+    "xsd":    "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/",
+    "skos":   "http://www.w3.org/2004/02/skos/core#"
+  },
+  "@graph": [
+    {
+      "@id": "erDeg:EnergyResourceMeter",
+      "@type": "rdfs:Class",
+      "rdfs:label": "EnergyResource — Meter",
+      "rdfs:comment": "A metering-point energy resource. v1.1: inherits EnergyResourceCommon/v1.1 (power fields as QuantitativeValue). CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).",
+      "rdfs:subClassOf": { "@id": "deg:EnergyResourceCommon" },
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#Meter" }
+    },
+    {
+      "@id": "erDeg:meterCapability",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter capability tier",
+      "rdfs:comment": "Communication and automation capability: Electromechanical, CMRI, AMR, AMI. CIM: AmiBillingReadyKind (IEC 61968-9).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:energyDirection",
+      "@type": "rdf:Property",
+      "rdfs:label": "Energy flow direction",
+      "rdfs:comment": "Forward, Reverse, Bidirectional, or Net. CIM: FlowDirectionKind (ESPI NAESB REQ.21).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:meterFunctions",
+      "@type": "rdf:Property",
+      "rdfs:label": "Meter functions",
+      "rdfs:comment": "Active meter capabilities per IEC 61968-9 EndDeviceFunction[0..*]: ToU, NetMetering, MaxDemand, LoadControl, TamperDetection, PowerQuality, EventLogging.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:feeder",
+      "@type": "rdf:Property",
+      "rdfs:label": "Feeder",
+      "rdfs:comment": "Feeder identifier this meter is supplied from.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:bus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Busbar",
+      "rdfs:comment": "Busbar identifier at the meter's connection point.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:communicationTechnology",
+      "@type": "rdf:Property",
+      "rdfs:label": "Communication technology",
+      "rdfs:comment": "Physical transport layer: PLC, RF_Mesh, GPRS, NB-IoT, LoRa, ZigBee, Other.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
+      "@id": "erDeg:applicationProtocol",
+      "@type": "rdf:Property",
+      "rdfs:label": "Application protocol",
+      "rdfs:comment": "Application-layer protocol: DLMS_COSEM, ANSI_C12_18, IEC_61850, Modbus, Other.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceMeter" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    }
+  ]
+}

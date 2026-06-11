@@ -1,0 +1,76 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "deg":   "https://schema.beckn.io/deg/EnergyResource/v2.1/",
+    "qudt":  "http://qudt.org/schema/qudt/",
+    "schema": "https://schema.org/",
+    "rdf":   "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd":   "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+
+    { "@id": "deg:EnergyResource",        "@type": "rdfs:Class", "rdfs:label": "Energy Resource",        "rdfs:comment": "Discriminated union of all typed EnergyResource kinds. v2.1: all power/capacity fields use QuantitativeValue." },
+    { "@id": "deg:EnergyResourceCommon",  "@type": "rdfs:Class", "rdfs:label": "Energy Resource Common", "rdfs:comment": "Envelope schema inherited by every typed kind via allOf. Defines id, type, subResources, parentResources, and the attributes bag." },
+
+    { "@id": "deg:EnergyResourceMeter",     "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — Meter",      "rdfs:comment": "Metering device (type: METER). CIM: Meter extends EndDevice (IEC 61968-9)." },
+    { "@id": "deg:EnergyResourceGenerator", "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — Generator",  "rdfs:comment": "Electrical generation asset (SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL). CIM: GeneratingUnit subtypes (IEC 61970-302)." },
+    { "@id": "deg:EnergyResourceBESS",      "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — BESS",        "rdfs:comment": "Stationary battery energy storage system (type: BESS). CIM: BatteryUnit (IEC 61970-302). BATTERY deprecated." },
+    { "@id": "deg:EnergyResourceEVCharger", "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — EV Charger",  "rdfs:comment": "EV charging station (EV_CHARGER, EV_V2G). CIM: ElectricVehicleChargingStation (CIM17+)." },
+    { "@id": "deg:EnergyResourceInverter",  "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — Inverter",    "rdfs:comment": "Grid-connected power-electronics converter (type: INVERTER). IEEE 1547-2018 / SunSpec DER Models 702-714. CIM: PowerElectronicsConnection." },
+    { "@id": "deg:EnergyResourceLoad",      "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — Load",        "rdfs:comment": "Controllable electrical load (SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD). CIM: EnergyConsumer / ConformLoad (IEC 61970-301)." },
+    { "@id": "deg:EnergyResourceNetwork",   "@type": "rdfs:Class", "rdfs:subClassOf": {"@id": "deg:EnergyResourceCommon"}, "rdfs:label": "Energy Resource — Network",     "rdfs:comment": "Distribution network topology element (DT, BUS, FEEDER, MICROGRID). CIM: PowerTransformer, BusbarSection, Feeder (IEC 61970-301)." },
+
+    { "@id": "deg:resourceType",   "@type": "rdf:Property", "rdfs:label": "Resource Type",   "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "rdfs:range": "xsd:string",
+      "rdfs:comment": "Asset class discriminator: METER, SOLAR_PV, WIND, HYDRO, BIOGAS, CHP, FUEL_CELL, BESS, EV_CHARGER, EV_V2G, INVERTER, SMART_HVAC, SMART_WATER_HEATER, CONTROLLABLE_LOAD, DT, BUS, FEEDER, MICROGRID." },
+    { "@id": "deg:subResources",   "@type": "rdf:Property", "rdfs:label": "Sub Resources",   "rdfs:domain": {"@id": "deg:EnergyResourceCommon"} },
+    { "@id": "deg:parentResources","@type": "rdf:Property", "rdfs:label": "Parent Resources","rdfs:domain": {"@id": "deg:EnergyResourceCommon"} },
+    { "@id": "deg:attributes",     "@type": "rdf:Property", "rdfs:label": "Attributes",      "rdfs:domain": {"@id": "deg:EnergyResourceCommon"} },
+
+    { "@id": "deg:make",              "@type": "rdf:Property", "rdfs:label": "Make",               "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:model",             "@type": "rdf:Property", "rdfs:label": "Model",              "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:telemetryProvider", "@type": "rdf:Property", "rdfs:label": "Telemetry Provider", "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:commissioningDate", "@type": "rdf:Property", "rdfs:label": "Commissioning Date", "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "schema:rangeIncludes": {"@id": "xsd:dateTime"} },
+    { "@id": "deg:location",          "@type": "rdf:Property", "rdfs:label": "Location",           "rdfs:domain": {"@id": "deg:EnergyResourceCommon"} },
+
+    { "@id": "deg:ratedPower",  "@type": "rdf:Property", "rdfs:label": "Rated Power",  "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Manufacturer-rated power as QuantitativeValue. Typical unit: KiloW. Replaces ratedPowerKw." },
+    { "@id": "deg:maxExport",   "@type": "rdf:Property", "rdfs:label": "Max Export",   "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Maximum power injected to grid. Typical unit: KiloW. Replaces maxExportKw." },
+    { "@id": "deg:maxImport",   "@type": "rdf:Property", "rdfs:label": "Max Import",   "rdfs:domain": {"@id": "deg:EnergyResourceCommon"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Maximum power drawn from grid. Typical unit: KiloW. Replaces maxImportKw." },
+
+    { "@id": "deg:meterCapability",         "@type": "rdf:Property", "rdfs:label": "Meter Capability",          "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:energyDirection",         "@type": "rdf:Property", "rdfs:label": "Energy Direction",          "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:functions",               "@type": "rdf:Property", "rdfs:label": "Functions",                 "rdfs:domain": {"@id": "deg:EnergyResourceMeter"} },
+    { "@id": "deg:feeder",                  "@type": "rdf:Property", "rdfs:label": "Feeder",                    "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:bus",                     "@type": "rdf:Property", "rdfs:label": "Bus",                       "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:communicationTechnology", "@type": "rdf:Property", "rdfs:label": "Communication Technology",  "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:applicationProtocol",     "@type": "rdf:Property", "rdfs:label": "Application Protocol",      "rdfs:domain": {"@id": "deg:EnergyResourceMeter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+
+    { "@id": "deg:nominalPower", "@type": "rdf:Property", "rdfs:label": "Nominal Power", "rdfs:domain": {"@id": "deg:EnergyResourceGenerator"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Nameplate nominal power. Typical unit: KiloW. Replaces nominalPowerKw." },
+    { "@id": "deg:efficiency",   "@type": "rdf:Property", "rdfs:label": "Efficiency (%)", "rdfs:domain": {"@id": "deg:EnergyResourceGenerator"}, "schema:rangeIncludes": {"@id": "xsd:decimal"} },
+
+    { "@id": "deg:storageCapacity", "@type": "rdf:Property", "rdfs:label": "Storage Capacity", "rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Rated stored-energy capacity. Typical unit: kWh. Replaces storageCapacityKwh." },
+    { "@id": "deg:storageType",     "@type": "rdf:Property", "rdfs:label": "Storage Type",     "rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:stateOfHealthPct","@type": "rdf:Property", "rdfs:label": "State of Health (%)","rdfs:domain": {"@id": "deg:EnergyResourceBESS"}, "schema:rangeIncludes": {"@id": "xsd:decimal"} },
+
+    { "@id": "deg:connectorType",   "@type": "rdf:Property", "rdfs:label": "Connector Type",   "rdfs:domain": {"@id": "deg:EnergyResourceEVCharger"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:controlProtocol", "@type": "rdf:Property", "rdfs:label": "Control Protocol", "rdfs:domain": {"@id": "deg:EnergyResourceEVCharger"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:v2xProtocol",     "@type": "rdf:Property", "rdfs:label": "V2X Protocol",     "rdfs:domain": {"@id": "deg:EnergyResourceEVCharger"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+
+    { "@id": "deg:ratedApparentPower",     "@type": "rdf:Property", "rdfs:label": "Rated Apparent Power", "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Rated apparent power. Typical unit: KiloV-A. Replaces ratedApparentPowerKva." },
+    { "@id": "deg:maxReactivePower",       "@type": "rdf:Property", "rdfs:label": "Max Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power injection. Typical unit: kVAR. Replaces maxReactivePowerKvar." },
+    { "@id": "deg:minReactivePower",       "@type": "rdf:Property", "rdfs:label": "Min Reactive Power",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Max reactive power absorption. Typical unit: kVAR. Replaces minReactivePowerKvar." },
+    { "@id": "deg:rideThroughCategory",    "@type": "rdf:Property", "rdfs:label": "Ride-Through Category","rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:operatingMode",          "@type": "rdf:Property", "rdfs:label": "Operating Mode",       "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:voltVarEnabled",         "@type": "rdf:Property", "rdfs:label": "Volt-VAr Enabled",     "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:boolean"} },
+    { "@id": "deg:freqDroopEnabled",       "@type": "rdf:Property", "rdfs:label": "Freq-Droop Enabled",   "rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:boolean"} },
+    { "@id": "deg:enterServiceRampTimeSec","@type": "rdf:Property", "rdfs:label": "Enter Service Ramp (s)","rdfs:domain": {"@id": "deg:EnergyResourceInverter"}, "schema:rangeIncludes": {"@id": "xsd:decimal"} },
+
+    { "@id": "deg:loadCategory", "@type": "rdf:Property", "rdfs:label": "Load Category", "rdfs:domain": {"@id": "deg:EnergyResourceLoad"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+
+    { "@id": "deg:nominalVoltage", "@type": "rdf:Property", "rdfs:label": "Nominal Voltage", "rdfs:domain": {"@id": "deg:EnergyResourceNetwork"}, "rdfs:range": {"@id": "qudt:QuantitativeValue"}, "rdfs:comment": "Nominal operating voltage. Typical unit: KiloV. Replaces nominalVoltageKv." },
+    { "@id": "deg:zone",           "@type": "rdf:Property", "rdfs:label": "Zone",            "rdfs:domain": {"@id": "deg:EnergyResourceNetwork"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:substationId",   "@type": "rdf:Property", "rdfs:label": "Substation ID",   "rdfs:domain": {"@id": "deg:EnergyResourceNetwork"}, "schema:rangeIncludes": {"@id": "xsd:string"} },
+    { "@id": "deg:feederCode",     "@type": "rdf:Property", "rdfs:label": "Feeder Code",     "rdfs:domain": {"@id": "deg:EnergyResourceNetwork"}, "schema:rangeIncludes": {"@id": "xsd:string"} }
+  ]
+}
