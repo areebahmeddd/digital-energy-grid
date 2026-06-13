@@ -13,6 +13,14 @@
     ]
   },
   "message": {
+    "publishDirectives": [
+      {
+        "catalogId": "catalog-merc-tariff-policy-001",
+        "catalogType": "REGULAR",
+        "updateMode": "MERGE",
+        "visibleTo": ["nfh.global/testnet-deg"]
+      }
+    ],
     "catalogs": [
       {
         "id": "catalog-merc-tariff-policy-001",
