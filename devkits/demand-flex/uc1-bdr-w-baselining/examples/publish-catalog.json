@@ -15,6 +15,14 @@
     ]
   },
   "message": {
+    "publishDirectives": [
+      {
+        "catalogId": "catalog-flex-tpddl-2026-04",
+        "catalogType": "REGULAR",
+        "updateMode": "MERGE",
+        "visibleTo": ["nfh.global/testnet-deg"]
+      }
+    ],
     "catalogs": [
       {
         "id": "catalog-flex-tpddl-2026-04",

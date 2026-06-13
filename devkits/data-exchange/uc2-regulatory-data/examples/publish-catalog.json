@@ -13,6 +13,14 @@
     ]
   },
   "message": {
+    "publishDirectives": [
+      {
+        "catalogId": "catalog-bescom-arr-filings-001",
+        "catalogType": "REGULAR",
+        "updateMode": "MERGE",
+        "visibleTo": ["nfh.global/testnet-deg"]
+      }
+    ],
     "catalogs": [
       {
         "id": "catalog-bescom-arr-filings-001",

@@ -16,6 +16,14 @@
     ]
   },
   "message": {
+    "publishDirectives": [
+      {
+        "catalogId": "catalog-intelligrid-ami-data-001",
+        "catalogType": "REGULAR",
+        "updateMode": "MERGE",
+        "visibleTo": ["nfh.global/testnet-deg"]
+      }
+    ],
     "catalogs": [
       {
         "id": "catalog-intelligrid-ami-data-001",

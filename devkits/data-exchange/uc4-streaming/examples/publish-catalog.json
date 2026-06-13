@@ -13,6 +13,14 @@
     ]
   },
   "message": {
+    "publishDirectives": [
+      {
+        "catalogId": "catalog-intelligrid-streaming-001",
+        "catalogType": "REGULAR",
+        "updateMode": "MERGE",
+        "visibleTo": ["nfh.global/testnet-deg"]
+      }
+    ],
     "catalogs": [
       {
         "id": "catalog-intelligrid-streaming-001",
