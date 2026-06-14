@@ -12,7 +12,7 @@
     "timestamp": "2026-04-01T09:15:05Z",
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
-      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
+      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
     ]
   },
   "message": {
@@ -93,7 +93,7 @@
             "name": "BESCOM - Distribution Company"
           },
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
+            "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
             "@type": "MeterDataRequestCredential",
             "id": "urn:uuid:f7a8b9c0-d1e2-4f56-a789-012345678901",
             "issuer": {"id": "did:web:bescom.karnataka.gov.in", "name": "BESCOM – Bangalore Electricity Supply Company Ltd", "licenseNumber": "KERC-DISCOM-2025-001"},
@@ -103,7 +103,7 @@
             "credentialSubject": {
               "id": "did:dedi:ies:discom:IN-KA-BESCOM",
               "meterDataRequest": {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.6/context.jsonld",
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
                 "@type": "MeterDataRequest",
                 "resources": ["did:dedi:ies:feeder:IN-KA-BLR-ZONE-A"],
                 "scope": "ResourceAndChildren",
