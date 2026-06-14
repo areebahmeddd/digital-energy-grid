@@ -50,23 +50,11 @@
       "participants": [
         {
           "id": "provider-001",
-          "descriptor": { "name": "Data Provider" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "provider-001",
-            "name": "Data Provider"
-          }
+          "descriptor": { "name": "Data Provider" }
         },
         {
           "id": "consumer-001",
-          "descriptor": { "name": "Data Consumer" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "consumer-001",
-            "name": "Data Consumer"
-          }
+          "descriptor": { "name": "Data Consumer" }
         }
       ],
       "performance": [],

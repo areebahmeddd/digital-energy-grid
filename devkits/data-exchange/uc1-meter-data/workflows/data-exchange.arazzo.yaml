@@ -93,3 +93,116 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/on-status-response-ready-inline.json"
+
+  - workflowId: paged-push-delivery
+    summary: BPP proactively pushes AMI meter data in three paginated on_status messages
+    description: >
+      BPP-push pagination pattern. After confirm/on_confirm the BPP first signals
+      PROCESSING, then pushes three consecutive on_status messages (pages 1–3) to
+      the BAP without waiting for additional status polls. BAP accumulates
+      dataPayload entries across pages and triggers downstream processing when
+      pageInfo.isLast == true.
+    steps:
+      - stepId: confirm
+        description: BAP confirms contract
+        operationId: beckn-bap-caller.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-request.json"
+
+      - stepId: on-confirm
+        description: BPP acknowledges contract
+        operationId: beckn-bpp-caller.onConfirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-confirm-response.json"
+
+      - stepId: on-status-processing
+        description: BPP signals data preparation is underway (PROCESSING state)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-processing.json"
+
+      - stepId: on-status-push-p1
+        description: BPP pushes page 1 of 3 (~167 customers, sequence 0, isLast false)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-paged-push-p1.json"
+
+      - stepId: on-status-push-p2
+        description: BPP pushes page 2 of 3 (~167 customers, sequence 1, isLast false)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-paged-push-p2.json"
+
+      - stepId: on-status-push-p3
+        description: BPP pushes final page (~166 customers, sequence 2, isLast true) — BAP triggers downstream processing
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-paged-push-p3.json"
+
+  - workflowId: paged-pull-delivery
+    summary: BAP drives paginated data retrieval via cursor-based status polling
+    description: >
+      BAP-pull pagination pattern. BAP polls status after confirm/on_confirm.
+      BPP first returns PROCESSING; on the next poll BAP includes a pageCursor
+      tag to request a specific page. BPP responds with that page's data and a
+      nextCursor pointing to the following page.
+    steps:
+      - stepId: confirm
+        description: BAP confirms contract
+        operationId: beckn-bap-caller.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-request.json"
+
+      - stepId: on-confirm
+        description: BPP acknowledges contract
+        operationId: beckn-bpp-caller.onConfirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-confirm-response.json"
+
+      - stepId: status
+        description: BAP polls for delivery readiness (initial poll, no cursor)
+        operationId: beckn-bap-caller.status
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/status-request.json"
+
+      - stepId: on-status-processing
+        description: BPP signals data preparation is underway (PROCESSING state)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-processing.json"
+
+      - stepId: status-paged-pull
+        description: BAP requests page 2 with pageCursor ami-meter-blr-zone-a-q1-p2
+        operationId: beckn-bap-caller.status
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/status-request-paged-pull.json"
+
+      - stepId: on-status-paged-pull
+        description: BPP delivers page 2 of 3 with nextCursor for page 3 (isLast false)
+        operationId: beckn-bpp-caller.onStatus
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/on-status-response-paged-pull.json"
