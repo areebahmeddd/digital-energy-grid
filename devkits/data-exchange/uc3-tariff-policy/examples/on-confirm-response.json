@@ -84,23 +84,11 @@
           "id": "merc-regulator-001",
           "descriptor": {
             "name": "Maharashtra Electricity Regulatory Commission"
-          },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "merc-regulator-001",
-            "name": "Maharashtra Electricity Regulatory Commission"
           }
         },
         {
           "id": "merashehar-discom-001",
           "descriptor": {
-            "name": "MeraShehar - Distribution Company"
-          },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "merashehar-discom-001",
             "name": "MeraShehar - Distribution Company"
           }
         }

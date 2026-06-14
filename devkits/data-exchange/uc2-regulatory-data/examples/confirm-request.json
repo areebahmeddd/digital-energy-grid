@@ -84,23 +84,11 @@
           "id": "bescom-discom-001",
           "descriptor": {
             "name": "BESCOM - Bangalore Electricity Supply Company"
-          },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "bescom-discom-001",
-            "name": "BESCOM - Bangalore Electricity Supply Company"
           }
         },
         {
           "id": "aperc-regulator-001",
           "descriptor": {
-            "name": "APERC - AP Electricity Regulatory Commission"
-          },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "aperc-regulator-001",
             "name": "APERC - AP Electricity Regulatory Commission"
           }
         }
