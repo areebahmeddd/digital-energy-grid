@@ -12,7 +12,7 @@
     "timestamp": "2026-04-01T09:25:05Z",
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
-      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld"
+      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld"
     ]
   },
   "message": {
@@ -74,10 +74,10 @@
             "schema:name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026",
             "schema:temporalCoverage": "2026-01-01/2026-03-31",
             "dataset:accessMethod": "INLINE",
-            "ies:dataSchema": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/schema.json",
+            "ies:dataSchema": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/schema.json",
             "dataPayload": [
               {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "CustomerProfile",
                 "profileType": "CUSTOMER",
                 "customerRefs": [{ "scheme": "CONSUMER_NUMBER", "value": "RR-1234" }],
@@ -104,7 +104,7 @@
                 ]
               },
               {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
                 "readingPurpose": "BLOCK_LOAD_PROFILE",
@@ -128,7 +128,7 @@
                 ]
               },
               {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "CustomerProfile",
                 "profileType": "CUSTOMER",
                 "customerRefs": [{ "scheme": "CONSUMER_NUMBER", "value": "RR-5678" }],
@@ -155,7 +155,7 @@
                 ]
               },
               {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
                 "readingPurpose": "BLOCK_LOAD_PROFILE",

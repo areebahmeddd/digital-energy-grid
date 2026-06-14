@@ -74,7 +74,7 @@
             "schema:temporalCoverage": "2026-01-01/2026-03-31",
             "dataset:accessMethod": "DOWNLOAD",
             "dataset:exportFormat": "JSON",
-            "ies:dataSchema": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/schema.json",
+            "ies:dataSchema": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/schema.json",
             "dataset:downloadUrl": "https://intelligrid.example.in/exports/ami-meter-data-blr-zone-a-q1-2026.json",
             "dataset:downloadExpiresAt": "2026-04-08T09:25:05Z",
             "dataset:fileSizeBytes": 245000,
