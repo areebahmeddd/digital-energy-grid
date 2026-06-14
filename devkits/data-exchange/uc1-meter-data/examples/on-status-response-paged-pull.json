@@ -3,13 +3,15 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "_comment_design": "BAP-PULL PAGINATION (illustrative). Same ~500-customer feeder and contract as the push example, but here the BAP drives the cadence by issuing status calls, each carrying a pageCursor tag. This file is the BPP's on_status response to the status-request-paged-pull.json request whose context.tags carried pageCursor='ami-meter-blr-zone-a-q1-p2'. The response echoes that cursor on pageInfo.cursor and advertises the next slice via pageInfo.nextCursor. BAP keeps pulling until pageInfo.nextCursor is null AND pageInfo.isLast is true, then assembles the full dataPayload and runs downstream processing. The _comment_inbound_request below records the triggering request shape so this example is self-contained.",
+    "_comment_design": "BAP-PULL PAGINATION (illustrative). Same ~500-customer feeder and contract as the push example, but here the BAP drives the cadence by issuing status calls, each carrying a pageCursor tag on message.tags (Beckn v2 Contract is a closed schema and cannot host tags directly; context.tags is reserved for routing/transaction state; Message is the open envelope appropriate for query-state tags). This file is the BPP's on_status response to the status-request-paged-pull.json request whose message.tags carried pageCursor='ami-meter-blr-zone-a-q1-p2'. The response echoes that cursor on pageInfo.cursor and advertises the next slice via pageInfo.nextCursor. BAP keeps pulling until pageInfo.nextCursor is null AND pageInfo.isLast is true, then assembles the full dataPayload and runs downstream processing. The _comment_inbound_request below records the triggering request shape so this example is self-contained.",
     "_comment_inbound_request": {
       "context": {
         "action": "status",
         "transactionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
         "messageId": "7e8f9012-3456-7890-1234-567890123456",
-        "timestamp": "2026-04-01T09:26:10Z",
+        "timestamp": "2026-04-01T09:26:10Z"
+      },
+      "message": {
         "tags": [
           {
             "descriptor": {"code": "pagination"},
@@ -18,7 +20,8 @@
               {"descriptor": {"code": "collectionId"}, "value": "ami-meter-blr-zone-a-q1-2026"}
             ]
           }
-        ]
+        ],
+        "contract": {"id": "660e9500-f30c-52e5-b827-557766551300"}
       }
     },
     "bapId": "bap.example.com",
