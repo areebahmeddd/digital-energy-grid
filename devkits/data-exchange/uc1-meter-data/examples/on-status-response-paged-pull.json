@@ -109,24 +109,15 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
-                "readingPurpose": "BLOCK_LOAD_PROFILE",
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-3456"}],
                 "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2024-334455"}],
+                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-3456"}],
                 "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-34560"}],
-                "timePeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT1H"},
-                "intervalBlocks": [
-                  {
-                    "timePeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
-                    "payloadDescriptors": [
-                      {"readingTypeRef": {"scheme": "SHORT_CODE", "value": "kWh imp block"}, "accumulationBehaviour": "DELTA"}
-                    ],
-                    "intervals": [
-                      {"id": 0, "values": [1.82]},
-                      {"id": 1, "values": [1.91]},
-                      {"id": 2, "values": [2.04]},
-                      {"id": 3, "values": [1.77]}
-                    ]
-                  }
+                "intervalPeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
+                "intervals": [
+                  {"id": 0, "readings": [{"readingType": "kWh imp block", "value": 1.82}]},
+                  {"id": 1, "readings": [{"readingType": "kWh imp block", "value": 1.91}]},
+                  {"id": 2, "readings": [{"readingType": "kWh imp block", "value": 2.04}]},
+                  {"id": 3, "readings": [{"readingType": "kWh imp block", "value": 1.77}]}
                 ]
               },
               {
@@ -160,24 +151,15 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
-                "readingPurpose": "BLOCK_LOAD_PROFILE",
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-7890"}],
                 "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-778899"}],
+                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-7890"}],
                 "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-78900"}],
-                "timePeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT1H"},
-                "intervalBlocks": [
-                  {
-                    "timePeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
-                    "payloadDescriptors": [
-                      {"readingTypeRef": {"scheme": "SHORT_CODE", "value": "kWh imp block"}, "accumulationBehaviour": "DELTA"}
-                    ],
-                    "intervals": [
-                      {"id": 0, "values": [0.33]},
-                      {"id": 1, "values": [0.29]},
-                      {"id": 2, "values": [0.31]},
-                      {"id": 3, "values": [0.28]}
-                    ]
-                  }
+                "intervalPeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
+                "intervals": [
+                  {"id": 0, "readings": [{"readingType": "kWh imp block", "value": 0.33}]},
+                  {"id": 1, "readings": [{"readingType": "kWh imp block", "value": 0.29}]},
+                  {"id": 2, "readings": [{"readingType": "kWh imp block", "value": 0.31}]},
+                  {"id": 3, "readings": [{"readingType": "kWh imp block", "value": 0.28}]}
                 ]
               }
             ],

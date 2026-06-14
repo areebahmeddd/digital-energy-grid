@@ -59,54 +59,7 @@
             "schema:identifier": "ds-ami-meter-data-blr-zone-a-q1-2026",
             "schema:name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026",
             "schema:temporalCoverage": "2026-01-01/2026-03-31",
-            "dataset:accessMethod": "INLINE",
-            "ies:meterDataRequest": {
-              "@context": [
-                "https://www.w3.org/ns/credentials/v2",
-                "https://schema.beckn.io/EnergyCredential/v2.0/context.jsonld",
-                "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
-              ],
-              "id": "urn:uuid:f7a8b9c0-d1e2-4f56-a789-012345678901",
-              "type": ["VerifiableCredential", "MeterDataRequestCredential"],
-              "issuer": {
-                "id": "did:web:bescom.karnataka.gov.in",
-                "name": "BESCOM – Bangalore Electricity Supply Company Ltd",
-                "licenseNumber": "KERC-DISCOM-2025-001"
-              },
-              "validFrom": "2026-04-01T00:00:00Z",
-              "validUntil": "2026-04-30T23:59:59Z",
-              "credentialStatus": {
-                "id": "https://dedi.global/dedi/query/did:web:bescom.karnataka.gov.in/vc-revocation-registry",
-                "type": "dediregistry",
-                "statusPurpose": "revocation",
-                "statusListCredential": "https://dedi.global/dedi/lookup/did:web:bescom.karnataka.gov.in/vc-revocation-registry"
-              },
-              "credentialSubject": {
-                "id": "did:dedi:ies:discom:IN-KA-BESCOM",
-                "meterDataRequest": {
-                  "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.5/context.jsonld",
-                  "@type": "MeterDataRequest",
-                  "resources": ["did:dedi:ies:feeder:IN-KA-BLR-ZONE-A"],
-                  "scope": "ResourceAndChildren",
-                  "from": "2026-01-01T00:00:00Z",
-                  "duration": "P3M",
-                  "maxRecordsShared": 10000,
-                  "includeDetails": [
-                    { "profileType": "CustomerProfile" },
-                    { "profileType": "IntervalProfile" },
-                    { "profileType": "DailyProfile" },
-                    { "profileType": "MonthlyProfile" }
-                  ]
-                }
-              },
-              "proof": {
-                "type": "Ed25519Signature2020",
-                "created": "2026-04-01T00:00:00Z",
-                "verificationMethod": "did:web:bescom.karnataka.gov.in#key-1",
-                "proofPurpose": "assertionMethod",
-                "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndTaXoT..."
-              }
-            }
+            "dataset:accessMethod": "INLINE"
           }
         }
       ],
@@ -126,22 +79,40 @@
       "participants": [
         {
           "id": "intelligrid-amisp-001",
-          "descriptor": { "name": "IntelliGrid AMI Services" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "intelligrid-amisp-001",
-            "name": "IntelliGrid AMI Services"
-          }
+          "descriptor": { "name": "IntelliGrid AMI Services" }
         },
         {
           "id": "bescom-discom-001",
           "descriptor": { "name": "BESCOM - Distribution Company" },
           "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "bescom-discom-001",
-            "name": "BESCOM - Distribution Company"
+            "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
+            "@type": "MeterDataRequestCredential",
+            "id": "urn:uuid:f7a8b9c0-d1e2-4f56-a789-012345678901",
+            "issuer": {"id": "did:web:bescom.karnataka.gov.in", "name": "BESCOM – Bangalore Electricity Supply Company Ltd", "licenseNumber": "KERC-DISCOM-2025-001"},
+            "validFrom": "2026-04-01T00:00:00Z",
+            "validUntil": "2026-04-30T23:59:59Z",
+            "credentialStatus": {"id": "https://dedi.global/dedi/query/did:web:bescom.karnataka.gov.in/vc-revocation-registry", "type": "dediregistry", "statusPurpose": "revocation", "statusListCredential": "https://dedi.global/dedi/lookup/did:web:bescom.karnataka.gov.in/vc-revocation-registry"},
+            "credentialSubject": {
+              "id": "did:dedi:ies:discom:IN-KA-BESCOM",
+              "meterDataRequest": {
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
+                "@type": "MeterDataRequest",
+                "resources": ["did:dedi:ies:feeder:IN-KA-BLR-ZONE-A"],
+                "scope": "ResourceAndChildren",
+                "from": "2026-01-01T00:00:00Z",
+                "duration": "P3M",
+                "maxRecordsShared": 10000,
+                "capabilitiesRequested": {
+                  "profiles": [
+                    {"profileType": "CustomerProfile"},
+                    {"profileType": "IntervalProfile"},
+                    {"profileType": "DailyProfile"},
+                    {"profileType": "MonthlyProfile"}
+                  ]
+                }
+              }
+            },
+            "proof": {"type": "Ed25519Signature2020", "created": "2026-04-01T00:00:00Z", "verificationMethod": "did:web:bescom.karnataka.gov.in#key-1", "proofPurpose": "assertionMethod", "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndTaXoT..."}
           }
         }
       ],
