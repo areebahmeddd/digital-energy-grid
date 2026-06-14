@@ -11,7 +11,7 @@
     "schemaContext": [
       "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
       "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/context.jsonld",
-      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.5/context.jsonld",
+      "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.6/context.jsonld",
       "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
     ]
   },
@@ -59,22 +59,20 @@
               "dataset:accessMethod": "INLINE",
               "ies:dataSchema": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterData/v0.6/schema.json",
               "ies:capabilityProfile": {
-                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.5/context.jsonld",
-                "@type": "MeterDataRequest",
-                "resources": ["did:dedi:ies:feeder:IN-KA-BLR-ZONE-A"],
-                "scope": "ResourceAndChildren",
-                "from": "2024-01-01T00:00:00Z",
-                "duration": "P3Y",
-                "includeDetails": [
-                  { "profileType": "CustomerProfile" },
-                  { "profileType": "IntervalProfile" },
-                  { "profileType": "DailyProfile" },
-                  { "profileType": "MonthlyProfile" },
-                  { "profileType": "BillDetails" },
-                  { "profileType": "InstantaneousProfile" },
-                  { "profileType": "EventProfile" },
-                  { "profileType": "AlarmProfile" }
-                ]
+                "@context": "https://raw.githubusercontent.com/India-Energy-Stack/ies-accelerator/main/schemas/MeterDataRequest/v0.6/context.jsonld",
+                "@type": "MeterDataCapabilities",
+                "profiles": [
+                  {"profileType": "CustomerProfile"},
+                  {"profileType": "IntervalProfile"},
+                  {"profileType": "DailyProfile"},
+                  {"profileType": "MonthlyProfile"},
+                  {"profileType": "BillDetails"},
+                  {"profileType": "InstantaneousProfile"},
+                  {"profileType": "EventProfile"},
+                  {"profileType": "AlarmProfile"}
+                ],
+                "supportedScopes": ["ResourceOnly", "ResourceAndChildren", "ChildrenOnly"],
+                "maxHistoryDuration": "P3Y"
               }
             }
           }
