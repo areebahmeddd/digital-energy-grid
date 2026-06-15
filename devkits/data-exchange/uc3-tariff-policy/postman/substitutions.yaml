@@ -43,9 +43,8 @@ roles:
         context.bppUri: {var: bpp_host_root, suffix: /bpp/receiver, required: false}
 
     # publishDirectives.visibleTo[0] mirrors context.networkId — same {{domain}} variable.
-    # NOTE: the generator sets the whole visibleTo key to the string "{{domain}}"; the
-    # generated body must be kept as ["{{domain}}"] (array) by post-processing or by
-    # treating this rule as documentation until the generator supports list-element paths.
+    # Target the first element of the visibleTo array so the array shape is preserved
+    # (generator's _parse_path supports positional [n] segments).
     - match: "publish-catalog.json"
       paths:
-        message.publishDirectives[catalogId=catalog-merc-tariff-policy-001].visibleTo: {var: domain, required: false}
+        message.publishDirectives[catalogId=catalog-merc-tariff-policy-001].visibleTo[0]: {var: domain, required: false}
