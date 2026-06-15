@@ -681,10 +681,15 @@ def _load_substitutions(yaml_path: Path) -> Optional[Dict]:
 
 def _parse_path(path_str: str) -> List[tuple]:
     """
-    Parse a dot-notation path with optional array filters into segments.
+    Parse a dot-notation path with optional array filters or positional
+    indices into segments.
 
     'context.bapId'
       → [('key','context'), ('key','bapId')]
+
+    'message.publishDirectives[0].visibleTo[0]'
+      → [('key','message'), ('key','publishDirectives'), ('index',0),
+         ('key','visibleTo'), ('index',0)]
 
     'message.contract.participants[role=buyer].participantAttributes.platformUri'
       → [('key','message'), ('key','contract'),
@@ -697,8 +702,12 @@ def _parse_path(path_str: str) -> List[tuple]:
             arr_key, rest = part.split("[", 1)
             if arr_key:
                 segments.append(("key", arr_key))
-            field, value = rest.rstrip("]").split("=", 1)
-            segments.append(("filter", field.strip(), value.strip()))
+            inner = rest.rstrip("]").strip()
+            if inner.isdigit() or (inner.startswith("-") and inner[1:].isdigit()):
+                segments.append(("index", int(inner)))
+            else:
+                field, value = inner.split("=", 1)
+                segments.append(("filter", field.strip(), value.strip()))
         else:
             segments.append(("key", part))
     return segments
@@ -707,8 +716,9 @@ def _parse_path(path_str: str) -> List[tuple]:
 def _navigate_to_parent(obj: Any, segments: List[tuple], path_str: str, filename: str):
     """
     Walk obj following all but the last segment.
-    Returns (parent_container, final_key_or_filter) so the caller can set a value.
-    Raises ValueError with a diagnostic message if any step fails.
+    Returns (parent_container, final_key_or_filter_or_index) so the caller can
+    set a value. The final element is either a string (dict key) or an int
+    (list index). Raises ValueError with a diagnostic message if any step fails.
     """
     current = obj
     for seg in segments[:-1]:
@@ -720,6 +730,17 @@ def _navigate_to_parent(obj: Any, segments: List[tuple], path_str: str, filename
                     f"{filename!r}: path {path_str!r}: key {key!r} not found"
                 )
             current = current[key]
+        elif kind == "index":
+            idx = seg[1]
+            if not isinstance(current, list):
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: expected list for index [{idx}]"
+                )
+            if idx >= len(current) or idx < -len(current):
+                raise ValueError(
+                    f"{filename!r}: path {path_str!r}: index {idx} out of range (len={len(current)})"
+                )
+            current = current[idx]
         elif kind == "filter":
             _, field, value = seg
             if not isinstance(current, list):
@@ -737,11 +758,13 @@ def _navigate_to_parent(obj: Any, segments: List[tuple], path_str: str, filename
             current = match
 
     last = segments[-1]
-    if last[0] != "key":
-        raise ValueError(
-            f"{filename!r}: path {path_str!r}: path must end with a key, not an array filter"
-        )
-    return current, last[1]
+    if last[0] == "key":
+        return current, last[1]
+    if last[0] == "index":
+        return current, last[1]
+    raise ValueError(
+        f"{filename!r}: path {path_str!r}: path must end with a key or index, not an array filter"
+    )
 
 
 def _apply_substitutions(
@@ -784,11 +807,22 @@ def _apply_substitutions(
         segments = _parse_path(path_str)
         try:
             container, key = _navigate_to_parent(data, segments, path_str, filename)
-            if not isinstance(container, dict) or key not in container:
-                raise ValueError(
-                    f"{filename!r}: path {path_str!r}: final key {key!r} not found"
-                )
-            container[key] = new_value
+            if isinstance(key, int):
+                if not isinstance(container, list):
+                    raise ValueError(
+                        f"{filename!r}: path {path_str!r}: final segment is an index but container is not a list"
+                    )
+                if key >= len(container) or key < -len(container):
+                    raise ValueError(
+                        f"{filename!r}: path {path_str!r}: final index {key} out of range (len={len(container)})"
+                    )
+                container[key] = new_value
+            else:
+                if not isinstance(container, dict) or key not in container:
+                    raise ValueError(
+                        f"{filename!r}: path {path_str!r}: final key {key!r} not found"
+                    )
+                container[key] = new_value
         except ValueError as exc:
             if required:
                 raise
