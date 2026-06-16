@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.1",
   "title": "EnergyResourceStorage",
-  "description": "Typed schema for stationary battery energy storage resources (BESS). v1.1: storageCapacityKwh → storageCapacity (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS.",
+  "description": "Typed schema for stationary battery energy storage resources (BESS). v1.1: storageCapacityKwh → storageCapacity (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. Optional admin field roundTripEfficiencyPct carries AC-to-AC round-trip efficiency per IEC 62933-2-1.",
   "allOf": [
     { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
@@ -40,6 +40,12 @@
               "minimum": 0,
               "maximum": 100,
               "description": "Battery state-of-health as a percentage (0–100)."
+            },
+            "roundTripEfficiencyPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "AC-to-AC round-trip efficiency (0–100). Energy returned to grid / energy drawn over a full charge/discharge cycle. IEC 62933-2-1. Distinct from stateOfHealthPct."
             }
           }
         }

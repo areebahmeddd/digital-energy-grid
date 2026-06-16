@@ -18,8 +18,9 @@
                   "@vocab": "http://qudt.org/vocab/unit/"
                 }
               },
-              "storageType":      { "@id": "erDeg:storageType",      "@type": "xsd:string"  },
-              "stateOfHealthPct": { "@id": "erDeg:stateOfHealthPct", "@type": "xsd:decimal" }
+              "storageType":            { "@id": "erDeg:storageType",            "@type": "xsd:string"  },
+              "stateOfHealthPct":       { "@id": "erDeg:stateOfHealthPct",       "@type": "xsd:decimal" },
+              "roundTripEfficiencyPct": { "@id": "erDeg:roundTripEfficiencyPct", "@type": "xsd:decimal" }
             }
           }
         }

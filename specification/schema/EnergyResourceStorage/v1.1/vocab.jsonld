@@ -42,6 +42,14 @@
       "rdfs:comment": "Battery state-of-health as a percentage (0–100).",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
       "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "erDeg:roundTripEfficiencyPct",
+      "@type": "rdf:Property",
+      "rdfs:label": "Round-Trip Efficiency (%)",
+      "rdfs:comment": "AC-to-AC round-trip efficiency (0–100) — fraction of energy returned to the grid relative to energy drawn over a full charge/discharge cycle. Measured per IEC 62933-2-1. Distinct from stateOfHealthPct.",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceStorage" },
+      "schema:rangeIncludes": { "@id": "xsd:decimal" }
     }
   ]
 }

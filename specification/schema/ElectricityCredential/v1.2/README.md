@@ -47,8 +47,8 @@ Each kind is also published as a **standalone reusable schema** in `specificatio
 
 Inherited by all seven kinds via `allOf`. All power fields are `QVPower {value, unit: W|kW|MW}`.
 
-| Field | Type | CIM alignment | Description |
-|-------|------|---------------|-------------|
+| Field | Type | CIM alignment / standard | Description |
+|-------|------|--------------------------|-------------|
 | `make` | string | — | Manufacturer name |
 | `model` | string | — | Model number |
 | `ratedPower` | QVPower | `GeneratingUnit.maxOperatingP` | Nameplate peak power — kept for backward compatibility; prefer `maxExport` |
@@ -57,6 +57,9 @@ Inherited by all seven kinds via `allOf`. All power fields are `QVPower {value, 
 | `telemetryProvider` | string | — | Vendor API / data-source for telemetry |
 | `commissioningDate` | string (date-time) | — | ISO 8601 commissioning date-time |
 | `location` | object | — | `geo` (GeoJSONGeometry, coordinates [lon, lat]) + optional `address` (PostalAddress) |
+| `serialNumber` | string | `EndDeviceInfo.serialNumber` (IEC 61968-9) | Equipment-nameplate device serial; distinct from the network DID in `id`. |
+| `inspection` | object | IEEE 1547-2018 Cl. 11; CEA Connectivity Regs 2013 | Commissioning / safety inspection record: `{date, result: pass\|fail\|conditional, inspectorId}`. |
+| `aggregator` | object | IEEE 2030.5; IEC 61850-7-420 | Demand-flex enrolment block: `{id (URI), name, controllable (bool), enrolledOn (date)}`. `controllable: false` = observation-only. |
 
 ## Kind-specific attributes
 
@@ -74,20 +77,22 @@ Inherited by all seven kinds via `allOf`. All power fields are `QVPower {value, 
 
 ### EnergyResourceGenerator (type: `SOLAR_PV` | `WIND` | `HYDRO` | `BIOGAS` | `CHP` | `FUEL_CELL`)
 
-| Field | Type | CIM alignment | Description |
-|-------|------|---------------|-------------|
+| Field | Type | CIM alignment / standard | Description |
+|-------|------|--------------------------|-------------|
 | `nominalPower` | QVPower | `GeneratingUnit.nominalP` | Nominal output power, unit: W\|kW\|MW |
 | `efficiency` | number (0–100) | — | Conversion efficiency, % |
+| `dcArrayCapacity` | QVPower | IS 16221; IEC 61727 | DC-side PV array nameplate at STC (industry "kWp"). SOLAR_PV. Distinct from AC `maxExport`. Unit: W\|kW\|MW. |
 
 ### EnergyResourceStorage (type: `BESS`)
 
 Stationary battery. `storageCapacity` is **exclusive to this kind**. Discharge rate: `maxExport`. Charge rate: `maxImport`. Both in common attributes.
 
-| Field | Type | CIM alignment | Description |
-|-------|------|---------------|-------------|
+| Field | Type | CIM alignment / standard | Description |
+|-------|------|--------------------------|-------------|
 | `storageCapacity` | QVEnergy | `BatteryUnit.ratedE` | **Storage-only** — rated energy capacity, unit: kWh\|MWh |
 | `storageType` | enum | — | LithiumIon, LeadAcid, FlowBattery, NaS, NiCd, Flywheel, Other |
 | `stateOfHealthPct` | number (0–100) | — | Battery SoH as % of original capacity |
+| `roundTripEfficiencyPct` | number (0–100) | IEC 62933-2-1 | AC-to-AC round-trip efficiency over a full charge/discharge cycle |
 
 ### EnergyResourceEVCharger (type: `EV_CHARGER` | `EV_V2G`)
 
@@ -175,6 +180,7 @@ A single `customerNumber` can span arbitrary asset topologies.
 | `premisesType` | enum | No | Residential, Commercial, Industrial, Agricultural |
 | `connectionType` | enum | No | Single-phase, Three-phase |
 | `paymentMode` | enum | No | POSTPAID, PREPAID |
+| `serviceStatus` | enum | No | `active`, `suspended`, `closed`. CIM `UsagePoint.status`. Lifecycle state of the service connection, not of the meter device. |
 
 ## customerDetails (PII)
 

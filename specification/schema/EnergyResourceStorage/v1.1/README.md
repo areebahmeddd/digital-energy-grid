@@ -12,6 +12,14 @@ Inherits `EnergyResourceCommon/v1.1`. Common power fields renamed to `Quantitati
 `ratedPowerKw → ratedPower`, `maxExportKw → maxExport`, `maxImportKw → maxImport`.
 Storage-specific: `storageCapacityKwh → storageCapacity` (unit: `kWh|MWh`).
 
+Optional admin attribute added (non-breaking; optional):
+
+| Field | Standard | Notes |
+|---|---|---|
+| `roundTripEfficiencyPct` | IEC 62933-2-1 | AC-to-AC round-trip efficiency (0–100) over a full charge/discharge cycle. Distinct from `stateOfHealthPct` (cumulative life) and from inverter conversion efficiency. |
+
+Common-attribute additions inherited from `EnergyResourceCommon/v1.1`: `serialNumber`, `inspection`, `aggregator`.
+
 ---
 
 ## Overview
@@ -50,11 +58,12 @@ Storage-specific: `storageCapacityKwh → storageCapacity` (unit: `kWh|MWh`).
 
 ### Storage-specific attributes
 
-| Field | Type | CIM | Description |
-|-------|------|-----|-------------|
+| Field | Type | CIM / standard | Description |
+|-------|------|----------------|-------------|
 | `storageCapacity` | QuantitativeValue | `BatteryUnit.ratedE` | Rated energy capacity. `unit: kWh\|MWh` |
 | `storageType` | enum | — | `LithiumIon` · `LeadAcid` · `FlowBattery` · `NaS` · `NiCd` · `Flywheel` · `Other` |
 | `stateOfHealthPct` | number 0–100 | — | State of health as % of original capacity |
+| `roundTripEfficiencyPct` | number 0–100 | IEC 62933-2-1 | AC-to-AC round-trip efficiency over a full charge/discharge cycle. |
 
 ---
 
@@ -68,7 +77,11 @@ Storage-specific: `storageCapacityKwh → storageCapacity` (unit: `kWh|MWh`).
     "maxExport": {"value": 5, "unit": "kW"},
     "maxImport": {"value": 5, "unit": "kW"},
     "storageCapacity": {"value": 10, "unit": "kWh"},
-    "storageType": "LithiumIon"
+    "storageType": "LithiumIon",
+    "stateOfHealthPct": 98,
+    "roundTripEfficiencyPct": 92,
+    "serialNumber": "PW3-7H2K9-44182",
+    "aggregator": {"id": "did:web:exampleflex.in", "name": "ExampleFlex Aggregator", "controllable": true, "enrolledOn": "2025-04-01"}
   },
   "parentResources": ["did:web:utility.com:assets:meter:MET-001"]
 }

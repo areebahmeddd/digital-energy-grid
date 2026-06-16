@@ -34,6 +34,14 @@
       "rdfs:comment": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP resources.",
       "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
       "schema:rangeIncludes": { "@id": "xsd:decimal" }
+    },
+    {
+      "@id": "erDeg:dcArrayCapacity",
+      "@type": "rdf:Property",
+      "rdfs:label": "DC Array Capacity (kWp)",
+      "rdfs:comment": "DC-side nameplate capacity of a photovoltaic array at Standard Test Conditions (industry 'kWp'). Encoded as qudt:QuantitativeValue with QUDT unit kW; the STC/peak semantic is documented, not encoded in the unit. Distinct from AC-side maxExport (PV systems are typically DC-oversized). Relevant for SOLAR_PV. Standards: IS 16221 (PV module qualification); IEC 61727 (PV grid interface).",
+      "rdfs:domain": { "@id": "erDeg:EnergyResourceGenerator" },
+      "rdfs:range":  { "@id": "qudt:QuantitativeValue" }
     }
   ]
 }

@@ -24,6 +24,7 @@
     "premisesType":       { "@id": "deg:premisesType" },
     "connectionType":     { "@id": "deg:connectionType" },
     "paymentMode":        { "@id": "deg:paymentMode" },
+    "serviceStatus":      { "@id": "deg:serviceStatus" },
     "billingCycleDay":    { "@id": "deg:billingCycleDay", "@type": "xsd:integer" },
 
     "sanctionedLoad": {

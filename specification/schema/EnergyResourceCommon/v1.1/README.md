@@ -18,6 +18,14 @@ Power dimensioning fields now use `QuantitativeValue {value, unit}` instead of p
 
 Unit aliases (`W`, `kW`, `MW`, `kWh`, `MWh`, `kVA`, `MVA`, `kVAR`, `MVAR`, `V`, `kV`) are defined in the JSON-LD context and mapped to QUDT IRIs.
 
+Optional administrative attributes added (non-breaking; all optional):
+
+| Field | Standard | Notes |
+|---|---|---|
+| `serialNumber` | CIM `EndDeviceInfo.serialNumber` (IEC 61968-9) | Equipment-nameplate device serial; distinct from the network DID in `id` |
+| `inspection` | IEEE 1547-2018 Cl. 11; CEA Connectivity Regs 2013 | Commissioning / safety inspection record `{date, result, inspectorId}` |
+| `aggregator` | IEEE 2030.5; IEC 61850-7-420 | Demand-flex enrolment block `{id, name, controllable, enrolledOn}` |
+
 ---
 
 ## Schemas
@@ -48,6 +56,9 @@ The attribute bag base inherited inside every kind's `<Kind>Attributes` object v
 | `telemetryProvider` | string | Vendor API / data-source identifier |
 | `commissioningDate` | date-time | ISO 8601 asset commissioning date-time |
 | `location` | object | beckn Location/2.0 shape — `geo` (GeoJSON, required) + `address` (postal, optional) |
+| `serialNumber` | string | Manufacturer-assigned device serial from the equipment nameplate. Distinct from `id` (network-issued DID). CIM: `cim:EndDeviceInfo.serialNumber` (IEC 61968-9) |
+| `inspection` | object | Commissioning / safety inspection record: `{date, result: pass\|fail\|conditional, inspectorId}`. IEEE 1547-2018 Cl. 11; CEA Connectivity Regulations 2013 (amd. 2018) |
+| `aggregator` | object | Third-party demand-flex enrolment: `{id (URI), name, controllable (bool), enrolledOn (date)}`. `controllable: false` = observation-only. IEEE 2030.5 / IEC 61850-7-420 |
 
 ---
 

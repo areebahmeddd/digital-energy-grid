@@ -12,6 +12,14 @@ Inherits `EnergyResourceCommon/v1.1`. Common power fields renamed to `Quantitati
 `ratedPowerKw → ratedPower`, `maxExportKw → maxExport`, `maxImportKw → maxImport`.
 Generator-specific: `nominalPowerKw → nominalPower` (unit: `W|kW|MW`).
 
+Optional admin attribute added (non-breaking; optional):
+
+| Field | Standard | Notes |
+|---|---|---|
+| `dcArrayCapacity` | IS 16221; IEC 61727 | DC-side PV array nameplate at STC (industry "kWp"). Distinct from AC-side `maxExport`. Relevant for SOLAR_PV. |
+
+Common-attribute additions inherited from `EnergyResourceCommon/v1.1`: `serialNumber`, `inspection`, `aggregator`.
+
 ---
 
 ## Overview
@@ -58,10 +66,11 @@ Generator-specific: `nominalPowerKw → nominalPower` (unit: `W|kW|MW`).
 
 ### Generator-specific attributes
 
-| Field | Type | CIM | Description |
-|-------|------|-----|-------------|
+| Field | Type | CIM / standard | Description |
+|-------|------|----------------|-------------|
 | `nominalPower` | QuantitativeValue | `GeneratingUnit.nominalP` | Nominal rated output. `unit: W\|kW\|MW` |
 | `efficiency` | number 0–100 | — | Conversion efficiency %; relevant for FUEL_CELL, CHP |
+| `dcArrayCapacity` | QuantitativeValue | IS 16221; IEC 61727 | DC-side PV array nameplate at STC (industry "kWp"). PV systems are typically DC-oversized vs AC `maxExport`. SOLAR_PV. QUDT unit `kW`; STC/peak semantic documented, not encoded. |
 
 ---
 
@@ -73,9 +82,12 @@ Generator-specific: `nominalPowerKw → nominalPower` (unit: `W|kW|MW`).
   "type": "SOLAR_PV",
   "attributes": {
     "maxExport": {"value": 5, "unit": "kW"},
+    "dcArrayCapacity": {"value": 6.2, "unit": "kW"},
     "make": "Waaree",
     "model": "WS-400M",
-    "commissioningDate": "2025-02-10T00:00:00+05:30"
+    "serialNumber": "WS-400M-78821",
+    "commissioningDate": "2025-02-10T00:00:00+05:30",
+    "inspection": {"date": "2025-02-08", "result": "pass", "inspectorId": "INSP-KA-204"}
   },
   "parentResources": ["did:web:utility.com:assets:meter:MET-001"]
 }

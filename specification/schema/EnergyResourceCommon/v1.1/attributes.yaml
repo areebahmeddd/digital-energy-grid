@@ -10,6 +10,15 @@ info:
       maxExportKw    → maxExport    (typical unit: kW)
       maxImportKw    → maxImport    (typical unit: kW)
 
+    Optional administrative attributes added (non-breaking; all optional):
+      serialNumber — manufacturer asset serial. CIM: EndDeviceInfo.serialNumber.
+      inspection   — commissioning/safety inspection record (date, result,
+                     inspectorId). Aligned to IEEE 1547-2018 commissioning
+                     evaluations and CEA connectivity inspection.
+      aggregator   — third-party demand-flex enrolment block (id, name,
+                     controllable, enrolledOn). Aligned to IEEE 2030.5 and
+                     IEC 61850-7-420 DER control roles.
+
     The unit field holds a QUDT unit code that expands to a full IRI in
     the JSON-LD context via qudt:unit (e.g. "kW" →
     http://qudt.org/vocab/unit/KiloW).
@@ -120,6 +129,77 @@ components:
           description: Physical location of this asset.
           x-jsonld:
             "@id": deg:location
+
+        serialNumber:
+          type: string
+          minLength: 1
+          description: >
+            Manufacturer-assigned device serial number from the equipment
+            nameplate. Distinct from id (which is the network-issued DID).
+            CIM: cim:EndDeviceInfo.serialNumber (IEC 61968-9).
+          x-jsonld:
+            "@id": deg:serialNumber
+
+        inspection:
+          type: object
+          additionalProperties: false
+          description: >
+            Commissioning / safety inspection record for the asset. Captured
+            by the distribution licensee at energisation and on
+            re-certification events. Aligned to IEEE 1547-2018
+            commissioning evaluations (Cl. 11) and CEA (Technical Standards
+            for Connectivity of Distributed Generation Resources)
+            Regulations, 2013 (amended 2018).
+          properties:
+            date:
+              type: string
+              format: date
+              description: ISO 8601 date the inspection was performed.
+            result:
+              type: string
+              enum: [pass, fail, conditional]
+              description: >
+                Inspection outcome. 'conditional' indicates pass subject to
+                remedial action.
+            inspectorId:
+              type: string
+              minLength: 1
+              description: >
+                Identifier of the inspector or inspecting body, as recorded
+                by the licensee.
+          x-jsonld:
+            "@id": deg:inspection
+
+        aggregator:
+          type: object
+          additionalProperties: false
+          description: >
+            Third-party flexibility / demand-response enrolment for this
+            asset. Present when an aggregator is authorised to dispatch or
+            observe the resource. Controllability flag is asset-level; the
+            asset may still be observable even when controllable is false.
+            Aligned to IEEE 2030.5 and IEC 61850-7-420 DER control roles.
+          properties:
+            id:
+              type: string
+              format: uri
+              description: >
+                Aggregator identity — typically a did:web for the
+                aggregator's domain.
+            name:
+              type: string
+              description: Human-readable aggregator name (free text).
+            controllable:
+              type: boolean
+              description: >
+                True if the aggregator is authorised to issue dispatch /
+                curtailment instructions. False = observation-only.
+            enrolledOn:
+              type: string
+              format: date
+              description: ISO 8601 date the asset was enrolled with the aggregator.
+          x-jsonld:
+            "@id": deg:aggregator
 
     EnergyResourceCommon:
       $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon

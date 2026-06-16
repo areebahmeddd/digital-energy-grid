@@ -86,6 +86,15 @@
       "rdfs:comment": "Billing modality: POSTPAID or PREPAID. CIM: ESPI AmiBillingReadyKind.",
       "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
       "rdfs:range": "xsd:string"
+    },
+    {
+      "@id": "deg:serviceStatus",
+      "@type": "rdf:Property",
+      "rdfs:label": "Service Status",
+      "rdfs:comment": "Lifecycle state of the service connection (UsagePoint), not of the meter device. Values: active | suspended | closed. CIM: cim:UsagePoint.status (IEC 61968-9).",
+      "rdfs:domain": { "@id": "deg:MeterServiceProfile" },
+      "rdfs:range": "xsd:string",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#UsagePoint.status" }
     }
   ]
 }

@@ -76,6 +76,100 @@
       "rdfs:comment": "ISO 8601 date-time the asset was commissioned.",
       "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
       "rdfs:range":  "xsd:dateTime"
+    },
+    {
+      "@id": "deg:serialNumber",
+      "@type": "rdf:Property",
+      "rdfs:label": "Serial Number",
+      "rdfs:comment": "Manufacturer-assigned device serial number from the equipment nameplate. Distinct from the asset id (network-issued DID). CIM: cim:EndDeviceInfo.serialNumber (IEC 61968-9).",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  "xsd:string",
+      "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-9.ttl#EndDeviceInfo.serialNumber" }
+    },
+    {
+      "@id": "deg:Inspection",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Inspection",
+      "rdfs:comment": "Commissioning / safety inspection record for an energy resource. IEEE 1547-2018 Cl. 11 commissioning evaluations; CEA (Technical Standards for Connectivity of Distributed Generation Resources) Regulations, 2013 (amended 2018)."
+    },
+    {
+      "@id": "deg:inspection",
+      "@type": "rdf:Property",
+      "rdfs:label": "Inspection",
+      "rdfs:comment": "Commissioning / safety inspection record for the asset.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  { "@id": "deg:Inspection" }
+    },
+    {
+      "@id": "deg:inspectionDate",
+      "@type": "rdf:Property",
+      "rdfs:label": "Inspection Date",
+      "rdfs:comment": "ISO 8601 date the inspection was performed.",
+      "rdfs:domain": { "@id": "deg:Inspection" },
+      "rdfs:range":  "xsd:date"
+    },
+    {
+      "@id": "deg:inspectionResult",
+      "@type": "rdf:Property",
+      "rdfs:label": "Inspection Result",
+      "rdfs:comment": "Inspection outcome: pass | fail | conditional. 'conditional' = pass subject to remedial action.",
+      "rdfs:domain": { "@id": "deg:Inspection" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:inspectorId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Inspector ID",
+      "rdfs:comment": "Identifier of the inspector or inspecting body, per licensee records.",
+      "rdfs:domain": { "@id": "deg:Inspection" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:Aggregator",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Aggregator Enrolment",
+      "rdfs:comment": "Third-party flexibility / demand-response enrolment block recorded on an energy resource. IEEE 2030.5 client/server roles; IEC 61850-7-420 DER control."
+    },
+    {
+      "@id": "deg:aggregator",
+      "@type": "rdf:Property",
+      "rdfs:label": "Aggregator",
+      "rdfs:comment": "Third-party flexibility enrolment for this asset. controllable=false indicates observation-only.",
+      "rdfs:domain": { "@id": "deg:EnergyResourceCommonAttributes" },
+      "rdfs:range":  { "@id": "deg:Aggregator" },
+      "rdfs:seeAlso": { "@id": "https://standards.ieee.org/ieee/2030.5/5897/" }
+    },
+    {
+      "@id": "deg:aggregatorId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Aggregator ID",
+      "rdfs:comment": "Aggregator identity — typically a did:web for the aggregator's domain.",
+      "rdfs:domain": { "@id": "deg:Aggregator" },
+      "rdfs:range":  { "@id": "xsd:anyURI" }
+    },
+    {
+      "@id": "deg:aggregatorName",
+      "@type": "rdf:Property",
+      "rdfs:label": "Aggregator Name",
+      "rdfs:comment": "Human-readable aggregator name (free text).",
+      "rdfs:domain": { "@id": "deg:Aggregator" },
+      "rdfs:range":  "xsd:string"
+    },
+    {
+      "@id": "deg:controllable",
+      "@type": "rdf:Property",
+      "rdfs:label": "Controllable",
+      "rdfs:comment": "True if the aggregator is authorised to dispatch / curtail this asset. False = observation-only.",
+      "rdfs:domain": { "@id": "deg:Aggregator" },
+      "rdfs:range":  "xsd:boolean"
+    },
+    {
+      "@id": "deg:enrolledOn",
+      "@type": "rdf:Property",
+      "rdfs:label": "Enrolled On",
+      "rdfs:comment": "ISO 8601 date the asset was enrolled with the aggregator.",
+      "rdfs:domain": { "@id": "deg:Aggregator" },
+      "rdfs:range":  "xsd:date"
     }
   ]
 }

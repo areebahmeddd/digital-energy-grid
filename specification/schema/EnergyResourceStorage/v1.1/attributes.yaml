@@ -9,6 +9,12 @@ info:
     CIM: BatteryUnit (IEC 61970-302).
     BATTERY is a deprecated alias for BESS.
 
+    Optional admin attributes (non-breaking; all optional):
+      roundTripEfficiencyPct — AC-to-AC round-trip efficiency (%), per
+                               IEC 62933-2-1 performance test method.
+                               Distinct from stateOfHealthPct (life)
+                               and storage chemistry efficiency curves.
+
 components:
   schemas:
 
@@ -77,3 +83,16 @@ components:
               description: Battery state-of-health as a percentage (0–100).
               x-jsonld:
                 "@id": erDeg:stateOfHealthPct
+
+            roundTripEfficiencyPct:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: >
+                AC-to-AC round-trip efficiency as a percentage (0–100): the
+                fraction of energy returned to the grid relative to energy
+                drawn during a full charge/discharge cycle. Measured per IEC
+                62933-2-1. Distinct from stateOfHealthPct (cumulative life
+                indicator) and from inverter conversion efficiency.
+              x-jsonld:
+                "@id": erDeg:roundTripEfficiencyPct
