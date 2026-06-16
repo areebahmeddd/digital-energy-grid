@@ -87,6 +87,9 @@ All live inside the `attributes` bag. No field is required at the schema level.
 | `telemetryProvider` | string | Vendor API / data source |
 | `commissioningDate` | string (date-time) | ISO 8601 |
 | `location` | object | `geo` (GeoJSON, coordinates [lon, lat]) + optional `address` |
+| `serialNumber` | string | Equipment-nameplate device serial. CIM `EndDeviceInfo.serialNumber` (IEC 61968-9). Distinct from the network DID in `id`. |
+| `inspection` | object | Commissioning / safety inspection: `{date, result: pass\|fail\|conditional, inspectorId}`. IEEE 1547-2018 Cl. 11; CEA Connectivity Regs 2013. |
+| `aggregator` | object | Demand-flex enrolment: `{id (URI), name, controllable (bool), enrolledOn (date)}`. IEEE 2030.5 / IEC 61850-7-420. |
 
 ## Kind-specific attributes
 
@@ -108,6 +111,7 @@ All live inside the `attributes` bag. No field is required at the schema level.
 |-------|------|-------|
 | `nominalPower` | QuantitativeValue | Nominal rated output. `unit: W\|kW\|MW`. CIM: `GeneratingUnit.nominalP` |
 | `efficiency` | number 0–100 | Conversion efficiency %; relevant for FUEL_CELL, CHP |
+| `dcArrayCapacity` | QuantitativeValue | DC-side PV array nameplate at STC (industry "kWp"). Distinct from AC-side `maxExport`. SOLAR_PV. `unit: W\|kW\|MW`. IS 16221; IEC 61727. |
 
 ### EnergyResourceStorage
 
@@ -116,6 +120,7 @@ All live inside the `attributes` bag. No field is required at the schema level.
 | `storageCapacity` | QuantitativeValue | Rated energy capacity. `unit: kWh\|MWh`. CIM: `BatteryUnit.ratedE` |
 | `storageType` | enum | `LithiumIon` · `LeadAcid` · `FlowBattery` · `NaS` · `NiCd` · `Flywheel` · `Other` |
 | `stateOfHealthPct` | number 0–100 | State of health as % of original capacity |
+| `roundTripEfficiencyPct` | number 0–100 | AC-to-AC round-trip efficiency over a full cycle. IEC 62933-2-1 |
 
 ### EnergyResourceEVCharger
 

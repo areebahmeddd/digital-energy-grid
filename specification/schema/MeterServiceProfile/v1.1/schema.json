@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/MeterServiceProfile/v1.1",
   "title": "MeterServiceProfile",
-  "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} with short unit aliases (W, kW, MW) mapped to QUDT IRIs. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility.",
+  "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} with short unit aliases (W, kW, MW) mapped to QUDT IRIs. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility. Optional admin field serviceStatus carries the connection lifecycle state (CIM UsagePoint.status).",
   "$defs": {
     "QVPower": {
       "$anchor": "QVPower",
@@ -29,7 +29,8 @@
         "tariffCategoryCode":   { "type": "string", "minLength": 1, "description": "Billing/tariff category code assigned by the utility." },
         "premisesType":         { "type": "string", "enum": ["Residential", "Commercial", "Industrial", "Agricultural"] },
         "connectionType":       { "type": "string", "enum": ["Single-phase", "Three-phase"], "description": "Electrical connection type. CIM: UsagePoint.phaseCode." },
-        "paymentMode":          { "type": "string", "enum": ["POSTPAID", "PREPAID"], "description": "Billing/payment modality. Administrative — placed on the profile not the meter. CIM: ESPI AmiBillingReadyKind." }
+        "paymentMode":          { "type": "string", "enum": ["POSTPAID", "PREPAID"], "description": "Billing/payment modality. Administrative — placed on the profile not the meter. CIM: ESPI AmiBillingReadyKind." },
+        "serviceStatus":        { "type": "string", "enum": ["active", "suspended", "closed"], "description": "Lifecycle state of the service connection (UsagePoint), not the meter device. 'active' = energised/billable; 'suspended' = temporarily disconnected with contract on record; 'closed' = permanently terminated. CIM: cim:UsagePoint.status (IEC 61968-9)." }
       }
     }
   }

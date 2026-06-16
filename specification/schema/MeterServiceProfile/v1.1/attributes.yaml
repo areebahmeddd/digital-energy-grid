@@ -15,6 +15,10 @@ info:
     Used by ElectricityCredential/v1.2 consumptionProfiles[].
     Formerly called ConsumptionProfile — that alias is preserved.
 
+    Optional admin attribute (non-breaking; optional):
+      serviceStatus — service-connection lifecycle state (active | suspended
+                      | closed). CIM: UsagePoint.status.
+
     Canonical IRI: https://schema.beckn.io/MeterServiceProfile/v1.1
 
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
@@ -127,3 +131,19 @@ components:
             PREPAID: pay-before-use. CIM: ESPI AmiBillingReadyKind (IEC 61968-9).
           x-jsonld:
             "@id": deg:paymentMode
+
+        serviceStatus:
+          type: string
+          enum:
+            - active
+            - suspended
+            - closed
+          description: >
+            Lifecycle state of the service connection (the UsagePoint), not
+            of the meter device itself. 'active' = currently energised and
+            billable; 'suspended' = temporarily disconnected (non-payment,
+            inspection, fault) with the contract still on record; 'closed' =
+            permanently terminated. Distinct from the meter device's
+            operational state. CIM: cim:UsagePoint.status (IEC 61968-9).
+          x-jsonld:
+            "@id": deg:serviceStatus

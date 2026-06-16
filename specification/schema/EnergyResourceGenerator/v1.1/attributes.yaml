@@ -9,6 +9,12 @@ info:
     CIM: GeneratingUnit subtypes (IEC 61970-301/302).
     SOLAR is a deprecated alias for SOLAR_PV.
 
+    Optional admin attributes (non-breaking; all optional):
+      dcArrayCapacity — DC nameplate capacity of a PV array at STC
+                        (industry "kWp"). Encoded as QuantitativeValue with
+                        unit kW; semantically a peak/STC rating, distinct
+                        from the AC-side maxExport. IS 16221; IEC 61727.
+
 components:
   schemas:
 
@@ -69,3 +75,23 @@ components:
                 FUEL_CELL and CHP resources.
               x-jsonld:
                 "@id": erDeg:efficiency
+
+            dcArrayCapacity:
+              type: object
+              required: [value, unit]
+              additionalProperties: false
+              description: >
+                DC-side nameplate capacity of a photovoltaic array at Standard
+                Test Conditions (industry term: "kWp"). For PV systems this is
+                typically larger than the AC-side maxExport because of inverter
+                clipping and DC-to-AC ratios. Relevant for SOLAR_PV resources.
+                Encoded as QuantitativeValue; the unit is the standard QUDT
+                power alias kW — the STC/peak semantic is documented here,
+                not encoded in the unit string.
+                Standards: IS 16221 (PV module qualification); IEC 61727
+                (PV grid interface).
+              properties:
+                value: { type: number, minimum: 0 }
+                unit:  { type: string }
+              x-jsonld:
+                "@id": erDeg:dcArrayCapacity

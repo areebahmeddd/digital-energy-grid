@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schema.beckn.io/EnergyResourceCommon/v1.1",
   "title": "EnergyResourceCommon",
-  "description": "Canonical base schemas shared by all typed EnergyResource kinds. v1.1: power fields use QuantitativeValue {value, unit} with short unit aliases (kW, MW, kWh, kVA, kVAR, kV) mapped to QUDT IRIs via JSON-LD context. Contains typed QV variants (QVPower, QVEnergy, QVApparentPower, QVReactivePower, QVVoltage), EnergyResourceCommonAttributes, and EnergyResourceCommon.",
+  "description": "Canonical base schemas shared by all typed EnergyResource kinds. v1.1: power fields use QuantitativeValue {value, unit} with short unit aliases (kW, MW, kWh, kVA, kVAR, kV) mapped to QUDT IRIs via JSON-LD context. Contains typed QV variants (QVPower, QVEnergy, QVApparentPower, QVReactivePower, QVVoltage), EnergyResourceCommonAttributes, and EnergyResourceCommon. Optional admin fields on the attributes bag: serialNumber (CIM EndDeviceInfo.serialNumber), inspection (IEEE 1547-2018 / CEA commissioning record), aggregator (IEEE 2030.5 / IEC 61850-7-420 demand-flex enrolment).",
   "$defs": {
     "QVPower": {
       "$anchor": "QVPower",
@@ -72,7 +72,29 @@
         "maxImport":         { "$ref": "#/$defs/QVPower",  "description": "Maximum power drawn from the grid (absorbs/charges). Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
-        "location":          { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
+        "location":          { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." },
+        "serialNumber":      { "type": "string", "minLength": 1, "description": "Manufacturer-assigned device serial number from the equipment nameplate. Distinct from id (the network-issued DID). CIM: cim:EndDeviceInfo.serialNumber (IEC 61968-9)." },
+        "inspection": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Commissioning / safety inspection record. IEEE 1547-2018 commissioning evaluations (Cl. 11); CEA (Technical Standards for Connectivity of Distributed Generation Resources) Regulations, 2013 (amended 2018).",
+          "properties": {
+            "date":        { "type": "string", "format": "date", "description": "ISO 8601 date the inspection was performed." },
+            "result":      { "type": "string", "enum": ["pass", "fail", "conditional"], "description": "Inspection outcome. 'conditional' = pass subject to remedial action." },
+            "inspectorId": { "type": "string", "minLength": 1, "description": "Identifier of the inspector or inspecting body, per licensee records." }
+          }
+        },
+        "aggregator": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Third-party flexibility / demand-response enrolment for this asset. controllable=false means observation-only. IEEE 2030.5; IEC 61850-7-420 DER control roles.",
+          "properties": {
+            "id":           { "type": "string", "format": "uri", "description": "Aggregator identity — typically a did:web." },
+            "name":         { "type": "string", "description": "Human-readable aggregator name." },
+            "controllable": { "type": "boolean", "description": "True if the aggregator is authorised to dispatch/curtail the asset." },
+            "enrolledOn":   { "type": "string", "format": "date", "description": "ISO 8601 date the asset was enrolled with the aggregator." }
+          }
+        }
       }
     },
     "EnergyResourceCommon": {

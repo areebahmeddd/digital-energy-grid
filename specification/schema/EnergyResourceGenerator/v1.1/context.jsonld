@@ -18,7 +18,15 @@
                   "@vocab": "http://qudt.org/vocab/unit/"
                 }
               },
-              "efficiency": { "@id": "erDeg:efficiency", "@type": "xsd:decimal" }
+              "efficiency": { "@id": "erDeg:efficiency", "@type": "xsd:decimal" },
+              "dcArrayCapacity": {
+                "@id": "erDeg:dcArrayCapacity",
+                "@context": {
+                  "value": { "@id": "qudt:value", "@type": "xsd:decimal" },
+                  "unit":  { "@id": "qudt:unit",  "@type": "@vocab" },
+                  "@vocab": "http://qudt.org/vocab/unit/"
+                }
+              }
             }
           }
         }

@@ -16,6 +16,12 @@
 | `sanctionedExportLoadKw` | `sanctionedExportLoad` |
 | `contractMaxDemandKw` | `contractMaxDemand` |
 
+Optional admin attribute added (non-breaking; optional):
+
+| Field | Standard | Notes |
+|---|---|---|
+| `serviceStatus` | CIM `UsagePoint.status` (IEC 61968-9) | Lifecycle state of the service connection (the UsagePoint), not of the meter device. Values: `active` \| `suspended` \| `closed`. |
+
 ---
 
 ## Overview
@@ -50,6 +56,7 @@ Carried in `ElectricityCredential/v1.2` as `consumptionProfiles[]`.
 | `premisesType` | — | enum | `Residential`, `Commercial`, `Industrial`, `Agricultural` |
 | `connectionType` | — | enum | `Single-phase` or `Three-phase` |
 | `paymentMode` | — | enum | `POSTPAID` or `PREPAID` |
+| `serviceStatus` | — | enum | `active`, `suspended`, `closed`. CIM `UsagePoint.status`. State of the connection, not of the meter device. |
 
 ---
 
@@ -75,6 +82,7 @@ Carried in `ElectricityCredential/v1.2` as `consumptionProfiles[]`.
   "tariffCategoryCode": "LT-2A",
   "premisesType": "Residential",
   "connectionType": "Single-phase",
-  "paymentMode": "POSTPAID"
+  "paymentMode": "POSTPAID",
+  "serviceStatus": "active"
 }
 ```

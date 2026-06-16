@@ -18,11 +18,31 @@
 
     "make":              { "@id": "deg:make" },
     "model":             { "@id": "deg:model" },
+    "serialNumber":      { "@id": "deg:serialNumber" },
     "telemetryProvider": { "@id": "deg:telemetryProvider" },
     "commissioningDate": { "@id": "deg:commissioningDate", "@type": "xsd:dateTime" },
     "location":          { "@id": "deg:location" },
     "geo":               { "@id": "deg:geo" },
     "address":           { "@id": "deg:address" },
+
+    "inspection": {
+      "@id": "deg:inspection",
+      "@context": {
+        "date":        { "@id": "deg:inspectionDate",   "@type": "xsd:date" },
+        "result":      { "@id": "deg:inspectionResult" },
+        "inspectorId": { "@id": "deg:inspectorId" }
+      }
+    },
+
+    "aggregator": {
+      "@id": "deg:aggregator",
+      "@context": {
+        "id":           { "@id": "deg:aggregatorId",   "@type": "@id" },
+        "name":         { "@id": "deg:aggregatorName" },
+        "controllable": { "@id": "deg:controllable",   "@type": "xsd:boolean" },
+        "enrolledOn":   { "@id": "deg:enrolledOn",     "@type": "xsd:date" }
+      }
+    },
 
     "W":    "http://qudt.org/vocab/unit/W",
     "kW":   "http://qudt.org/vocab/unit/KiloW",
