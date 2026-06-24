@@ -57,6 +57,17 @@ components:
           x-jsonld:
             "@id": schema:name
 
+        careOf:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: >
+            Care-of (c/o) name, typically the head of household. Helps
+            disambiguate customers who share the same fullName within a
+            locality (e.g. a village).
+          x-jsonld:
+            "@id": deg:careOf
+
         installationAddress:
           $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
           description: >

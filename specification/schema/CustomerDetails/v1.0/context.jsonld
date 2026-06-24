@@ -9,6 +9,7 @@
     "CustomerDetails": { "@id": "deg:CustomerDetails" },
 
     "fullName":             { "@id": "schema:name",                  "@type": "xsd:string"   },
+    "careOf":               { "@id": "deg:careOf",                   "@type": "xsd:string"   },
     "serviceConnectionDate":{ "@id": "deg:serviceConnectionDate",    "@type": "xsd:dateTime" },
 
     "installationAddress": {

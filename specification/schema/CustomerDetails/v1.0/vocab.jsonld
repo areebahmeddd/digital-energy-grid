@@ -16,6 +16,14 @@
       "rdfs:seeAlso": { "@id": "https://ontology.tno.nl/IEC_CIM/iec61968-1.ttl#Customer" }
     },
     {
+      "@id": "deg:careOf",
+      "@type": "rdf:Property",
+      "rdfs:label": "Care of",
+      "rdfs:comment": "Care-of (c/o) name, typically the head of household. Used to disambiguate customers who share the same full name within a locality.",
+      "rdfs:domain": { "@id": "deg:CustomerDetails" },
+      "schema:rangeIncludes": { "@id": "xsd:string" }
+    },
+    {
       "@id": "deg:serviceConnectionDate",
       "@type": "rdf:Property",
       "rdfs:label": "Service connection date",

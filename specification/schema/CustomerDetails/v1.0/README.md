@@ -30,6 +30,7 @@ Extracted from `ElectricityCredential/v1.2` `customerDetails` and published as a
 | Field | Required | Type | CIM | Description |
 |-------|----------|------|-----|-------------|
 | `fullName` | ✅ | string | `Customer.name` | Full name as per ID proof |
+| `careOf` | ➖ | string | — | Care-of (c/o) name, typically the head of household; disambiguates customers sharing the same `fullName` within a locality |
 | `installationAddress` | ✅ | Location/2.0 | `ServiceLocation` | GeoJSON Point + PostalAddress |
 | `serviceConnectionDate` | ✅ | date-time | activation date | ISO 8601 with timezone offset |
 
@@ -50,6 +51,7 @@ Extracted from `ElectricityCredential/v1.2` `customerDetails` and published as a
 ```json
 {
   "fullName": "Ravi Kumar",
+  "careOf": "Suresh Kumar",
   "installationAddress": {
     "geo": {
       "type": "Point",

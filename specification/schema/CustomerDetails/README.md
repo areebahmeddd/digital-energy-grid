@@ -21,7 +21,7 @@ PII identity and address details for a utility service customer.
 
 Three concerns:
 
-- **Identity** — `fullName` (as per ID proof)
+- **Identity** — `fullName` (as per ID proof), optional `careOf` (head of household, for disambiguation)
 - **Location** — `installationAddress` (GeoJSON + PostalAddress via beckn Location/2.0)
 - **Tenure** — `serviceConnectionDate` (when the connection was activated)
 

@@ -15,6 +15,12 @@
           "maxLength": 200,
           "description": "Full name of the customer as per ID proof."
         },
+        "careOf": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Care-of (c/o) name, typically the head of household. Helps disambiguate customers who share the same fullName within a locality."
+        },
         "installationAddress": {
           "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location",
           "description": "Physical location of the metered installation. geo (GeoJSON Point) required; address (PostalAddress) optional."
