@@ -9,8 +9,16 @@
     "CustomerDetails": { "@id": "deg:CustomerDetails" },
 
     "fullName":             { "@id": "schema:name",                  "@type": "xsd:string"   },
-    "careOf":               { "@id": "deg:careOf",                   "@type": "xsd:string"   },
     "serviceConnectionDate":{ "@id": "deg:serviceConnectionDate",    "@type": "xsd:dateTime" },
+
+    "careOf": {
+      "@id": "deg:careOf",
+      "@container": "@set",
+      "@context": {
+        "name":         { "@id": "schema:name",      "@type": "xsd:string" },
+        "relationship": { "@id": "deg:relationship", "@type": "xsd:string" }
+      }
+    },
 
     "installationAddress": {
       "@id": "beckn:Location",

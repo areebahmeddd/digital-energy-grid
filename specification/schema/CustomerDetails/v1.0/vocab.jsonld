@@ -19,8 +19,15 @@
       "@id": "deg:careOf",
       "@type": "rdf:Property",
       "rdfs:label": "Care of",
-      "rdfs:comment": "Care-of (c/o) name, typically the head of household. Used to disambiguate customers who share the same full name within a locality.",
-      "rdfs:domain": { "@id": "deg:CustomerDetails" },
+      "rdfs:comment": "Care-of (c/o) reference person(s) used to uniquely identify / disambiguate a customer who may share the same full name with others in a locality. Each entry pairs a name with an optional gender-neutral relationship.",
+      "rdfs:domain": { "@id": "deg:CustomerDetails" }
+    },
+    {
+      "@id": "deg:relationship",
+      "@type": "rdf:Property",
+      "rdfs:label": "Relationship",
+      "rdfs:comment": "Gender-neutral relationship of a care-of reference person to the customer (parent, spouse, guardian, sibling, child, other).",
+      "rdfs:domain": { "@id": "deg:careOf" },
       "schema:rangeIncludes": { "@id": "xsd:string" }
     },
     {
