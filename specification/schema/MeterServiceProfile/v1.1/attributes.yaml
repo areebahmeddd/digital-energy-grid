@@ -29,26 +29,20 @@ paths: {}
 components:
   schemas:
 
-    QuantitativeValue:
-      $id: https://schema.beckn.io/MeterServiceProfile/v1.1#/components/schemas/QuantitativeValue
+    QVPower:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVPower
       type: object
       description: >
-        A dimensioned quantity. value is the numeric magnitude; unit is a QUDT
-        unit code (e.g. KiloW, KiloW-HR, KiloV-A, KiloV-A_Reactive, KiloV).
-        The JSON-LD context maps this to qudt:QuantitativeValue with
-        qudt:value and qudt:unit, expanding the unit string to a full QUDT
-        unit IRI (http://qudt.org/vocab/unit/<unit>).
+        Active-power quantity {value, unit}. unit is a QUDT power alias
+        (W, kW, MW) expanded to a QUDT IRI via the JSON-LD context.
       required: [value, unit]
       additionalProperties: false
       properties:
         value:
           type: number
-          description: Numeric magnitude.
         unit:
           type: string
-          description: >
-            QUDT unit code. Common values for this schema:
-            KiloW (kilowatt), KiloW-HR (kilowatt-hour).
+          enum: [W, kW, MW]
 
     MeterServiceProfile:
       $id: https://schema.beckn.io/MeterServiceProfile/v1.1#/components/schemas/MeterServiceProfile
@@ -76,13 +70,14 @@ components:
           x-jsonld:
             "@id": deg:meterId
         sanctionedLoad:
-          $ref: "#/components/schemas/QuantitativeValue"
-          description: "Sanctioned/approved import load. Typical unit: KiloW. CIM: UsagePoint.ratedCurrent × voltage."
+          $ref: "#/components/schemas/QVPower"
+          description: "Sanctioned/approved import load."
+          x-standard: "CIM (IEC 61968-9 UsagePoint)"
           x-jsonld:
             "@id": deg:sanctionedLoad
         sanctionedExportLoad:
-          $ref: "#/components/schemas/QuantitativeValue"
-          description: "Sanctioned/approved grid export limit. Typical unit: KiloW."
+          $ref: "#/components/schemas/QVPower"
+          description: "Sanctioned/approved grid export limit."
           x-jsonld:
             "@id": deg:sanctionedExportLoad
         billingCycleDay:
@@ -93,14 +88,15 @@ components:
           x-jsonld:
             "@id": deg:billingCycleDay
         contractMaxDemand:
-          $ref: "#/components/schemas/QuantitativeValue"
-          description: "Maximum demand contracted with the utility for this connection. Typical unit: KiloW."
+          $ref: "#/components/schemas/QVPower"
+          description: "Maximum demand contracted with the utility for this connection."
           x-jsonld:
             "@id": deg:contractMaxDemand
         tariffCategoryCode:
           type: string
           minLength: 1
-          description: "Billing/tariff category code assigned by the utility. CIM: UsagePoint.serviceCategory."
+          description: "Billing/tariff category code assigned by the utility."
+          x-standard: "CIM (IEC 61968-9 UsagePoint.serviceCategory)"
           x-jsonld:
             "@id": deg:tariffCategoryCode
         premisesType:
@@ -118,7 +114,8 @@ components:
           enum:
             - Single-phase
             - Three-phase
-          description: "Electrical connection type. CIM: UsagePoint.phaseCode."
+          description: "Electrical connection type."
+          x-standard: "CIM (IEC 61968-9 UsagePoint.phaseCode)"
           x-jsonld:
             "@id": deg:connectionType
         paymentMode:
@@ -128,7 +125,8 @@ components:
             - PREPAID
           description: >
             Billing/payment modality. POSTPAID: consume now, pay later.
-            PREPAID: pay-before-use. CIM: ESPI AmiBillingReadyKind (IEC 61968-9).
+            PREPAID: pay-before-use.
+          x-standard: "CIM (IEC 61968-9 AmiBillingReadyKind, ESPI)"
           x-jsonld:
             "@id": deg:paymentMode
 
@@ -144,6 +142,7 @@ components:
             billable; 'suspended' = temporarily disconnected (non-payment,
             inspection, fault) with the contract still on record; 'closed' =
             permanently terminated. Distinct from the meter device's
-            operational state. CIM: cim:UsagePoint.status (IEC 61968-9).
+            operational state.
+          x-standard: "CIM (IEC 61968-9 UsagePoint.status)"
           x-jsonld:
             "@id": deg:serviceStatus

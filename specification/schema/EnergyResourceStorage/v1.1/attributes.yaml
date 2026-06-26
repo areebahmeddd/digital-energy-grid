@@ -57,15 +57,10 @@ components:
           properties:
 
             storageCapacity:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVEnergy"
               description: >
-                Rated stored-energy capacity. Typical unit: KiloW-HR.
-                CIM: BatteryUnit.ratedE. Replaces storageCapacityKwh from v1.0.
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+                Rated stored-energy capacity. Replaces storageCapacityKwh from v1.0.
+              x-standard: "CIM (IEC 61970-302 BatteryUnit.ratedE)"
               x-jsonld:
                 "@id": erDeg:storageCapacity
 
@@ -91,8 +86,9 @@ components:
               description: >
                 AC-to-AC round-trip efficiency as a percentage (0–100): the
                 fraction of energy returned to the grid relative to energy
-                drawn during a full charge/discharge cycle. Measured per IEC
-                62933-2-1. Distinct from stateOfHealthPct (cumulative life
-                indicator) and from inverter conversion efficiency.
+                drawn during a full charge/discharge cycle. Distinct from
+                stateOfHealthPct (cumulative life indicator) and from inverter
+                conversion efficiency.
+              x-standard: "IEC 62933-2-1 (performance test method)"
               x-jsonld:
                 "@id": erDeg:roundTripEfficiencyPct

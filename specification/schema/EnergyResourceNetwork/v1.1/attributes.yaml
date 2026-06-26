@@ -52,16 +52,10 @@ components:
           properties:
 
             nominalVoltage:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVVoltage"
               description: >
-                Nominal operating voltage. Typical unit: KiloV.
-                CIM: BaseVoltage.nominalVoltage.
-                Replaces nominalVoltageKv from v1.0.
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+                Nominal operating voltage. Replaces nominalVoltageKv from v1.0.
+              x-standard: "CIM (IEC 61970-301 BaseVoltage.nominalVoltage)"
               x-jsonld:
                 "@id": erDeg:nominalVoltage
 
