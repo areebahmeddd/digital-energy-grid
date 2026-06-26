@@ -275,25 +275,21 @@
                     "description": "Full name of the customer as per ID proof"
                 },
                 "careOf": {
-                    "type": "array",
-                    "description": "Optional care-of (c/o) reference person(s), used to uniquely identify / disambiguate a customer who may share the same fullName with others in a locality. Each entry pairs a name with an optional, gender-neutral relationship.",
-                    "minItems": 1,
-                    "items": {
-                        "type": "object",
-                        "required": ["name"],
-                        "additionalProperties": false,
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 200,
-                                "description": "Name of the care-of / reference person used to disambiguate the customer."
-                            },
-                            "relationship": {
-                                "type": "string",
-                                "enum": ["parent", "spouse", "guardian", "sibling", "child", "other"],
-                                "description": "Gender-neutral relationship of the reference person to the customer."
-                            }
+                    "type": "object",
+                    "description": "Optional care-of (c/o) reference person, used to uniquely identify / disambiguate a customer who may share the same fullName with others in a locality. Pairs a name with an optional, gender-neutral relationship.",
+                    "required": ["name"],
+                    "additionalProperties": false,
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200,
+                            "description": "Name of the care-of / reference person used to disambiguate the customer."
+                        },
+                        "relationship": {
+                            "type": "string",
+                            "enum": ["parent", "spouse", "guardian", "sibling", "child", "other"],
+                            "description": "Gender-neutral relationship of the reference person to the customer."
                         }
                     }
                 },
