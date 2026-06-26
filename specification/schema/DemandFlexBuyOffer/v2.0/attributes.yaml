@@ -144,6 +144,7 @@ components:
                   description: Total meter count in the cohort.
                 sha256OfSortedIds:
                   type: string
+                  x-standard: "SHA-256 (FIPS 180-4)"
                   pattern: "^sha256:[0-9a-f]{64}$"
                   description: >
                     `sha256:<64-hex>` of the cohort's meter IDs after
