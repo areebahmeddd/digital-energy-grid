@@ -19,7 +19,7 @@
       "@id": "deg:careOf",
       "@type": "rdf:Property",
       "rdfs:label": "Care of",
-      "rdfs:comment": "Care-of (c/o) reference person(s) used to uniquely identify / disambiguate a customer who may share the same full name with others in a locality. Each entry pairs a name with an optional gender-neutral relationship.",
+      "rdfs:comment": "Care-of (c/o) reference person used to uniquely identify / disambiguate a customer who may share the same full name with others in a locality. Pairs a name with an optional gender-neutral relationship.",
       "rdfs:domain": { "@id": "deg:CustomerDetails" }
     },
     {
