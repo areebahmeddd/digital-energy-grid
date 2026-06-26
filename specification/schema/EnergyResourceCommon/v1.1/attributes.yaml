@@ -57,6 +57,85 @@ components:
             kVA, MVA (apparent power); kVAR, MVAR (reactive power);
             V, kV (voltage). Mapped to QUDT IRIs via JSON-LD context.
 
+    QVPower:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVPower
+      type: object
+      description: >
+        Active-power quantity {value, unit}. unit is a QUDT power alias
+        (W, kW, MW) expanded to a QUDT IRI via the JSON-LD context.
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          enum: [W, kW, MW]
+
+    QVEnergy:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVEnergy
+      type: object
+      description: >
+        Energy quantity {value, unit}. unit is a QUDT energy alias
+        (kWh, MWh) expanded to a QUDT IRI via the JSON-LD context.
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [kWh, MWh]
+
+    QVApparentPower:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVApparentPower
+      type: object
+      description: >
+        Apparent-power quantity {value, unit}. unit is a QUDT apparent-power
+        alias (kVA, MVA) expanded to a QUDT IRI via the JSON-LD context.
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [kVA, MVA]
+
+    QVReactivePower:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVReactivePower
+      type: object
+      description: >
+        Reactive-power quantity {value, unit}. unit is a QUDT reactive-power
+        alias (kVAR, MVAR) expanded to a QUDT IRI via the JSON-LD context.
+        value may be negative (absorption).
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          enum: [kVAR, MVAR]
+
+    QVVoltage:
+      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVVoltage
+      type: object
+      description: >
+        Voltage quantity {value, unit}. unit is a QUDT voltage alias
+        (V, kV) expanded to a QUDT IRI via the JSON-LD context.
+      required: [value, unit]
+      additionalProperties: false
+      properties:
+        value:
+          type: number
+          minimum: 0
+        unit:
+          type: string
+          enum: [V, kV]
+
     EnergyResourceCommonAttributes:
       $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes
       type: object
@@ -82,32 +161,31 @@ components:
             "@id": deg:model
 
         ratedPower:
-          $ref: "#/components/schemas/QuantitativeValue"
+          $ref: "#/components/schemas/QVPower"
           description: >
             Manufacturer-rated peak power (nameplate value in principal direction).
-            Typical unit: kW. Kept for backward compatibility — prefer maxExport.
-            CIM: GeneratingUnit.maxOperatingP / EndDeviceInfo.ratedPower.
+            Kept for backward compatibility — prefer maxExport.
+          x-standard: "CIM (IEC 61968-9 EndDeviceInfo.ratedPower; IEC 61970 GeneratingUnit.maxOperatingP)"
           x-jsonld:
             "@id": deg:ratedPower
 
         maxExport:
-          $ref: "#/components/schemas/QuantitativeValue"
+          $ref: "#/components/schemas/QVPower"
           description: >
             Maximum power this resource injects to the grid (generates/discharges).
-            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
-            this is the max discharge rate. Supersedes ratedPower.
-            CIM: GeneratingUnit.maxOperatingP / PowerElectronicsConnection.maxP
-            (injection direction).
+            Always ≥0. For bidirectional resources (BESS, V2G) this is the max
+            discharge rate. Supersedes ratedPower.
+          x-standard: "CIM (IEC 61970 GeneratingUnit.maxOperatingP; IEC 61970-302 PowerElectronicsConnection.maxP, injection)"
           x-jsonld:
             "@id": deg:maxExport
 
         maxImport:
-          $ref: "#/components/schemas/QuantitativeValue"
+          $ref: "#/components/schemas/QVPower"
           description: >
             Maximum power this resource draws from the grid (absorbs/charges).
-            Typical unit: kW. Always ≥0. For bidirectional resources (BESS, V2G)
-            this is the max charge rate.
-            CIM: PowerElectronicsConnection.maxP (absorption direction).
+            Always ≥0. For bidirectional resources (BESS, V2G) this is the max
+            charge rate.
+          x-standard: "CIM (IEC 61970-302 PowerElectronicsConnection.maxP, absorption)"
           x-jsonld:
             "@id": deg:maxImport
 
@@ -136,7 +214,7 @@ components:
           description: >
             Manufacturer-assigned device serial number from the equipment
             nameplate. Distinct from id (which is the network-issued DID).
-            CIM: cim:EndDeviceInfo.serialNumber (IEC 61968-9).
+          x-standard: "CIM (IEC 61968-9 EndDeviceInfo.serialNumber)"
           x-jsonld:
             "@id": deg:serialNumber
 
@@ -146,10 +224,8 @@ components:
           description: >
             Commissioning / safety inspection record for the asset. Captured
             by the distribution licensee at energisation and on
-            re-certification events. Aligned to IEEE 1547-2018
-            commissioning evaluations (Cl. 11) and CEA (Technical Standards
-            for Connectivity of Distributed Generation Resources)
-            Regulations, 2013 (amended 2018).
+            re-certification events.
+          x-standard: "IEEE 1547-2018 Cl. 11 (commissioning); CEA Connectivity Regs 2013 (amended 2018)"
           properties:
             date:
               type: string
@@ -178,7 +254,7 @@ components:
             asset. Present when an aggregator is authorised to dispatch or
             observe the resource. Controllability flag is asset-level; the
             asset may still be observable even when controllable is false.
-            Aligned to IEEE 2030.5 and IEC 61850-7-420 DER control roles.
+          x-standard: "IEEE 2030.5; IEC 61850-7-420 (DER control roles)"
           properties:
             id:
               type: string

@@ -54,15 +54,11 @@ components:
           properties:
 
             nominalPower:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVPower"
               description: >
-                Nominal (nameplate) power output. Typical unit: KiloW.
-                CIM: GeneratingUnit.nominalP. Use when distinct from maxExport (peak).
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+                Nominal (nameplate) power output. Use when distinct from
+                maxExport (peak).
+              x-standard: "CIM (IEC 61970 GeneratingUnit.nominalP)"
               x-jsonld:
                 "@id": erDeg:nominalPower
 
@@ -77,21 +73,14 @@ components:
                 "@id": erDeg:efficiency
 
             dcArrayCapacity:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVPower"
               description: >
                 DC-side nameplate capacity of a photovoltaic array at Standard
                 Test Conditions (industry term: "kWp"). For PV systems this is
                 typically larger than the AC-side maxExport because of inverter
                 clipping and DC-to-AC ratios. Relevant for SOLAR_PV resources.
-                Encoded as QuantitativeValue; the unit is the standard QUDT
-                power alias kW — the STC/peak semantic is documented here,
-                not encoded in the unit string.
-                Standards: IS 16221 (PV module qualification); IEC 61727
-                (PV grid interface).
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+                The unit is the standard QUDT power alias kW — the STC/peak
+                semantic is documented here, not encoded in the unit string.
+              x-standard: "IS 16221 (PV module qualification); IEC 61727 (PV grid interface)"
               x-jsonld:
                 "@id": erDeg:dcArrayCapacity

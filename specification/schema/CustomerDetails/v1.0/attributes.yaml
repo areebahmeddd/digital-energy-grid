@@ -54,6 +54,7 @@ components:
           minLength: 1
           maxLength: 200
           description: Full name of the customer as per ID proof.
+          x-standard: "CIM (IEC 61968-1 Customer.name)"
           x-jsonld:
             "@id": schema:name
 
@@ -97,6 +98,7 @@ components:
             Physical location of the metered installation. geo (GeoJSON Point,
             coordinates [longitude, latitude]) is required; address
             (schema.org PostalAddress fields) is optional.
+          x-standard: "GeoJSON RFC 7946; schema.org PostalAddress; CIM (IEC 61968-1 ServiceLocation)"
           x-jsonld:
             "@id": deg:installationAddress
 
@@ -105,6 +107,7 @@ components:
           format: date-time
           description: >
             Date and time the service connection was activated, with timezone
-            offset (ISO 8601). CIM: ServiceLocation activation date.
+            offset (ISO 8601).
+          x-standard: "CIM (IEC 61968-1 ServiceLocation activation date)"
           x-jsonld:
             "@id": deg:serviceConnectionDate

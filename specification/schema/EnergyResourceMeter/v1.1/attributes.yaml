@@ -52,7 +52,8 @@ components:
               description: >
                 Communication/automation generation. Electromechanical: induction-disc.
                 CMRI: manual optical-port (India legacy). AMR: one-way automated read.
-                AMI: two-way smart meter. CIM: AmiBillingReadyKind (IEC 61968-9).
+                AMI: two-way smart meter.
+              x-standard: "CIM (IEC 61968-9 AmiBillingReadyKind)"
               x-jsonld:
                 "@id": erDeg:meterCapability
 
@@ -60,16 +61,16 @@ components:
               type: string
               enum: [Forward, Reverse, Bidirectional, Net]
               default: Forward
-              description: >
-                Energy flow direction metered at this point. CIM: FlowDirectionKind
-                (ESPI NAESB REQ.21).
+              description: Energy flow direction metered at this point.
+              x-standard: "CIM (FlowDirectionKind); ESPI NAESB REQ.21"
               x-jsonld:
                 "@id": erDeg:energyDirection
 
             functions:
               type: array
               uniqueItems: true
-              description: Active meter capabilities per IEC 61968-9 EndDeviceFunction[0..*].
+              description: Active meter capabilities.
+              x-standard: "CIM (IEC 61968-9 EndDeviceFunction)"
               items:
                 type: string
                 enum: [ToU, NetMetering, MaxDemand, LoadControl, TamperDetection, PowerQuality, EventLogging]

@@ -53,46 +53,28 @@ components:
           properties:
 
             ratedApparentPower:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVApparentPower"
               description: >
-                Rated apparent power. Typical unit: KiloV-A.
-                SunSpec Model 702 maxVA. CIM: PowerElectronicsConnection.ratedS.
-                Replaces ratedApparentPowerKva from v1.0.
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+                Rated apparent power. Replaces ratedApparentPowerKva from v1.0.
+              x-standard: "SunSpec DER Model 702 (maxVA); CIM (IEC 61970-302 PowerElectronicsConnection.ratedS)"
               x-jsonld:
                 "@id": erDeg:ratedApparentPower
 
             maxReactivePower:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVReactivePower"
               description: >
                 Maximum reactive power injection (leading / over-excited).
-                Typical unit: KiloV-A_Reactive.
-                SunSpec Model 702 maxVar. CIM: PowerElectronicsConnection.maxQ.
                 Replaces maxReactivePowerKvar from v1.0.
-              properties:
-                value: { type: number, minimum: 0 }
-                unit:  { type: string }
+              x-standard: "SunSpec DER Model 702 (maxVar); CIM (IEC 61970-302 PowerElectronicsConnection.maxQ)"
               x-jsonld:
                 "@id": erDeg:maxReactivePower
 
             minReactivePower:
-              type: object
-              required: [value, unit]
-              additionalProperties: false
+              $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVReactivePower"
               description: >
                 Maximum reactive power absorption (lagging / under-excited).
-                Typical unit: KiloV-A_Reactive. Value is typically negative.
-                SunSpec Model 702 maxVarNeg. CIM: PowerElectronicsConnection.minQ.
-                Replaces minReactivePowerKvar from v1.0.
-              properties:
-                value: { type: number }
-                unit:  { type: string }
+                Value is typically negative. Replaces minReactivePowerKvar from v1.0.
+              x-standard: "SunSpec DER Model 702 (maxVarNeg); CIM (IEC 61970-302 PowerElectronicsConnection.minQ)"
               x-jsonld:
                 "@id": erDeg:minReactivePower
 
@@ -100,9 +82,10 @@ components:
               type: string
               enum: [CategoryI, CategoryII, CategoryIII]
               description: >
-                IEEE 1547-2018 abnormal operating performance category.
-                CategoryI: basic. CategoryII: enhanced for distribution-connected DER.
+                Abnormal operating performance category. CategoryI: basic.
+                CategoryII: enhanced for distribution-connected DER.
                 CategoryIII: advanced for large/transmission-connected DER.
+              x-standard: "IEEE 1547-2018 (ride-through category)"
               x-jsonld:
                 "@id": erDeg:rideThroughCategory
 
@@ -113,29 +96,28 @@ components:
                 Inverter grid-interaction mode. GridFollowing: PLL-based sync.
                 GridForming: own V/f reference (microgrid islanding, black-start).
                 Standby: energised but not injecting.
-                CIM: PowerElectronicsConnection.inverterMode.
+              x-standard: "CIM (IEC 61970-302 PowerElectronicsConnection.inverterMode)"
               x-jsonld:
                 "@id": erDeg:operatingMode
 
             voltVarEnabled:
               type: boolean
-              description: >
-                Volt-VAr curve active. IEEE 2030.5 opModVoltVar / SunSpec Model 705.
+              description: Volt-VAr curve active.
+              x-standard: "IEEE 2030.5 (opModVoltVar); SunSpec DER Model 705"
               x-jsonld:
                 "@id": erDeg:voltVarEnabled
 
             freqDroopEnabled:
               type: boolean
-              description: >
-                Frequency-Watt droop active. SunSpec Model 711 / IEEE 1547-2018.
+              description: Frequency-Watt droop active.
+              x-standard: "IEEE 1547-2018; SunSpec DER Model 711"
               x-jsonld:
                 "@id": erDeg:freqDroopEnabled
 
             enterServiceRampTimeSec:
               type: number
               minimum: 0
-              description: >
-                Seconds to ramp from 0 to rated power after reconnection.
-                SunSpec Model 703 ESRmpTms.
+              description: Seconds to ramp from 0 to rated power after reconnection.
+              x-standard: "SunSpec DER Model 703 (ESRmpTms)"
               x-jsonld:
                 "@id": erDeg:enterServiceRampTimeSec

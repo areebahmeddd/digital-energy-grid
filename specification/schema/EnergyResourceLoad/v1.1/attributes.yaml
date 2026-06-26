@@ -57,6 +57,7 @@ components:
             loadCategory:
               type: string
               enum: [Heating, Cooling, WaterHeating, Lighting, EV, Industrial, Other]
-              description: "Functional category of this load. CIM: ConformLoad classification."
+              description: Functional category of this load.
+              x-standard: "CIM (IEC 61970-301 ConformLoad classification)"
               x-jsonld:
                 "@id": erDeg:loadCategory
