@@ -89,5 +89,6 @@ components:
                 type: string
                 minLength: 3
                 maxLength: 3
+                x-standard: "ISO 4217"
               description:
                 type: string

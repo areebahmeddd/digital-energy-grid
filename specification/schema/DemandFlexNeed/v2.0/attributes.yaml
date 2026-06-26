@@ -45,12 +45,14 @@ components:
             startDate:
               type: string
               format: date-time
+              x-standard: "ISO 8601 (UTC, RFC 3339 profile)"
               pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
               description: Event start time in UTC.
               example: "2026-04-01T14:00:00Z"
             endDate:
               type: string
               format: date-time
+              x-standard: "ISO 8601 (UTC, RFC 3339 profile)"
               pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
               description: Event end time in UTC.
               example: "2026-04-01T16:00:00Z"
@@ -76,6 +78,7 @@ components:
 
         location:
           description: Geographic area where flex is needed (GeoJSON).
+          x-standard: "GeoJSON (RFC 7946)"
           x-jsonld:
             "@id": location
           type: object
