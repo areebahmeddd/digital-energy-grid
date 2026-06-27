@@ -142,7 +142,7 @@
                 "from": "2026-06-04T00:00:00Z",
                 "maxRecordsShared": 10000,
                 "resources": [],
-                "scope": "Resource"
+                "scope": "ResourceOnly"
               }
             },
             "id": "urn:uuid:6f2d86e2-cdc3-4fdd-9144-8d7b76a0d350",

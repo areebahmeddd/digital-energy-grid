@@ -57,15 +57,7 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            # Extended (JSON-LD) schema introspection is disabled on the BPP
-            # receiver. Incoming confirm messages carry a Verifiable Credential
-            # in the receiver participant; that VC is an opaque, cryptographically
-            # signed object from another trust domain. Its internal conformance
-            # is governed by its own `credentialSchema` and is verified by the
-            # `vcvalidator` middleware below — beckn validates only the message
-            # envelope (core schema). Re-running the IES domain schema over the
-            # embedded VC here would reject perfectly valid issued credentials.
-            extendedSchema_enabled: "false"
+            extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
@@ -139,7 +131,7 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            extendedSchema_enabled: "false"
+            extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"

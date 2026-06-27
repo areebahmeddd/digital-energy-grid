@@ -57,7 +57,7 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            extendedSchema_enabled: "false"
+            extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
@@ -118,13 +118,7 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            # Disabled on the confirm send path: the outgoing confirm carries a
-            # Verifiable Credential (MeterDataRequestCredential) in the receiver
-            # participant. That VC is an opaque, cryptographically signed object
-            # whose internal conformance is governed by its own credentialSchema
-            # (and verified by the BPP receiver's vcvalidator middleware), not by
-            # re-running the IES domain schema over it at the beckn layer.
-            extendedSchema_enabled: "false"
+            extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
