@@ -57,7 +57,15 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            extendedSchema_enabled: "true"
+            # Extended (JSON-LD) schema introspection is disabled on the BPP
+            # receiver. Incoming confirm messages carry a Verifiable Credential
+            # in the receiver participant; that VC is an opaque, cryptographically
+            # signed object from another trust domain. Its internal conformance
+            # is governed by its own `credentialSchema` and is verified by the
+            # `vcvalidator` middleware below — beckn validates only the message
+            # envelope (core schema). Re-running the IES domain schema over the
+            # embedded VC here would reject perfectly valid issued credentials.
+            extendedSchema_enabled: "false"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
@@ -68,6 +76,24 @@ modules:
           id: router
           config:
             routingConfig: ./config/local-simple-routing-BPPReceiver.yaml
+        middleware:
+          # Verifiable Credential validator. Runs outermost on the BPP
+          # receiver: for the gated action(s) it verifies every embedded VC
+          # (e.g. the MeterDataRequestCredential carried in the confirm
+          # receiver participant) and rejects the request with a NACK if a
+          # credential's proof is invalid, expired, revoked, or signed by
+          # someone other than its issuer.
+          - id: vcvalidator
+            config:
+              enabled: "true"
+              actions: "confirm"
+              allowedDidMethods: "key,jwk,web"
+              checkExpiry: "true"
+              checkRevocation: "true"
+              requireProof: "true"
+              failOpen: "false"
+              httpTimeout: "10"
+              debugLogging: "true"
       steps:
         - validateSign
         - addRoute
@@ -113,7 +139,7 @@ modules:
             type: url
             location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "3600"
-            extendedSchema_enabled: "true"
+            extendedSchema_enabled: "false"
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
