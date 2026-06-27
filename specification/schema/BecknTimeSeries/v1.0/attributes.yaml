@@ -25,6 +25,7 @@ components:
         `payloadType` follows OpenADR's open-string convention — consumer
         profiles (e.g. `DemandFlexPerformance`) MAY restrict it to a
         domain-specific set and add cross-field membership checks.
+      x-standard: "OpenADR 3.1.0"
       x-tags:
         - time-series
         - openadr
