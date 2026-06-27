@@ -1,0 +1,92 @@
+arazzo: 1.0.1
+info:
+  title: Energy Data Exchange — UC1 VC Validation (DEG vcvalidator plugin)
+  version: 2.0.0
+  description: >
+    Asserts the DEG `vcvalidator` beckn-onix middleware. The plugin is wired on
+    the BPP receiver (see config/local-simple-bpp.yaml) and gates the `confirm`
+    action: it verifies the Verifiable Credential carried in the confirm
+    receiver participant (a MeterDataRequestCredential) and rejects the request
+    with a NACK when the credential's proof is invalid, expired, or signed by
+    someone other than its declared issuer.
+
+    Positive case flows through the BAP caller (which signs the request) so the
+    full pipeline returns an ACK. Negative cases POST directly to the BPP
+    receiver — the middleware runs outermost and NACKs before signature/schema
+    validation, so the rejection is deterministic and offline.
+
+    Run with the dedicated runner (the shared run-arazzo.sh treats every NACK
+    as a failure, which is the opposite of what the negative cases assert):
+      ./run-vc-validation.sh
+
+sourceDescriptions:
+  - name: beckn-bap-caller
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8081/bap/caller
+
+  - name: beckn-bpp-receiver
+    type: openapi
+    url: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
+    x-serverUrl: http://localhost:8082/bpp/receiver
+
+workflows:
+  - workflowId: valid-vc-accepted
+    summary: A genuine did:key VC passes validation and the confirm is ACKed
+    steps:
+      - stepId: confirm-valid
+        description: BAP confirms with a cryptographically valid MeterDataRequestCredential
+        operationId: beckn-bap-caller.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-request.json"
+        successCriteria:
+          - condition: $statusCode == 200
+          - context: $response.body
+            condition: $.message.status == "ACK"
+
+  - workflowId: tampered-vc-rejected
+    summary: A VC with a tampered signature is rejected with INVALID_PROOF
+    steps:
+      - stepId: confirm-tampered
+        description: BPP receiver rejects a confirm whose VC signature was altered
+        operationId: beckn-bpp-receiver.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-tampered-vc.json"
+        successCriteria:
+          - condition: $statusCode == 401
+          - context: $response.body
+            condition: $.message.error.code == "INVALID_PROOF"
+
+  - workflowId: expired-vc-rejected
+    summary: An expired VC is rejected with CREDENTIAL_EXPIRED
+    steps:
+      - stepId: confirm-expired
+        description: BPP receiver rejects a confirm whose VC is past validUntil
+        operationId: beckn-bpp-receiver.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-expired-vc.json"
+        successCriteria:
+          - condition: $statusCode == 401
+          - context: $response.body
+            condition: $.message.error.code == "CREDENTIAL_EXPIRED"
+
+  - workflowId: wrong-issuer-vc-rejected
+    summary: A VC whose declared issuer did not sign it is rejected with ISSUER_MISMATCH
+    steps:
+      - stepId: confirm-wrong-issuer
+        description: BPP receiver rejects a confirm whose VC issuer != JWT signer
+        operationId: beckn-bpp-receiver.confirm
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/confirm-wrong-issuer-vc.json"
+        successCriteria:
+          - condition: $statusCode == 401
+          - context: $response.body
+            condition: $.message.error.code == "ISSUER_MISMATCH"
