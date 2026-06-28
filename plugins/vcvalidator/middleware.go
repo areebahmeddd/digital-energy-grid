@@ -21,6 +21,7 @@ func NewMiddleware(cfg map[string]string) (func(http.Handler) http.Handler, erro
 
 	client := &http.Client{Timeout: config.HTTPTimeout}
 	v := newVerifier(config, httpFetcher(client))
+	v.statusGet = httpStatusFetcher(client)
 
 	fmt.Printf("[VCValidator] enabled=%v actions=%v methods=%v checkExpiry=%v checkRevocation=%v requireProof=%v failOpen=%v\n",
 		config.Enabled, config.Actions, config.AllowedDIDMethods,
