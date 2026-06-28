@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -77,13 +78,19 @@ func (c *credential) issuerDID() (string, error) {
 
 // verifier validates credentials against the configured policy.
 type verifier struct {
-	cfg   *Config
-	fetch fetcher
-	now   func() time.Time
+	cfg       *Config
+	fetch     fetcher
+	statusGet statusFetcher
+	now       func() time.Time
 }
 
 func newVerifier(cfg *Config, fetch fetcher) *verifier {
-	return &verifier{cfg: cfg, fetch: fetch, now: time.Now}
+	return &verifier{
+		cfg:       cfg,
+		fetch:     fetch,
+		statusGet: httpStatusFetcher(http.DefaultClient),
+		now:       time.Now,
+	}
 }
 
 // verify runs all configured checks on a single credential. It returns a

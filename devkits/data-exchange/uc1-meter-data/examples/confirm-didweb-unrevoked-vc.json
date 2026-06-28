@@ -1,0 +1,184 @@
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "confirm",
+    "bapId": "bap.example.com",
+    "bapUri": "http://beckn-router:9000/bap/receiver",
+    "bppId": "bpp.example.com",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "transactionId": "60d0f7e1-9b89-456e-b6b3-a7e6c1177a58",
+    "messageId": "didweb-unrevoked-af5a9819",
+    "timestamp": "2026-04-01T09:15:00Z",
+    "schemaContext": [
+      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
+    ]
+  },
+  "message": {
+    "contract": {
+      "id": "660e9500-f30c-52e5-b827-557766551300",
+      "descriptor": {
+        "name": "AMI Meter Data Exchange",
+        "shortDesc": "AMI meter data exchange under existing AMISP contract"
+      },
+      "status": {
+        "code": "ACTIVE"
+      },
+      "commitments": [
+        {
+          "id": "commitment-ami-meter-001",
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
+          "resources": [
+            {
+              "id": "ds-ami-meter-data-blr-zone-a-q1-2026",
+              "descriptor": {
+                "name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026"
+              },
+              "quantity": {
+                "unitText": "report",
+                "unitCode": "EA",
+                "value": "1"
+              }
+            }
+          ],
+          "offer": {
+            "id": "offer-ami-meter-data-inline",
+            "descriptor": {
+              "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
+            },
+            "resourceIds": [
+              "ds-ami-meter-data-blr-zone-a-q1-2026"
+            ]
+          },
+          "commitmentAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+            "@type": "DatasetItem",
+            "schema:identifier": "ds-ami-meter-data-blr-zone-a-q1-2026",
+            "schema:name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026",
+            "schema:temporalCoverage": "2026-01-01/2026-03-31",
+            "dataset:accessMethod": "INLINE"
+          }
+        }
+      ],
+      "consideration": [
+        {
+          "id": "consideration-ami-existing-contract",
+          "status": {
+            "code": "ACTIVE"
+          },
+          "considerationAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
+            "@type": "PriceSpecification",
+            "currency": "INR",
+            "value": 0,
+            "description": "Covered under existing AMI services contract (BESCOM-AMISP-2025-001)"
+          }
+        }
+      ],
+      "participants": [
+        {
+          "id": "intelligrid-amisp-001",
+          "descriptor": {
+            "name": "IntelliGrid AMI Services"
+          }
+        },
+        {
+          "id": "bescom-discom-001",
+          "descriptor": {
+            "name": "BESCOM - Distribution Company"
+          },
+          "participantAttributes": {
+            "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
+            "@type": "MeterDataRequestCredential",
+            "id": "urn:uuid:a8ecc8ad-36d3-45f3-8a5b-7ce620f9730c",
+            "issuer": "did:web:ameetdesh.github.io:ies-did",
+            "validFrom": "2026-06-28T00:00:00Z",
+            "validUntil": "2026-12-25T00:00:00Z",
+            "credentialStatus": {
+              "id": "https://api.dedi.global/dedi/lookup/did:web:did.cord.network:76EU7h2qxfauoLdvRWqSi5jxci13MTTjQ3mTzCrC5QSCAzwWq78Rid/vc-revocation-registry/3f9e72be6abf63bbbb8d1d07fc884e5f3d933537e743a4db9eb93ad07f6c11a3",
+              "type": "dedi",
+              "statusPurpose": "revocation",
+              "statusListCredential": "https://api.dedi.global/dedi/lookup/did:web:did.cord.network:76EU7h2qxfauoLdvRWqSi5jxci13MTTjQ3mTzCrC5QSCAzwWq78Rid/vc-revocation-registry"
+            },
+            "credentialSchema": {
+              "id": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/schema.json",
+              "type": "JsonSchema"
+            },
+            "credentialSubject": {
+              "id": "did:key:z6MksPXPYXKnhtvgxzooB7ApMmHLh2dHaKrV4JDgCkX9YD7Z",
+              "meterDataRequest": {
+                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
+                "@type": "MeterDataRequest",
+                "resources": [],
+                "scope": "ResourceOnly",
+                "from": "2026-06-04T00:00:00Z",
+                "duration": "P6M",
+                "maxRecordsShared": 10000,
+                "capabilitiesRequested": {
+                  "profiles": [
+                    {
+                      "profileType": "CustomerProfile"
+                    },
+                    {
+                      "profileType": "IntervalProfile",
+                      "readings": [
+                        {
+                          "mode": "USAGE",
+                          "value": "kWh imp block"
+                        }
+                      ]
+                    },
+                    {
+                      "profileType": "DailyProfile",
+                      "readings": [
+                        {
+                          "mode": "READING",
+                          "value": "kWh imp"
+                        }
+                      ]
+                    },
+                    {
+                      "profileType": "MonthlyProfile",
+                      "readings": [
+                        {
+                          "mode": "USAGE",
+                          "value": "kWh imp"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "proof": {
+              "type": "JsonWebSignature2020",
+              "jwt": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDp3ZWI6YW1lZXRkZXNoLmdpdGh1Yi5pbzppZXMtZGlkI2tleS0wIn0.eyJpc3MiOiJkaWQ6d2ViOmFtZWV0ZGVzaC5naXRodWIuaW86aWVzLWRpZCIsInN1YiI6ImRpZDprZXk6ejZNa3NQWFBZWEtuaHR2Z3h6b29CN0FwTW1ITGgyZEhhS3JWNEpEZ0NrWDlZRDdaIiwianRpIjoidXJuOnV1aWQ6YThlY2M4YWQtMzZkMy00NWYzLThhNWItN2NlNjIwZjk3MzBjIiwibmJmIjoxNzgyNjA0ODAwLCJleHAiOjE3OTgxNTY4MDAsImlhdCI6MTc4MjYxOTc0OSwidmMiOnsiQGNvbnRleHQiOlsiaHR0cHM6Ly93d3cudzMub3JnL25zL2NyZWRlbnRpYWxzL3YyIl0sImlkIjoidXJuOnV1aWQ6YThlY2M4YWQtMzZkMy00NWYzLThhNWItN2NlNjIwZjk3MzBjIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCJdLCJjcmVkZW50aWFsU3ViamVjdCI6eyJtZXRlckRhdGFSZXF1ZXN0Ijp7IkBjb250ZXh0IjoiaHR0cHM6Ly9pbmRpYS1lbmVyZ3ktc3RhY2suZ2l0aHViLmlvL2llcy1hY2NlbGVyYXRvci9zY2hlbWFzL01ldGVyRGF0YVJlcXVlc3QvdjAuNi9jb250ZXh0Lmpzb25sZCIsIkB0eXBlIjoiTWV0ZXJEYXRhUmVxdWVzdCIsInJlc291cmNlcyI6W10sInNjb3BlIjoiUmVzb3VyY2VPbmx5IiwiZnJvbSI6IjIwMjYtMDYtMDRUMDA6MDA6MDBaIiwiZHVyYXRpb24iOiJQNk0iLCJtYXhSZWNvcmRzU2hhcmVkIjoxMDAwMCwiY2FwYWJpbGl0aWVzUmVxdWVzdGVkIjp7InByb2ZpbGVzIjpbeyJwcm9maWxlVHlwZSI6IkN1c3RvbWVyUHJvZmlsZSJ9LHsicHJvZmlsZVR5cGUiOiJJbnRlcnZhbFByb2ZpbGUiLCJyZWFkaW5ncyI6W3sibW9kZSI6IlVTQUdFIiwidmFsdWUiOiJrV2ggaW1wIGJsb2NrIn1dfSx7InByb2ZpbGVUeXBlIjoiRGFpbHlQcm9maWxlIiwicmVhZGluZ3MiOlt7Im1vZGUiOiJSRUFESU5HIiwidmFsdWUiOiJrV2ggaW1wIn1dfSx7InByb2ZpbGVUeXBlIjoiTW9udGhseVByb2ZpbGUiLCJyZWFkaW5ncyI6W3sibW9kZSI6IlVTQUdFIiwidmFsdWUiOiJrV2ggaW1wIn1dfV19fX0sImNyZWRlbnRpYWxTdGF0dXMiOnsiaWQiOiJodHRwczovL2FwaS5kZWRpLmdsb2JhbC9kZWRpL2xvb2t1cC9kaWQ6d2ViOmRpZC5jb3JkLm5ldHdvcms6NzZFVTdoMnF4ZmF1b0xkdlJXcVNpNWp4Y2kxM01UVGpRM21UekNyQzVRU0NBendXcTc4UmlkL3ZjLXJldm9jYXRpb24tcmVnaXN0cnkvM2Y5ZTcyYmU2YWJmNjNiYmJiOGQxZDA3ZmM4ODRlNWYzZDkzMzUzN2U3NDNhNGRiOWViOTNhZDA3ZjZjMTFhMyIsInR5cGUiOiJkZWRpIiwic3RhdHVzUHVycG9zZSI6InJldm9jYXRpb24iLCJzdGF0dXNMaXN0Q3JlZGVudGlhbCI6Imh0dHBzOi8vYXBpLmRlZGkuZ2xvYmFsL2RlZGkvbG9va3VwL2RpZDp3ZWI6ZGlkLmNvcmQubmV0d29yazo3NkVVN2gycXhmYXVvTGR2UldxU2k1anhjaTEzTVRUalEzbVR6Q3JDNVFTQ0F6d1dxNzhSaWQvdmMtcmV2b2NhdGlvbi1yZWdpc3RyeSJ9LCJjcmVkZW50aWFsU2NoZW1hIjp7ImlkIjoiaHR0cHM6Ly9pbmRpYS1lbmVyZ3ktc3RhY2suZ2l0aHViLmlvL2llcy1hY2NlbGVyYXRvci9zY2hlbWFzL01ldGVyRGF0YVJlcXVlc3RDcmVkZW50aWFsL3YwLjEvc2NoZW1hLmpzb24iLCJ0eXBlIjoiSnNvblNjaGVtYSJ9fX0.uRVTpyqH1L4GGvuKxq2AmjAuWOG_282Uy9N7Td-oCyW70Z10QComtObbI3rGiL5kyN1yZcncEtqoT8_GwJS3-g"
+            }
+          }
+        }
+      ],
+      "performance": [],
+      "settlements": [
+        {
+          "id": "settlement-payment-completed",
+          "considerationId": "consideration-ami-existing-contract",
+          "status": "COMPLETE",
+          "settlementAttributes": {
+            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
+            "@type": "Payment",
+            "beckn:paymentStatus": "COMPLETED",
+            "beckn:amount": {
+              "currency": "INR",
+              "value": 0
+            }
+          }
+        }
+      ]
+    }
+  }
+}

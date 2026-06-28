@@ -49,6 +49,9 @@ func testVerifier(cfg *Config) *verifier {
 	v := newVerifier(cfg, func(ctx context.Context, url string) ([]byte, error) {
 		return nil, fmt.Errorf("unexpected fetch: %s", url)
 	})
+	v.statusGet = func(ctx context.Context, url string) (int, []byte, error) {
+		return 0, nil, fmt.Errorf("unexpected statusGet: %s", url)
+	}
 	v.now = fixedNow
 	return v
 }
@@ -159,18 +162,23 @@ func TestDIDWebUnreachableFailsClosed(t *testing.T) {
 	}
 }
 
-func TestRevoked(t *testing.T) {
+// dediVC builds a did:web VC carrying a DEDI credentialStatus, plus the
+// did:web doc and a fetch/statusGet wired verifier. statusCode is what the DEDI
+// per-record lookup returns (200 = revoked record exists, 404 = not revoked).
+func dediVC(t *testing.T, statusCode int) (*verifier, json.RawMessage) {
+	t.Helper()
 	did := "did:web:issuer.example.org"
 	kid := did + "#key-1"
 	pub, priv, _ := ed25519.GenerateKey(nil)
 	didDoc := makeDIDWebDoc(t, did, kid, pub)
 	jwt := signVCJWT(t, priv, kid, did, "x", fixedNow())
+	statusID := "https://api.dedi.global/dedi/lookup/did:web:did.cord.network:NS/vc-revocation-registry/abc123"
 	vc := map[string]any{
 		"issuer":            did,
 		"credentialSubject": map[string]any{"id": "x"},
 		"credentialStatus": map[string]any{
-			"id":            "https://status.example.org/registry/123",
-			"type":          "dediregistry",
+			"id":            statusID,
+			"type":          "dedi",
 			"statusPurpose": "revocation",
 		},
 		"proof": map[string]any{"type": "JsonWebSignature2020", "jwt": jwt},
@@ -178,17 +186,31 @@ func TestRevoked(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.Actions = []string{"confirm"}
 	v := newVerifier(cfg, func(ctx context.Context, url string) ([]byte, error) {
-		switch url {
-		case "https://issuer.example.org/.well-known/did.json":
+		if url == "https://issuer.example.org/.well-known/did.json" {
 			return didDoc, nil
-		case "https://status.example.org/registry/123":
-			return []byte(`{"status":"revoked"}`), nil
 		}
 		return nil, fmt.Errorf("unexpected fetch: %s", url)
 	})
+	v.statusGet = func(ctx context.Context, url string) (int, []byte, error) {
+		if url == statusID {
+			return statusCode, []byte(`{"message":"..."}`), nil
+		}
+		return 0, nil, fmt.Errorf("unexpected statusGet: %s", url)
+	}
 	v.now = fixedNow
-	err := v.verify(context.Background(), vcBytes(t, vc))
-	assertClass(t, err, failRevoked)
+	return v, vcBytes(t, vc)
+}
+
+func TestDEDIRevoked(t *testing.T) {
+	v, raw := dediVC(t, 200) // DEDI record exists → revoked
+	assertClass(t, v.verify(context.Background(), raw), failRevoked)
+}
+
+func TestDEDINotRevoked(t *testing.T) {
+	v, raw := dediVC(t, 404) // no DEDI record → not revoked → passes
+	if err := v.verify(context.Background(), raw); err != nil {
+		t.Fatalf("expected not-revoked DEDI VC to pass, got: %v", err)
+	}
 }
 
 func TestDataIntegrityProofRejectedWhenRequired(t *testing.T) {

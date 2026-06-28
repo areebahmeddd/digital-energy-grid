@@ -368,6 +368,32 @@ func httpFetcher(client *http.Client) fetcher {
 	}
 }
 
+// statusFetcher performs an HTTP GET and returns the status code and body. It
+// returns an error only on a transport failure (DNS, dial, timeout) — a non-2xx
+// status is reported via the returned code, not as an error, so callers can
+// distinguish e.g. 404 (record absent) from 200 (record present). Used by the
+// DEDI revocation check, where record existence — not body content — is the
+// signal.
+type statusFetcher func(ctx context.Context, url string) (int, []byte, error)
+
+// httpStatusFetcher returns a statusFetcher backed by an http.Client.
+func httpStatusFetcher(client *http.Client) statusFetcher {
+	return func(ctx context.Context, url string) (int, []byte, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return 0, nil, err
+		}
+		req.Header.Set("Accept", "application/json, */*")
+		resp, err := client.Do(req)
+		if err != nil {
+			return 0, nil, err
+		}
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+		return resp.StatusCode, body, nil
+	}
+}
+
 func hasPrefix(b, prefix []byte) bool {
 	if len(b) < len(prefix) {
 		return false
