@@ -31,6 +31,7 @@ modules:
         registry:
           id: dediregistry
           config:
+            url: https://api.dev.beckn.io/registry/dedi
             registryName: subscribers.beckn.one
             allowedParentNamespaces: "IES,IES-DISCOMS"
             timeout: 10
@@ -46,6 +47,8 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
+            type: url
+            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/api/beckn.yaml
             cacheTTL: "3600"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
@@ -112,6 +115,7 @@ modules:
         registry:
           id: dediregistry
           config:
+            url: https://api.dev.beckn.io/registry/dedi
             registryName: subscribers.beckn.one
             allowedParentNamespaces: "IES,IES-DISCOMS"
             timeout: 10
@@ -127,6 +131,8 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
+            type: url
+            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/api/beckn.yaml
             cacheTTL: "3600"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "86400"
