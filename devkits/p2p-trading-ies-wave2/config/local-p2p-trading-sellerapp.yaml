@@ -31,7 +31,6 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
             allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network"
             timeout: 10
@@ -47,8 +46,6 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
-            type: url
-            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "172800"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "172800"
@@ -117,7 +114,6 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
             allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network"
             timeout: 10
@@ -133,8 +129,6 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
-            type: url
-            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "172800"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "172800"
@@ -201,7 +195,6 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
             allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network"
             timeout: 10
@@ -217,8 +210,6 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
-            type: url
-            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "172800"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "172800"
@@ -299,7 +290,6 @@ modules:
         registry:
           id: dediregistry
           config:
-            url: https://fabric.nfh.global/registry/dedi
             registryName: subscribers.beckn.one
             allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network"
             timeout: 10
@@ -315,8 +305,6 @@ modules:
         schemaValidator:
           id: schemav2validator
           config:
-            type: url
-            location: https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/tags/core-v2.0.0-lts/api/v2.0.0/beckn.yaml
             cacheTTL: "172800"
             extendedSchema_enabled: "true"
             extendedSchema_cacheTTL: "172800"
