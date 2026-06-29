@@ -1,28 +1,5 @@
 {
-  "context": {
-    "version": "2.0.0",
-    "action": "discover",
-    "timestamp": "2024-10-04T10:00:00Z",
-    "message_id": "msg-discover-001",
-    "transaction_id": "txn-energy-001",
-    "bap_id": "bap.example.com",
-    "bap_uri": "https://bap.example.com",
-    "bpp_id": "bpp.example.com",
-    "bpp_uri": "https://bpp.example.com",
-    "ttl": "PT30S",
-    "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0",
-    "location": {
-      "city": {
-        "code": "BLR",
-        "name": "Bangalore"
-      },
-      "country": {
-        "code": "IND",
-        "name": "India"
-      }
-    },
-    "schema_context": ["https://raw.githubusercontent.com/beckn/DEG/tags/deg-1.0.1/specification/schema/EnergyTrade/v0.3/context.jsonld"]
-  },
+  "context": {"version": "2.0.0", "action": "discover", "timestamp": "2024-10-04T10:00:00Z", "message_id": "msg-discover-001", "transaction_id": "txn-energy-001", "bap_id": "bap.example.com", "bap_uri": "https://bap.example.com", "bpp_id": "bpp.example.com", "bpp_uri": "https://bpp.example.com", "ttl": "PT30S", "domain": "beckn.one:deg:p2p-trading-interdiscom:2.0.0", "location": {"city": {"code": "BLR", "name": "Bangalore"}, "country": {"code": "IND", "name": "India"}}, "schema_context": ["https://raw.githubusercontent.com/beckn/DEG/tags/deg-1.0.1/specification/schema/EnergyTrade/v0.3/context.jsonld"]},
   "message": {
     "filters": {
       "type": "jsonpath",

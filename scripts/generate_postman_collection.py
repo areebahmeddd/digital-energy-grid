@@ -408,10 +408,22 @@ pm.collectionVariables.set('iso_date', isoTimestamp);
 """
 
 
-# Keys whose array elements should each render as a single line of JSON in
-# emitted Postman bodies. Mirrors the formatting convention used in the
-# example payloads on disk so collections stay compact and easy to scan.
-_COLLAPSE_ITEM_KEYS = {
+# Compact-yet-readable JSON formatting.
+#
+# `_format_payload` renders an object/array on ONE line whenever its compact
+# form fits within `_MAX_INLINE` characters (about three wrapped lines), so
+# small structures — schemaContext, descriptor, status, quantity, eventWindow,
+# policy, … — stay compact instead of sprawling across many lines. Larger
+# structures (commitments, resources, inputs, meters, performance, offers,
+# catalogs) exceed the budget and expand with 2-space indentation.
+#
+# Arrays under `_FORCE_ELEMENT_KEYS` get a stronger guarantee: when the array
+# is too big to inline whole, each element is still emitted on its own single
+# line. This keeps every TimeSeries `intervals[i]` (id + payloads) and every
+# payloadDescriptor / reportDescriptor / role / participant on one row even
+# when an individual element would otherwise wrap.
+_MAX_INLINE = 600
+_FORCE_ELEMENT_KEYS = {
     "intervals",
     "payloadDescriptors",
     "reportDescriptors",
@@ -420,50 +432,47 @@ _COLLAPSE_ITEM_KEYS = {
     "participants",
     "revenueFlows",
 }
-_SCALAR_INLINE_LIMIT = 140
 
 
-def _format_payload(doc: Any) -> str:
-    """Pretty-print JSON, but collapse small repetitive arrays to one-liners.
+def _compact(node: Any) -> str:
+    return json.dumps(node, separators=(", ", ": "), ensure_ascii=False)
 
-    Each element of an array under one of `_COLLAPSE_ITEM_KEYS` renders on a
-    single line. Pure-scalar arrays whose inline form is short also collapse
-    inline. Larger nested structures (commitments, resources, inputs, meters,
-    performance, offers, catalogs) stay expanded.
+
+def _format_payload(doc: Any, level: int = 0, force_elements: bool = False) -> str:
+    """Pretty-print JSON, collapsing any object/array that fits on one line.
+
+    A node renders inline when its compact form is <= `_MAX_INLINE` chars.
+    Otherwise it expands with 2-space indentation and its children are
+    formatted recursively. When `force_elements` is set (an array under a key
+    in `_FORCE_ELEMENT_KEYS` that was too big to inline whole), each element is
+    emitted compact on its own line.
     """
-    placeholders: Dict[str, str] = {}
+    compact = _compact(doc)
+    if len(compact) <= _MAX_INLINE:
+        return compact
 
-    def add(item: Any) -> str:
-        ph = f"__PMPH_{len(placeholders)}__"
-        placeholders[ph] = json.dumps(item, separators=(", ", ": "), ensure_ascii=False)
-        return ph
+    pad = "  " * level
+    inner = "  " * (level + 1)
 
-    def visit(node: Any) -> None:
-        if isinstance(node, dict):
-            for key in list(node.keys()):
-                value = node[key]
-                if key in _COLLAPSE_ITEM_KEYS and isinstance(value, list):
-                    for i, item in enumerate(value):
-                        value[i] = add(item)
-                elif isinstance(value, list) and value and all(
-                    isinstance(x, (str, int, float, bool, type(None))) for x in value
-                ):
-                    inline = json.dumps(value, separators=(", ", ": "), ensure_ascii=False)
-                    if len(inline) <= _SCALAR_INLINE_LIMIT:
-                        node[key] = add(value)
-                else:
-                    visit(value)
-        elif isinstance(node, list):
-            for x in node:
-                visit(x)
+    if isinstance(doc, dict):
+        items = list(doc.items())
+        lines = []
+        for i, (key, value) in enumerate(items):
+            comma = "," if i < len(items) - 1 else ""
+            force = isinstance(value, list) and key in _FORCE_ELEMENT_KEYS
+            rendered = _format_payload(value, level + 1, force)
+            lines.append(f"{inner}{json.dumps(key, ensure_ascii=False)}: {rendered}{comma}")
+        return "{\n" + "\n".join(lines) + f"\n{pad}}}"
 
-    # We mutate `doc` in place; callers pass a freshly produced
-    # request_body so that's fine.
-    visit(doc)
-    out = json.dumps(doc, indent=2, ensure_ascii=False)
-    for ph, oneline in placeholders.items():
-        out = out.replace(f'"{ph}"', oneline)
-    return out
+    if isinstance(doc, list):
+        lines = []
+        for i, value in enumerate(doc):
+            comma = "," if i < len(doc) - 1 else ""
+            rendered = _compact(value) if force_elements else _format_payload(value, level + 1)
+            lines.append(f"{inner}{rendered}{comma}")
+        return "[\n" + "\n".join(lines) + f"\n{pad}]"
+
+    return compact
 
 
 def matches_role_filter(filename: str, role: str) -> bool:

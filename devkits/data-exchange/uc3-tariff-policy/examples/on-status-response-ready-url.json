@@ -1,63 +1,15 @@
 {
-  "context": {
-    "networkId": "nfh.global/testnet-deg",
-    "version": "2.0.0",
-    "action": "on_status",
-    "bapId": "bap.example.com",
-    "bapUri": "http://beckn-router:9000/bap/receiver",
-    "bppId": "bpp.example.com",
-    "bppUri": "http://beckn-router:9000/bpp/receiver",
-    "transactionId": "e5f6a7b8-c9d0-1234-ef01-234567890123",
-    "messageId": "7c8d9e0f-1a2b-3456-ef01-234567890128",
-    "timestamp": "2026-04-01T09:25:05Z",
-    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]
-  },
+  "context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "on_status", "bapId": "bap.example.com", "bapUri": "http://beckn-router:9000/bap/receiver", "bppId": "bpp.example.com", "bppUri": "http://beckn-router:9000/bpp/receiver", "transactionId": "e5f6a7b8-c9d0-1234-ef01-234567890123", "messageId": "7c8d9e0f-1a2b-3456-ef01-234567890128", "timestamp": "2026-04-01T09:25:05Z", "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]},
   "message": {
     "contract": {
       "id": "770e9500-f30c-52e5-b827-557766551301",
-      "descriptor": {
-        "name": "Retail Tariff Policy Subscription"
-      },
-      "status": {
-        "code": "ACTIVE"
-      },
-      "commitments": [
-        {
-          "id": "commitment-tariff-policy-001",
-          "status": {
-            "descriptor": {
-              "code": "CLOSED"
-            }
-          },
-          "resources": [
-            {
-              "id": "ds-tariff-policy-mum-res-2024-25",
-              "descriptor": {
-                "name": "Mumbai Residential Telescopic Tariff 2024-25"
-              },
-              "quantity": {
-                "unitText": "policy",
-                "unitCode": "EA",
-                "value": "1"
-              }
-            }
-          ],
-          "offer": {
-            "id": "offer-tariff-policy-inline",
-            "descriptor": {
-              "name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"
-            },
-            "resourceIds": ["ds-tariff-policy-mum-res-2024-25"]
-          }
-        }
-      ],
+      "descriptor": {"name": "Retail Tariff Policy Subscription"},
+      "status": {"code": "ACTIVE"},
+      "commitments": [{"id": "commitment-tariff-policy-001", "status": {"descriptor": {"code": "CLOSED"}}, "resources": [{"id": "ds-tariff-policy-mum-res-2024-25", "descriptor": {"name": "Mumbai Residential Telescopic Tariff 2024-25"}, "quantity": {"unitText": "policy", "unitCode": "EA", "value": "1"}}], "offer": {"id": "offer-tariff-policy-inline", "descriptor": {"name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"}, "resourceIds": ["ds-tariff-policy-mum-res-2024-25"]}}],
       "performance": [
         {
           "id": "perf-tariff-policy-delivery-001",
-          "status": {
-            "code": "DELIVERY_COMPLETE",
-            "name": "Tariff policy artefact available for download"
-          },
+          "status": {"code": "DELIVERY_COMPLETE", "name": "Tariff policy artefact available for download"},
           "commitmentIds": ["commitment-tariff-policy-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
@@ -70,33 +22,12 @@
             "dataset:downloadUrl": "https://merc.example.in/exports/tariff-policy-mum-res-2024-25.jsonld",
             "dataset:downloadExpiresAt": "2026-04-08T09:25:05Z",
             "dataset:fileSizeBytes": 4320,
-            "dataset:checksum": {
-              "algorithm": "SHA-256",
-              "value": "f1e2d3c4b5a697887766554433221100ffeeddccbbaa99887766554433221100"
-            }
+            "dataset:checksum": {"algorithm": "SHA-256", "value": "f1e2d3c4b5a697887766554433221100ffeeddccbbaa99887766554433221100"}
           }
         }
       ],
-      "participants": [
-        {"id": "merc-regulator-001", "descriptor": {"name": "Maharashtra Electricity Regulatory Commission"}},
-        {"id": "merashehar-discom-001", "descriptor": {"name": "MeraShehar - Distribution Company"}}
-      ],
-      "settlements": [
-        {
-          "id": "settlement-tariff-no-charge",
-          "considerationId": "consideration-tariff-public-good",
-          "status": "COMPLETE",
-          "settlementAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
-            "@type": "Payment",
-            "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": {
-              "currency": "INR",
-              "value": 0
-            }
-          }
-        }
-      ]
+      "participants": [{"id": "merc-regulator-001", "descriptor": {"name": "Maharashtra Electricity Regulatory Commission"}}, {"id": "merashehar-discom-001", "descriptor": {"name": "MeraShehar - Distribution Company"}}],
+      "settlements": [{"id": "settlement-tariff-no-charge", "considerationId": "consideration-tariff-public-good", "status": "COMPLETE", "settlementAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld", "@type": "Payment", "beckn:paymentStatus": "COMPLETED", "beckn:amount": {"currency": "INR", "value": 0}}}]
     }
   }
 }

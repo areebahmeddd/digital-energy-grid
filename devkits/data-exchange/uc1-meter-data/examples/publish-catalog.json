@@ -8,45 +8,21 @@
     "transactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "messageId": "1a2b3c4d-5e6f-7890-abcd-ef0987654321",
     "timestamp": "2026-04-01T06:00:00Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
-      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
-      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
-      "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld", "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld", "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld", "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld"]
   },
   "message": {
-    "publishDirectives": [
-      {
-        "catalogId": "catalog-intelligrid-ami-data-001",
-        "catalogType": "REGULAR",
-        "updateMode": "MERGE",
-        "visibleTo": ["nfh.global/testnet-deg"]
-      }
-    ],
+    "publishDirectives": [{"catalogId": "catalog-intelligrid-ami-data-001", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["nfh.global/testnet-deg"]}],
     "catalogs": [
       {
         "id": "catalog-intelligrid-ami-data-001",
-        "descriptor": {
-          "name": "IntelliGrid AMI - Energy Meter Data Catalogue",
-          "shortDesc": "Advanced metering infrastructure datasets for distribution companies"
-        },
+        "descriptor": {"name": "IntelliGrid AMI - Energy Meter Data Catalogue", "shortDesc": "Advanced metering infrastructure datasets for distribution companies"},
         "bppId": "bpp.example.com",
         "bppUri": "http://bpp.example.com/bpp/receiver",
-        "provider": {
-          "id": "intelligrid-amisp-001",
-          "descriptor": {
-            "name": "IntelliGrid AMI Services"
-          }
-        },
+        "provider": {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}},
         "resources": [
           {
             "id": "ds-ami-meter-data-blr-zone-a-q1-2026",
-            "descriptor": {
-              "name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026",
-              "shortDesc": "15-minute interval smart meter readings for residential consumers in Bengaluru Zone A",
-              "longDesc": "IES_Report-format AMI telemetry data from smart meters deployed across Bengaluru Zone A residential connections. Includes active energy (kWh) usage readings at 15-minute intervals, suitable for billing, load forecasting, and demand-response analytics."
-            },
+            "descriptor": {"name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026", "shortDesc": "15-minute interval smart meter readings for residential consumers in Bengaluru Zone A", "longDesc": "IES_Report-format AMI telemetry data from smart meters deployed across Bengaluru Zone A residential connections. Includes active energy (kWh) usage readings at 15-minute intervals, suitable for billing, load forecasting, and demand-response analytics."},
             "resourceAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
               "@type": "DatasetItem",
@@ -58,83 +34,21 @@
               "dataset:refreshFrequency": "PT15M",
               "dataset:accessMethod": "INLINE",
               "ies:dataSchema": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/schema.json",
-              "ies:capabilityProfile": {
-                "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
-                "@type": "MeterDataCapabilities",
-                "profiles": [
-                  {
-                    "profileType": "CustomerProfile"
-                  },
-                  {
-                    "profileType": "IntervalProfile"
-                  },
-                  {
-                    "profileType": "DailyProfile"
-                  },
-                  {
-                    "profileType": "MonthlyProfile"
-                  },
-                  {
-                    "profileType": "BillDetails"
-                  },
-                  {
-                    "profileType": "InstantaneousProfile"
-                  },
-                  {
-                    "profileType": "EventProfile"
-                  },
-                  {
-                    "profileType": "AlarmProfile"
-                  }
-                ],
-                "supportedScopes": ["ResourceOnly", "ResourceAndChildren", "ChildrenOnly"],
-                "maxHistoryDuration": "P3Y"
-              }
+              "ies:capabilityProfile": {"@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld", "@type": "MeterDataCapabilities", "profiles": [{"profileType": "CustomerProfile"}, {"profileType": "IntervalProfile"}, {"profileType": "DailyProfile"}, {"profileType": "MonthlyProfile"}, {"profileType": "BillDetails"}, {"profileType": "InstantaneousProfile"}, {"profileType": "EventProfile"}, {"profileType": "AlarmProfile"}], "supportedScopes": ["ResourceOnly", "ResourceAndChildren", "ChildrenOnly"], "maxHistoryDuration": "P3Y"}
             }
           }
         ],
         "offers": [
           {
             "id": "offer-ami-meter-data-inline",
-            "descriptor": {
-              "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026",
-              "shortDesc": "In-message delivery of AMI meter data via beckn dataPayload (IES_Report format)"
-            },
+            "descriptor": {"name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026", "shortDesc": "In-message delivery of AMI meter data via beckn dataPayload (IES_Report format)"},
             "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"],
-            "validity": {
-              "startDate": "2026-01-01T00:00:00Z",
-              "endDate": "2026-06-30T23:59:59Z"
-            },
-            "considerations": [
-              {
-                "id": "consideration-ami-existing-contract",
-                "status": {
-                  "code": "ACTIVE"
-                },
-                "considerationAttributes": {
-                  "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
-                  "@type": "PriceSpecification",
-                  "currency": "INR",
-                  "value": 0,
-                  "description": "Covered under existing AMI services contract (BESCOM-AMISP-2025-001)"
-                }
-              }
-            ],
+            "validity": {"startDate": "2026-01-01T00:00:00Z", "endDate": "2026-06-30T23:59:59Z"},
+            "considerations": [{"id": "consideration-ami-existing-contract", "status": {"code": "ACTIVE"}, "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 0, "description": "Covered under existing AMI services contract (BESCOM-AMISP-2025-001)"}}],
             "offerAttributes": {
               "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/context.jsonld",
               "@type": "MeterDataRequestCredential",
-              "policy": {
-                "requiredCredentials": [
-                  {
-                    "type": "MeterDataRequestCredential",
-                    "schemaUrl": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/schema.json",
-                    "validationRequired": true,
-                    "attachAt": "confirm",
-                    "attachIn": "commitmentAttributes.ies:meterDataRequest",
-                    "description": "Seeker must attach a valid, signed MeterDataRequestCredential scoping the requested meters, profiles, and time window. Provider will verify signature, expiry, and revocation status before fulfilling delivery."
-                  }
-                ]
-              }
+              "policy": {"requiredCredentials": [{"type": "MeterDataRequestCredential", "schemaUrl": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequestCredential/v0.1/schema.json", "validationRequired": true, "attachAt": "confirm", "attachIn": "commitmentAttributes.ies:meterDataRequest", "description": "Seeker must attach a valid, signed MeterDataRequestCredential scoping the requested meters, profiles, and time window. Provider will verify signature, expiry, and revocation status before fulfilling delivery."}]}
             }
           }
         ]

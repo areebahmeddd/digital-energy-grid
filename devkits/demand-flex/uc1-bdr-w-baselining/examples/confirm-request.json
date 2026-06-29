@@ -10,57 +10,16 @@
     "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
     "messageId": "54fb3f15-48aa-4408-bca4-52486b767679",
     "timestamp": "2026-03-30T10:10:00Z",
-    "schemaContext": [
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
-    ]
+    "schemaContext": ["https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld", "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld", "https://schema.beckn.io/Quantity/context.jsonld"]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
-          "resources": [
-            {
-              "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi",
-                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
-              "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-                "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [77.209, 28.6139]
-                }
-              }
-            }
-          ],
+          "status": {"descriptor": {"code": "DRAFT"}},
+          "resources": [{"id": "flex-need-north-delhi-apr1", "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"}, "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"}, "resourceAttributes": {"@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "@type": "DemandFlexNeed", "direction": "REDUCE", "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"}, "capacityType": "CURTAILMENT", "maxCapacityKw": 500, "location": {"type": "Point", "coordinates": [77.209, 28.6139]}}}],
           "offer": {
             "id": "offer-flex-001",
             "resourceIds": ["flex-need-north-delhi-apr1"],
@@ -68,55 +27,14 @@
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
-                {
-                  "role": "buyer",
-                  "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
-                },
+                {"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}},
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
+                    "plannedDemandChange": {"unitCode": "KWH", "unitQuantity": 150.0, "@type": "Quantity"},
                     "participatingMeters": ["der://meter/001", "der://meter/002"],
-                    "energyResources": [
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN001",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Nexon EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 30.0,
-                        "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": ["der://meter/001"]
-                      },
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN002",
-                        "resourceType": "EV_CHARGER",
-                        "make": "MG",
-                        "model": "ZS EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 44.5,
-                        "telemetryProvider": "mg-imotion",
-                        "parentResources": ["der://meter/002"]
-                      }
-                    ],
+                    "energyResources": [{"@type": "EnergyResource", "resourceId": "der://ev/VIN001", "resourceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics", "parentResources": ["der://meter/001"]}, {"@type": "EnergyResource", "resourceId": "der://ev/VIN002", "resourceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion", "parentResources": ["der://meter/002"]}],
                     "reportDescriptors": [
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
                       {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
@@ -131,22 +49,8 @@
           }
         }
       ],
-      "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-        "@type": "DEGContract",
-        "roles": [
-          {"role": "buyer", "participantId": "tpddl-north-delhi"},
-          {"role": "seller", "participantId": "greenflex-agg"}
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
-          "queryPath": "data.deg.contracts.demand_flex"
-        }
-      },
-      "participants": [
-        {"role": "buyer", "participantId": "tpddl-north-delhi"},
-        {"role": "seller", "participantId": "greenflex-agg"}
-      ]
+      "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego", "queryPath": "data.deg.contracts.demand_flex"}},
+      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }
   }
 }

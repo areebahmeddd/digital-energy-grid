@@ -5,47 +5,8 @@
     "action": "on_status",
     "_comment_design": "BAP-PULL PAGINATION (illustrative). Same 12,000-meter cohort and event as the push example, but here the BAP drives the cadence — it issues `status` calls, each carrying a `pageCursor` tag, and the BPP returns one page per call. This file is the BPP's on_status response to a BAP status request whose context.tags carried `{descriptor: {code: 'pageCursor'}, value: 'evt-bulk-001-p2'}`. The response echoes that cursor on pageInfo.cursor and advertises the next slice via pageInfo.nextCursor. BAP keeps pulling until pageInfo.nextCursor is null AND pageInfo.isLast is true, then assembles meters[] and runs settlement. _comment_inbound_request below records the shape of the request that triggered this response so the example is self-contained.",
     "_comment_inbound_request": {
-      "context": {
-        "networkId": "nfh.global/testnet-deg",
-        "version": "2.0.0",
-        "action": "status",
-        "bapId": "bap.example.com",
-        "bppId": "bpp.example.com",
-        "transactionId": "01ac9817-da6f-4f6f-908e-bec6f9b2b8cd",
-        "messageId": "e403fe18-94ba-4986-9908-4d0d2e7f133b",
-        "timestamp": "2026-04-01T10:34:30Z",
-        "tags": [
-          {
-            "descriptor": {
-              "code": "pagination"
-            },
-            "list": [
-              {
-                "descriptor": {
-                  "code": "pageCursor"
-                },
-                "value": "evt-bulk-001-p2"
-              },
-              {
-                "descriptor": {
-                  "code": "collectionId"
-                },
-                "value": "perf-evt-bulk-001-actuals"
-              }
-            ]
-          }
-        ]
-      },
-      "message": {
-        "ref": {
-          "id": "contract-flex-bulk-001",
-          "performance": [
-            {
-              "id": "perf-evt-bulk-001-actuals"
-            }
-          ]
-        }
-      }
+      "context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "status", "bapId": "bap.example.com", "bppId": "bpp.example.com", "transactionId": "01ac9817-da6f-4f6f-908e-bec6f9b2b8cd", "messageId": "e403fe18-94ba-4986-9908-4d0d2e7f133b", "timestamp": "2026-04-01T10:34:30Z", "tags": [{"descriptor": {"code": "pagination"}, "list": [{"descriptor": {"code": "pageCursor"}, "value": "evt-bulk-001-p2"}, {"descriptor": {"code": "collectionId"}, "value": "perf-evt-bulk-001-actuals"}]}]},
+      "message": {"ref": {"id": "contract-flex-bulk-001", "performance": [{"id": "perf-evt-bulk-001-actuals"}]}}
     },
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
@@ -54,53 +15,17 @@
     "transactionId": "01ac9817-da6f-4f6f-908e-bec6f9b2b8cd",
     "messageId": "ae710ba6-5687-4e72-b6d6-bcce78db1c89",
     "timestamp": "2026-04-01T10:34:31Z",
-    "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/BecknPageInfo/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/BecknResourceRef/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
-    ]
+    "schemaContext": ["https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld", "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld", "https://schema.beckn.io/BecknPageInfo/v1.0/context.jsonld", "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld", "https://schema.beckn.io/BecknResourceRef/v1.0/context.jsonld", "https://schema.beckn.io/Quantity/context.jsonld", "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"]
   },
   "message": {
     "contract": {
       "id": "contract-flex-bulk-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-bulk-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
-          "resources": [
-            {
-              "id": "flex-need-north-delhi-apr1-bulk",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 6000,
-                "@type": "Quantity"
-              },
-              "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-                "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 20000
-              }
-            }
-          ],
+          "status": {"descriptor": {"code": "ACTIVE"}},
+          "resources": [{"id": "flex-need-north-delhi-apr1-bulk", "quantity": {"unitCode": "kW", "unitQuantity": 6000, "@type": "Quantity"}, "resourceAttributes": {"@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "@type": "DemandFlexNeed", "direction": "REDUCE", "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"}, "capacityType": "CURTAILMENT", "maxCapacityKw": 20000}}],
           "offer": {
             "id": "offer-flex-bulk-001",
             "resourceIds": ["flex-need-north-delhi-apr1-bulk"],
@@ -108,47 +33,15 @@
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
-                {
-                  "role": "buyer",
-                  "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
-                },
+                {"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}},
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 6000.0
-                    },
-                    "participatingMetersRef": {
-                      "@type": "ResourceRef",
-                      "uri": "https://bpp.example.com/bulk/cohort-2026-04-01.jsonld",
-                      "contentHash": "sha256:5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
-                      "count": 12000,
-                      "contentType": "application/ld+json",
-                      "schemaContext": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld",
-                      "sizeBytes": 920000
-                    },
-                    "participatingMetersDigest": {
-                      "count": 12000,
-                      "sha256OfSortedIds": "sha256:b3a8e0e1f9ab1bfe3a14b4e95f3a0e1c2d3f4e5a6b7c8d9e0f1a2b3c4d5e6f7a"
-                    },
-                    "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}
-                    ]
+                    "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 6000.0},
+                    "participatingMetersRef": {"@type": "ResourceRef", "uri": "https://bpp.example.com/bulk/cohort-2026-04-01.jsonld", "contentHash": "sha256:5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", "count": 12000, "contentType": "application/ld+json", "schemaContext": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld", "sizeBytes": 920000},
+                    "participatingMetersDigest": {"count": 12000, "sha256OfSortedIds": "sha256:b3a8e0e1f9ab1bfe3a14b4e95f3a0e1c2d3f4e5a6b7c8d9e0f1a2b3c4d5e6f7a"},
+                    "reportDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}]
                   }
                 }
               ]
@@ -159,10 +52,7 @@
       "performance": [
         {
           "id": "perf-evt-bulk-001-actuals",
-          "status": {
-            "code": "DELIVERY_COMPLETE_PARTIAL",
-            "name": "Actuals page 2 of 3 (4,000 of 12,000 meters)"
-          },
+          "status": {"code": "DELIVERY_COMPLETE_PARTIAL", "name": "Actuals page 2 of 3 (4,000 of 12,000 meters)"},
           "commitmentIds": ["commitment-flex-bulk-001"],
           "performanceAttributes": {
             "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
@@ -173,70 +63,19 @@
             "meters": [
               {
                 "meterId": "der://meter/04001",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-01T08:30:00Z",
-                    "duration": "PT1H"
-                  },
-                  "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
-                  ],
-                  "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [52.0]}, {"type": "USAGE", "values": [26.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [24.0]}]}
-                  ]
-                }
+                "telemetry": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}], "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [52.0]}, {"type": "USAGE", "values": [26.0]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [24.0]}]}]}
               },
               {
                 "meterId": "der://meter/04002",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-01T08:30:00Z",
-                    "duration": "PT1H"
-                  },
-                  "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
-                  ],
-                  "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [41.0]}, {"type": "USAGE", "values": [19.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [40.0]}, {"type": "USAGE", "values": [16.0]}]}
-                  ]
-                }
+                "telemetry": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}], "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [41.0]}, {"type": "USAGE", "values": [19.0]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [40.0]}, {"type": "USAGE", "values": [16.0]}]}]}
               }
             ],
-            "pageInfo": {
-              "@type": "PageInfo",
-              "sequence": 1,
-              "pageSize": 4000,
-              "total": 12000,
-              "isLast": false,
-              "cursor": "evt-bulk-001-p2",
-              "nextCursor": "evt-bulk-001-p3",
-              "collectionId": "perf-evt-bulk-001-actuals"
-            }
+            "pageInfo": {"@type": "PageInfo", "sequence": 1, "pageSize": 4000, "total": 12000, "isLast": false, "cursor": "evt-bulk-001-p2", "nextCursor": "evt-bulk-001-p3", "collectionId": "perf-evt-bulk-001-actuals"}
           }
         }
       ],
-      "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-        "@type": "DEGContract",
-        "roles": [
-          {"role": "buyer", "participantId": "tpddl-north-delhi"},
-          {"role": "seller", "participantId": "greenflex-agg"}
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
-          "queryPath": "data.deg.contracts.demand_flex"
-        }
-      },
-      "participants": [
-        {"role": "buyer", "participantId": "tpddl-north-delhi"},
-        {"role": "seller", "participantId": "greenflex-agg"}
-      ]
+      "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego", "queryPath": "data.deg.contracts.demand_flex"}},
+      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }
   }
 }

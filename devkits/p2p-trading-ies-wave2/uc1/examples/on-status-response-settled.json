@@ -10,60 +10,22 @@
     "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
     "messageId": "acd9569e-7656-44f5-b5dd-b8f172593b3a",
     "timestamp": "2026-04-26T06:30:00Z",
-    "schemaContext": [
-      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
-    ]
+    "schemaContext": ["https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld", "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld", "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"]
   },
   "message": {
     "contract": {
       "id": "contract-p2p-001",
-      "status": {
-        "code": "COMPLETE"
-      },
+      "status": {"code": "COMPLETE"},
       "commitments": [
         {
           "id": "commitment-p2p-001",
-          "status": {
-            "descriptor": {
-              "code": "CLOSED"
-            }
-          },
-          "resources": [
-            {
-              "id": "energy-resource-solar-001",
-              "descriptor": {
-                "name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"
-              },
-              "quantity": {
-                "@type": "Quantity",
-                "unitCode": "KWH",
-                "unitQuantity": 35.0
-              },
-              "resourceAttributes": {
-                "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-                "@type": "EnergyResource",
-                "type": "SOLAR",
-                "id": "TEST_METER_SELLER_001"
-              }
-            }
-          ],
-          "offer": {
-            "id": "offer-p2p-001",
-            "resourceIds": ["energy-resource-solar-001"]
-          },
+          "status": {"descriptor": {"code": "CLOSED"}},
+          "resources": [{"id": "energy-resource-solar-001", "descriptor": {"name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"}, "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.0}, "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}}],
+          "offer": {"id": "offer-p2p-001", "resourceIds": ["energy-resource-solar-001"]},
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
-            "intervalPeriod": {
-              "start": "2026-04-26T04:30:00Z",
-              "duration": "PT1H"
-            },
+            "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
               {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR", "insertedBy": "sellerPlatform"},
               {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH", "insertedBy": "buyerPlatform"},
@@ -80,20 +42,7 @@
           }
         }
       ],
-      "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-        "@type": "DEGContract",
-        "roles": [
-          {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
-          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
-          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
-          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
-          "queryPath": "data.deg.contracts.p2p_trading"
-        }
-      },
+      "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyerPlatform", "participantId": "buyerapp.example.com"}, {"role": "sellerPlatform", "participantId": "sellerapp.example.com"}, {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"}, {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego", "queryPath": "data.deg.contracts.p2p_trading"}},
       "participants": [
         {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
         {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
@@ -101,56 +50,10 @@
         {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
       "consideration": [
-        {
-          "id": "payment-term-p2p-001",
-          "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
-            "@type": "SettlementTerm",
-            "amount": {
-              "currency": "INR",
-              "value": 450.26
-            },
-            "settlementStatus": "COMPLETE",
-            "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {
-              "accountHolderName": "Seller Platform Pvt Ltd",
-              "accountNumber": "0012345678901",
-              "branchCode": "HDFC0001234",
-              "bankName": "HDFC Bank"
-            },
-            "acceptedPaymentMethods": ["BANK_TRANSFER"]
-          }
-        },
-        {
-          "id": "auto-revenue-flows",
-          "considerationAttributes": {
-            "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
-            "@type": "RevenueFlow",
-            "revenueFlows": [
-              {"role": "sellerPlatform", "value": 437.15, "currency": "INR", "description": "Energy sale proceeds (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"},
-              {"role": "buyerPlatform", "value": -437.15, "currency": "INR", "description": "Energy purchase cost (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"}
-            ]
-          }
-        }
+        {"id": "payment-term-p2p-001", "considerationAttributes": {"@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "amount": {"currency": "INR", "value": 450.26}, "settlementStatus": "COMPLETE", "paymentTrigger": "ON_FULFILLMENT", "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"}, "acceptedPaymentMethods": ["BANK_TRANSFER"]}},
+        {"id": "auto-revenue-flows", "considerationAttributes": {"@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld", "@type": "RevenueFlow", "revenueFlows": [{"role": "sellerPlatform", "value": 437.15, "currency": "INR", "description": "Energy sale proceeds (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"}, {"role": "buyerPlatform", "value": -437.15, "currency": "INR", "description": "Energy purchase cost (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"}]}}
       ],
-      "settlements": [
-        {
-          "id": "settlement-p2p-001",
-          "considerationId": "payment-term-p2p-001",
-          "status": "COMPLETE",
-          "settlementAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
-            "@type": "SettlementTerm",
-            "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST",
-            "energyValue": 437.15,
-            "sellerPlatformFee": 13.11,
-            "buyerPlatformFee": 8.74,
-            "totalPayable": 459.0,
-            "paidAt": "2026-04-26T07:30:00Z",
-            "txnRef": "TXN-P2P-001-SETTLED"
-          }
-        }
-      ]
+      "settlements": [{"id": "settlement-p2p-001", "considerationId": "payment-term-p2p-001", "status": "COMPLETE", "settlementAttributes": {"@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST", "energyValue": 437.15, "sellerPlatformFee": 13.11, "buyerPlatformFee": 8.74, "totalPayable": 459.0, "paidAt": "2026-04-26T07:30:00Z", "txnRef": "TXN-P2P-001-SETTLED"}}]
     }
   }
 }
