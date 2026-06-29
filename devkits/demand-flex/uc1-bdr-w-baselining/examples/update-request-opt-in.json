@@ -54,7 +54,7 @@
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {"plannedDemandChange": {"unitCode": "KWH", "unitQuantity": 120.0, "@type": "Quantity"}, "participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"]}
+                  "inputs": {"plannedDemandChange": {"unitCode": "KWH", "unitQuantity": 120.0, "@type": "Quantity"}, "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002", "did:web:tpddl.delhi.gov.in:meters:003"]}
                 }
               ]
             }

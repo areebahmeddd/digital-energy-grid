@@ -53,7 +53,7 @@
                   "participantId": "tpddl-north-delhi",
                   "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
                 },
-                {"role": "seller", "participantId": "greenflex-agg", "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002"]}}
+                {"role": "seller", "participantId": "greenflex-agg", "inputs": {"participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002"]}}
               ]
             }
           }

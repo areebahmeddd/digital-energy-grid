@@ -95,8 +95,8 @@
                       "@type": "Quantity"
                     },
                     "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
+                      "did:web:tpddl.delhi.gov.in:meters:001",
+                      "did:web:tpddl.delhi.gov.in:meters:002"
                     ]
                   }
                 }
