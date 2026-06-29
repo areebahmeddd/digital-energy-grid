@@ -1,5 +1,15 @@
 {
-  "context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "catalog/publish", "bppId": "bpp.example.com", "bppUri": "http://beckn-router:9000/bpp/receiver", "transactionId": "c3d4e5f6-a7b8-9012-cdef-012345678901", "messageId": "1c2d3e4f-5a6b-7890-cdef-012345678902", "timestamp": "2026-04-01T06:00:00Z", "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]},
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "catalog/publish",
+    "bppId": "bpp.example.com",
+    "bppUri": "http://beckn-router:9000/bpp/receiver",
+    "transactionId": "c3d4e5f6-a7b8-9012-cdef-012345678901",
+    "messageId": "1c2d3e4f-5a6b-7890-cdef-012345678902",
+    "timestamp": "2026-04-01T06:00:00Z",
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]
+  },
   "message": {
     "publishDirectives": [{"catalogId": "catalog-merc-tariff-policy-001", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["nfh.global/testnet-deg"]}],
     "catalogs": [
@@ -12,8 +22,21 @@
         "resources": [
           {
             "id": "ds-tariff-policy-mum-res-2024-25",
-            "descriptor": {"name": "Mumbai Residential Telescopic Tariff 2024-25", "shortDesc": "Three-slab telescopic tariff with evening peak surcharge and night-time off-peak discount", "longDesc": "IES_Policy-format tariff specification for the LT-I residential category. Includes three energy slabs (0-100, 101-300, 301+) with telescopic INR/kWh pricing, an evening-peak time-of-day surcharge (T18:00-T22:00, +20%), and a night-time off-peak discount (T23:00-T05:00, -10%). Derived from MERC Order Case No. 226 of 2023."},
-            "resourceAttributes": {"@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld", "@type": "DatasetItem", "schema:identifier": "ds-tariff-policy-mum-res-2024-25", "schema:name": "Mumbai Residential Telescopic Tariff 2024-25", "schema:temporalCoverage": "2024-04-01/2025-03-31", "dataset:sensitivityLevel": "PUBLIC", "dataset:refreshType": "EVENT_DRIVEN", "dataset:accessMethod": "INLINE"}
+            "descriptor": {
+              "name": "Mumbai Residential Telescopic Tariff 2024-25",
+              "shortDesc": "Three-slab telescopic tariff with evening peak surcharge and night-time off-peak discount",
+              "longDesc": "IES_Policy-format tariff specification for the LT-I residential category. Includes three energy slabs (0-100, 101-300, 301+) with telescopic INR/kWh pricing, an evening-peak time-of-day surcharge (T18:00-T22:00, +20%), and a night-time off-peak discount (T23:00-T05:00, -10%). Derived from MERC Order Case No. 226 of 2023."
+            },
+            "resourceAttributes": {
+              "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+              "@type": "DatasetItem",
+              "schema:identifier": "ds-tariff-policy-mum-res-2024-25",
+              "schema:name": "Mumbai Residential Telescopic Tariff 2024-25",
+              "schema:temporalCoverage": "2024-04-01/2025-03-31",
+              "dataset:sensitivityLevel": "PUBLIC",
+              "dataset:refreshType": "EVENT_DRIVEN",
+              "dataset:accessMethod": "INLINE"
+            }
           }
         ],
         "offers": [
@@ -22,7 +45,19 @@
             "descriptor": {"name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25", "shortDesc": "In-message delivery of IES_Policy via beckn dataPayload"},
             "resourceIds": ["ds-tariff-policy-mum-res-2024-25"],
             "validity": {"startDate": "2024-04-01T00:00:00Z", "endDate": "2025-03-31T23:59:59Z"},
-            "considerations": [{"id": "consideration-tariff-public-good", "status": {"code": "ACTIVE"}, "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 0, "description": "Tariff orders are public regulatory artefacts — distributed at zero cost under MERC public-disclosure norms"}}]
+            "considerations": [
+              {
+                "id": "consideration-tariff-public-good",
+                "status": {"code": "ACTIVE"},
+                "considerationAttributes": {
+                  "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
+                  "@type": "PriceSpecification",
+                  "currency": "INR",
+                  "value": 0,
+                  "description": "Tariff orders are public regulatory artefacts — distributed at zero cost under MERC public-disclosure norms"
+                }
+              }
+            ]
           }
         ]
       }

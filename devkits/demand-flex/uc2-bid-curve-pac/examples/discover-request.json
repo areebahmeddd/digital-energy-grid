@@ -1,1 +1,13 @@
-{"context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "discover", "bapId": "bap.example.com", "bapUri": "https://bap.example.com/beckn", "transactionId": "c2d3e4f5-a6b7-8901-abcd-ef5678901234", "messageId": "e2f3a4b5-c6d7-8901-abcd-ef7890123456", "timestamp": "2026-06-14T09:00:00Z"}, "message": {"filters": {"resources": "$.catalogs[*].resources[*] ? (@.resourceAttributes.capacityType == 'CURTAILMENT' && @.resourceAttributes.direction == 'REDUCE')"}}}
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "discover",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
+    "transactionId": "c2d3e4f5-a6b7-8901-abcd-ef5678901234",
+    "messageId": "e2f3a4b5-c6d7-8901-abcd-ef7890123456",
+    "timestamp": "2026-06-14T09:00:00Z"
+  },
+  "message": {"filters": {"resources": "$.catalogs[*].resources[*] ? (@.resourceAttributes.capacityType == 'CURTAILMENT' && @.resourceAttributes.direction == 'REDUCE')"}}
+}

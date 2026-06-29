@@ -10,7 +10,12 @@
     "transactionId": "c2d3e4f5-a6b7-8901-abcd-ef5678901234",
     "messageId": "f9a0b1c2-d3e4-5678-abcd-ef4567890124",
     "timestamp": "2026-06-14T09:05:05Z",
-    "schemaContext": ["https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld", "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/Quantity/context.jsonld"]
+    "schemaContext": [
+      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/Quantity/context.jsonld"
+    ]
   },
   "message": {
     "contract": {
@@ -19,11 +24,46 @@
         {
           "id": "commitment-pac-001",
           "status": {"descriptor": {"code": "DRAFT"}},
-          "resources": [{"id": "flex-need-north-delhi-jun15", "descriptor": {"name": "Evening Peak Demand Flex - North Delhi"}, "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"}, "resourceAttributes": {"@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "@type": "DemandFlexNeed", "direction": "REDUCE", "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"}, "capacityType": "CURTAILMENT", "maxCapacityKw": 200, "location": {"type": "Point", "coordinates": [77.209, 28.6139]}}}],
-          "offer": {"id": "offer-pac-001", "resourceIds": ["flex-need-north-delhi-jun15"], "offerAttributes": {"@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld", "@type": "DemandFlexBuyOffer", "inputs": [{"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}}, {"role": "seller", "participantId": null}]}}
+          "resources": [
+            {
+              "id": "flex-need-north-delhi-jun15",
+              "descriptor": {"name": "Evening Peak Demand Flex - North Delhi"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
+              "resourceAttributes": {
+                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@type": "DemandFlexNeed",
+                "direction": "REDUCE",
+                "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
+                "capacityType": "CURTAILMENT",
+                "maxCapacityKw": 200,
+                "location": {"type": "Point", "coordinates": [77.209, 28.6139]}
+              }
+            }
+          ],
+          "offer": {
+            "id": "offer-pac-001",
+            "resourceIds": ["flex-need-north-delhi-jun15"],
+            "offerAttributes": {
+              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@type": "DemandFlexBuyOffer",
+              "inputs": [
+                {
+                  "role": "buyer",
+                  "participantId": "tpddl-north-delhi",
+                  "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
+                },
+                {"role": "seller", "participantId": null}
+              ]
+            }
+          }
         }
       ],
-      "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_revenue.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}},
+      "contractAttributes": {
+        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@type": "DEGContract",
+        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}],
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_revenue.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
+      },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}]
     }
   }

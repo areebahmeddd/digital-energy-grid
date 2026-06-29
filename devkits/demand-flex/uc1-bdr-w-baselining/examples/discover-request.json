@@ -1,1 +1,13 @@
-{"context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "discover", "bapId": "bap.example.com", "bapUri": "https://bap.example.com/beckn", "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc", "messageId": "258ed231-2def-4840-86ed-2970320c2294", "timestamp": "2026-03-30T09:00:00Z"}, "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].resources[*] ? (@.resourceAttributes.capacityType == 'CURTAILMENT' && @.resourceAttributes.direction == 'REDUCE')"}}}}
+{
+  "context": {
+    "networkId": "nfh.global/testnet-deg",
+    "version": "2.0.0",
+    "action": "discover",
+    "bapId": "bap.example.com",
+    "bapUri": "https://bap.example.com/beckn",
+    "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
+    "messageId": "258ed231-2def-4840-86ed-2970320c2294",
+    "timestamp": "2026-03-30T09:00:00Z"
+  },
+  "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].resources[*] ? (@.resourceAttributes.capacityType == 'CURTAILMENT' && @.resourceAttributes.direction == 'REDUCE')"}}}
+}

@@ -411,18 +411,19 @@ pm.collectionVariables.set('iso_date', isoTimestamp);
 # Compact-yet-readable JSON formatting.
 #
 # `_format_payload` renders an object/array on ONE line whenever its compact
-# form fits within `_MAX_INLINE` characters (about three wrapped lines), so
-# small structures — schemaContext, descriptor, status, quantity, eventWindow,
-# policy, … — stay compact instead of sprawling across many lines. Larger
-# structures (commitments, resources, inputs, meters, performance, offers,
-# catalogs) exceed the budget and expand with 2-space indentation.
+# form fits within `_MAX_INLINE` characters, so small structures — descriptor,
+# status, quantity, eventWindow, policy, … — stay compact instead of sprawling
+# across many lines, while keeping lines short enough to avoid horizontal
+# scrolling. Larger structures (schemaContext, commitments, resources, inputs,
+# meters, performance, offers, catalogs) exceed the budget and expand with
+# 2-space indentation.
 #
 # Arrays under `_FORCE_ELEMENT_KEYS` get a stronger guarantee: when the array
 # is too big to inline whole, each element is still emitted on its own single
 # line. This keeps every TimeSeries `intervals[i]` (id + payloads) and every
 # payloadDescriptor / reportDescriptor / role / participant on one row even
 # when an individual element would otherwise wrap.
-_MAX_INLINE = 600
+_MAX_INLINE = 200
 _FORCE_ELEMENT_KEYS = {
     "intervals",
     "payloadDescriptors",
