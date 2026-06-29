@@ -1,71 +1,16 @@
 {
-  "context": {
-    "networkId": "nfh.global/testnet-deg",
-    "version": "2.0.0",
-    "action": "on_status",
-    "bapId": "bap.example.com",
-    "bapUri": "http://beckn-router:9000/bap/receiver",
-    "bppId": "bpp.example.com",
-    "bppUri": "http://beckn-router:9000/bpp/receiver",
-    "transactionId": "e5f6a7b8-c9d0-1234-ef01-234567890123",
-    "messageId": "8d9e0f1a-2b3c-4567-ef01-234567890129",
-    "timestamp": "2026-04-01T09:25:05Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"
-    ]
-  },
+  "context": {"networkId": "nfh.global/testnet-deg", "version": "2.0.0", "action": "on_status", "bapId": "bap.example.com", "bapUri": "http://beckn-router:9000/bap/receiver", "bppId": "bpp.example.com", "bppUri": "http://beckn-router:9000/bpp/receiver", "transactionId": "e5f6a7b8-c9d0-1234-ef01-234567890123", "messageId": "8d9e0f1a-2b3c-4567-ef01-234567890129", "timestamp": "2026-04-01T09:25:05Z", "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]},
   "message": {
     "contract": {
       "id": "770e9500-f30c-52e5-b827-557766551301",
-      "descriptor": {
-        "name": "Retail Tariff Policy Subscription",
-        "shortDesc": "MeraShehar DISCOM subscribing to MERC retail tariff orders under public-disclosure norms"
-      },
-      "status": {
-        "code": "ACTIVE"
-      },
-      "commitments": [
-        {
-          "id": "commitment-tariff-policy-001",
-          "status": {
-            "descriptor": {
-              "code": "CLOSED"
-            }
-          },
-          "resources": [
-            {
-              "id": "ds-tariff-policy-mum-res-2024-25",
-              "descriptor": {
-                "name": "Mumbai Residential Telescopic Tariff 2024-25"
-              },
-              "quantity": {
-                "unitText": "policy",
-                "unitCode": "EA",
-                "value": "1"
-              }
-            }
-          ],
-          "offer": {
-            "id": "offer-tariff-policy-inline",
-            "descriptor": {
-              "name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"
-            },
-            "resourceIds": [
-              "ds-tariff-policy-mum-res-2024-25"
-            ]
-          }
-        }
-      ],
+      "descriptor": {"name": "Retail Tariff Policy Subscription", "shortDesc": "MeraShehar DISCOM subscribing to MERC retail tariff orders under public-disclosure norms"},
+      "status": {"code": "ACTIVE"},
+      "commitments": [{"id": "commitment-tariff-policy-001", "status": {"descriptor": {"code": "CLOSED"}}, "resources": [{"id": "ds-tariff-policy-mum-res-2024-25", "descriptor": {"name": "Mumbai Residential Telescopic Tariff 2024-25"}, "quantity": {"unitText": "policy", "unitCode": "EA", "value": "1"}}], "offer": {"id": "offer-tariff-policy-inline", "descriptor": {"name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"}, "resourceIds": ["ds-tariff-policy-mum-res-2024-25"]}}],
       "performance": [
         {
           "id": "perf-tariff-policy-delivery-001",
-          "status": {
-            "code": "DELIVERY_COMPLETE",
-            "name": "Tariff policy delivered inline via dataPayload"
-          },
-          "commitmentIds": [
-            "commitment-tariff-policy-001"
-          ],
+          "status": {"code": "DELIVERY_COMPLETE", "name": "Tariff policy delivered inline via dataPayload"},
+          "commitmentIds": ["commitment-tariff-policy-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
             "@type": "DatasetItem",
@@ -85,87 +30,14 @@
               "policyName": "Mumbai Residential Telescopic 2024",
               "policyType": "TARIFF",
               "samplingInterval": "R/2024-04-10T00:00:00Z/P1M",
-              "energySlabs": [
-                {
-                  "id": "slab-0-100",
-                  "@type": "EnergySlab",
-                  "start": 0,
-                  "end": 100,
-                  "price": 4.5
-                },
-                {
-                  "id": "slab-101-300",
-                  "@type": "EnergySlab",
-                  "start": 101,
-                  "end": 300,
-                  "price": 7.2
-                },
-                {
-                  "id": "slab-301-plus",
-                  "@type": "EnergySlab",
-                  "start": 301,
-                  "end": null,
-                  "price": 9.8
-                }
-              ],
-              "surchargeTariffs": [
-                {
-                  "id": "surcharge-evening-peak",
-                  "@type": "SurchargeTariff",
-                  "recurrence": "P1D",
-                  "interval": {
-                    "start": "T18:00:00Z",
-                    "duration": "PT4H"
-                  },
-                  "value": 20,
-                  "unit": "PERCENT"
-                },
-                {
-                  "id": "discount-night-offpeak",
-                  "@type": "SurchargeTariff",
-                  "recurrence": "P1D",
-                  "interval": {
-                    "start": "T23:00:00Z",
-                    "duration": "PT6H"
-                  },
-                  "value": -10,
-                  "unit": "PERCENT"
-                }
-              ]
+              "energySlabs": [{"id": "slab-0-100", "@type": "EnergySlab", "start": 0, "end": 100, "price": 4.5}, {"id": "slab-101-300", "@type": "EnergySlab", "start": 101, "end": 300, "price": 7.2}, {"id": "slab-301-plus", "@type": "EnergySlab", "start": 301, "end": null, "price": 9.8}],
+              "surchargeTariffs": [{"id": "surcharge-evening-peak", "@type": "SurchargeTariff", "recurrence": "P1D", "interval": {"start": "T18:00:00Z", "duration": "PT4H"}, "value": 20, "unit": "PERCENT"}, {"id": "discount-night-offpeak", "@type": "SurchargeTariff", "recurrence": "P1D", "interval": {"start": "T23:00:00Z", "duration": "PT6H"}, "value": -10, "unit": "PERCENT"}]
             }
           }
         }
       ],
-      "participants": [
-        {
-          "id": "merc-regulator-001",
-          "descriptor": {
-            "name": "Maharashtra Electricity Regulatory Commission"
-          }
-        },
-        {
-          "id": "merashehar-discom-001",
-          "descriptor": {
-            "name": "MeraShehar - Distribution Company"
-          }
-        }
-      ],
-      "settlements": [
-        {
-          "id": "settlement-tariff-no-charge",
-          "considerationId": "consideration-tariff-public-good",
-          "status": "COMPLETE",
-          "settlementAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
-            "@type": "Payment",
-            "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": {
-              "currency": "INR",
-              "value": 0
-            }
-          }
-        }
-      ]
+      "participants": [{"id": "merc-regulator-001", "descriptor": {"name": "Maharashtra Electricity Regulatory Commission"}}, {"id": "merashehar-discom-001", "descriptor": {"name": "MeraShehar - Distribution Company"}}],
+      "settlements": [{"id": "settlement-tariff-no-charge", "considerationId": "consideration-tariff-public-good", "status": "COMPLETE", "settlementAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld", "@type": "Payment", "beckn:paymentStatus": "COMPLETED", "beckn:amount": {"currency": "INR", "value": 0}}}]
     }
   }
 }

@@ -10,167 +10,42 @@
     "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
     "messageId": "acd9569e-7656-44f5-b5dd-b8f172593b3a",
     "timestamp": "2026-04-01T11:00:00Z",
-    "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
-    ]
+    "schemaContext": ["https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld", "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld", "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld", "https://schema.beckn.io/Quantity/context.jsonld"]
   },
   "message": {
     "contract": {
       "id": "contract-flex-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
-          "resources": [
-            {
-              "id": "flex-need-north-delhi-apr1",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
-              "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-                "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
-              }
-            }
-          ],
+          "status": {"descriptor": {"code": "ACTIVE"}},
+          "resources": [{"id": "flex-need-north-delhi-apr1", "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"}, "resourceAttributes": {"@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "@type": "DemandFlexNeed", "direction": "REDUCE", "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"}, "capacityType": "CURTAILMENT", "maxCapacityKw": 500}}],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
-                {
-                  "role": "buyer",
-                  "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
-                },
+                {"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}},
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 120.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ],
+                    "plannedDemandChange": {"unitCode": "KWH", "unitQuantity": 120.0, "@type": "Quantity"},
+                    "participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"],
                     "energyResources": [
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN001",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Nexon EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 30.0,
-                        "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": [
-                          "der://meter/001"
-                        ]
-                      },
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN002",
-                        "resourceType": "EV_CHARGER",
-                        "make": "MG",
-                        "model": "ZS EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 44.5,
-                        "telemetryProvider": "mg-imotion",
-                        "parentResources": [
-                          "der://meter/002"
-                        ]
-                      },
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN003",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Tigor EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 26.0,
-                        "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": [
-                          "der://meter/003"
-                        ]
-                      }
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN001", "resourceType": "EV_CHARGER", "make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics", "parentResources": ["der://meter/001"]},
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN002", "resourceType": "EV_CHARGER", "make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion", "parentResources": ["der://meter/002"]},
+                      {"@type": "EnergyResource", "resourceId": "der://ev/VIN003", "resourceType": "EV_CHARGER", "make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics", "parentResources": ["der://meter/003"]}
                     ],
                     "reportDescriptors": [
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "USAGE",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "POWER",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "SOC_END",
-                        "readingType": "DIRECT_READ",
-                        "units": "KWH",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LAT",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LON",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      }
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
                     ]
                   }
                 }
@@ -182,13 +57,8 @@
       "performance": [
         {
           "id": "perf-evt-001-actuals",
-          "status": {
-            "code": "SETTLED",
-            "name": "Settlement computed from policy evaluation"
-          },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
+          "status": {"code": "SETTLED", "name": "Settlement computed from policy evaluation"},
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
             "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
@@ -197,216 +67,22 @@
             "meters": [
               {
                 "meterId": "der://meter/001",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-01T08:30:00Z",
-                    "duration": "PT1H"
-                  },
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    }
-                  ],
-                  "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            46.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            22.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            44.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            18.0
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "telemetry": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}], "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [46.0]}, {"type": "USAGE", "values": [22.0]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [44.0]}, {"type": "USAGE", "values": [18.0]}]}]}
               },
               {
                 "meterId": "der://meter/002",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-01T08:30:00Z",
-                    "duration": "PT1H"
-                  },
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    }
-                  ],
-                  "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            39.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            16.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            37.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            14.0
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "telemetry": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}], "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [39.0]}, {"type": "USAGE", "values": [16.0]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [37.0]}, {"type": "USAGE", "values": [14.0]}]}]}
               },
               {
                 "meterId": "der://meter/003",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {
-                    "start": "2026-04-01T08:30:00Z",
-                    "duration": "PT1H"
-                  },
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    },
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "USAGE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    }
-                  ],
-                  "intervals": [
-                    {
-                      "id": 0,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            53.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            26.0
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "id": 1,
-                      "payloads": [
-                        {
-                          "type": "BASELINE",
-                          "values": [
-                            51.0
-                          ]
-                        },
-                        {
-                          "type": "USAGE",
-                          "values": [
-                            24.0
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "telemetry": {"@type": "TimeSeries", "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}, {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}], "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [53.0]}, {"type": "USAGE", "values": [26.0]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [51.0]}, {"type": "USAGE", "values": [24.0]}]}]}
               }
             ]
           }
         }
       ],
-      "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-        "@type": "DEGContract",
-        "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
-          "queryPath": "data.deg.contracts.demand_flex"
-        }
-      },
-      "participants": [
-        {
-          "role": "buyer",
-          "participantId": "tpddl-north-delhi"
-        },
-        {
-          "role": "seller",
-          "participantId": "greenflex-agg"
-        }
-      ]
+      "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego", "queryPath": "data.deg.contracts.demand_flex"}},
+      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }
   }
 }
