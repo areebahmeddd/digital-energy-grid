@@ -24,13 +24,7 @@
         "category": "FULFILLMENT",
         "feedback": {
           "comments": "Excellent charging experience! The station was clean, easy to find, and the charging was fast and reliable. The staff was helpful and the payment process was smooth.",
-          "tags": [
-            "fast-charging",
-            "easy-to-use",
-            "clean-station",
-            "helpful-staff",
-            "smooth-payment"
-          ]
+          "tags": ["fast-charging", "easy-to-use", "clean-station", "helpful-staff", "smooth-payment"]
         }
       }
     ]

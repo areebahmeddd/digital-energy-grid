@@ -43,9 +43,7 @@
             "descriptor": {
               "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
             },
-            "resourceIds": [
-              "ds-ami-meter-data-blr-zone-a-q1-2026"
-            ]
+            "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"]
           }
         }
       ]

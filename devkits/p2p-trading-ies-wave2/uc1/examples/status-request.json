@@ -54,9 +54,7 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": [
-              "energy-resource-solar-001"
-            ]
+            "resourceIds": ["energy-resource-solar-001"]
           },
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
@@ -66,54 +64,12 @@
               "duration": "PT1H"
             },
             "payloadDescriptors": [
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "PRICE_PER_KWH",
-                "currency": "INR",
-                "insertedBy": "sellerPlatform"
-              },
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "REQUESTED_QTY",
-                "units": "KWH",
-                "insertedBy": "buyerPlatform"
-              }
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR", "insertedBy": "sellerPlatform"},
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH", "insertedBy": "buyerPlatform"}
             ],
             "intervals": [
-              {
-                "id": 0,
-                "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      12.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      20.5
-                    ]
-                  }
-                ]
-              },
-              {
-                "id": 1,
-                "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      14.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      15.5
-                    ]
-                  }
-                ]
-              }
+              {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "REQUESTED_QTY", "values": [20.5]}]},
+              {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "REQUESTED_QTY", "values": [15.5]}]}
             ]
           }
         }
@@ -122,22 +78,10 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyerPlatform",
-            "participantId": "buyerapp.example.com"
-          },
-          {
-            "role": "sellerPlatform",
-            "participantId": "sellerapp.example.com"
-          },
-          {
-            "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger.example.com"
-          },
-          {
-            "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger.example.com"
-          }
+          {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
+          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
@@ -145,54 +89,10 @@
         }
       },
       "participants": [
-        {
-          "role": "sellerPlatform",
-          "participantId": "sellerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_SELLER_001",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "utilityCustomerId": "TEST_CUST_SELLER_001",
-            "platformUrl": "http://sellerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerPlatform",
-          "participantId": "buyerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_BUYER_001",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "utilityCustomerId": "TEST_CUST_BUYER_001",
-            "platformUrl": "http://buyerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://buyer-discom.example.com:9000"
-          }
-        },
-        {
-          "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://seller-discom.example.com:9000"
-          }
-        }
+        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
+        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
+        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
+        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ]
     }
   }

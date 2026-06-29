@@ -53,19 +53,14 @@
                 "maxCapacityKw": 500,
                 "location": {
                   "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
+                  "coordinates": [77.209, 28.6139]
                 }
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
@@ -94,10 +89,7 @@
                       "unitQuantity": 150.0,
                       "@type": "Quantity"
                     },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
+                    "participatingMeters": ["der://meter/001", "der://meter/002"]
                   }
                 }
               ]
@@ -109,14 +101,8 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
@@ -124,14 +110,8 @@
         }
       },
       "participants": [
-        {
-          "role": "buyer",
-          "participantId": "tpddl-north-delhi"
-        },
-        {
-          "role": "seller",
-          "participantId": "greenflex-agg"
-        }
+        {"role": "buyer", "participantId": "tpddl-north-delhi"},
+        {"role": "seller", "participantId": "greenflex-agg"}
       ]
     }
   }

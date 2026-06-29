@@ -10,9 +10,7 @@
     "transactionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
     "messageId": "7a8b9c0d-1e2f-3456-0123-456789012345",
     "timestamp": "2026-04-01T09:15:00Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -50,9 +48,7 @@
             "descriptor": {
               "name": "ARR Filing Inline Delivery - BESCOM FY 2025-26"
             },
-            "resourceIds": [
-              "ds-bescom-arr-filing-fy2025-26"
-            ]
+            "resourceIds": ["ds-bescom-arr-filing-fy2025-26"]
           },
           "commitmentAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
@@ -80,18 +76,8 @@
         }
       ],
       "participants": [
-        {
-          "id": "bescom-discom-001",
-          "descriptor": {
-            "name": "BESCOM - Bangalore Electricity Supply Company"
-          }
-        },
-        {
-          "id": "aperc-regulator-001",
-          "descriptor": {
-            "name": "APERC - AP Electricity Regulatory Commission"
-          }
-        }
+        {"id": "bescom-discom-001", "descriptor": {"name": "BESCOM - Bangalore Electricity Supply Company"}},
+        {"id": "aperc-regulator-001", "descriptor": {"name": "APERC - AP Electricity Regulatory Commission"}}
       ],
       "performance": [],
       "settlements": [

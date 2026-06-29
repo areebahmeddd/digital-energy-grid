@@ -81,9 +81,7 @@
               "schema:name": "Morning Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 15,
@@ -115,7 +113,7 @@
       "beckn:orderValue": {
         "currency": "INR",
         "value": 127.5,
-        "description": "Adjusted inter-platform settlement for delivered quantity (8.5 kWh \u00d7 \u20b915). Catalog prices are inclusive of seller platform charges."
+        "description": "Adjusted inter-platform settlement for delivered quantity (8.5 kWh × ₹15). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",

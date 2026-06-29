@@ -10,9 +10,7 @@
     "transactionId": "e5f6a7b8-c9d0-1234-ef01-345678901234",
     "messageId": "e5f6a7b8-c9d0-1234-ef01-345678901235",
     "timestamp": "2026-05-07T09:03:05Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -21,21 +19,35 @@
         "name": "Solar Generation Forecast API",
         "shortDesc": "Monthly API subscription — bearer token and doc URL active"
       },
-      "status": { "code": "ACTIVE" },
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-stream-api-001",
-          "status": { "descriptor": { "code": "ACTIVE" } },
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "stream-solar-forecast-api",
-              "descriptor": { "name": "Solar Generation Forecast API" },
-              "quantity": { "unitText": "stream", "unitCode": "EA", "value": "1" }
+              "descriptor": {
+                "name": "Solar Generation Forecast API"
+              },
+              "quantity": {
+                "unitText": "stream",
+                "unitCode": "EA",
+                "value": "1"
+              }
             }
           ],
           "offer": {
             "id": "offer-solar-forecast-api-monthly",
-            "descriptor": { "name": "Monthly API subscription — 60 req/min" },
+            "descriptor": {
+              "name": "Monthly API subscription — 60 req/min"
+            },
             "resourceIds": ["stream-solar-forecast-api"],
             "offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
@@ -57,41 +69,27 @@
       "consideration": [
         {
           "id": "consideration-stream-api-001",
-          "status": { "code": "ACTIVE" },
+          "status": {
+            "code": "ACTIVE"
+          },
           "considerationAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
             "@type": "PriceSpecification",
             "currency": "INR",
-            "value": 8000.00
+            "value": 8000.0
           }
         }
       ],
       "participants": [
-        {
-          "id": "intelligrid-amisp-001",
-          "descriptor": { "name": "IntelliGrid AMI Services" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "intelligrid-amisp-001",
-            "name": "IntelliGrid AMI Services"
-          }
-        },
-        {
-          "id": "renewco-forecasting-001",
-          "descriptor": { "name": "RenewCo Forecasting Team" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "renewco-forecasting-001",
-            "name": "RenewCo Forecasting Team"
-          }
-        }
+        {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "intelligrid-amisp-001", "name": "IntelliGrid AMI Services"}},
+        {"id": "renewco-forecasting-001", "descriptor": {"name": "RenewCo Forecasting Team"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "renewco-forecasting-001", "name": "RenewCo Forecasting Team"}}
       ],
       "performance": [
         {
           "id": "ffl-solar-api-20260507-001",
-          "status": { "code": "ACTIVE" },
+          "status": {
+            "code": "ACTIVE"
+          },
           "commitmentIds": ["commitment-stream-api-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
@@ -122,7 +120,10 @@
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": { "currency": "INR", "value": 8000.00 },
+            "beckn:amount": {
+              "currency": "INR",
+              "value": 8000.0
+            },
             "beckn:txnRef": "UPI-TXN-2026-050709031345"
           }
         }

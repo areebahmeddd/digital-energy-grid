@@ -21,11 +21,8 @@
       "name": "Ravi Kumar",
       "phone": "+91-9876543210",
       "email": "ravi.kumar@example.com",
-      "hours": "Mon\u2013Sun: 6:00 PM - 10:00 PM IST",
-      "channels": [
-        "PHONE",
-        "WHATSAPP"
-      ]
+      "hours": "Mon–Sun: 6:00 PM - 10:00 PM IST",
+      "channels": ["PHONE", "WHATSAPP"]
     }
   }
 }

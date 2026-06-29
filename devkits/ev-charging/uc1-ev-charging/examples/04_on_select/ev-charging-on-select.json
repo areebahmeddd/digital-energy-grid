@@ -44,9 +44,7 @@
               "@type": "beckn:Descriptor",
               "schema:name": "Per-kWh Tariff - CCS2 60kW"
             },
-            "beckn:items": [
-              "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
-            ],
+            "beckn:items": ["IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"],
             "beckn:provider": "ecopower-charging",
             "beckn:price": {
               "currency": "INR",
@@ -77,7 +75,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",

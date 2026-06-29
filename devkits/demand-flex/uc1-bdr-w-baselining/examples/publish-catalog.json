@@ -57,10 +57,7 @@
               "maxCapacityKw": 500,
               "location": {
                 "type": "Point",
-                "coordinates": [
-                  77.209,
-                  28.6139
-                ]
+                "coordinates": [77.209, 28.6139]
               }
             }
           }
@@ -72,9 +69,7 @@
               "name": "Standard Flex @ 3.50 INR/kWh",
               "shortDesc": "Demand reduction with 5.00 INR/kWh premium for guaranteed flex"
             },
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "validity": {
               "startDate": "2026-03-28T00:00:00Z",
               "endDate": "2026-04-01T08:30:00Z"
@@ -87,14 +82,8 @@
                 "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  {
-                    "role": "buyer",
-                    "participantId": "tpddl-north-delhi"
-                  },
-                  {
-                    "role": "seller",
-                    "participantId": null
-                  }
+                  {"role": "buyer", "participantId": "tpddl-north-delhi"},
+                  {"role": "seller", "participantId": null}
                 ],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",

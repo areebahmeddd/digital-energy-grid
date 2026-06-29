@@ -56,7 +56,7 @@
             "type": "UNIT",
             "value": 112.5,
             "currency": "INR",
-            "description": "Base charging session cost (45 INR/kWh \u00d7 2.5 kWh)"
+            "description": "Base charging session cost (45 INR/kWh × 2.5 kWh)"
           },
           {
             "type": "SURCHARGE",
@@ -101,11 +101,7 @@
         "beckn:paymentURL": "https://payments.bluechargenet-aggregator.io/pay?transaction_id=$transaction_id&amount=$amount",
         "beckn:txnRef": "TXN-123456789",
         "beckn:beneficiary": "BPP",
-        "beckn:acceptedPaymentMethod": [
-          "BANK_TRANSFER",
-          "UPI",
-          "WALLET"
-        ],
+        "beckn:acceptedPaymentMethod": ["BANK_TRANSFER", "UPI", "WALLET"],
         "beckn:paymentStatus": "INITIATED",
         "beckn:paymentAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/PaymentSettlement/v1/context.jsonld",

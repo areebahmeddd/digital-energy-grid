@@ -44,9 +44,7 @@
               "@type": "beckn:Descriptor",
               "schema:name": "Per-kWh Tariff - CCS2 60kW"
             },
-            "beckn:items": [
-              "IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"
-            ],
+            "beckn:items": ["IND*ecopower-charging*cs-01*IN*ECO*BTM*01*CCS2*A*CCS2-A"],
             "beckn:provider": "ecopower-charging",
             "beckn:price": {
               "currency": "INR",

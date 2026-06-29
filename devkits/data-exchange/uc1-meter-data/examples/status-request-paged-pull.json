@@ -15,30 +15,56 @@
   "message": {
     "tags": [
       {
-        "descriptor": {"code": "pagination"},
+        "descriptor": {
+          "code": "pagination"
+        },
         "list": [
-          {"descriptor": {"code": "pageCursor"}, "value": "ami-meter-blr-zone-a-q1-p2"},
-          {"descriptor": {"code": "collectionId"}, "value": "ami-meter-blr-zone-a-q1-2026"}
+          {
+            "descriptor": {
+              "code": "pageCursor"
+            },
+            "value": "ami-meter-blr-zone-a-q1-p2"
+          },
+          {
+            "descriptor": {
+              "code": "collectionId"
+            },
+            "value": "ami-meter-blr-zone-a-q1-2026"
+          }
         ]
       }
     ],
     "contract": {
       "id": "660e9500-f30c-52e5-b827-557766551300",
-      "status": {"code": "ACTIVE"},
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-ami-meter-001",
-          "status": {"descriptor": {"code": "ACTIVE"}},
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "ds-ami-meter-data-blr-zone-a-q1-2026",
-              "descriptor": {"name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026"},
-              "quantity": {"unitText": "report", "unitCode": "EA", "value": "1"}
+              "descriptor": {
+                "name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026"
+              },
+              "quantity": {
+                "unitText": "report",
+                "unitCode": "EA",
+                "value": "1"
+              }
             }
           ],
           "offer": {
             "id": "offer-ami-meter-data-inline",
-            "descriptor": {"name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"},
+            "descriptor": {
+              "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
+            },
             "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"]
           }
         }

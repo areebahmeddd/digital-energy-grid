@@ -43,9 +43,7 @@
             "descriptor": {
               "name": "ARR Filing Inline Delivery - BESCOM FY 2025-26"
             },
-            "resourceIds": [
-              "ds-bescom-arr-filing-fy2025-26"
-            ]
+            "resourceIds": ["ds-bescom-arr-filing-fy2025-26"]
           }
         }
       ]

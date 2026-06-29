@@ -34,7 +34,9 @@
         "bppUri": "http://bpp.example.com/bpp/receiver",
         "provider": {
           "id": "tpddl-north-delhi",
-          "descriptor": { "name": "TPDDL North Delhi Distribution" }
+          "descriptor": {
+            "name": "TPDDL North Delhi Distribution"
+          }
         },
         "resources": [
           {
@@ -53,7 +55,10 @@
               },
               "capacityType": "CURTAILMENT",
               "maxCapacityKw": 200,
-              "location": { "type": "Point", "coordinates": [77.209, 28.6139] }
+              "location": {
+                "type": "Point",
+                "coordinates": [77.209, 28.6139]
+              }
             }
           }
         ],
@@ -77,8 +82,8 @@
                 "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  { "role": "buyer", "participantId": "tpddl-north-delhi" },
-                  { "role": "seller", "participantId": null }
+                  {"role": "buyer", "participantId": "tpddl-north-delhi"},
+                  {"role": "seller", "participantId": null}
                 ],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_revenue.rego",
@@ -93,11 +98,17 @@
                     "clearingMethod": "PAY-AS-CLEAR",
                     "clearingTime": "2026-06-15T12:00:00Z",
                     "currency": "INR",
-                    "baselineMethodology": { "bestOf": 5, "outOf": 10 },
+                    "baselineMethodology": {
+                      "bestOf": 5,
+                      "outOf": 10
+                    },
                     "penaltyRate": 0.5
                   }
                 },
-                { "role": "seller", "participantId": null }
+                {
+                  "role": "seller",
+                  "participantId": null
+                }
               ]
             }
           }

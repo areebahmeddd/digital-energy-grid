@@ -20,13 +20,8 @@
       "phone": "18001080",
       "email": "support@bluechargenet-aggregator.io",
       "url": "https://support.bluechargenet-aggregator.io/ticket/SUP-20250730-001",
-      "hours": "Mon\u2013Sun 24/7 IST",
-      "channels": [
-        "PHONE",
-        "EMAIL",
-        "WEB",
-        "CHAT"
-      ]
+      "hours": "Mon–Sun 24/7 IST",
+      "channels": ["PHONE", "EMAIL", "WEB", "CHAT"]
     }
   }
 }

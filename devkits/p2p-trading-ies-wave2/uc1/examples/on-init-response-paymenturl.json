@@ -54,9 +54,7 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": [
-              "energy-resource-solar-001"
-            ]
+            "resourceIds": ["energy-resource-solar-001"]
           },
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
@@ -70,20 +68,8 @@
               {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH", "insertedBy": "buyerPlatform"}
             ],
             "intervals": [
-              {
-                "id": 0,
-                "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [12.5]},
-                  {"type": "REQUESTED_QTY", "values": [20.5]}
-                ]
-              },
-              {
-                "id": 1,
-                "payloads": [
-                  {"type": "PRICE_PER_KWH", "values": [14.5]},
-                  {"type": "REQUESTED_QTY", "values": [15.5]}
-                ]
-              }
+              {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "REQUESTED_QTY", "values": [20.5]}]},
+              {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "REQUESTED_QTY", "values": [15.5]}]}
             ]
           }
         }
@@ -103,54 +89,10 @@
         }
       },
       "participants": [
-        {
-          "role": "sellerPlatform",
-          "participantId": "sellerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_SELLER_001",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "utilityCustomerId": "TEST_CUST_SELLER_001",
-            "platformUrl": "http://sellerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerPlatform",
-          "participantId": "buyerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_BUYER_001",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "utilityCustomerId": "TEST_CUST_BUYER_001",
-            "platformUrl": "http://buyerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://buyer-discom.example.com:9000"
-          }
-        },
-        {
-          "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://seller-discom.example.com:9000"
-          }
-        }
+        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
+        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
+        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
+        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
       "consideration": [
         {
@@ -158,10 +100,15 @@
           "considerationAttributes": {
             "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 481.0},
+            "amount": {
+              "currency": "INR",
+              "value": 481.0
+            },
             "settlementStatus": "PENDING",
             "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"paymentUrl": "https://pay.sellerplatform.example.com/invoice/offer-p2p-001"},
+            "payTo": {
+              "paymentUrl": "https://pay.sellerplatform.example.com/invoice/offer-p2p-001"
+            },
             "acceptedPaymentMethods": ["PAYMENT_URL"]
           }
         }

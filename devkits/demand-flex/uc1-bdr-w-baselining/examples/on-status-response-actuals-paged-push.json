@@ -71,7 +71,10 @@
                   "inputs": {
                     "incentivePerKwh": 3.5,
                     "currency": "INR",
-                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
+                    "baselineMethodology": {
+                      "bestOf": 5,
+                      "outOf": 10
+                    },
                     "penaltyRate": 1.5,
                     "premiumForGuaranteed": 5.0,
                     "optOutDefault": false
@@ -130,7 +133,10 @@
                 "meterId": "der://meter/00001",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT1H"
+                  },
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
@@ -145,7 +151,10 @@
                 "meterId": "der://meter/00002",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT1H"
+                  },
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}

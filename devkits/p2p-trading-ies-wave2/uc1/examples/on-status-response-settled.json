@@ -55,9 +55,7 @@
           ],
           "offer": {
             "id": "offer-p2p-001",
-            "resourceIds": [
-              "energy-resource-solar-001"
-            ]
+            "resourceIds": ["energy-resource-solar-001"]
           },
           "commitmentAttributes": {
             "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
@@ -67,144 +65,17 @@
               "duration": "PT1H"
             },
             "payloadDescriptors": [
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "PRICE_PER_KWH",
-                "currency": "INR",
-                "insertedBy": "sellerPlatform"
-              },
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "REQUESTED_QTY",
-                "units": "KWH",
-                "insertedBy": "buyerPlatform"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "BUYER_DISCOM_ALLOC",
-                "units": "KWH",
-                "insertedBy": "buyerDiscom"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "BUYER_DISCOM_STATUS",
-                "units": "STRING",
-                "insertedBy": "buyerDiscom"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "SELLER_DISCOM_ALLOC",
-                "units": "KWH",
-                "insertedBy": "sellerDiscom"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "SELLER_DISCOM_STATUS",
-                "units": "STRING",
-                "insertedBy": "sellerDiscom"
-              },
-              {
-                "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "FINAL_ALLOC",
-                "units": "KWH",
-                "insertedBy": "sellerDiscom"
-              }
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE_PER_KWH", "currency": "INR", "insertedBy": "sellerPlatform"},
+              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "REQUESTED_QTY", "units": "KWH", "insertedBy": "buyerPlatform"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_ALLOC", "units": "KWH", "insertedBy": "buyerDiscom"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BUYER_DISCOM_STATUS", "units": "STRING", "insertedBy": "buyerDiscom"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_ALLOC", "units": "KWH", "insertedBy": "sellerDiscom"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_STATUS", "units": "STRING", "insertedBy": "sellerDiscom"},
+              {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "FINAL_ALLOC", "units": "KWH", "insertedBy": "sellerDiscom"}
             ],
             "intervals": [
-              {
-                "id": 0,
-                "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      12.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      20.5
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_ALLOC",
-                    "values": [
-                      18.5
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  },
-                  {
-                    "type": "SELLER_DISCOM_ALLOC",
-                    "values": [
-                      19.2
-                    ]
-                  },
-                  {
-                    "type": "SELLER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  },
-                  {
-                    "type": "FINAL_ALLOC",
-                    "values": [
-                      18.5
-                    ]
-                  }
-                ]
-              },
-              {
-                "id": 1,
-                "payloads": [
-                  {
-                    "type": "PRICE_PER_KWH",
-                    "values": [
-                      14.5
-                    ]
-                  },
-                  {
-                    "type": "REQUESTED_QTY",
-                    "values": [
-                      15.5
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_ALLOC",
-                    "values": [
-                      14.2
-                    ]
-                  },
-                  {
-                    "type": "BUYER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  },
-                  {
-                    "type": "SELLER_DISCOM_ALLOC",
-                    "values": [
-                      14.7
-                    ]
-                  },
-                  {
-                    "type": "SELLER_DISCOM_STATUS",
-                    "values": [
-                      "COMPLETED"
-                    ]
-                  },
-                  {
-                    "type": "FINAL_ALLOC",
-                    "values": [
-                      14.2
-                    ]
-                  }
-                ]
-              }
+              {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "REQUESTED_QTY", "values": [20.5]}, {"type": "BUYER_DISCOM_ALLOC", "values": [18.5]}, {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]}, {"type": "SELLER_DISCOM_ALLOC", "values": [19.2]}, {"type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"]}, {"type": "FINAL_ALLOC", "values": [18.5]}]},
+              {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "REQUESTED_QTY", "values": [15.5]}, {"type": "BUYER_DISCOM_ALLOC", "values": [14.2]}, {"type": "BUYER_DISCOM_STATUS", "values": ["COMPLETED"]}, {"type": "SELLER_DISCOM_ALLOC", "values": [14.7]}, {"type": "SELLER_DISCOM_STATUS", "values": ["COMPLETED"]}, {"type": "FINAL_ALLOC", "values": [14.2]}]}
             ]
           }
         }
@@ -213,22 +84,10 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyerPlatform",
-            "participantId": "buyerapp.example.com"
-          },
-          {
-            "role": "sellerPlatform",
-            "participantId": "sellerapp.example.com"
-          },
-          {
-            "role": "buyerDiscom",
-            "participantId": "buyer-discom-ledger.example.com"
-          },
-          {
-            "role": "sellerDiscom",
-            "participantId": "seller-discom-ledger.example.com"
-          }
+          {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
+          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
@@ -236,54 +95,10 @@
         }
       },
       "participants": [
-        {
-          "role": "sellerPlatform",
-          "participantId": "sellerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_SELLER_001",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "utilityCustomerId": "TEST_CUST_SELLER_001",
-            "platformUrl": "http://sellerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerPlatform",
-          "participantId": "buyerapp.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-            "@type": "EnergyCustomer",
-            "meterId": "TEST_METER_BUYER_001",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "utilityCustomerId": "TEST_CUST_BUYER_001",
-            "platformUrl": "http://buyerapp.example.com:9000"
-          }
-        },
-        {
-          "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://buyer-discom.example.com:9000"
-          }
-        },
-        {
-          "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger.example.com",
-          "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-            "@type": "DiscomLedgerProvider",
-            "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
-
-            "platformUrl": "http://seller-discom.example.com:9000"
-          }
-        }
+        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
+        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
+        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
+        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
       "consideration": [
         {
@@ -291,10 +106,18 @@
           "considerationAttributes": {
             "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 450.26},
+            "amount": {
+              "currency": "INR",
+              "value": 450.26
+            },
             "settlementStatus": "COMPLETE",
             "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
+            "payTo": {
+              "accountHolderName": "Seller Platform Pvt Ltd",
+              "accountNumber": "0012345678901",
+              "branchCode": "HDFC0001234",
+              "bankName": "HDFC Bank"
+            },
             "acceptedPaymentMethods": ["BANK_TRANSFER"]
           }
         },
@@ -315,7 +138,17 @@
           "id": "settlement-p2p-001",
           "considerationId": "payment-term-p2p-001",
           "status": "COMPLETE",
-          "settlementAttributes": {"@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST", "energyValue": 437.15, "sellerPlatformFee": 13.11, "buyerPlatformFee": 8.74, "totalPayable": 459.0, "paidAt": "2026-04-26T07:30:00Z", "txnRef": "TXN-P2P-001-SETTLED"}
+          "settlementAttributes": {
+            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST",
+            "energyValue": 437.15,
+            "sellerPlatformFee": 13.11,
+            "buyerPlatformFee": 8.74,
+            "totalPayable": 459.0,
+            "paidAt": "2026-04-26T07:30:00Z",
+            "txnRef": "TXN-P2P-001-SETTLED"
+          }
         }
       ]
     }

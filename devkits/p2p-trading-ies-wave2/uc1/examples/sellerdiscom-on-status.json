@@ -18,16 +18,29 @@
   "message": {
     "contract": {
       "id": "contract-p2p-001",
-      "status": {"code": "ACTIVE"},
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-p2p-001",
-          "status": {"descriptor": {"code": "ACTIVE"}},
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "ds-actuals-001",
-              "descriptor": {"name": "Seller-discom meter actuals"},
-              "quantity": {"@type": "Quantity", "unitText": "report", "unitCode": "EA", "value": "1"},
+              "descriptor": {
+                "name": "Seller-discom meter actuals"
+              },
+              "quantity": {
+                "@type": "Quantity",
+                "unitText": "report",
+                "unitCode": "EA",
+                "value": "1"
+              },
               "resourceAttributes": {
                 "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
                 "@type": "DatasetItem",
@@ -39,20 +52,24 @@
                   "@type": "TimeSeries",
                   "resourceName": "TEST_METER_SELLER_001",
                   "clientName": "TEST_DISCOM_SELLER",
-                  "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {
+                    "start": "2026-04-26T04:30:00Z",
+                    "duration": "PT1H"
+                  },
                   "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "ENERGY_CONSUMPTION",
-                      "units": "KWH"
-                    }
+                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ENERGY_CONSUMPTION", "units": "KWH"}
                   ],
-                  "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": [-19.2]}]}]
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": [-19.2]}]}
+                  ]
                 }
               }
             }
           ],
-          "offer": {"id": "offer-001", "resourceIds": ["ds-actuals-001"]}
+          "offer": {
+            "id": "offer-001",
+            "resourceIds": ["ds-actuals-001"]
+          }
         }
       ]
     }

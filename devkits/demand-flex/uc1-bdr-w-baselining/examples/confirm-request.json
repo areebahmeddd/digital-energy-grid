@@ -56,19 +56,14 @@
                 "maxCapacityKw": 500,
                 "location": {
                   "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
+                  "coordinates": [77.209, 28.6139]
                 }
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
@@ -97,10 +92,7 @@
                       "unitQuantity": 150.0,
                       "@type": "Quantity"
                     },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ],
+                    "participatingMeters": ["der://meter/001", "der://meter/002"],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
@@ -111,9 +103,7 @@
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 30.0,
                         "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": [
-                          "der://meter/001"
-                        ]
+                        "parentResources": ["der://meter/001"]
                       },
                       {
                         "@type": "EnergyResource",
@@ -124,47 +114,15 @@
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 44.5,
                         "telemetryProvider": "mg-imotion",
-                        "parentResources": [
-                          "der://meter/002"
-                        ]
+                        "parentResources": ["der://meter/002"]
                       }
                     ],
                     "reportDescriptors": [
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "USAGE",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "POWER",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "SOC_END",
-                        "readingType": "DIRECT_READ",
-                        "units": "KWH",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LAT",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LON",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      }
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
                     ]
                   }
                 }
@@ -177,14 +135,8 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
@@ -192,14 +144,8 @@
         }
       },
       "participants": [
-        {
-          "role": "buyer",
-          "participantId": "tpddl-north-delhi"
-        },
-        {
-          "role": "seller",
-          "participantId": "greenflex-agg"
-        }
+        {"role": "buyer", "participantId": "tpddl-north-delhi"},
+        {"role": "seller", "participantId": "greenflex-agg"}
       ]
     }
   }

@@ -16,10 +16,22 @@
         "timestamp": "2026-04-01T10:34:30Z",
         "tags": [
           {
-            "descriptor": {"code": "pagination"},
+            "descriptor": {
+              "code": "pagination"
+            },
             "list": [
-              {"descriptor": {"code": "pageCursor"}, "value": "evt-bulk-001-p2"},
-              {"descriptor": {"code": "collectionId"}, "value": "perf-evt-bulk-001-actuals"}
+              {
+                "descriptor": {
+                  "code": "pageCursor"
+                },
+                "value": "evt-bulk-001-p2"
+              },
+              {
+                "descriptor": {
+                  "code": "collectionId"
+                },
+                "value": "perf-evt-bulk-001-actuals"
+              }
             ]
           }
         ]
@@ -27,7 +39,11 @@
       "message": {
         "ref": {
           "id": "contract-flex-bulk-001",
-          "performance": [{"id": "perf-evt-bulk-001-actuals"}]
+          "performance": [
+            {
+              "id": "perf-evt-bulk-001-actuals"
+            }
+          ]
         }
       }
     },
@@ -53,20 +69,33 @@
   "message": {
     "contract": {
       "id": "contract-flex-bulk-001",
-      "status": {"code": "ACTIVE"},
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-flex-bulk-001",
-          "status": {"descriptor": {"code": "ACTIVE"}},
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1-bulk",
-              "quantity": {"unitCode": "kW", "unitQuantity": 6000, "@type": "Quantity"},
+              "quantity": {
+                "unitCode": "kW",
+                "unitQuantity": 6000,
+                "@type": "Quantity"
+              },
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
+                "eventWindow": {
+                  "startDate": "2026-04-01T08:30:00Z",
+                  "endDate": "2026-04-01T10:30:00Z"
+                },
                 "capacityType": "CURTAILMENT",
                 "maxCapacityKw": 20000
               }
@@ -85,7 +114,10 @@
                   "inputs": {
                     "incentivePerKwh": 3.5,
                     "currency": "INR",
-                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
+                    "baselineMethodology": {
+                      "bestOf": 5,
+                      "outOf": 10
+                    },
                     "penaltyRate": 1.5,
                     "premiumForGuaranteed": 5.0,
                     "optOutDefault": false
@@ -95,7 +127,11 @@
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 6000.0},
+                    "plannedDemandChange": {
+                      "@type": "Quantity",
+                      "unitCode": "KWH",
+                      "unitQuantity": 6000.0
+                    },
                     "participatingMetersRef": {
                       "@type": "ResourceRef",
                       "uri": "https://bpp.example.com/bulk/cohort-2026-04-01.jsonld",
@@ -139,7 +175,10 @@
                 "meterId": "der://meter/04001",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT1H"
+                  },
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
@@ -154,7 +193,10 @@
                 "meterId": "der://meter/04002",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {
+                    "start": "2026-04-01T08:30:00Z",
+                    "duration": "PT1H"
+                  },
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}

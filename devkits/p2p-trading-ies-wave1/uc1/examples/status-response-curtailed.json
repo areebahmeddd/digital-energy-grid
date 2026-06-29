@@ -81,9 +81,7 @@
               "schema:name": "Morning Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 15,
@@ -148,9 +146,7 @@
               "schema:name": "Afternoon Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 18,

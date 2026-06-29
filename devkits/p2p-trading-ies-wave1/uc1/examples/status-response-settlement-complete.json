@@ -47,9 +47,7 @@
               "schema:name": "Morning Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ]
+            "beckn:items": ["energy-resource-solar-001"]
           }
         },
         {
@@ -67,16 +65,14 @@
               "schema:name": "Afternoon Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ]
+            "beckn:items": ["energy-resource-solar-001"]
           }
         }
       ],
       "beckn:orderValue": {
         "currency": "INR",
         "value": 405,
-        "description": "Inter-platform settlement at catalog prices (15 kWh \u00d7 \u20b915 + 10 kWh \u00d7 \u20b918). Catalog prices are inclusive of seller platform charges."
+        "description": "Inter-platform settlement at catalog prices (15 kWh × ₹15 + 10 kWh × ₹18). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",

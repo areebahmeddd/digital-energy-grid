@@ -79,9 +79,7 @@
               "schema:name": "Morning Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 15,
@@ -156,9 +154,7 @@
               "schema:name": "Afternoon Solar Energy Offer"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 18,
@@ -190,7 +186,7 @@
       "beckn:orderValue": {
         "currency": "INR",
         "value": 405,
-        "description": "Inter-platform settlement at catalog prices (15 kWh \u00d7 \u20b915 + 10 kWh \u00d7 \u20b918). Catalog prices are inclusive of seller platform charges."
+        "description": "Inter-platform settlement at catalog prices (15 kWh × ₹15 + 10 kWh × ₹18). Catalog prices are inclusive of seller platform charges."
       },
       "beckn:payment": {
         "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
@@ -202,10 +198,7 @@
         },
         "beckn:beneficiary": "BPP",
         "beckn:paymentStatus": "AUTHORIZED",
-        "beckn:acceptedPaymentMethod": [
-          "UPI",
-          "BANK_TRANSFER"
-        ],
+        "beckn:acceptedPaymentMethod": ["UPI", "BANK_TRANSFER"],
         "beckn:paymentURL": "https://payments.seller-platform.com/track?txn=TXN-ENERGY-001",
         "beckn:paymentAttributes": {
           "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/PaymentSettlement/v1/context.jsonld",

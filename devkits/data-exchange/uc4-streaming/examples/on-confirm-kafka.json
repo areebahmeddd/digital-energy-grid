@@ -10,9 +10,7 @@
     "transactionId": "d4e5f6a7-b8c9-0123-def0-234567890123",
     "messageId": "d4e5f6a7-b8c9-0123-def0-234567890124",
     "timestamp": "2026-05-07T09:03:05Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -21,21 +19,35 @@
         "name": "Grid Event Stream — India (Kafka)",
         "shortDesc": "Monthly Kafka consumer subscription — credentials active"
       },
-      "status": { "code": "ACTIVE" },
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-stream-kafka-001",
-          "status": { "descriptor": { "code": "ACTIVE" } },
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "stream-grid-events-kafka-india",
-              "descriptor": { "name": "Grid Event Stream — India" },
-              "quantity": { "unitText": "stream", "unitCode": "EA", "value": "1" }
+              "descriptor": {
+                "name": "Grid Event Stream — India"
+              },
+              "quantity": {
+                "unitText": "stream",
+                "unitCode": "EA",
+                "value": "1"
+              }
             }
           ],
           "offer": {
             "id": "offer-grid-events-kafka-monthly",
-            "descriptor": { "name": "Monthly Kafka consumer subscription" },
+            "descriptor": {
+              "name": "Monthly Kafka consumer subscription"
+            },
             "resourceIds": ["stream-grid-events-kafka-india"],
             "offerAttributes": {
               "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
@@ -57,41 +69,27 @@
       "consideration": [
         {
           "id": "consideration-stream-kafka-001",
-          "status": { "code": "ACTIVE" },
+          "status": {
+            "code": "ACTIVE"
+          },
           "considerationAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
             "@type": "PriceSpecification",
             "currency": "INR",
-            "value": 25000.00
+            "value": 25000.0
           }
         }
       ],
       "participants": [
-        {
-          "id": "intelligrid-amisp-001",
-          "descriptor": { "name": "IntelliGrid AMI Services" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "intelligrid-amisp-001",
-            "name": "IntelliGrid AMI Services"
-          }
-        },
-        {
-          "id": "posoco-analytics-001",
-          "descriptor": { "name": "POSOCO Grid Analytics" },
-          "participantAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld",
-            "@type": "Organization",
-            "id": "posoco-analytics-001",
-            "name": "POSOCO Grid Analytics"
-          }
-        }
+        {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "intelligrid-amisp-001", "name": "IntelliGrid AMI Services"}},
+        {"id": "posoco-analytics-001", "descriptor": {"name": "POSOCO Grid Analytics"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "posoco-analytics-001", "name": "POSOCO Grid Analytics"}}
       ],
       "performance": [
         {
           "id": "ffl-grid-kafka-20260507-001",
-          "status": { "code": "ACTIVE" },
+          "status": {
+            "code": "ACTIVE"
+          },
           "commitmentIds": ["commitment-stream-kafka-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
@@ -127,7 +125,10 @@
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": { "currency": "INR", "value": 25000.00 },
+            "beckn:amount": {
+              "currency": "INR",
+              "value": 25000.0
+            },
             "beckn:txnRef": "UPI-TXN-2026-050709031234"
           }
         }

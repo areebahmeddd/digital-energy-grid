@@ -10,9 +10,7 @@
     "transactionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
     "messageId": "1e2f3a4b-5c6d-7890-4567-890123456789",
     "timestamp": "2026-04-01T09:25:05Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -50,9 +48,7 @@
             "descriptor": {
               "name": "ARR Filing Inline Delivery - BESCOM FY 2025-26"
             },
-            "resourceIds": [
-              "ds-bescom-arr-filing-fy2025-26"
-            ]
+            "resourceIds": ["ds-bescom-arr-filing-fy2025-26"]
           }
         }
       ],
@@ -63,9 +59,7 @@
             "code": "DELIVERY_COMPLETE",
             "name": "ARR filing delivered inline via dataPayload"
           },
-          "commitmentIds": [
-            "commitment-arr-filing-001"
-          ],
+          "commitmentIds": ["commitment-arr-filing-001"],
           "performanceAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
             "@type": "DatasetItem",
@@ -99,7 +93,7 @@
                       "category": "VARIABLE",
                       "subCategory": "POWER_PURCHASE",
                       "head": "Power Purchase Cost",
-                      "amount": 18245.50,
+                      "amount": 18245.5,
                       "formReference": "Form 1.1"
                     },
                     {
@@ -108,7 +102,7 @@
                       "category": "FIXED",
                       "subCategory": "NETWORK_COST",
                       "head": "Transmission Cost",
-                      "amount": 2150.00,
+                      "amount": 2150.0,
                       "componentOf": "network-and-sldc-cost"
                     },
                     {
@@ -125,7 +119,7 @@
                       "category": "FIXED",
                       "subCategory": "DEPRECIATION",
                       "head": "Depreciation",
-                      "amount": 1890.30
+                      "amount": 1890.3
                     },
                     {
                       "lineItemId": "interest-on-loan",
@@ -133,7 +127,7 @@
                       "category": "FIXED",
                       "subCategory": "INTEREST",
                       "head": "Interest on Loan Capital",
-                      "amount": 1245.00
+                      "amount": 1245.0
                     },
                     {
                       "lineItemId": "return-on-equity",
@@ -149,7 +143,7 @@
                       "category": "INCOME",
                       "subCategory": "NON_TARIFF_INCOME",
                       "head": "Non-Tariff Income",
-                      "amount": -450.00
+                      "amount": -450.0
                     },
                     {
                       "lineItemId": "total-arr",
@@ -157,7 +151,7 @@
                       "category": "ARR",
                       "subCategory": "NET_ARR",
                       "head": "Aggregate Revenue Requirement",
-                      "amount": 27481.80,
+                      "amount": 27481.8,
                       "formula": "power-purchase-cost + transmission-cost + o-and-m-expenses + depreciation + interest-on-loan + return-on-equity + non-tariff-income"
                     }
                   ]
@@ -168,18 +162,8 @@
         }
       ],
       "participants": [
-        {
-          "id": "bescom-discom-001",
-          "descriptor": {
-            "name": "BESCOM - Bangalore Electricity Supply Company"
-          }
-        },
-        {
-          "id": "aperc-regulator-001",
-          "descriptor": {
-            "name": "APERC - AP Electricity Regulatory Commission"
-          }
-        }
+        {"id": "bescom-discom-001", "descriptor": {"name": "BESCOM - Bangalore Electricity Supply Company"}},
+        {"id": "aperc-regulator-001", "descriptor": {"name": "APERC - AP Electricity Regulatory Commission"}}
       ],
       "settlements": [
         {

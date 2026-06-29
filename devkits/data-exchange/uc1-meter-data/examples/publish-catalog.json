@@ -62,14 +62,30 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterDataRequest/v0.6/context.jsonld",
                 "@type": "MeterDataCapabilities",
                 "profiles": [
-                  {"profileType": "CustomerProfile"},
-                  {"profileType": "IntervalProfile"},
-                  {"profileType": "DailyProfile"},
-                  {"profileType": "MonthlyProfile"},
-                  {"profileType": "BillDetails"},
-                  {"profileType": "InstantaneousProfile"},
-                  {"profileType": "EventProfile"},
-                  {"profileType": "AlarmProfile"}
+                  {
+                    "profileType": "CustomerProfile"
+                  },
+                  {
+                    "profileType": "IntervalProfile"
+                  },
+                  {
+                    "profileType": "DailyProfile"
+                  },
+                  {
+                    "profileType": "MonthlyProfile"
+                  },
+                  {
+                    "profileType": "BillDetails"
+                  },
+                  {
+                    "profileType": "InstantaneousProfile"
+                  },
+                  {
+                    "profileType": "EventProfile"
+                  },
+                  {
+                    "profileType": "AlarmProfile"
+                  }
                 ],
                 "supportedScopes": ["ResourceOnly", "ResourceAndChildren", "ChildrenOnly"],
                 "maxHistoryDuration": "P3Y"

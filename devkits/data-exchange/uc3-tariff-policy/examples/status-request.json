@@ -43,9 +43,7 @@
             "descriptor": {
               "name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"
             },
-            "resourceIds": [
-              "ds-tariff-policy-mum-res-2024-25"
-            ]
+            "resourceIds": ["ds-tariff-policy-mum-res-2024-25"]
           }
         }
       ]

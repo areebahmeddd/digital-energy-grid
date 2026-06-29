@@ -10,9 +10,7 @@
     "transactionId": "c3d4e5f6-a7b8-9012-cdef-012345678910",
     "messageId": "c3d4e5f6-a7b8-9012-cdef-012345678914",
     "timestamp": "2026-05-07T09:03:00Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -25,18 +23,28 @@
         {
           "id": "commitment-stream-mqtt-001",
           "status": {
-            "descriptor": { "code": "ACTIVE" }
+            "descriptor": {
+              "code": "ACTIVE"
+            }
           },
           "resources": [
             {
               "id": "stream-ami-mqtt-blr-zone-a",
-              "descriptor": { "name": "AMI Smart Meter Stream — Bengaluru Zone A" },
-              "quantity": { "unitText": "stream", "unitCode": "EA", "value": "1" }
+              "descriptor": {
+                "name": "AMI Smart Meter Stream — Bengaluru Zone A"
+              },
+              "quantity": {
+                "unitText": "stream",
+                "unitCode": "EA",
+                "value": "1"
+              }
             }
           ],
           "offer": {
             "id": "offer-ami-mqtt-monthly",
-            "descriptor": { "name": "Monthly MQTT stream subscription" },
+            "descriptor": {
+              "name": "Monthly MQTT stream subscription"
+            },
             "resourceIds": ["stream-ami-mqtt-blr-zone-a"]
           }
         }
@@ -44,25 +52,21 @@
       "consideration": [
         {
           "id": "consideration-stream-001",
-          "status": { "code": "ACTIVE" },
+          "status": {
+            "code": "ACTIVE"
+          },
           "considerationAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
             "@type": "PriceSpecification",
             "currency": "INR",
-            "value": 12000.00,
+            "value": 12000.0,
             "description": "Monthly subscription — AMI MQTT stream, Bengaluru Zone A"
           }
         }
       ],
       "participants": [
-        {
-          "id": "intelligrid-amisp-001",
-          "descriptor": { "name": "IntelliGrid AMI Services" }
-        },
-        {
-          "id": "bescom-analytics-001",
-          "descriptor": { "name": "BESCOM Analytics Team" }
-        }
+        {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}},
+        {"id": "bescom-analytics-001", "descriptor": {"name": "BESCOM Analytics Team"}}
       ],
       "settlements": [
         {
@@ -73,7 +77,10 @@
             "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
-            "beckn:amount": { "currency": "INR", "value": 12000.00 },
+            "beckn:amount": {
+              "currency": "INR",
+              "value": 12000.0
+            },
             "beckn:txnRef": "UPI-TXN-2026-050709031122",
             "beckn:paidAt": "2026-05-07T09:02:55Z"
           }

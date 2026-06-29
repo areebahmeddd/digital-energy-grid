@@ -24,21 +24,35 @@
         "name": "AMI Meter Data Exchange",
         "shortDesc": "AMI meter data exchange under existing AMISP contract"
       },
-      "status": {"code": "ACTIVE"},
+      "status": {
+        "code": "ACTIVE"
+      },
       "commitments": [
         {
           "id": "commitment-ami-meter-001",
-          "status": {"descriptor": {"code": "ACTIVE"}},
+          "status": {
+            "descriptor": {
+              "code": "ACTIVE"
+            }
+          },
           "resources": [
             {
               "id": "ds-ami-meter-data-blr-zone-a-q1-2026",
-              "descriptor": {"name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026"},
-              "quantity": {"unitText": "report", "unitCode": "EA", "value": "1"}
+              "descriptor": {
+                "name": "IntelliGrid AMI Meter Data - Bengaluru Zone A - Q1 2026"
+              },
+              "quantity": {
+                "unitText": "report",
+                "unitCode": "EA",
+                "value": "1"
+              }
             }
           ],
           "offer": {
             "id": "offer-ami-meter-data-inline",
-            "descriptor": {"name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"},
+            "descriptor": {
+              "name": "AMI Meter Data Inline Delivery - Bengaluru Zone A Q1 2026"
+            },
             "resourceIds": ["ds-ami-meter-data-blr-zone-a-q1-2026"]
           }
         }
@@ -65,25 +79,60 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "CustomerProfile",
                 "profileType": "CUSTOMER",
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-1234"}],
+                "customerRefs": [
+                  {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-1234"
+                  }
+                ],
                 "timeZone": "Asia/Kolkata",
                 "customer": {
-                  "id": {"scheme": "CONSUMER_NUMBER", "value": "RR-1234"},
+                  "id": {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-1234"
+                  },
                   "name": "Residential Consumer A",
                   "consumerCategory": "LT-1",
                   "sanctionedLoadKw": 5.0,
                   "billingCycleDay": 1
                 },
                 "serviceDeliveryPoints": [
-                  {"id": {"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-12345"}, "addressLine": "12 MG Road", "city": "Bengaluru", "postalCode": "560001"}
+                  {
+                    "id": {
+                      "scheme": "SERVICE_DELIVERY_POINT",
+                      "value": "SDP-BLR-A-12345"
+                    },
+                    "addressLine": "12 MG Road",
+                    "city": "Bengaluru",
+                    "postalCode": "560001"
+                  }
                 ],
                 "meters": [
-                  {"id": {"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-654321"}, "manufacturer": "Genus", "modelNumber": "SM-1PH-2W-WC", "meterCategory": "D1", "serviceKind": "ELECTRICITY"}
+                  {
+                    "id": {
+                      "scheme": "METER_SERIAL",
+                      "value": "BESCOM-SM-2025-654321"
+                    },
+                    "manufacturer": "Genus",
+                    "modelNumber": "SM-1PH-2W-WC",
+                    "meterCategory": "D1",
+                    "serviceKind": "ELECTRICITY"
+                  }
                 ],
                 "associations": [
                   {
-                    "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-654321"}],
-                    "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-12345"}],
+                    "meterRefs": [
+                      {
+                        "scheme": "METER_SERIAL",
+                        "value": "BESCOM-SM-2025-654321"
+                      }
+                    ],
+                    "serviceDeliveryPointRefs": [
+                      {
+                        "scheme": "SERVICE_DELIVERY_POINT",
+                        "value": "SDP-BLR-A-12345"
+                      }
+                    ],
                     "installedAt": "2025-01-01T00:00:00+05:30"
                   }
                 ]
@@ -92,10 +141,28 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
-                "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-654321"}],
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-1234"}],
-                "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-12345"}],
-                "intervalPeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
+                "meterRefs": [
+                  {
+                    "scheme": "METER_SERIAL",
+                    "value": "BESCOM-SM-2025-654321"
+                  }
+                ],
+                "customerRefs": [
+                  {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-1234"
+                  }
+                ],
+                "serviceDeliveryPointRefs": [
+                  {
+                    "scheme": "SERVICE_DELIVERY_POINT",
+                    "value": "SDP-BLR-A-12345"
+                  }
+                ],
+                "intervalPeriod": {
+                  "start": "2026-01-01T00:00:00+05:30",
+                  "duration": "PT15M"
+                },
                 "intervals": [
                   {"id": 0, "readings": [{"readingType": "kWh imp block", "value": 0.42}]},
                   {"id": 1, "readings": [{"readingType": "kWh imp block", "value": 0.38}]},
@@ -107,25 +174,60 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "CustomerProfile",
                 "profileType": "CUSTOMER",
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-5678"}],
+                "customerRefs": [
+                  {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-5678"
+                  }
+                ],
                 "timeZone": "Asia/Kolkata",
                 "customer": {
-                  "id": {"scheme": "CONSUMER_NUMBER", "value": "RR-5678"},
+                  "id": {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-5678"
+                  },
                   "name": "Residential Consumer B",
                   "consumerCategory": "LT-1",
                   "sanctionedLoadKw": 3.0,
                   "billingCycleDay": 1
                 },
                 "serviceDeliveryPoints": [
-                  {"id": {"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-67890"}, "addressLine": "45 Residency Road", "city": "Bengaluru", "postalCode": "560025"}
+                  {
+                    "id": {
+                      "scheme": "SERVICE_DELIVERY_POINT",
+                      "value": "SDP-BLR-A-67890"
+                    },
+                    "addressLine": "45 Residency Road",
+                    "city": "Bengaluru",
+                    "postalCode": "560025"
+                  }
                 ],
                 "meters": [
-                  {"id": {"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-789012"}, "manufacturer": "HPL", "modelNumber": "SM-1PH-2W-WC", "meterCategory": "D1", "serviceKind": "ELECTRICITY"}
+                  {
+                    "id": {
+                      "scheme": "METER_SERIAL",
+                      "value": "BESCOM-SM-2025-789012"
+                    },
+                    "manufacturer": "HPL",
+                    "modelNumber": "SM-1PH-2W-WC",
+                    "meterCategory": "D1",
+                    "serviceKind": "ELECTRICITY"
+                  }
                 ],
                 "associations": [
                   {
-                    "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-789012"}],
-                    "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-67890"}],
+                    "meterRefs": [
+                      {
+                        "scheme": "METER_SERIAL",
+                        "value": "BESCOM-SM-2025-789012"
+                      }
+                    ],
+                    "serviceDeliveryPointRefs": [
+                      {
+                        "scheme": "SERVICE_DELIVERY_POINT",
+                        "value": "SDP-BLR-A-67890"
+                      }
+                    ],
                     "installedAt": "2025-03-15T00:00:00+05:30"
                   }
                 ]
@@ -134,10 +236,28 @@
                 "@context": "https://india-energy-stack.github.io/ies-accelerator/schemas/MeterData/v0.6/context.jsonld",
                 "@type": "IntervalProfile",
                 "profileType": "INTERVAL",
-                "meterRefs": [{"scheme": "METER_SERIAL", "value": "BESCOM-SM-2025-789012"}],
-                "customerRefs": [{"scheme": "CONSUMER_NUMBER", "value": "RR-5678"}],
-                "serviceDeliveryPointRefs": [{"scheme": "SERVICE_DELIVERY_POINT", "value": "SDP-BLR-A-67890"}],
-                "intervalPeriod": {"start": "2026-01-01T00:00:00+05:30", "duration": "PT15M"},
+                "meterRefs": [
+                  {
+                    "scheme": "METER_SERIAL",
+                    "value": "BESCOM-SM-2025-789012"
+                  }
+                ],
+                "customerRefs": [
+                  {
+                    "scheme": "CONSUMER_NUMBER",
+                    "value": "RR-5678"
+                  }
+                ],
+                "serviceDeliveryPointRefs": [
+                  {
+                    "scheme": "SERVICE_DELIVERY_POINT",
+                    "value": "SDP-BLR-A-67890"
+                  }
+                ],
+                "intervalPeriod": {
+                  "start": "2026-01-01T00:00:00+05:30",
+                  "duration": "PT15M"
+                },
                 "intervals": [
                   {"id": 0, "readings": [{"readingType": "kWh imp block", "value": 0.21}]},
                   {"id": 1, "readings": [{"readingType": "kWh imp block", "value": 0.19}]},

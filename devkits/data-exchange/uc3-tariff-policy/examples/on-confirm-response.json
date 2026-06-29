@@ -10,9 +10,7 @@
     "transactionId": "e5f6a7b8-c9d0-1234-ef01-234567890123",
     "messageId": "3e4f5a6b-7c8d-9012-ef01-234567890124",
     "timestamp": "2026-04-01T09:15:05Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -50,9 +48,7 @@
             "descriptor": {
               "name": "Inline Tariff Policy Delivery - Mumbai Residential 2024-25"
             },
-            "resourceIds": [
-              "ds-tariff-policy-mum-res-2024-25"
-            ]
+            "resourceIds": ["ds-tariff-policy-mum-res-2024-25"]
           },
           "commitmentAttributes": {
             "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
@@ -80,18 +76,8 @@
         }
       ],
       "participants": [
-        {
-          "id": "merc-regulator-001",
-          "descriptor": {
-            "name": "Maharashtra Electricity Regulatory Commission"
-          }
-        },
-        {
-          "id": "merashehar-discom-001",
-          "descriptor": {
-            "name": "MeraShehar - Distribution Company"
-          }
-        }
+        {"id": "merc-regulator-001", "descriptor": {"name": "Maharashtra Electricity Regulatory Commission"}},
+        {"id": "merashehar-discom-001", "descriptor": {"name": "MeraShehar - Distribution Company"}}
       ],
       "performance": [],
       "settlements": []

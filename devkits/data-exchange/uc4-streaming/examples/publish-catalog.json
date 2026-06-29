@@ -8,9 +8,7 @@
     "transactionId": "c3d4e5f6-a7b8-9012-cdef-012345678901",
     "messageId": "c3d4e5f6-a7b8-9012-cdef-012345678902",
     "timestamp": "2026-05-07T06:00:00Z",
-    "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld"
-    ]
+    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld"]
   },
   "message": {
     "publishDirectives": [
@@ -152,7 +150,9 @@
             "considerations": [
               {
                 "id": "consideration-mqtt-monthly",
-                "status": { "code": "ACTIVE" },
+                "status": {
+                  "code": "ACTIVE"
+                },
                 "considerationAttributes": {
                   "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
                   "@type": "PriceSpecification",
@@ -176,7 +176,9 @@
             "considerations": [
               {
                 "id": "consideration-kafka-monthly",
-                "status": { "code": "ACTIVE" },
+                "status": {
+                  "code": "ACTIVE"
+                },
                 "considerationAttributes": {
                   "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
                   "@type": "PriceSpecification",
@@ -200,7 +202,9 @@
             "considerations": [
               {
                 "id": "consideration-api-monthly",
-                "status": { "code": "ACTIVE" },
+                "status": {
+                  "code": "ACTIVE"
+                },
                 "considerationAttributes": {
                   "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
                   "@type": "PriceSpecification",
@@ -224,7 +228,9 @@
             "considerations": [
               {
                 "id": "consideration-datalake-monthly",
-                "status": { "code": "ACTIVE" },
+                "status": {
+                  "code": "ACTIVE"
+                },
                 "considerationAttributes": {
                   "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
                   "@type": "PriceSpecification",

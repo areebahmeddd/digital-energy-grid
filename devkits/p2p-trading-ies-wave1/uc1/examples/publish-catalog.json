@@ -28,9 +28,7 @@
           {
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
-            "beckn:networkId": [
-              "p2p-interdiscom-trading-test-network"
-            ],
+            "beckn:networkId": ["p2p-interdiscom-trading-test-network"],
             "beckn:isActive": true,
             "beckn:id": "energy-resource-solar-001",
             "beckn:descriptor": {
@@ -63,9 +61,7 @@
           {
             "@context": "https://raw.githubusercontent.com/beckn/protocol-specifications-v2/tags/core-2.0.0-rc-eos-release/schema/core/v2/context.jsonld",
             "@type": "beckn:Item",
-            "beckn:networkId": [
-              "p2p-interdiscom-trading-test-network"
-            ],
+            "beckn:networkId": ["p2p-interdiscom-trading-test-network"],
             "beckn:isActive": true,
             "beckn:id": "energy-resource-solar-002",
             "beckn:descriptor": {
@@ -107,9 +103,7 @@
               "schema:name": "Solar Energy Offer - Morning Slot"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-001"
-            ],
+            "beckn:items": ["energy-resource-solar-001"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 15,
@@ -146,9 +140,7 @@
               "schema:name": "Solar Energy Offer - Afternoon Slot"
             },
             "beckn:provider": "provider-solar-farm-001",
-            "beckn:items": [
-              "energy-resource-solar-002"
-            ],
+            "beckn:items": ["energy-resource-solar-002"],
             "beckn:price": {
               "@type": "schema:PriceSpecification",
               "schema:price": 12,
