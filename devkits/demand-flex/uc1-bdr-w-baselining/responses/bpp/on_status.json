@@ -88,9 +88,9 @@
                       "unitQuantity": 150.0
                     },
                     "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
+                      "did:web:tpddl.delhi.gov.in:meters:001",
+                      "did:web:tpddl.delhi.gov.in:meters:002",
+                      "did:web:tpddl.delhi.gov.in:meters:003"
                     ]
                   }
                 }
@@ -116,7 +116,7 @@
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
@@ -130,7 +130,7 @@
                 }
               },
               {
-                "meterId": "der://meter/002",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },
@@ -144,7 +144,7 @@
                 }
               },
               {
-                "meterId": "der://meter/003",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:003",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": { "start": "2026-04-01T08:30:00Z", "duration": "PT1H" },

@@ -69,7 +69,7 @@
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "participatingMeters": ["der://meter/001", "der://meter/002"],
+                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002"],
                     "reportDescriptors": [
                       {
                         "objectType": "REPORT_PAYLOAD_DESCRIPTOR",

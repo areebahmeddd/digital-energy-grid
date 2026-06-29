@@ -59,29 +59,29 @@
                   "participantId": "greenflex-agg",
                   "inputs": {
                     "plannedDemandChange": {"unitCode": "KWH", "unitQuantity": 150.0, "@type": "Quantity"},
-                    "participatingMeters": ["der://meter/001", "der://meter/002"],
+                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002"],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN001",
+                        "resourceId": "did:web:tatamotors.com:vin:VIN001",
                         "resourceType": "EV_CHARGER",
                         "make": "Tata",
                         "model": "Nexon EV",
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 30.0,
                         "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": ["der://meter/001"]
+                        "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN002",
+                        "resourceId": "did:web:mgmotor.co.in:vin:VIN002",
                         "resourceType": "EV_CHARGER",
                         "make": "MG",
                         "model": "ZS EV",
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 44.5,
                         "telemetryProvider": "mg-imotion",
-                        "parentResources": ["der://meter/002"]
+                        "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       }
                     ],
                     "reportDescriptors": [

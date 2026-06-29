@@ -60,40 +60,40 @@
                   "participantId": "greenflex-agg",
                   "inputs": {
                     "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 150.0},
-                    "participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"],
+                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002", "did:web:tpddl.delhi.gov.in:meters:003"],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN001",
+                        "resourceId": "did:web:tatamotors.com:vin:VIN001",
                         "resourceType": "EV_CHARGER",
                         "make": "Tata",
                         "model": "Nexon EV",
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 30.0,
                         "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": ["der://meter/001"]
+                        "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN002",
+                        "resourceId": "did:web:mgmotor.co.in:vin:VIN002",
                         "resourceType": "EV_CHARGER",
                         "make": "MG",
                         "model": "ZS EV",
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 44.5,
                         "telemetryProvider": "mg-imotion",
-                        "parentResources": ["der://meter/002"]
+                        "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       },
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN003",
+                        "resourceId": "did:web:tatamotors.com:vin:VIN003",
                         "resourceType": "EV_CHARGER",
                         "make": "Tata",
                         "model": "Tigor EV",
                         "ratedPowerKw": 7.0,
                         "energyCapacityKwh": 26.0,
                         "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": ["der://meter/003"]
+                        "parentResources": ["did:web:tpddl.delhi.gov.in:meters:003"]
                       }
                     ],
                     "reportDescriptors": [
@@ -122,7 +122,7 @@
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
@@ -137,7 +137,7 @@
                 }
               },
               {
-                "meterId": "der://meter/002",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
@@ -152,7 +152,7 @@
                 }
               },
               {
-                "meterId": "der://meter/003",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:003",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},

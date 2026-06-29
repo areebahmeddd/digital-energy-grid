@@ -97,7 +97,7 @@
             "_comment_meters_slice": "In the wire payload this array carries 4,000 meters (this page's slice). Two are shown here as a representative sample of the shape.",
             "meters": [
               {
-                "meterId": "der://meter/00001",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:00001",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
@@ -112,7 +112,7 @@
                 }
               },
               {
-                "meterId": "der://meter/00002",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:00002",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},

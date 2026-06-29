@@ -59,7 +59,7 @@
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "participatingMeters": ["der://meter/001", "der://meter/002"],
+                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002"],
                     "reportDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}]
                   }
                 }
@@ -95,7 +95,7 @@
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
@@ -110,7 +110,7 @@
                 }
               },
               {
-                "meterId": "der://meter/002",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
