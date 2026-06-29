@@ -8,7 +8,13 @@
     "transactionId": "a1b2c3d4-e5f6-7890-abcd-ef1122334455",
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
     "timestamp": "2026-04-25T06:00:00Z",
-    "schemaContext": ["https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld", "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld"]
+    "schemaContext": [
+      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
+      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld"
+    ]
   },
   "message": {
     "publishDirectives": [{"catalogId": "catalog-p2p-energy-2026-04", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["nfh.global/testnet-deg"]}],
@@ -19,7 +25,13 @@
         "bppId": "sellerapp.example.com",
         "bppUri": "http://sellerapp.example.com/bpp/receiver",
         "provider": {"id": "sellerapp.example.com", "descriptor": {"name": "Prosumer Solar Farm - North Delhi"}},
-        "resources": [{"id": "energy-resource-solar-001", "descriptor": {"name": "Solar energy - 2026-04-26 10:00-12:00 IST (2 hourly slots)", "shortDesc": "Up to 30 kWh @ 12 INR/kWh (slot 0) and 25 kWh @ 14 INR/kWh (slot 1)"}, "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}}],
+        "resources": [
+          {
+            "id": "energy-resource-solar-001",
+            "descriptor": {"name": "Solar energy - 2026-04-26 10:00-12:00 IST (2 hourly slots)", "shortDesc": "Up to 30 kWh @ 12 INR/kWh (slot 0) and 25 kWh @ 14 INR/kWh (slot 1)"},
+            "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}
+          }
+        ],
         "offers": [
           {
             "id": "offer-p2p-001",
@@ -31,7 +43,16 @@
               "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "validityWindow": {"@type": "beckn:TimePeriod", "schema:startTime": "2026-04-25T06:00:00Z", "schema:endTime": "2026-04-26T00:30:00Z"},
-              "contractAttributes": {"@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld", "@type": "DEGContract", "roles": [{"role": "buyerPlatform", "participantId": "buyerapp.example.com"}, {"role": "sellerPlatform", "participantId": "sellerapp.example.com"}, {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}], "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego", "queryPath": "data.deg.contracts.p2p_trading"}},
+              "contractAttributes": {
+                "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+                "@type": "DEGContract",
+                "roles": [
+                  {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
+                  {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+                  {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
+                ],
+                "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego", "queryPath": "data.deg.contracts.p2p_trading"}
+              },
               "commitmentAttributes": {
                 "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
                 "@type": "TimeSeries",
@@ -46,10 +67,23 @@
                   {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SELLER_DISCOM_STATUS", "units": "STRING", "insertedBy": "sellerDiscom"},
                   {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "FINAL_ALLOC", "units": "KWH", "insertedBy": "sellerDiscom"}
                 ],
-                "intervals": [{"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "AVAILABLE_QTY", "values": [30.5]}]}, {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "AVAILABLE_QTY", "values": [25.5]}]}]
+                "intervals": [
+                  {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "AVAILABLE_QTY", "values": [30.5]}]},
+                  {"id": 1, "payloads": [{"type": "PRICE_PER_KWH", "values": [14.5]}, {"type": "AVAILABLE_QTY", "values": [25.5]}]}
+                ]
               }
             },
-            "provider": {"id": "sellerapp.example.com", "descriptor": {"name": "Prosumer Solar Farm - North Delhi"}, "providerAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001"}}
+            "provider": {
+              "id": "sellerapp.example.com",
+              "descriptor": {"name": "Prosumer Solar Farm - North Delhi"},
+              "providerAttributes": {
+                "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+                "@type": "EnergyCustomer",
+                "meterId": "TEST_METER_SELLER_001",
+                "utilityId": "TEST_DISCOM_SELLER",
+                "utilityCustomerId": "TEST_CUST_SELLER_001"
+              }
+            }
           }
         ]
       }

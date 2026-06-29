@@ -31,7 +31,15 @@
                 "schema:identifier": "ds-actuals-buyer-001",
                 "schema:name": "Buyer-discom meter actuals",
                 "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
-                "dataPayload": {"@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld", "@type": "TimeSeries", "resourceName": "TEST_METER_BUYER_001", "clientName": "TEST_DISCOM_BUYER", "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"}, "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ENERGY_CONSUMPTION", "units": "KWH"}], "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": [19.2]}]}]}
+                "dataPayload": {
+                  "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+                  "@type": "TimeSeries",
+                  "resourceName": "TEST_METER_BUYER_001",
+                  "clientName": "TEST_DISCOM_BUYER",
+                  "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
+                  "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ENERGY_CONSUMPTION", "units": "KWH"}],
+                  "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": [19.2]}]}]
+                }
               }
             }
           ],
