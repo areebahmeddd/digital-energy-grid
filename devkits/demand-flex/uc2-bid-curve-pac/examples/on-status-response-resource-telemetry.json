@@ -3,14 +3,14 @@
     "networkId": "nfh.global/testnet-deg",
     "version": "2.0.0",
     "action": "on_status",
-    "_comment_design": "DISCOM publishes per-EnergyResource telemetry that originated from the aggregator's vendor-API integrations (e.g. Tata EVP Telematics, MG iMotion — collected out-of-band) AFTER actuals and BEFORE settlement. This is a non-settlement-grade reconciliation channel only — settlement is computed by the meter-based revenue rego against utility-published grid-meter BASELINE/USAGE in the actuals message, never against this EnergyResource data. BASELINE is deliberately absent here because baselines are exclusively utility-provided. PER_INTERVAL payloads (USAGE/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
+    "_comment_design": "DISCOM publishes per-EnergyResource telemetry that originated from the aggregator's vendor-API integrations (e.g. Tata EVP Telematics, MG iMotion — collected out-of-band) AFTER actuals and BEFORE settlement. This is a non-settlement-grade reconciliation channel only — settlement is computed by the meter-based pac revenue rego against utility-published grid-meter BASELINE/USAGE in the actuals message, never against this EnergyResource data. BASELINE is deliberately absent here because baselines are exclusively utility-provided. PER_INTERVAL payloads (USAGE/SOC_END) appear in every interval; PER_EVENT payloads (GPS_LAT/GPS_LON) appear only on interval 0.",
     "bapId": "bap.example.com",
     "bapUri": "https://bap.example.com/beckn",
     "bppId": "bpp.example.com",
     "bppUri": "https://bpp.example.com/beckn",
-    "transactionId": "3d39df73-a4c0-4374-9836-ec6c365a7ecc",
-    "messageId": "022e188f-cdc9-4eb4-af1a-21447e9bacbc",
-    "timestamp": "2026-04-01T10:45:00Z",
+    "transactionId": "c2d3e4f5-a6b7-8901-abcd-ef5678901234",
+    "messageId": "e8f9a0b1-c2d3-4567-abcd-ef3456789013",
+    "timestamp": "2026-06-15T16:15:00Z",
     "schemaContext": [
       "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
@@ -24,29 +24,29 @@
   },
   "message": {
     "contract": {
-      "id": "contract-flex-001",
+      "id": "contract-pac-001",
       "status": {"code": "ACTIVE"},
       "commitments": [
         {
-          "id": "commitment-flex-001",
+          "id": "commitment-pac-001",
           "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
-              "id": "flex-need-north-delhi-apr1",
-              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
+              "id": "flex-need-north-delhi-jun15",
+              "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
               "resourceAttributes": {
                 "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
+                "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
                 "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "maxCapacityKw": 200
               }
             }
           ],
           "offer": {
-            "id": "offer-flex-001",
-            "resourceIds": ["flex-need-north-delhi-apr1"],
+            "id": "offer-pac-001",
+            "resourceIds": ["flex-need-north-delhi-jun15"],
             "offerAttributes": {
               "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
@@ -54,14 +54,13 @@
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}
+                  "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 150.0},
-                    "participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"],
+                    "participatingMeters": ["der://meter/001", "der://meter/002"],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
@@ -84,17 +83,6 @@
                         "energyCapacityKwh": 44.5,
                         "telemetryProvider": "mg-imotion",
                         "parentResources": ["der://meter/002"]
-                      },
-                      {
-                        "@type": "EnergyResource",
-                        "resourceId": "der://ev/VIN003",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Tigor EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 26.0,
-                        "telemetryProvider": "tata-evp-telematics",
-                        "parentResources": ["der://meter/003"]
                       }
                     ],
                     "reportDescriptors": [
@@ -112,23 +100,23 @@
       ],
       "performance": [
         {
-          "id": "perf-evt-001-resource-telemetry",
+          "id": "perf-pac-001-resource-telemetry",
           "status": {
             "code": "REPORT_DELIVERED",
             "name": "EnergyResource telemetry delivered (USAGE/SOC_END per interval; GPS only on interval 0). Non-settlement-grade — utility-provided grid-meter BASELINE/USAGE in the actuals message is the sole settlement input."
           },
-          "commitmentIds": ["commitment-flex-001"],
+          "commitmentIds": ["commitment-pac-001"],
           "performanceAttributes": {
             "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
-            "eventId": "evt-2026-04-01-001",
+            "eventId": "evt-2026-06-15-001",
             "methodology": "RESOURCE_TELEMETRY",
             "meters": [
               {
                 "meterId": "der://ev/VIN001",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
@@ -137,9 +125,7 @@
                   ],
                   "intervals": [
                     {"id": 0, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [20.5]}, {"type": "GPS_LAT", "values": [28.6139]}, {"type": "GPS_LON", "values": [77.209]}]},
-                    {"id": 1, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.0]}]},
-                    {"id": 2, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.5]}]},
-                    {"id": 3, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [22.0]}]}
+                    {"id": 1, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.5]}]}
                   ]
                 }
               },
@@ -147,7 +133,7 @@
                 "meterId": "der://ev/VIN002",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
                   "payloadDescriptors": [
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
@@ -156,28 +142,7 @@
                   ],
                   "intervals": [
                     {"id": 0, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}, {"type": "GPS_LAT", "values": [28.628]}, {"type": "GPS_LON", "values": [77.241]}]},
-                    {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
-                    {"id": 2, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
-                    {"id": 3, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]}
-                  ]
-                }
-              },
-              {
-                "meterId": "der://ev/VIN003",
-                "telemetry": {
-                  "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
-                  "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "units": "DEGREES"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
-                  ],
-                  "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [12.5]}, {"type": "GPS_LAT", "values": [28.545]}, {"type": "GPS_LON", "values": [77.1925]}]},
-                    {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [12.0]}]},
-                    {"id": 2, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [11.5]}]},
-                    {"id": 3, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [11.0]}]}
+                    {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]}
                   ]
                 }
               }
@@ -189,7 +154,7 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego", "queryPath": "data.deg.contracts.demand_flex"}
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_revenue.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }
