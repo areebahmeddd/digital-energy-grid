@@ -55,7 +55,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/confirm-tampered-vc.json"
+            $ref: "../examples/confirm-request-tampered.json"
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body
@@ -70,7 +70,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/confirm-expired-vc.json"
+            $ref: "../examples/confirm-request-expired.json"
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body
@@ -85,7 +85,7 @@ workflows:
         requestBody:
           contentType: application/json
           payload:
-            $ref: "../examples/confirm-wrong-issuer-vc.json"
+            $ref: "../examples/confirm-request-wrong-issuer.json"
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body

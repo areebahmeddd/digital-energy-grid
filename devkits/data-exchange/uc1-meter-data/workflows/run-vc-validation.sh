@@ -82,15 +82,15 @@ else
 fi
 
 echo "[2/4] tampered-vc-rejected (direct to BPP receiver)"
-post "$BPP_RECEIVER/confirm" "$EX/confirm-tampered-vc.json"
+post "$BPP_RECEIVER/confirm" "$EX/confirm-request-tampered.json"
 check "tampered VC → INVALID_PROOF" 401 INVALID_PROOF
 
 echo "[3/4] expired-vc-rejected (direct to BPP receiver)"
-post "$BPP_RECEIVER/confirm" "$EX/confirm-expired-vc.json"
+post "$BPP_RECEIVER/confirm" "$EX/confirm-request-expired.json"
 check "expired VC → CREDENTIAL_EXPIRED" 401 CREDENTIAL_EXPIRED
 
 echo "[4/4] wrong-issuer-vc-rejected (direct to BPP receiver)"
-post "$BPP_RECEIVER/confirm" "$EX/confirm-wrong-issuer-vc.json"
+post "$BPP_RECEIVER/confirm" "$EX/confirm-request-wrong-issuer.json"
 check "wrong issuer VC → ISSUER_MISMATCH" 401 ISSUER_MISMATCH
 
 echo
