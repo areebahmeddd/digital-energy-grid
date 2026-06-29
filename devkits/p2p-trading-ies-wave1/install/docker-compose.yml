@@ -135,18 +135,18 @@ services:
     # hostnames the shared Arazzo runner rewrites payload bap_uri/bpp_uri
     # to (see devkits/scripts/run-arazzo-lib.sh). The runner uses each
     # payload's context.bap_id / bpp_id as the hostname, so these aliases
-    # must match this devkit's subscriberIds (p2p-trading-sandbox1.com /
-    # p2p-trading-sandbox2.com — see uc*/examples/*.json). Caddy routes
+    # must match this devkit's subscriberIds (bap.example.com /
+    # bpp.example.com — see uc*/examples/*.json). Caddy routes
     # purely on path (/bap/*, /bpp/*) so the host header is irrelevant.
     networks:
       bap_side:
         aliases:
-          - p2p-trading-sandbox1.com
-          - p2p-trading-sandbox2.com
+          - bap.example.com
+          - bpp.example.com
       bpp_side:
         aliases:
-          - p2p-trading-sandbox1.com
-          - p2p-trading-sandbox2.com
+          - bap.example.com
+          - bpp.example.com
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
 
