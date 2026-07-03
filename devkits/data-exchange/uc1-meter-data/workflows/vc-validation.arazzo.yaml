@@ -3,17 +3,20 @@ info:
   title: Energy Data Exchange — UC1 VC Validation (DEG vcvalidator plugin)
   version: 2.0.0
   description: >
-    Asserts the DEG `vcvalidator` beckn-onix middleware. The plugin is wired on
-    the BPP receiver (see config/local-simple-bpp.yaml) and gates the `confirm`
-    action: it verifies the Verifiable Credential carried in the confirm
-    receiver participant (a MeterDataRequestCredential) and rejects the request
-    with a NACK when the credential's proof is invalid, expired, or signed by
-    someone other than its declared issuer.
+    Asserts the beckn-onix `vcvalidator` step plugin. The plugin is wired as
+    the first pipeline step on the BPP receiver (see
+    config/local-simple-bpp.yaml) and gates the `confirm` action: it verifies
+    the Verifiable Credential carried in the confirm receiver participant (a
+    MeterDataRequestCredential) and rejects the request with a NACK when the
+    credential's proof is invalid, expired, or signed by someone other than
+    its declared issuer. The machine-readable failure class (e.g.
+    INVALID_PROOF) appears in the NACK's error.message; error.code carries the
+    standard pipeline code (Unauthorized / Bad Request).
 
     Positive case flows through the BAP caller (which signs the request) so the
     full pipeline returns an ACK. Negative cases POST directly to the BPP
-    receiver — the middleware runs outermost and NACKs before signature/schema
-    validation, so the rejection is deterministic and offline.
+    receiver — vcvalidator runs before signature/schema validation, so the
+    rejection is deterministic and offline.
 
     Run with the dedicated runner (the shared run-arazzo.sh treats every NACK
     as a failure, which is the opposite of what the negative cases assert):
@@ -59,7 +62,8 @@ workflows:
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body
-            condition: $.message.error.code == "INVALID_PROOF"
+            type: regex
+            condition: INVALID_PROOF
 
   - workflowId: expired-vc-rejected
     summary: An expired VC is rejected with CREDENTIAL_EXPIRED
@@ -74,7 +78,8 @@ workflows:
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body
-            condition: $.message.error.code == "CREDENTIAL_EXPIRED"
+            type: regex
+            condition: CREDENTIAL_EXPIRED
 
   - workflowId: wrong-issuer-vc-rejected
     summary: A VC whose declared issuer did not sign it is rejected with ISSUER_MISMATCH
@@ -89,4 +94,5 @@ workflows:
         successCriteria:
           - condition: $statusCode == 401
           - context: $response.body
-            condition: $.message.error.code == "ISSUER_MISMATCH"
+            type: regex
+            condition: ISSUER_MISMATCH

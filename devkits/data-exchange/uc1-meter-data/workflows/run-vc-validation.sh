@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 # Runner for vc-validation.arazzo.yaml.
 #
-# Exercises the DEG `vcvalidator` middleware end-to-end against the running
-# data-exchange devkit (docker compose up -d in install/). The shared
+# Exercises the beckn-onix `vcvalidator` step plugin end-to-end against the
+# running data-exchange devkit (docker compose up -d in install/). The shared
 # run-arazzo.sh treats every NACK as a failure — the opposite of what the
 # negative cases assert here — so this dedicated runner drives the cases with
 # curl + jq and asserts the expected ACK / NACK responses directly.
 #
+# A rejection NACK carries the standard pipeline error.code (Unauthorized /
+# Bad Request); the machine-readable failure class (INVALID_PROOF,
+# CREDENTIAL_EXPIRED, …) appears inside error.message.
+#
 #   Positive case  → BAP caller (signs) → BPP receiver → ACK (HTTP 200)
-#   Negative cases → BPP receiver directly. The middleware runs outermost and
-#                    NACKs before signature/schema validation, so rejection is
-#                    deterministic and offline.
+#   Negative cases → BPP receiver directly. vcvalidator is the first pipeline
+#                    step, so it NACKs before signature/schema validation and
+#                    rejection is deterministic and offline.
 #
 # Usage (from uc1-meter-data/workflows/):
 #   ./run-vc-validation.sh
@@ -43,15 +47,17 @@ post() {
 # field JSONPATH -> echoes the value (empty on miss)
 field() { echo "$BODY" | jq -r "$1 // empty" 2>/dev/null; }
 
+# check NAME WANT_STATUS WANT_CLASS — the failure class is asserted inside
+# error.message (error.code carries the standard pipeline code).
 check() {
-  local name="$1" want_status="$2" want_code="$3"
-  local got_code
-  got_code="$(field '.message.error.code')"
-  if [ "$HTTP" = "$want_status" ] && [ "$got_code" = "$want_code" ]; then
-    echo "  ✓ $name — HTTP $HTTP, error.code=$got_code"
+  local name="$1" want_status="$2" want_class="$3"
+  local got_msg
+  got_msg="$(field '.message.error.message')"
+  if [ "$HTTP" = "$want_status" ] && [[ "$got_msg" == *"$want_class"* ]]; then
+    echo "  ✓ $name — HTTP $HTTP, class $want_class in error.message"
     pass=$((pass + 1))
   else
-    echo "  ✗ $name — want [HTTP $want_status, code $want_code], got [HTTP $HTTP, code '${got_code:-<none>}']"
+    echo "  ✗ $name — want [HTTP $want_status, class $want_class], got [HTTP $HTTP, message '${got_msg:-<none>}']"
     echo "      body: $(echo "$BODY" | jq -c . 2>/dev/null || echo "$BODY")"
     fail=$((fail + 1))
   fi
@@ -65,18 +71,18 @@ echo
 echo "[1/4] valid-vc-accepted (via BAP caller → signed → ACK)"
 post "$BAP_CALLER/confirm" "$EX/confirm-request.json"
 status="$(field '.message.status')"
-errcode="$(field '.message.error.code')"
+errmsg="$(field '.message.error.message')"
 if [ "$HTTP" = "200" ] && [ "$status" = "ACK" ]; then
   echo "  ✓ valid VC accepted — HTTP $HTTP, status=$status"
   pass=$((pass + 1))
-elif [ -n "$errcode" ] && [[ "$errcode" == INVALID_PROOF || "$errcode" == ISSUER_MISMATCH \
-  || "$errcode" == CREDENTIAL_EXPIRED || "$errcode" == CREDENTIAL_REVOKED \
-  || "$errcode" == DID_RESOLUTION_FAILED || "$errcode" == INVALID_CREDENTIAL ]]; then
-  echo "  ✗ valid VC was rejected by vcvalidator — HTTP $HTTP, code=$errcode"
+elif [[ "$errmsg" == *INVALID_PROOF* || "$errmsg" == *ISSUER_MISMATCH* \
+  || "$errmsg" == *CREDENTIAL_EXPIRED* || "$errmsg" == *CREDENTIAL_REVOKED* \
+  || "$errmsg" == *DID_RESOLUTION_FAILED* || "$errmsg" == *INVALID_CREDENTIAL* ]]; then
+  echo "  ✗ valid VC was rejected by vcvalidator — HTTP $HTTP, message=$errmsg"
   echo "      body: $(echo "$BODY" | jq -c . 2>/dev/null || echo "$BODY")"
   fail=$((fail + 1))
 else
-  echo "  ✗ valid VC: unexpected response — HTTP $HTTP, status='${status:-<none>}', code='${errcode:-<none>}'"
+  echo "  ✗ valid VC: unexpected response — HTTP $HTTP, status='${status:-<none>}', message='${errmsg:-<none>}'"
   echo "      body: $(echo "$BODY" | jq -c . 2>/dev/null || echo "$BODY")"
   fail=$((fail + 1))
 fi

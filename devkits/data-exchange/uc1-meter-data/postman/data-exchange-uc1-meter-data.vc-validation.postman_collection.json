@@ -67,7 +67,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
-              "pm.test('error.code = INVALID_PROOF', () => pm.expect(pm.response.json().message.error.code).to.eql('INVALID_PROOF'));"
+              "pm.test('INVALID_PROOF in error.message', () => pm.expect(pm.response.json().message.error.message).to.include('INVALID_PROOF'));"
             ]
           }
         }
@@ -110,7 +110,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
-              "pm.test('error.code = CREDENTIAL_EXPIRED', () => pm.expect(pm.response.json().message.error.code).to.eql('CREDENTIAL_EXPIRED'));"
+              "pm.test('CREDENTIAL_EXPIRED in error.message', () => pm.expect(pm.response.json().message.error.message).to.include('CREDENTIAL_EXPIRED'));"
             ]
           }
         }
@@ -153,7 +153,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
-              "pm.test('error.code = ISSUER_MISMATCH', () => pm.expect(pm.response.json().message.error.code).to.eql('ISSUER_MISMATCH'));"
+              "pm.test('ISSUER_MISMATCH in error.message', () => pm.expect(pm.response.json().message.error.message).to.include('ISSUER_MISMATCH'));"
             ]
           }
         }

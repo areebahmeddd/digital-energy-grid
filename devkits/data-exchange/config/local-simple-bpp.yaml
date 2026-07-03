@@ -65,13 +65,16 @@ modules:
           id: router
           config:
             routingConfig: ./config/local-simple-routing-BPPReceiver.yaml
-        middleware:
-          # Verifiable Credential validator. Runs outermost on the BPP
-          # receiver: for the gated action(s) it verifies every embedded VC
-          # (e.g. the MeterDataRequestCredential carried in the confirm
-          # receiver participant) and rejects the request with a NACK if a
-          # credential's proof is invalid, expired, revoked, or signed by
-          # someone other than its issuer.
+        steps:
+          # Verifiable Credential validator. Runs as the first pipeline step
+          # on the BPP receiver: for the gated action(s) it verifies every
+          # embedded VC (e.g. the MeterDataRequestCredential carried in the
+          # confirm receiver participant) and rejects the request with a NACK
+          # if a credential's proof is invalid, expired, revoked, or signed by
+          # someone other than its issuer. Placed before validateSign so a
+          # credential rejection is deterministic regardless of the request
+          # signature (the vc-validation workflow posts unsigned negative
+          # cases directly to this receiver).
           - id: vcvalidator
             config:
               enabled: "true"
@@ -84,6 +87,7 @@ modules:
               httpTimeout: "10"
               debugLogging: "true"
       steps:
+        - vcvalidator
         - validateSign
         - addRoute
         - validateSchema
