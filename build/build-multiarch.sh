@@ -17,7 +17,7 @@
 # Environment Variables:
 #   BECKN_ONIX_ROOT - Path to beckn-onix repo (will prompt if not set and default not found)
 #   IMAGE_NAME      - Image name (default: onix-adapter-deg)
-#   IMAGE_TAG       - Image tag (default: p2p-multiarch-v5)
+#   IMAGE_TAG       - Image tag (default: none)
 #   REGISTRY        - Registry prefix (default: none, local build)
 #   PLATFORMS       - Platforms to build (default: linux/amd64,linux/arm64)
 #   BUILDER_NAME    - Buildx builder name (default: deg-multiarch)
@@ -53,9 +53,19 @@ else
     BECKN_ONIX_ROOT="$USER_BECKN_ONIX_PATH"
 fi
 
+# Resolve beckn-onix path
+if [ -n "$IMAGE_TAG" ] && [ -d "$IMAGE_TAG" ]; then
+    # Use environment variable if set and valid
+    :
+else
+    # Prompt user for path
+    echo ""
+    read -p "Enter path to image tag (e.g. w-deg-plugins-v2): " IMAGE_TAG
+fi
+
 # Configuration with defaults
 IMAGE_NAME="${IMAGE_NAME:-onix-adapter-deg}"
-IMAGE_TAG="${IMAGE_TAG:-p2p-multiarch-v5}"
+IMAGE_TAG="${IMAGE_TAG:-}"
 REGISTRY="${REGISTRY:-}"
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"
 BUILDER_NAME="${BUILDER_NAME:-deg-multiarch}"

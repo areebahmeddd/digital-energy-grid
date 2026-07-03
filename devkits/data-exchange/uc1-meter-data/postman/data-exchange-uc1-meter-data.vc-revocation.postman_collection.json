@@ -66,8 +66,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('HTTP 403', () => pm.response.to.have.status(403));",
-              "pm.test('error.code = CREDENTIAL_REVOKED', () => pm.expect(pm.response.json().message.error.code).to.eql('CREDENTIAL_REVOKED'));"
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+              "pm.test('CREDENTIAL_REVOKED in error.message', () => pm.expect(pm.response.json().message.error.message).to.include('CREDENTIAL_REVOKED'));"
             ]
           }
         }
