@@ -64,6 +64,9 @@ services:
       - PORT=3001
     ports:
       - "3001:3001"
+    volumes:
+      - ./sandbox-ack-status-route.js:/startup/sandbox-ack-status-route.js:ro
+    command: ["sh", "-c", "node /startup/sandbox-ack-status-route.js && npm start"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
       interval: 10s
@@ -117,6 +120,9 @@ services:
       - PERSONA=bpp
     ports:
       - "3002:3002"
+    volumes:
+      - ./sandbox-ack-status-route.js:/startup/sandbox-ack-status-route.js:ro
+    command: ["sh", "-c", "node /startup/sandbox-ack-status-route.js && npm start"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3002/api/health"]
       interval: 10s
