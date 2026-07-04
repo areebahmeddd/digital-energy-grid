@@ -10,10 +10,13 @@ routingRules:
       - on_update
       - on_cancel
 
+  # Catalog actions are compound endpoints in Beckn v2 (/catalog/publish,
+  # /catalog/subscription); the router appends the full action to the target
+  # URL, hence the base ends at /beckn/.
   - version: "2.0.0"
     targetType: "url"
     target:
-      url: "https://fabric.nfh.global/beckn/catalog/"
+      url: "https://fabric.nfh.global/beckn/"
     endpoints:
-      - publish
-      - subscribe
+      - catalog/publish
+      - catalog/subscription
