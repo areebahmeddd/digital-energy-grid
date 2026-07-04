@@ -1,9 +1,9 @@
 arazzo: 1.0.1
 info:
-  title: Energy Data Exchange — UC1 VC Validation (DEG vcvalidator plugin)
+  title: Energy Data Exchange — UC1 VC Validation (beckn-onix validateVC step)
   version: 2.0.0
   description: >
-    Asserts the beckn-onix `vcvalidator` step plugin. The plugin is wired as
+    Asserts the beckn-onix `validateVC` step plugin. The plugin is wired as
     the first pipeline step on the BPP receiver (see
     config/local-simple-bpp.yaml) and gates the `confirm` action: it verifies
     the Verifiable Credential carried in the confirm receiver participant (a
@@ -15,7 +15,7 @@ info:
 
     Positive case flows through the BAP caller (which signs the request) so the
     full pipeline returns an ACK. Negative cases POST directly to the BPP
-    receiver — vcvalidator runs before signature/schema validation, so the
+    receiver — validateVC runs before signature/schema validation, so the
     rejection is deterministic and offline.
 
     Run with the dedicated runner (the shared run-arazzo.sh treats every NACK
