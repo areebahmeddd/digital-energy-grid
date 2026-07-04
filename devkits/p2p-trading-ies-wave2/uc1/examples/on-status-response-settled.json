@@ -66,7 +66,7 @@
           {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
           {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
         ],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego", "queryPath": "data.deg.contracts.p2p_trading"}
+        "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}
       },
       "participants": [
         {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
@@ -88,7 +88,7 @@
           }
         },
         {
-          "id": "auto-revenue-flows",
+          "id": "auto-settlement-flows",
           "considerationAttributes": {
             "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
             "@type": "RevenueFlow",

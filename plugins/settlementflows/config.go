@@ -1,4 +1,4 @@
-package revenueflows
+package settlementflows
 
 import (
 	"fmt"
@@ -7,26 +7,32 @@ import (
 	"time"
 )
 
-// Config holds configuration for the RevenueFlows plugin.
+// Config holds configuration for the SettlementFlows plugin.
 type Config struct {
 	// Enabled controls whether the plugin is active.
 	Enabled bool
 
-	// Actions is the list of beckn actions that trigger revenue flow computation.
+	// Actions is the list of beckn actions that trigger settlement flow computation.
 	// Default: ["on_status"]
 	Actions []string
 
 	// CacheTTL is how long a compiled rego policy is cached before re-fetch.
-	// Default: 5 minutes.
+	// Must be at least MinCacheTTL so registries like DeDi see at most one
+	// fetch per policy URL per day. Default: 1 day.
 	CacheTTL time.Duration
 
 	// MaxCacheEntries is the LRU bound on cached compiled policies.
 	// Default: 50.
 	MaxCacheEntries int
 
-	// PolicyFetchTimeout is the HTTP timeout for fetching rego from a URL.
-	// Default: 30 seconds.
+	// PolicyFetchTimeout is the per-attempt HTTP timeout for fetching the
+	// policy (or the DeDi record / data_url behind it). Default: 30 seconds.
 	PolicyFetchTimeout time.Duration
+
+	// FetchRetries is how many times a failed fetch (network error or HTTP
+	// 5xx) is retried before the resolver gives up. 4xx responses fail
+	// immediately — they will not heal on retry. Default: 2.
+	FetchRetries int
 
 	// MaxPolicySize is the maximum rego file size in bytes.
 	// Default: 1 MB.
@@ -35,9 +41,11 @@ type Config struct {
 	// DebugLogging enables verbose logging.
 	DebugLogging bool
 
-	// AllowedDomains restricts which domains rego can be fetched from.
-	// Empty = allow all. Comma-separated list.
-	AllowedDomains []string
+	// AllowedPolicyURLPrefixes restricts which policy URLs the plugin
+	// resolves: the payload's policy.url must start with one of these
+	// prefixes. Empty = allow all. Comma-separated list in YAML, e.g.
+	//   "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+	AllowedPolicyURLPrefixes []string
 
 	// ── output destination (REQUIRED in YAML — no code default) ─────────────
 	//
@@ -64,7 +72,7 @@ type Config struct {
 	//
 	// Examples:
 	//   message.contract.contractAttributes.revenueFlows
-	//   message.contract.consideration[id=auto-revenue-flows].considerationAttributes
+	//   message.contract.consideration[id=auto-settlement-flows].considerationAttributes
 	//   message.contract.commitments[0].offer.offerAttributes.revenueFlows
 	OutputPath string
 
@@ -106,6 +114,11 @@ const (
 	OutputModeJSONLD = "jsonld"
 )
 
+// MinCacheTTL is the lowest accepted cacheTTL. Policies change rarely and
+// every expiry re-hits the policy registry (DeDi) plus the data_url host,
+// so anything below a day is rejected at startup.
+const MinCacheTTL = 24 * time.Hour
+
 // DefaultConfig returns a Config seeded with sensible defaults for the
 // non-primary fields. Primary behavior knobs (OutputPath, OutputMode) are
 // intentionally left empty — ParseConfig requires them in the YAML.
@@ -113,9 +126,10 @@ func DefaultConfig() *Config {
 	return &Config{
 		Enabled:            true,
 		Actions:            []string{"on_status"},
-		CacheTTL:           5 * time.Minute,
+		CacheTTL:           MinCacheTTL,
 		MaxCacheEntries:    50,
 		PolicyFetchTimeout: 30 * time.Second,
+		FetchRetries:       2,
 		MaxPolicySize:      1 << 20, // 1 MB
 		DebugLogging:       false,
 		// OutputPath / OutputMode: required, no default.
@@ -168,11 +182,19 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		config.DebugLogging = debug == "true" || debug == "1"
 	}
 
-	if domains, ok := cfg["allowedDomains"]; ok && domains != "" {
-		for _, d := range strings.Split(domains, ",") {
-			d = strings.TrimSpace(d)
-			if d != "" {
-				config.AllowedDomains = append(config.AllowedDomains, d)
+	if r, ok := cfg["fetchRetries"]; ok && r != "" {
+		n, err := strconv.Atoi(r)
+		if err != nil || n < 0 {
+			return nil, fmt.Errorf("settlementflows: invalid fetchRetries %q (want integer >= 0)", r)
+		}
+		config.FetchRetries = n
+	}
+
+	if prefixes, ok := cfg["allowedPolicyUrlPrefixes"]; ok && prefixes != "" {
+		for _, p := range strings.Split(prefixes, ",") {
+			p = strings.TrimSpace(p)
+			if p != "" {
+				config.AllowedPolicyURLPrefixes = append(config.AllowedPolicyURLPrefixes, p)
 			}
 		}
 	}
@@ -187,7 +209,7 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		case OutputModeRaw, OutputModeJSONLD, "":
 			config.OutputMode = m
 		default:
-			return nil, fmt.Errorf("revenueflows: invalid outputMode %q (allowed: %q, %q)",
+			return nil, fmt.Errorf("settlementflows: invalid outputMode %q (allowed: %q, %q)",
 				m, OutputModeRaw, OutputModeJSONLD)
 		}
 	}
@@ -212,14 +234,19 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 	// the destination explicitly so behavior is visible from the config.
 	if config.OutputPath == "" {
 		return nil, fmt.Errorf(
-			"revenueflows: outputPath is required (e.g. " +
+			"settlementflows: outputPath is required (e.g. " +
 				"\"message.contract.contractAttributes.revenueFlows\" or " +
-				"\"message.contract.consideration[id=auto-revenue-flows].considerationAttributes\")")
+				"\"message.contract.consideration[id=auto-settlement-flows].considerationAttributes\")")
 	}
 	if config.OutputMode == "" {
 		return nil, fmt.Errorf(
-			"revenueflows: outputMode is required (allowed: %q, %q)",
+			"settlementflows: outputMode is required (allowed: %q, %q)",
 			OutputModeRaw, OutputModeJSONLD)
+	}
+	if config.CacheTTL < MinCacheTTL {
+		return nil, fmt.Errorf(
+			"settlementflows: cacheTTL %s is below the minimum %s (policies are fetched from a registry; short TTLs hammer it)",
+			config.CacheTTL, MinCacheTTL)
 	}
 
 	return config, nil
@@ -235,14 +262,14 @@ func (c *Config) IsActionEnabled(action string) bool {
 	return false
 }
 
-// IsDomainAllowed checks if the URL domain is in the allowed list.
-// Returns true if no domain restriction is configured.
-func (c *Config) IsDomainAllowed(url string) bool {
-	if len(c.AllowedDomains) == 0 {
+// IsPolicyURLAllowed checks if the policy URL starts with one of the
+// configured prefixes. Returns true if no restriction is configured.
+func (c *Config) IsPolicyURLAllowed(url string) bool {
+	if len(c.AllowedPolicyURLPrefixes) == 0 {
 		return true
 	}
-	for _, d := range c.AllowedDomains {
-		if strings.Contains(url, d) {
+	for _, p := range c.AllowedPolicyURLPrefixes {
+		if strings.HasPrefix(url, p) {
 			return true
 		}
 	}

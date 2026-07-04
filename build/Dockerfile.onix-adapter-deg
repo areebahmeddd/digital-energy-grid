@@ -45,8 +45,8 @@ WORKDIR /workspace/deg-plugins
 # Build DEG ledger recorder plugin
 RUN go build -buildmode=plugin -o /workspace/beckn-onix/plugins/degledgerrecorder.so ./degledgerrecorder/cmd/plugin.go
 
-# Build DEG revenue flows plugin
-RUN go build -buildmode=plugin -o /workspace/beckn-onix/plugins/revenueflows.so ./revenueflows/cmd/plugin.go
+# Build DEG settlement flows plugin
+RUN go build -buildmode=plugin -o /workspace/beckn-onix/plugins/settlementflows.so ./settlementflows/cmd/plugin.go
 
 # vcvalidator is upstreamed into beckn-onix (built above by install/build-plugins.sh).
 

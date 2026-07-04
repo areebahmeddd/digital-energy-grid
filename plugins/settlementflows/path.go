@@ -1,4 +1,4 @@
-package revenueflows
+package settlementflows
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package revenueflows
+package settlementflows
 
 import (
 	"encoding/json"
@@ -65,7 +65,7 @@ func ExtractAction(urlPath string, body []byte) string {
 	return ""
 }
 
-// InjectRevenueFlows writes the rego output into the message body at the
+// InjectSettlementFlows writes the rego output into the message body at the
 // configured destination. Behavior is fully driven by `cfg`:
 //
 //   - cfg.OutputPath defines WHERE the value lands (see path.go).
@@ -78,7 +78,7 @@ func ExtractAction(urlPath string, body []byte) string {
 //     '{"status":{"code":"SETTLED"}}' for Beckn-required Consideration.status).
 //
 // Numbers in the existing body are preserved via json.Number.
-func InjectRevenueFlows(body []byte, flows interface{}, cfg *Config) ([]byte, error) {
+func InjectSettlementFlows(body []byte, flows interface{}, cfg *Config) ([]byte, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("nil config")
 	}
