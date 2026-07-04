@@ -65,35 +65,23 @@
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "did:web:tatamotors.com:vin:VIN001",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Nexon EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 30.0,
-                        "telemetryProvider": "tata-evp-telematics",
+                        "id": "did:web:tatamotors.com:vin:VIN001",
+                        "type": "EV_CHARGER",
+                        "attributes": {"make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "did:web:mgmotor.co.in:vin:VIN002",
-                        "resourceType": "EV_CHARGER",
-                        "make": "MG",
-                        "model": "ZS EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 44.5,
-                        "telemetryProvider": "mg-imotion",
+                        "id": "did:web:mgmotor.co.in:vin:VIN002",
+                        "type": "EV_CHARGER",
+                        "attributes": {"make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       },
                       {
                         "@type": "EnergyResource",
-                        "resourceId": "did:web:tatamotors.com:vin:VIN003",
-                        "resourceType": "EV_CHARGER",
-                        "make": "Tata",
-                        "model": "Tigor EV",
-                        "ratedPowerKw": 7.0,
-                        "energyCapacityKwh": 26.0,
-                        "telemetryProvider": "tata-evp-telematics",
+                        "id": "did:web:tatamotors.com:vin:VIN003",
+                        "type": "EV_CHARGER",
+                        "attributes": {"make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:003"]
                       }
                     ],

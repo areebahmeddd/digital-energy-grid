@@ -236,13 +236,15 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
-          - id: revenueflows
+          - id: settlementflows
             config:
               actions: "on_status"
               cacheTTL: "172800"
               debugLogging: "true"
-              allowedDomains: "raw.githubusercontent.com"
-              outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
               outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"

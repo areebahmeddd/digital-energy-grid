@@ -231,7 +231,7 @@
           }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p_trading_ies_wave2_revenue.rego",
+          "url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1",
           "queryPath": "data.deg.contracts.p2p_trading"
         }
       },
@@ -299,7 +299,7 @@
           }
         },
         {
-          "id": "auto-revenue-flows",
+          "id": "auto-settlement-flows",
           "considerationAttributes": {
             "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
             "@type": "RevenueFlow",

@@ -26,4 +26,4 @@ routingRules:
       url: "https://fabric.nfh.global/beckn/catalog/subscription"
       excludeAction: true
     endpoints:
-      - subscribe
+      - catalog/subscription

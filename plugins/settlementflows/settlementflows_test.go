@@ -1,4 +1,4 @@
-package revenueflows
+package settlementflows
 
 import (
 	"encoding/json"
@@ -80,10 +80,10 @@ func TestExtractAction_FromBody(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// InjectRevenueFlows — legacy contractAttributes shape (raw mode)
+// InjectSettlementFlows — legacy contractAttributes shape (raw mode)
 // ---------------------------------------------------------------------------
 
-func TestInjectRevenueFlows_LegacyContractAttributes(t *testing.T) {
+func TestInjectSettlementFlows_LegacyContractAttributes(t *testing.T) {
 	body := []byte(`{
 		"context": {"action": "on_status"},
 		"message": {
@@ -105,9 +105,9 @@ func TestInjectRevenueFlows_LegacyContractAttributes(t *testing.T) {
 		OutputPath: "message.contract.contractAttributes.revenueFlows",
 		OutputMode: OutputModeRaw,
 	}
-	result, err := InjectRevenueFlows(body, flows, cfg)
+	result, err := InjectSettlementFlows(body, flows, cfg)
 	if err != nil {
-		t.Fatalf("InjectRevenueFlows failed: %v", err)
+		t.Fatalf("InjectSettlementFlows failed: %v", err)
 	}
 
 	var payload map[string]interface{}
@@ -129,10 +129,10 @@ func TestInjectRevenueFlows_LegacyContractAttributes(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// InjectRevenueFlows — Consideration / JSON-LD mode (find-or-create by id)
+// InjectSettlementFlows — Consideration / JSON-LD mode (find-or-create by id)
 // ---------------------------------------------------------------------------
 
-func TestInjectRevenueFlows_Consideration_CreatesEntry(t *testing.T) {
+func TestInjectSettlementFlows_Consideration_CreatesEntry(t *testing.T) {
 	body := []byte(`{
 		"message": {
 			"contract": {
@@ -147,14 +147,14 @@ func TestInjectRevenueFlows_Consideration_CreatesEntry(t *testing.T) {
 		map[string]interface{}{"role": "buyer", "value": -100, "currency": "INR"},
 	}
 	cfg := &Config{
-		OutputPath:       "message.contract.consideration[id=auto-revenue-flows].considerationAttributes",
+		OutputPath:       "message.contract.consideration[id=auto-settlement-flows].considerationAttributes",
 		OutputMode:       OutputModeJSONLD,
 		OutputType:       "RevenueFlow",
 		OutputContextURL: "https://example.com/RevenueFlow/v2.0/context.jsonld",
 		OutputArrayKey:   "revenueFlows",
 		EntryDefaults:    `{"status":{"code":"SETTLED"}}`,
 	}
-	result, err := InjectRevenueFlows(body, flows, cfg)
+	result, err := InjectSettlementFlows(body, flows, cfg)
 	if err != nil {
 		t.Fatalf("inject: %v", err)
 	}
@@ -167,8 +167,8 @@ func TestInjectRevenueFlows_Consideration_CreatesEntry(t *testing.T) {
 		t.Fatalf("expected 1 consideration entry, got %d", len(consider))
 	}
 	entry := consider[0].(map[string]interface{})
-	if entry["id"] != "auto-revenue-flows" {
-		t.Errorf("entry.id = %q, want auto-revenue-flows", entry["id"])
+	if entry["id"] != "auto-settlement-flows" {
+		t.Errorf("entry.id = %q, want auto-settlement-flows", entry["id"])
 	}
 	status := entry["status"].(map[string]interface{})
 	if status["code"] != "SETTLED" {
@@ -187,14 +187,14 @@ func TestInjectRevenueFlows_Consideration_CreatesEntry(t *testing.T) {
 	}
 }
 
-func TestInjectRevenueFlows_Consideration_ReplacesExistingEntry(t *testing.T) {
+func TestInjectSettlementFlows_Consideration_ReplacesExistingEntry(t *testing.T) {
 	body := []byte(`{
 		"message": {
 			"contract": {
 				"contractAttributes": {"policy": {"url": "test", "queryPath": "test"}},
 				"consideration": [
 					{
-						"id": "auto-revenue-flows",
+						"id": "auto-settlement-flows",
 						"status": {"code": "SETTLED"},
 						"considerationAttributes": {
 							"@type": "RevenueFlow",
@@ -212,12 +212,12 @@ func TestInjectRevenueFlows_Consideration_ReplacesExistingEntry(t *testing.T) {
 		map[string]interface{}{"role": "seller", "value": 100, "currency": "INR"},
 	}
 	cfg := &Config{
-		OutputPath:    "message.contract.consideration[id=auto-revenue-flows].considerationAttributes",
+		OutputPath:    "message.contract.consideration[id=auto-settlement-flows].considerationAttributes",
 		OutputMode:    OutputModeJSONLD,
 		OutputType:    "RevenueFlow",
 		EntryDefaults: `{"status":{"code":"SETTLED"}}`,
 	}
-	result, err := InjectRevenueFlows(body, flows, cfg)
+	result, err := InjectSettlementFlows(body, flows, cfg)
 	if err != nil {
 		t.Fatalf("inject: %v", err)
 	}
@@ -270,8 +270,8 @@ func TestParsePath_BracketForms(t *testing.T) {
 				t.Errorf("expected positional index 3, got %+v", s)
 			}
 		}},
-		{"foo[id=auto-revenue-flows]", "foo", true, func(t *testing.T, s PathSegment) {
-			if s.MatchKey != "id" || s.MatchVal != "auto-revenue-flows" {
+		{"foo[id=auto-settlement-flows]", "foo", true, func(t *testing.T, s PathSegment) {
+			if s.MatchKey != "id" || s.MatchVal != "auto-settlement-flows" {
 				t.Errorf("expected k=v match, got %+v", s)
 			}
 		}},
@@ -367,7 +367,7 @@ func TestParseConfig_LegacyShape(t *testing.T) {
 func TestParseConfig_ConsiderationShape(t *testing.T) {
 	cfg, err := ParseConfig(map[string]string{
 		"actions":          "on_status",
-		"outputPath":       "message.contract.consideration[id=auto-revenue-flows].considerationAttributes",
+		"outputPath":       "message.contract.consideration[id=auto-settlement-flows].considerationAttributes",
 		"outputMode":       "jsonld",
 		"outputType":       "RevenueFlow",
 		"outputContextURL": "https://example.com/RevenueFlow/v2.0/context.jsonld",
@@ -396,16 +396,57 @@ func TestParseConfig_RejectsInvalidOutputMode(t *testing.T) {
 	}
 }
 
-func TestIsDomainAllowed(t *testing.T) {
-	cfg := &Config{AllowedDomains: []string{"raw.githubusercontent.com"}}
-	if !cfg.IsDomainAllowed("https://raw.githubusercontent.com/beckn/DEG/policy.rego") {
+func TestIsPolicyURLAllowed(t *testing.T) {
+	cfg := &Config{AllowedPolicyURLPrefixes: []string{"https://api.dedi.global/dedi/lookup/indiaenergystack.in"}}
+	if !cfg.IsPolicyURLAllowed("https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/x") {
 		t.Error("expected allowed")
 	}
-	if cfg.IsDomainAllowed("https://evil.com/policy.rego") {
-		t.Error("expected blocked")
+	if cfg.IsPolicyURLAllowed("https://api.dedi.global/dedi/lookup/evil.org/policies/x") {
+		t.Error("expected blocked: different namespace")
+	}
+	// Prefix match must not degrade to substring match.
+	if cfg.IsPolicyURLAllowed("https://evil.com/?u=https://api.dedi.global/dedi/lookup/indiaenergystack.in") {
+		t.Error("expected blocked: allowed prefix appears mid-URL")
 	}
 	cfg2 := &Config{}
-	if !cfg2.IsDomainAllowed("https://anything.com/policy.rego") {
+	if !cfg2.IsPolicyURLAllowed("https://anything.com/policy.rego") {
 		t.Error("expected allowed when no restrictions")
+	}
+}
+
+func TestParseConfig_CacheTTLFloor(t *testing.T) {
+	_, err := ParseConfig(map[string]string{
+		"outputPath": "x.y",
+		"outputMode": "raw",
+		"cacheTTL":   "60", // 1 minute — below the 1-day floor
+	})
+	if err == nil {
+		t.Error("expected error for cacheTTL below MinCacheTTL")
+	}
+}
+
+func TestParseConfig_FetchRetriesAndPrefixes(t *testing.T) {
+	cfg, err := ParseConfig(map[string]string{
+		"outputPath":               "x.y",
+		"outputMode":               "raw",
+		"fetchRetries":             "3",
+		"allowedPolicyUrlPrefixes": "https://a.example, https://b.example",
+	})
+	if err != nil {
+		t.Fatalf("ParseConfig: %v", err)
+	}
+	if cfg.FetchRetries != 3 {
+		t.Errorf("FetchRetries = %d, want 3", cfg.FetchRetries)
+	}
+	if len(cfg.AllowedPolicyURLPrefixes) != 2 || cfg.AllowedPolicyURLPrefixes[1] != "https://b.example" {
+		t.Errorf("AllowedPolicyURLPrefixes = %v", cfg.AllowedPolicyURLPrefixes)
+	}
+
+	if _, err := ParseConfig(map[string]string{
+		"outputPath":   "x.y",
+		"outputMode":   "raw",
+		"fetchRetries": "-1",
+	}); err == nil {
+		t.Error("expected error for negative fetchRetries")
 	}
 }

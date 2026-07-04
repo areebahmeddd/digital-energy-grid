@@ -172,7 +172,7 @@ workflows:
       - stepId: on-status-settled
         description: >
           Phase 5 — after physical delivery and discom-ledger reconciliation,
-          Seller TP reports allocations + settled qty. The revenueflows
+          Seller TP reports allocations + settled qty. The settlementflows
           middleware evaluates the linked rego and emits revenueFlows.
         operationId: beckn-bpp-caller.onStatus
         requestBody:

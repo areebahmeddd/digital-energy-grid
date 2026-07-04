@@ -133,11 +133,11 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
-          - id: revenueflows
+          - id: settlementflows
             config:
               actions: "on_status"
               debugLogging: "true"
-              allowedDomains: "raw.githubusercontent.com"
+              allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
               # Wave2-style: rego output is wrapped as a Beckn-native
               # Consideration entry (idempotent on retry via the
               # [id=auto-revenue-flows] selector). The considerationAttributes

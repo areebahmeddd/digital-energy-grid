@@ -13,3 +13,4 @@ routingRules:
       - on_cancel
       - on_subscribe
       - catalog
+      - catalog/push

@@ -18,4 +18,4 @@ Part of the [DEG Schema](../../) · [DEGContract](../README.md)
 |----------|------|----------|-------------|
 | `roles` | `array` | ✅ | Contract roles. The participantId key is required on every role entry, but its value MA... |
 | `policy` | `object` | ✅ | OPA/Rego policy governing this contract. |
-| `revenueFlows` | `array` |  | Optional. Settlement-time per-role flows written by the `revenueflows` plugin when it i... |
+| `revenueFlows` | `array` |  | Optional. Settlement-time per-role flows written by the `settlementflows` plugin when it i... |
