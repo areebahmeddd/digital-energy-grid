@@ -1985,7 +1985,7 @@ python3 scripts/evaluate_demand_flex_settlement.py \
 
 ### In the onix pipeline
 
-The `settlementflows` middleware plugin runs on BPP Caller `on_status` messages. It reads the policy URL from `contractAttributes.policy`, fetches and caches the rego at runtime, evaluates it, and injects `revenueFlows` into the message body before signing.
+The `settlementflows` step plugin runs first in the BPP Caller pipeline on `on_status` messages. It reads the policy URL from `contractAttributes.policy`, fetches and caches the rego at runtime, evaluates it, and injects `revenueFlows` into the message body before schema validation and signing.
 
 ## 8. Implementation Notes
 
@@ -2003,7 +2003,7 @@ The `settlementflows` middleware plugin runs on BPP Caller `on_status` messages.
 - At `/on_select`, promote `contractTerms` to `contractAttributes` and bind buyer role
 - At `/on_init`, bind seller role in `contractAttributes.roles`
 - Send baselines via `on_status` before the event, actuals after
-- The `settlementflows` middleware computes and injects revenue flows automatically on `on_status`
+- The `settlementflows` step computes and injects revenue flows automatically on `on_status`
 - All quantity fields use `beckn:Quantity` with `@type: "Quantity"` and `unitCode`/`unitQuantity`
 
 ## 9. Devkit
@@ -2022,7 +2022,7 @@ docker compose -f devkits/demand-flex/install/docker-compose-demand-flex.yml up 
 | Component | Port | Description |
 |:----------|:-----|:------------|
 | onix-bap | 8081 | BAP adapter (Aggregator) |
-| onix-bpp | 8082 | BPP adapter (Utility) with settlementflows middleware |
+| onix-bpp | 8082 | BPP adapter (Utility) with settlementflows step |
 | sandbox-bap | 3001 | BAP sandbox |
 | sandbox-bpp | 3002 | BPP sandbox |
 | redis | 6379 | Cache |

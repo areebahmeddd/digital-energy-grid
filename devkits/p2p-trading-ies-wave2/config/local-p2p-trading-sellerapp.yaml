@@ -236,6 +236,9 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
+        steps:
+          # First step: injects settlement flows so validateSchema sees the
+          # enriched payload and sign signs it.
           - id: settlementflows
             config:
               actions: "on_status"
@@ -250,7 +253,6 @@ modules:
               outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
-        steps:
           - id: degledgerrecorder
             config:
               # Wave2: on_confirm → write commitment to sellerDiscom ledger.
@@ -268,6 +270,7 @@ modules:
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
       steps:
+        - settlementflows
         - validateSchema
         - checkPolicy
         - addRoute

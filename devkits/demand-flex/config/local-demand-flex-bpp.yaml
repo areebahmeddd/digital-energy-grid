@@ -133,6 +133,9 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
+        steps:
+          # First step: injects settlement flows so validateSchema sees the
+          # enriched payload and sign signs it.
           - id: settlementflows
             config:
               actions: "on_status"
@@ -150,6 +153,7 @@ modules:
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
+        - settlementflows
         - validateSchema
         - checkPolicy
         - addRoute
