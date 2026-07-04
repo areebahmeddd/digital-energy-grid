@@ -75,7 +75,7 @@ modules:
           # credential rejection is deterministic regardless of the request
           # signature (the vc-validation workflow posts unsigned negative
           # cases directly to this receiver).
-          - id: vcvalidator
+          - id: validateVC
             config:
               enabled: "true"
               actions: "confirm"
@@ -85,9 +85,16 @@ modules:
               requireProof: "true"
               failOpen: "false"
               httpTimeout: "10"
+              maxCredentials: "10"
+              # SSRF guard: did:web/revocation fetches to private, loopback or
+              # link-local addresses are blocked. The devkit VC is did:key with
+              # no credentialStatus, so verification is fully offline; flip to
+              # "true" only if you point credentials at issuers/registries on
+              # the local docker network.
+              allowPrivateNetworks: "false"
               debugLogging: "true"
       steps:
-        - vcvalidator
+        - validateVC
         - validateSign
         - addRoute
         - validateSchema

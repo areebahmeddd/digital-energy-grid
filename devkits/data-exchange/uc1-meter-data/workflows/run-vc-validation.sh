@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runner for vc-validation.arazzo.yaml.
 #
-# Exercises the beckn-onix `vcvalidator` step plugin end-to-end against the
+# Exercises the beckn-onix `validateVC` step plugin end-to-end against the
 # running data-exchange devkit (docker compose up -d in install/). The shared
 # run-arazzo.sh treats every NACK as a failure — the opposite of what the
 # negative cases assert here — so this dedicated runner drives the cases with
@@ -12,7 +12,7 @@
 # CREDENTIAL_EXPIRED, …) appears inside error.message.
 #
 #   Positive case  → BAP caller (signs) → BPP receiver → ACK (HTTP 200)
-#   Negative cases → BPP receiver directly. vcvalidator is the first pipeline
+#   Negative cases → BPP receiver directly. validateVC is the first pipeline
 #                    step, so it NACKs before signature/schema validation and
 #                    rejection is deterministic and offline.
 #
@@ -78,7 +78,7 @@ if [ "$HTTP" = "200" ] && [ "$status" = "ACK" ]; then
 elif [[ "$errmsg" == *INVALID_PROOF* || "$errmsg" == *ISSUER_MISMATCH* \
   || "$errmsg" == *CREDENTIAL_EXPIRED* || "$errmsg" == *CREDENTIAL_REVOKED* \
   || "$errmsg" == *DID_RESOLUTION_FAILED* || "$errmsg" == *INVALID_CREDENTIAL* ]]; then
-  echo "  ✗ valid VC was rejected by vcvalidator — HTTP $HTTP, message=$errmsg"
+  echo "  ✗ valid VC was rejected by validateVC — HTTP $HTTP, message=$errmsg"
   echo "      body: $(echo "$BODY" | jq -c . 2>/dev/null || echo "$BODY")"
   fail=$((fail + 1))
 else
