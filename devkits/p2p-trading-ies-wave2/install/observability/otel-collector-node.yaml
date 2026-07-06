@@ -1,0 +1,58 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+  filter/network_metrics:
+    error_mode: ignore
+    metrics:
+      metric:
+        - 'IsMatch(name, ".*http_request_count.*") == false'
+  filter/network_traces:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["transaction_id"] == nil and attributes["sender.id"] == nil'
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    const_labels:
+      observability_node: ${env:OTEL_NODE_NAME}
+  otlphttp/network:
+    endpoint: http://otel-collector-network:4318
+    compression: gzip
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics/app:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    metrics/network:
+      receivers: [otlp]
+      processors: [filter/network_metrics, batch]
+      exporters: [otlphttp/network]
+    traces/network:
+      receivers: [otlp]
+      processors: [filter/network_traces, batch]
+      exporters: [otlphttp/network]
+    logs/network:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/network]
+  telemetry:
+    logs:
+      level: info

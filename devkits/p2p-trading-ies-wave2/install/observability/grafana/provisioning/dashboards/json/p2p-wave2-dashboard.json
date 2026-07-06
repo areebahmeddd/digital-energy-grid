@@ -1,0 +1,129 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": true,
+      "title": "Zipkin traces",
+      "type": "link",
+      "url": "http://localhost:9411"
+    }
+  ],
+  "panels": [
+    { "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "id": 1, "title": "P2P Beckn Traffic", "type": "row" },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 2,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (action)",
+          "legendFormat": "{{action}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Request rate by Beckn action",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 3,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (http_status_code, observability_node)",
+          "legendFormat": "{{observability_node}} {{http_status_code}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Request rate by node and status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "id": 4,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (sender_id, recipient_id)",
+          "legendFormat": "{{sender_id}} -> {{recipient_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (sender_id, recipient_id)",
+          "hide": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Participant traffic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "id": 5,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate({__name__=~\".*step_execution_duration_seconds_bucket\"}[5m])) by (le, module, step))",
+          "legendFormat": "{{module}} {{step}}",
+          "refId": "A"
+        }
+      ],
+      "title": "ONIX step p95 latency",
+      "type": "timeseries"
+    },
+    { "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }, "id": 6, "title": "Logs", "type": "row" },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 18 },
+      "id": 10,
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showCommonLabels": false, "showLabels": false, "wrapLogMessage": true },
+      "targets": [
+        {
+          "expr": "{service_name=~\"p2p-wave2-.*\"} |= `${transactionId}`",
+          "refId": "A"
+        }
+      ],
+      "title": "ONIX logs by transaction ID",
+      "type": "logs"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["p2p-wave2", "otel", "beckn"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "", "value": "" },
+        "hide": 0,
+        "label": "Transaction ID",
+        "name": "transactionId",
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "",
+  "title": "P2P Wave 2 Observability",
+  "uid": "p2p-wave2-observability",
+  "version": 1,
+  "weekStart": ""
+}

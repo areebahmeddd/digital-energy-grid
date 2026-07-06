@@ -16,6 +16,25 @@ http:
     idle: 30
 pluginManager:
   root: ./plugins
+plugins:
+  otelsetup:
+    id: otelsetup
+    config:
+      serviceName: "p2p-wave2-sellerdiscom"
+      serviceVersion: "1.0.0"
+      environment: "development"
+      domain: "p2p-trading-wave2"
+      producer: "sellerdiscom.example.com"
+      producerType: "bpp"
+      otlpEndpoint: "otel-collector-sellerdiscom:4317"
+      enableMetrics: "true"
+      networkMetricsGranularity: "2min"
+      networkMetricsFrequency: "4min"
+      enableTracing: "true"
+      enableLogs: "true"
+      timeInterval: "5"
+      auditFieldsConfig: "/app/config/audit-fields.yaml"
+      cacheTTL: "3600"
 
 # Sellerdiscom *actor* — the seller's distribution utility, distinct from
 # the seller-discom-ledger TSP. Today discoms push meter actuals via the
