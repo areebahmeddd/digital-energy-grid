@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: P2P Wave 2
+    orgId: 1
+    folder: P2P Wave 2
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

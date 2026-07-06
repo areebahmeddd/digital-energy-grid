@@ -1,0 +1,55 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  transform/beckn_ids:
+    error_mode: ignore
+    trace_statements:
+      - set(span.attributes["_beckn_tx"], span.attributes["transaction_id"]) where span.attributes["transaction_id"] != nil
+      - replace_pattern(span.attributes["_beckn_tx"], "-", "") where span.attributes["_beckn_tx"] != nil
+      - set(span.trace_id, TraceID(span.attributes["_beckn_tx"])) where span.attributes["_beckn_tx"] != nil
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8890
+    const_labels:
+      observability: p2p-wave2-network
+  zipkin:
+    endpoint: http://zipkin:9411/api/v2/spans
+    format: json
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    compression: gzip
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [transform/beckn_ids, batch]
+      exporters: [zipkin]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki, debug]
+  telemetry:
+    logs:
+      level: info
