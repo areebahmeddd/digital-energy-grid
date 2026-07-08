@@ -82,6 +82,141 @@ makes your policy drop-in compatible with the wave2 tooling.
    ([`p2p_trading_ies_wave2_revenue_test.rego`](../p2p_trading_ies_wave2_revenue_test.rego))
    shows how to cover the allowlist, charge math, and action scoping.
 
+## Best practices: action gating and cheap evaluation
+
+Your policy runs inline in the message pipeline on every configured action —
+badly scoped rules NACK legitimate traffic, and badly ordered rules burn
+evaluation time on messages they were never meant to judge.
+
+### 1. Gate every rule class by action — and put the guard FIRST
+
+OPA evaluates a rule body top to bottom and abandons it at the first failing
+expression. A guard on `input.context.action` as the **first** line means the
+rest of the body — interval walks, aggregations, sprintf — is never evaluated
+for other actions:
+
+```rego
+# GOOD — action guard first: for init/confirm this rule costs one comparison.
+violations contains msg if {
+	input.context.action == "on_status"      # cheapest, most selective first
+	some i in _commit_ts.intervals            # only runs on on_status
+	i.id in _settled_interval_ids
+	not _price_by_id[i.id]
+	msg := sprintf("settled interval %v has no matching PRICE_PER_KWH interval", [i.id])
+}
+
+# BAD — walks every interval on every action, then throws the work away.
+violations contains msg if {
+	some i in _commit_ts.intervals
+	i.id in _settled_interval_ids
+	not _price_by_id[i.id]
+	input.context.action == "on_status"       # guard last = wasted evaluation
+	msg := sprintf(...)
+}
+```
+
+For rule classes that apply to several actions, name the gate once and reuse
+it — this also documents intent:
+
+```rego
+_trade_formation_actions := {"select", "init", "confirm"}
+
+_is_trade_formation if input.context.action in _trade_formation_actions
+```
+
+### 2. Scope by lifecycle stage, not only by action
+
+`on_status` arrives many times before settlement. Gating on the action alone
+still fires settlement checks against half-built contracts. Add a data-shape
+gate (here: "settled intervals exist") so the rule only judges messages that
+carry the data it validates:
+
+```rego
+_settled := count(_settled_interval_ids) > 0
+
+violations contains msg if {
+	input.context.action == "on_status"
+	_settled                                  # stage gate: skip pre-settlement on_status
+	not net_zero_ok
+	msg := sprintf("net-zero failed: revenue sum = %g (expected 0)", [_revenue_sum])
+}
+```
+
+The same idea protects injection: export `revenue_flows` only when there is
+something to inject, so trade-formation payloads stay untouched:
+
+```rego
+revenue_flows := [...] if _settled
+```
+
+### 3. Lean on OPA's laziness — rules are computed on demand and memoized
+
+A complete rule (`trade_value := ...`) is **not** evaluated unless something
+in the query actually needs it, and once evaluated its result is **cached for
+the rest of that evaluation**. Two consequences:
+
+- Expensive aggregates are free on actions whose rules never reference them —
+  *provided* the referencing rules are action-gated (point 1). With the guard
+  first, `trade_value` is simply never demanded at init.
+- Factor repeated expressions into named rules, not repeated inline logic:
+  `total_settled_kwh` referenced by four flow descriptions is computed once,
+  not four times.
+
+**Caveat:** user-defined *functions* (`f(x) := ...`) are re-evaluated on every
+call — they are not memoized. Use functions for per-item logic inside
+comprehensions; use complete rules for shared scalars/aggregates.
+
+### 4. Make undefined a non-event, not an error
+
+Partial-set rules (`violations contains msg if {...}`) are undefined-safe: a
+body that fails just contributes nothing. For scalars that other rules read,
+declare a `default` so downstream arithmetic never hits undefined:
+
+```rego
+default penalty_charge := 0
+penalty_charge := _round2(penalty_rate_per_kwh * total_shortfall_kwh) if _settled
+```
+
+And when a violation *should* fire on missing data (fail-closed decisions
+like the allowlist), make that an explicit paired rule rather than an
+accident of undefinedness:
+
+```rego
+violations contains msg if {
+	_buyer_discom_id                          # defined → check the allowlist
+	not _buyer_discom_id in allowed_buyer_discoms
+	msg := sprintf("buyer discom %q is not allowed ...", [_buyer_discom_id])
+}
+
+violations contains msg if {
+	not _buyer_discom_id                      # undefined → its own, explicit violation
+	msg := "cannot determine buyer discom: ..."
+}
+```
+
+Only do this for data the decision genuinely requires — don't fail-closed on
+optional fields that legitimately appear later in the lifecycle.
+
+### 5. Keep the exported surface stable and the rest private
+
+The network contract is `violations` + `revenue_flows` (+ the documented
+charge parameters). Prefix everything else with `_` so consumers and tests
+never couple to internals, and future refactors can't break payloads.
+
+### 6. Test each action's cost and behavior separately
+
+Write `with input as` tests per action — including the "rule must NOT fire
+here" cases (e.g. no FINAL_ALLOC violation at init). To find rules that
+evaluate where they shouldn't, profile a representative payload per action:
+
+```bash
+opa eval -d my-discom-policy.rego --input init-request.json \
+  --profile --format=pretty 'data.deg.contracts.p2p_trading'
+```
+
+If an interval-walking rule shows up in the init profile, its action guard is
+missing or not first.
+
 ## Publishing: checksum → release tag → stable URL → DeDi record
 
 ### 1. Compute the checksum
@@ -179,7 +314,9 @@ enforced actions (select/init/confirm) that rejection is itself a NACK.
 
 - [ ] Parameters edited (allowlist, wheeling, penalty, platform cap)
 - [ ] `opa test` green; `violations` empty on a known-good init payload
-- [ ] Settlement-integrity violations scoped to `on_status`
+- [ ] Every rule class action-gated, guard as the first body expression
+- [ ] Settlement-integrity violations scoped to `on_status` + a stage gate
+- [ ] `opa eval --profile` on an init payload shows no settlement rules evaluating
 - [ ] `revenue_flows` only exported when settled intervals exist, sums to zero
 - [ ] sha256 computed from the exact hosted bytes
 - [ ] Release tagged; `data_url` is tag-pinned (immutable), not a branch URL
