@@ -1,0 +1,273 @@
+# Optional observability override for P2P Wave 2.
+#
+# Start the normal devkit only:
+#   docker compose up -d
+#
+# Start the devkit with OTel collectors, Prometheus, Loki, Zipkin, and Grafana:
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+
+services:
+  observability-config-generator:
+    image: alpine:3.20
+    container_name: p2p-wave2-observability-config-generator
+    working_dir: /workspace/install
+    command: ["sh", "./observability/generate-configs.sh"]
+    volumes:
+      - ..:/workspace
+
+  onix-buyerapp:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-buyerapp.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-buyerapp:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-buyerapp.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-buyerapp:
+        condition: service_started
+
+  onix-sellerapp:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-sellerapp.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-sellerapp:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-sellerapp.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-sellerapp:
+        condition: service_started
+
+  onix-ledger-sellerdiscom:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-ledger-sellerdiscom.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-ledger-sellerdiscom:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-ledger-sellerdiscom.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-ledger-sellerdiscom:
+        condition: service_started
+
+  onix-ledger-buyerdiscom:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-ledger-buyerdiscom.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-ledger-buyerdiscom:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-ledger-buyerdiscom.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-ledger-buyerdiscom:
+        condition: service_started
+
+  onix-buyerdiscom:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-buyerdiscom.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-buyerdiscom:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-buyerdiscom.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-buyerdiscom:
+        condition: service_started
+
+  onix-sellerdiscom:
+    environment:
+      CONFIG_FILE: "/app/config/observability/local-p2p-trading-sellerdiscom.yaml"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-sellerdiscom:4317
+    command: ["./server", "--config=/app/config/observability/local-p2p-trading-sellerdiscom.yaml"]
+    depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
+      otel-collector-sellerdiscom:
+        condition: service_started
+
+  # ---------- Observability ----------
+  otel-collector-buyerapp:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-buyerapp
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: buyerapp
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bap_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-sellerapp:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-sellerapp
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: sellerapp
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bpp_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-ledger-buyerdiscom:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-ledger-buyerdiscom
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: ledger-buyerdiscom
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bap_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-ledger-sellerdiscom:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-ledger-sellerdiscom
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: ledger-sellerdiscom
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bpp_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-buyerdiscom:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-buyerdiscom
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: buyerdiscom
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bap_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-sellerdiscom:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-sellerdiscom
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      OTEL_NODE_NAME: sellerdiscom
+    volumes:
+      - ./observability/otel-collector-node.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - bpp_side
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  otel-collector-network:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-network
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-network.yaml:/etc/otel/config.yaml:ro
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: p2p-wave2-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - observability
+    depends_on:
+      otel-collector-network:
+        condition: service_started
+
+  loki:
+    image: grafana/loki:latest
+    container_name: p2p-wave2-loki
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - observability
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: p2p-wave2-promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./observability/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - observability
+    depends_on:
+      loki:
+        condition: service_started
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: p2p-wave2-zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: p2p-wave2-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: http://localhost:3005
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3005:3000"
+    networks:
+      - observability
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+      promtail:
+        condition: service_started
+      zipkin:
+        condition: service_started
+
+networks:
+  observability:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:

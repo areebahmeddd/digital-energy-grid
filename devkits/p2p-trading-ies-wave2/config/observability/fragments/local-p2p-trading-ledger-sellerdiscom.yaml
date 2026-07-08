@@ -1,0 +1,19 @@
+plugins:
+  otelsetup:
+    id: otelsetup
+    config:
+      serviceName: "p2p-wave2-ledger-sellerdiscom"
+      serviceVersion: "1.0.0"
+      environment: "development"
+      domain: "p2p-trading-wave2"
+      producer: "seller-discom-ledger.example.com"
+      producerType: "bpp"
+      otlpEndpoint: "otel-collector-ledger-sellerdiscom:4317"
+      enableMetrics: "true"
+      networkMetricsGranularity: "2min"
+      networkMetricsFrequency: "4min"
+      enableTracing: "true"
+      enableLogs: "true"
+      timeInterval: "5"
+      auditFieldsConfig: "/app/config/audit-fields.yaml"
+      cacheTTL: "3600"

@@ -3,6 +3,10 @@
 OpenTelemetry-based monitoring for the P2P Wave 2 devkit. Provides Grafana
 dashboards backed by Prometheus (metrics), Loki (logs), and Zipkin (traces).
 
+Observability is disabled in the default devkit startup to keep local memory
+usage low. Enable it only when you explicitly need Grafana dashboards, metrics,
+logs, or traces.
+
 ---
 
 ## Architecture Overview
@@ -50,7 +54,7 @@ visibility even before the ONIX `otelsetup` plugin emits OTel audit records.
 
 All companion collectors use the same config file
 (`observability/otel-collector-node.yaml`), differentiated only by the
-`OTEL_NODE_NAME` environment variable set in `docker-compose.yml`.
+`OTEL_NODE_NAME` environment variable set in `docker-compose.observability.yml`.
 
 ---
 
@@ -58,19 +62,40 @@ All companion collectors use the same config file
 
 From `DEG/devkits/p2p-trading-ies-wave2/install`:
 
+Start the normal devkit without observability:
+
 ```bash
 docker compose up -d
 ```
 
-After changing observability compose/config files, recreate the stack so stale
-containers and old mounted configs are removed:
+Start the devkit with observability enabled:
 
 ```bash
-docker compose down --remove-orphans
-docker compose up -d --force-recreate
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
 ```
 
-### UIs
+The observability override automatically runs
+`observability/generate-configs.sh` in a short-lived helper container before
+the ONIX adapters start.
+
+Stop the observability-enabled stack:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml down
+```
+
+After changing observability compose/config files, recreate the
+observability-enabled stack so stale containers and old mounted configs are
+removed:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml down --remove-orphans
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d --force-recreate
+```
+
+### Observability UIs
+
+These URLs are available only when the observability override is enabled.
 
 | Service    | Local URL                    | Credentials     |
 | ---------- | ---------------------------- | --------------- |
@@ -93,9 +118,13 @@ Open Grafana → **Dashboards** → **P2P Wave 2** folder →
 
 ### 1. ONIX Adapter Configs — `otelsetup` Plugin Block
 
-Each adapter YAML in `config/` has a top-level `plugins.otelsetup` section.
-This is what tells the ONIX adapter _"send your telemetry here, and tag it
-with these identifiers"_:
+Each fragment YAML in `config/observability/fragments/` has a top-level
+`plugins.otelsetup` section. The default adapter YAMLs remain the source of
+truth and do not include this block, so normal `docker compose up -d` stays
+lightweight. The observability override runs
+`observability/generate-configs.sh` automatically before the ONIX adapters
+start. The script combines each base adapter YAML with its fragment and writes
+the generated YAML to `config/observability/`.
 
 ```yaml
 plugins:
@@ -210,15 +239,15 @@ receives this adapter's telemetry over OTLP/gRPC.
 
 **When to change:**
 
-- **Local compose (default):** Don't change. The Docker service names in
-  `docker-compose.yml` already match.
+- **Local observability compose:** Don't change. The Docker service names in
+  `docker-compose.observability.yml` already match.
 - **Remote/VM deployment:** Replace the Docker service name with the
   collector's reachable hostname or IP address:
   ```yaml
   otlpEndpoint: "otel-collector.your-vm.internal:4317"
   ```
 - **Renamed collectors:** If you rename a collector service in
-  `docker-compose.yml`, update this to match.
+  `docker-compose.observability.yml`, update this to match.
 
 **What happens if you get it wrong:** The adapter will fail to connect to
 the collector. You'll see gRPC connection errors in the adapter container
@@ -257,20 +286,25 @@ You'd do the same for each of the 6 adapter config files, matching the
 
 ---
 
-**Files to update (one per adapter):**
+**Fragment files to update (one per adapter):**
 
 | File | `producer` should match | `producerType` |
 | ---- | ----------------------- | -------------- |
-| `config/local-p2p-trading-buyerapp.yaml` | Your buyer app subscriber ID | `bap` |
-| `config/local-p2p-trading-sellerapp.yaml` | Your seller app subscriber ID | `bpp` |
-| `config/local-p2p-trading-buyerdiscom.yaml` | Your buyer discom subscriber ID | `bpp` |
-| `config/local-p2p-trading-sellerdiscom.yaml` | Your seller discom subscriber ID | `bpp` |
-| `config/local-p2p-trading-ledger-buyerdiscom.yaml` | Your buyer discom ledger subscriber ID | `bap` |
-| `config/local-p2p-trading-ledger-sellerdiscom.yaml` | Your seller discom ledger subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-buyerapp.yaml` | Your buyer app subscriber ID | `bap` |
+| `config/observability/fragments/local-p2p-trading-sellerapp.yaml` | Your seller app subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-buyerdiscom.yaml` | Your buyer discom subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-sellerdiscom.yaml` | Your seller discom subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-ledger-buyerdiscom.yaml` | Your buyer discom ledger subscriber ID | `bap` |
+| `config/observability/fragments/local-p2p-trading-ledger-sellerdiscom.yaml` | Your seller discom ledger subscriber ID | `bpp` |
+
+The generated `config/observability/local-p2p-trading-*.yaml` files are
+ignored by Git. Regenerate them after changing a base adapter config or an
+observability fragment.
 
 ### 2. Docker Compose — OTLP Endpoint Environment Variables
 
-Each ONIX adapter service in `install/docker-compose.yml` has:
+Each ONIX adapter service receives OTLP environment variables from
+`install/docker-compose.observability.yml`:
 
 ```yaml
 environment:
@@ -395,9 +429,10 @@ Select the **Loki** datasource in Grafana Explore. Useful queries:
 
 ## Verification Checklist
 
-After starting the stack and running a P2P flow:
+After starting the observability-enabled stack and running a P2P flow:
 
-- [ ] `docker compose ps` — all services are `Up`
+- [ ] `observability-config-generator` completed successfully and generated adapter configs exist
+- [ ] `docker compose -f docker-compose.yml -f docker-compose.observability.yml ps` — all services are `Up`
 - [ ] Prometheus (`http://localhost:9090/targets`) — all 7 scrape targets
       show `UP`
 - [ ] Grafana dashboard shows non-zero request rate panels
@@ -442,19 +477,22 @@ For hosting the receiver stack on a VM (e.g. the ledger-service VM):
 ## File Reference
 
 ```
-observability/
-├── README.md                              ← this file
-├── otel-collector-node.yaml               ← shared per-adapter collector config
-├── otel-collector-network.yaml            ← network-level collector config
-├── prometheus.yml                         ← Prometheus scrape targets
-├── loki-config.yml                        ← Loki storage and schema config
-├── promtail-config.yml                    ← Promtail Docker log tailing config
-└── grafana/
-    └── provisioning/
-        ├── datasources/
-        │   └── datasources.yml            ← Prometheus + Loki + Zipkin datasources
-        └── dashboards/
-            ├── dashboards.yml             ← dashboard auto-discovery config
-            └── json/
-                └── p2p-wave2-dashboard.json ← pre-built Grafana dashboard
+install/
+├── docker-compose.yml                     ← default lightweight devkit
+├── docker-compose.observability.yml       ← explicit observability override
+└── observability/
+    ├── README.md                          ← this file
+    ├── otel-collector-node.yaml           ← shared per-adapter collector config
+    ├── otel-collector-network.yaml        ← network-level collector config
+    ├── prometheus.yml                     ← Prometheus scrape targets
+    ├── loki-config.yml                    ← Loki storage and schema config
+    ├── promtail-config.yml                ← Promtail Docker log tailing config
+    └── grafana/
+        └── provisioning/
+            ├── datasources/
+            │   └── datasources.yml        ← Prometheus + Loki + Zipkin datasources
+            └── dashboards/
+                ├── dashboards.yml         ← dashboard auto-discovery config
+                └── json/
+                    └── p2p-wave2-dashboard.json ← pre-built Grafana dashboard
 ```
