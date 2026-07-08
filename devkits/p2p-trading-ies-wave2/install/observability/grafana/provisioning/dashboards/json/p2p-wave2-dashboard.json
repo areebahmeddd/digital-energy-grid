@@ -42,8 +42,8 @@
       "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
       "targets": [
         {
-          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (http_status_code, observability_node)",
-          "legendFormat": "{{observability_node}} {{http_status_code}}",
+          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (exported_job, observability_node, status_code, http_status_code)",
+          "legendFormat": "{{observability_node}} {{exported_job}} {{status_code}}{{http_status_code}}",
           "refId": "A"
         }
       ],
@@ -95,7 +95,7 @@
       "options": { "dedupStrategy": "none", "enableLogDetails": true, "showCommonLabels": false, "showLabels": false, "wrapLogMessage": true },
       "targets": [
         {
-          "expr": "{service_name=~\"p2p-wave2-.*\"} |= `${transactionId}`",
+          "expr": "{service=~\"onix-.*\"} |= `${transactionId}`",
           "refId": "A"
         }
       ],
