@@ -53,14 +53,10 @@ else
     BECKN_ONIX_ROOT="$USER_BECKN_ONIX_PATH"
 fi
 
-# Resolve beckn-onix path
-if [ -n "$IMAGE_TAG" ] && [ -d "$IMAGE_TAG" ]; then
-    # Use environment variable if set and valid
-    :
-else
-    # Prompt user for path
+# Resolve image tag
+if [ -z "$IMAGE_TAG" ]; then
     echo ""
-    read -p "Enter path to image tag (e.g. w-deg-plugins-v2): " IMAGE_TAG
+    read -p "Enter image tag (e.g. v2): " IMAGE_TAG
 fi
 
 # Configuration with defaults

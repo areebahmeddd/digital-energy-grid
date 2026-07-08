@@ -43,6 +43,7 @@ info:
           -w status-roundtrip-via-seller-discom -v
 
       Available workflows: publish-catalog, discover, select-through-settlement,
+        init-blocked-by-policy,
         status-roundtrip-via-seller-discom, buyer-discom-emits-on-status,
         seller-status-to-buyer, seller-status-to-seller-discom,
         sellerdiscom-pushes-allocation, buyerdiscom-pushes-allocation,
@@ -179,6 +180,29 @@ workflows:
           contentType: application/json
           payload:
             $ref: "../examples/on-status-response-settled.json"
+
+  # ── Policy enforcement: buyer discom outside the seller-discom allowlist ──
+
+  - workflowId: init-blocked-by-policy
+    summary: >
+      Negative path: the buyer's discom (TEST_DISCOM_OUTSIDER) is not in the
+      seller-discom policy's allowed_buyer_discoms, so the settlementflows
+      step on seller/bpp/receiver NACKs the init with the policy violation.
+    steps:
+      - stepId: init-blocked
+        description: >
+          Same init as select-through-settlement but with the buyerPlatform
+          participant's utilityId set to TEST_DISCOM_OUTSIDER. The seller-side
+          settlementflows step evaluates the linked seller-discom rego,
+          finds a non-empty violations set, and returns a 400 NACK instead of
+          an ACK — the trade never forms.
+        operationId: beckn-bap-caller.init
+        requestBody:
+          contentType: application/json
+          payload:
+            $ref: "../examples/init-request-blocked-discom.json"
+        successCriteria:
+          - condition: $statusCode == 400
 
   # ── Status cascade via sellerDiscom ──
 

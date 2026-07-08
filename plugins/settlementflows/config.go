@@ -16,6 +16,21 @@ type Config struct {
 	// Default: ["on_status"]
 	Actions []string
 
+	// ViolationActions is the subset of Actions on which policy violations
+	// are ENFORCED: if the evaluated policy reports a non-empty `violations`
+	// set for one of these actions, the step returns an error and the
+	// message is NACKed. Enforcement is fail-closed — on these actions a
+	// missing policy reference, a disallowed policy URL, or a fetch/compile/
+	// eval failure also blocks the message (otherwise enforcement could be
+	// bypassed by stripping the policy ref).
+	//
+	// Actions NOT listed here keep the original soft-failure behavior: the
+	// message passes through unmodified on any problem.
+	//
+	// Comma-separated list in YAML, e.g. "select,init,confirm".
+	// Default: empty (never enforce). Must be a subset of Actions.
+	ViolationActions []string
+
 	// CacheTTL is how long a compiled rego policy is cached before re-fetch.
 	// Must be at least MinCacheTTL so registries like DeDi see at most one
 	// fetch per policy URL per day. Default: 1 day.
@@ -157,6 +172,15 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		}
 	}
 
+	if actions, ok := cfg["violationActions"]; ok && actions != "" {
+		for _, a := range strings.Split(actions, ",") {
+			a = strings.TrimSpace(a)
+			if a != "" {
+				config.ViolationActions = append(config.ViolationActions, a)
+			}
+		}
+	}
+
 	if ttl, ok := cfg["cacheTTL"]; ok && ttl != "" {
 		seconds, err := strconv.Atoi(ttl)
 		if err != nil {
@@ -243,6 +267,13 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 			"settlementflows: outputMode is required (allowed: %q, %q)",
 			OutputModeRaw, OutputModeJSONLD)
 	}
+	for _, va := range config.ViolationActions {
+		if !config.IsActionEnabled(va) {
+			return nil, fmt.Errorf(
+				"settlementflows: violationActions entry %q is not in actions %v — violations can only be enforced on actions the step runs on",
+				va, config.Actions)
+		}
+	}
 	if config.CacheTTL < MinCacheTTL {
 		return nil, fmt.Errorf(
 			"settlementflows: cacheTTL %s is below the minimum %s (policies are fetched from a registry; short TTLs hammer it)",
@@ -255,6 +286,17 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 // IsActionEnabled checks if the given action is in the configured list.
 func (c *Config) IsActionEnabled(action string) bool {
 	for _, a := range c.Actions {
+		if a == action {
+			return true
+		}
+	}
+	return false
+}
+
+// IsViolationEnforced reports whether policy violations must block the
+// message (NACK) for the given action.
+func (c *Config) IsViolationEnforced(action string) bool {
+	for _, a := range c.ViolationActions {
 		if a == action {
 			return true
 		}

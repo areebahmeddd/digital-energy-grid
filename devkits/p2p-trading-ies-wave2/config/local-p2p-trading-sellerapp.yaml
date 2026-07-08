@@ -92,6 +92,28 @@ modules:
               uuidKeys: transaction_id,message_id
               role: bpp
         steps:
+          # Enforces the seller-discom policy linked in the payload
+          # (contractAttributes.policy): a non-empty `violations` set — e.g.
+          # buyer from a discom outside the policy's allowlist — NACKs the
+          # trade before it forms. Fail-closed on these actions: a missing or
+          # unfetchable policy also NACKs. No revenue flows exist
+          # pre-settlement, so nothing is injected here (output settings are
+          # required config and mirror the bppTxnCaller instance).
+          - id: settlementflows
+            config:
+              actions: "select,init,confirm"
+              violationActions: "select,init,confirm"
+              cacheTTL: "172800"
+              debugLogging: "true"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
           - id: degledgerrecorder
             config:
               # Rule 1: incoming /status → cascade /status to sellerDiscom.
@@ -114,6 +136,7 @@ modules:
         - checkPolicy
         - addRoute
         - validateSchema
+        - settlementflows
         - degledgerrecorder
 
   # /bap/receiver — seller acts as BAP towards sellerDiscom. Receives /on_status
@@ -261,6 +284,8 @@ modules:
           - id: settlementflows
             config:
               actions: "on_status"
+              # Injection-only instance: violations are logged, never NACKed.
+              violationActions: ""
               cacheTTL: "172800"
               debugLogging: "true"
               # Only India Energy Stack policy records on DeDi are accepted.
