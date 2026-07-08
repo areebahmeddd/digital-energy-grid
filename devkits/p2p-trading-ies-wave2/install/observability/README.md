@@ -74,6 +74,10 @@ Start the devkit with observability enabled:
 docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
 ```
 
+The observability override automatically runs
+`observability/generate-configs.sh` in a short-lived helper container before
+the ONIX adapters start.
+
 Stop the observability-enabled stack:
 
 ```bash
@@ -114,10 +118,13 @@ Open Grafana → **Dashboards** → **P2P Wave 2** folder →
 
 ### 1. ONIX Adapter Configs — `otelsetup` Plugin Block
 
-Each observability adapter YAML in `config/observability/` has a top-level
-`plugins.otelsetup` section. The default adapter YAMLs do not include this
-block, so normal `docker compose up -d` stays lightweight. The observability
-override points ONIX to these observability-specific configs.
+Each fragment YAML in `config/observability/fragments/` has a top-level
+`plugins.otelsetup` section. The default adapter YAMLs remain the source of
+truth and do not include this block, so normal `docker compose up -d` stays
+lightweight. The observability override runs
+`observability/generate-configs.sh` automatically before the ONIX adapters
+start. The script combines each base adapter YAML with its fragment and writes
+the generated YAML to `config/observability/`.
 
 ```yaml
 plugins:
@@ -279,16 +286,20 @@ You'd do the same for each of the 6 adapter config files, matching the
 
 ---
 
-**Files to update (one per adapter):**
+**Fragment files to update (one per adapter):**
 
 | File | `producer` should match | `producerType` |
 | ---- | ----------------------- | -------------- |
-| `config/observability/local-p2p-trading-buyerapp.yaml` | Your buyer app subscriber ID | `bap` |
-| `config/observability/local-p2p-trading-sellerapp.yaml` | Your seller app subscriber ID | `bpp` |
-| `config/observability/local-p2p-trading-buyerdiscom.yaml` | Your buyer discom subscriber ID | `bpp` |
-| `config/observability/local-p2p-trading-sellerdiscom.yaml` | Your seller discom subscriber ID | `bpp` |
-| `config/observability/local-p2p-trading-ledger-buyerdiscom.yaml` | Your buyer discom ledger subscriber ID | `bap` |
-| `config/observability/local-p2p-trading-ledger-sellerdiscom.yaml` | Your seller discom ledger subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-buyerapp.yaml` | Your buyer app subscriber ID | `bap` |
+| `config/observability/fragments/local-p2p-trading-sellerapp.yaml` | Your seller app subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-buyerdiscom.yaml` | Your buyer discom subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-sellerdiscom.yaml` | Your seller discom subscriber ID | `bpp` |
+| `config/observability/fragments/local-p2p-trading-ledger-buyerdiscom.yaml` | Your buyer discom ledger subscriber ID | `bap` |
+| `config/observability/fragments/local-p2p-trading-ledger-sellerdiscom.yaml` | Your seller discom ledger subscriber ID | `bpp` |
+
+The generated `config/observability/local-p2p-trading-*.yaml` files are
+ignored by Git. Regenerate them after changing a base adapter config or an
+observability fragment.
 
 ### 2. Docker Compose — OTLP Endpoint Environment Variables
 
@@ -420,6 +431,7 @@ Select the **Loki** datasource in Grafana Explore. Useful queries:
 
 After starting the observability-enabled stack and running a P2P flow:
 
+- [ ] `observability-config-generator` completed successfully and generated adapter configs exist
 - [ ] `docker compose -f docker-compose.yml -f docker-compose.observability.yml ps` — all services are `Up`
 - [ ] Prometheus (`http://localhost:9090/targets`) — all 7 scrape targets
       show `UP`

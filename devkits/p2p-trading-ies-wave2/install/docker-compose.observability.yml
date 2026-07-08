@@ -7,6 +7,14 @@
 #   docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
 
 services:
+  observability-config-generator:
+    image: alpine:3.20
+    container_name: p2p-wave2-observability-config-generator
+    working_dir: /workspace/install
+    command: ["sh", "./observability/generate-configs.sh"]
+    volumes:
+      - ..:/workspace
+
   onix-buyerapp:
     environment:
       CONFIG_FILE: "/app/config/observability/local-p2p-trading-buyerapp.yaml"
@@ -14,6 +22,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-buyerapp:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-buyerapp.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-buyerapp:
         condition: service_started
 
@@ -24,6 +34,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-sellerapp:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-sellerapp.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-sellerapp:
         condition: service_started
 
@@ -34,6 +46,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-ledger-sellerdiscom:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-ledger-sellerdiscom.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-ledger-sellerdiscom:
         condition: service_started
 
@@ -44,6 +58,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-ledger-buyerdiscom:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-ledger-buyerdiscom.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-ledger-buyerdiscom:
         condition: service_started
 
@@ -54,6 +70,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-buyerdiscom:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-buyerdiscom.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-buyerdiscom:
         condition: service_started
 
@@ -64,6 +82,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector-sellerdiscom:4317
     command: ["./server", "--config=/app/config/observability/local-p2p-trading-sellerdiscom.yaml"]
     depends_on:
+      observability-config-generator:
+        condition: service_completed_successfully
       otel-collector-sellerdiscom:
         condition: service_started
 
