@@ -7,14 +7,24 @@
 // at one — see source.go), evaluates it against the full message, and writes
 // the resulting flows at the configured outputPath.
 //
-// Soft failure: if anything goes wrong (fetch, compile, eval), the message
-// passes through unmodified with a warning log. Never blocks delivery.
+// Besides revenue flows, the policy may export a `violations` set (error
+// strings). On actions listed in violationActions the step ENFORCES the
+// policy: non-empty violations — or any failure to obtain and evaluate the
+// policy (fail-closed) — return an error, which the pipeline turns into a
+// NACK. This is how a discom's policy (e.g. an allowlist of counterpart
+// discoms, or mandated wheeling/penalty charges) blocks non-compliant trades
+// at select/init/confirm.
+//
+// Soft failure everywhere else: on actions not in violationActions, if
+// anything goes wrong (fetch, compile, eval), the message passes through
+// unmodified with a warning log and delivery is never blocked.
 package settlementflows
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/beckn-one/beckn-onix/pkg/log"
 	"github.com/beckn-one/beckn-onix/pkg/model"
@@ -57,9 +67,18 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 		return nil
 	}
 
+	// On enforced actions every failure below is fail-closed: the policy
+	// gate must not be bypassable by stripping the policy ref or breaking
+	// the policy fetch.
+	enforced := rf.config.IsViolationEnforced(action)
+
 	// Extract policy reference from the message
 	ref := ExtractPolicyRef(ctx.Body)
 	if ref == nil {
+		if enforced {
+			return model.NewBadReqErr(fmt.Errorf(
+				"settlementflows: action %q requires a contractAttributes.policy reference", action))
+		}
 		if rf.config.DebugLogging {
 			log.Debug(ctx, "SettlementFlows: no contractAttributes.policy in message, skipping")
 		}
@@ -68,6 +87,10 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 
 	// Check URL-prefix allowlist
 	if !rf.config.IsPolicyURLAllowed(ref.URL) {
+		if enforced {
+			return model.NewBadReqErr(fmt.Errorf(
+				"settlementflows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL))
+		}
 		log.Warnf(ctx, "SettlementFlows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL)
 		return nil
 	}
@@ -79,6 +102,9 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 	// Get or compile the policy
 	pq, err := rf.cache.GetOrCompile(context.Background(), ref.URL, ref.QueryPath)
 	if err != nil {
+		if enforced {
+			return fmt.Errorf("settlementflows: failed to load policy %s: %w", ref.URL, err)
+		}
 		log.Warnf(ctx, "SettlementFlows: failed to load policy: %v", err)
 		return nil // soft failure
 	}
@@ -86,6 +112,9 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 	// Parse message as OPA input
 	var input interface{}
 	if err := json.Unmarshal(ctx.Body, &input); err != nil {
+		if enforced {
+			return model.NewBadReqErr(fmt.Errorf("settlementflows: failed to parse message body: %w", err))
+		}
 		log.Warnf(ctx, "SettlementFlows: failed to parse message body: %v", err)
 		return nil
 	}
@@ -93,8 +122,23 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 	// Evaluate
 	rs, err := pq.Eval(context.Background(), rego.EvalInput(input))
 	if err != nil {
+		if enforced {
+			return fmt.Errorf("settlementflows: rego evaluation of %s failed: %w", ref.URL, err)
+		}
 		log.Warnf(ctx, "SettlementFlows: rego evaluation failed: %v", err)
 		return nil // soft failure
+	}
+
+	// Violations gate delivery on enforced actions.
+	if violations := extractViolations(rs); len(violations) > 0 {
+		if enforced {
+			log.Warnf(ctx, "SettlementFlows: NACKing %s — %d policy violation(s): %s",
+				action, len(violations), strings.Join(violations, "; "))
+			return model.NewBadReqErr(fmt.Errorf(
+				"settlement policy violations: %s", strings.Join(violations, "; ")))
+		}
+		log.Warnf(ctx, "SettlementFlows: %d policy violation(s) on %s (not enforced): %s",
+			len(violations), action, strings.Join(violations, "; "))
 	}
 
 	// Extract revenue_flows from result
@@ -145,4 +189,39 @@ func extractFlows(rs rego.ResultSet) []interface{} {
 	}
 
 	return nil
+}
+
+// extractViolations pulls the policy's `violations` set from the OPA result
+// set as strings. Rego sets arrive as JSON arrays. Non-string entries are
+// stringified so a malformed policy still produces a readable message.
+func extractViolations(rs rego.ResultSet) []string {
+	if len(rs) == 0 || len(rs[0].Expressions) == 0 {
+		return nil
+	}
+
+	val := rs[0].Expressions[0].Value
+
+	// Query returned the full package: look for the "violations" key.
+	if m, ok := val.(map[string]interface{}); ok {
+		v, ok := m["violations"]
+		if !ok {
+			return nil
+		}
+		val = v
+	}
+
+	arr, ok := val.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	out := make([]string, 0, len(arr))
+	for _, v := range arr {
+		if s, ok := v.(string); ok {
+			out = append(out, s)
+		} else {
+			out = append(out, fmt.Sprintf("%v", v))
+		}
+	}
+	return out
 }

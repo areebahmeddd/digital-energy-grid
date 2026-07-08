@@ -139,6 +139,8 @@ modules:
           - id: settlementflows
             config:
               actions: "on_status"
+              # Injection-only instance: violations are logged, never NACKed.
+              violationActions: ""
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
               # Wave2-style: rego output is wrapped as a Beckn-native

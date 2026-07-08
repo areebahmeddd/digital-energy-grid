@@ -6,6 +6,17 @@
 |------|---------|
 | `p2p-trading-interdiscom.rego` | Policy rules (domain, version, order, catalog, test-ID consistency) |
 | `p2p-trading-interdiscom_test.rego` | OPA unit tests |
+| `p2p_trading_ies_wave2_revenue.rego` | Wave2 **seller-discom policy**: buyer-discom allowlist (`violations` → NACK at select/init/confirm) + itemized settlement `revenue_flows` (wheeling, shortfall penalty, platform charge cap) |
+| `p2p_trading_ies_wave2_revenue_test.rego` | OPA unit tests for the seller-discom policy |
+| `p2p_trading_ies_wave2_network.rego` (+ tests) | Wave2 network policy run by `opapolicychecker` |
+| [`discom-policy-guide/`](./discom-policy-guide/) | How a discom authors, versions, and publishes its own policy (checksum, release tag, DeDi record) |
+
+Run each policy's tests against its own pair of files (a whole-directory `opa test .` trips over cross-package helper name clashes):
+
+```bash
+cd specification/policies
+opa test p2p_trading_ies_wave2_revenue.rego p2p_trading_ies_wave2_revenue_test.rego -v
+```
 
 ## Prerequisites
 
