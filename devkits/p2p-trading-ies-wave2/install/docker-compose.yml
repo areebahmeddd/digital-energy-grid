@@ -125,6 +125,12 @@ services:
       - "3002:3002"
     volumes:
       - ./sandbox-ack-status-route.js:/startup/sandbox-ack-status-route.js:ro
+      # Mock on_* responses for the testnet-deg network (the image ships no
+      # fixtures for it): without these the sandbox answers init/confirm/
+      # status with a context-only body that fails schema validation at the
+      # seller's /bpp/caller. Same mount pattern as the ledger sandboxes;
+      # PERSONA=bpp resolves the bpp/ subdir.
+      - ../responses/sellerapp:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/bpp
     command: ["sh", "-c", "node /startup/sandbox-ack-status-route.js && npm start"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3002/api/health"]

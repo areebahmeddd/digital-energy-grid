@@ -9,5 +9,5 @@
     "messageId": "258ed231-2def-4840-86ed-2970320c2294",
     "timestamp": "2026-04-25T09:00:00Z"
   },
-  "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].offers[*][?(@.offerAttributes['@type']=='EnergyTradeOffer')]"}}}
+  "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].offers[*] ? (@.offerAttributes.\"@type\" == \"EnergyTradeOffer\")"}}}
 }
