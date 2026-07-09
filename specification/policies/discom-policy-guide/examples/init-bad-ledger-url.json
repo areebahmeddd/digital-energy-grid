@@ -42,14 +42,14 @@
           "role": "buyerDiscom",
           "participantAttributes": {
             "utilityId": "TEST_DISCOM_BUYER",
-            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUrl": "http://rogue-ledger.example.com"
           }
         },
         {
           "role": "sellerDiscom",
           "participantAttributes": {
             "utilityId": "TEST_DISCOM_SELLER",
-            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
+            "ledgerUrl": "http://rogue-ledger.example.com"
           }
         }
       ],

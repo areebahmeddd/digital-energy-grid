@@ -35,7 +35,8 @@ import rego.v1
 # ============================================================================
 # This is the ONLY part of the file you touch when adopting the template:
 #   environments                  — networks, policy applicability, allowlist
-#                                   switch + allowlist, per environment
+#                                   switch + allowlist, permitted discom
+#                                   ledger endpoints — per environment
 #   allowed_currencies            — permitted settlement currency (INR)
 #   wheeling_charge_*_per_kwh     — your wheeling rates
 #   penalty_rate_per_kwh          — your under-delivery penalty rate
@@ -79,6 +80,12 @@ import rego.v1
 #                           add a prospective partner there to run trials
 #                           before the regulator approves them for the
 #                           production list.
+#   allowed_ledger_urls   — permitted ledgerUrl values for the buyerDiscom
+#                           and sellerDiscom participants: both discoms must
+#                           record the trade against a recognized ledger
+#                           endpoint. Production pins the canonical IES P2P
+#                           energy ledger; the test set may additionally
+#                           list local/sandbox ledger endpoints.
 #
 # NOTE: avoid the `test_` prefix in rule names (e.g. test_network_ids) —
 # `opa test` treats `test_`-prefixed rules as unit tests.
@@ -100,6 +107,10 @@ environments := {
 			"PROSPECTIVE_PARTNER_DISCOM", # piloting on test net, not yet approved for prod
 			"TEST_DISCOM_BUYER", # devkit test identity
 		},
+		"allowed_ledger_urls": {
+			"https://ies-p2p-energy-ledger.beckn.io",
+			# add local/sandbox ledger endpoints here for devkit testing
+		},
 	},
 	"production": {
 		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
@@ -110,6 +121,7 @@ environments := {
 			"NEIGHBOR_DISCOM_A",
 			"NEIGHBOR_DISCOM_B",
 		},
+		"allowed_ledger_urls": {"https://ies-p2p-energy-ledger.beckn.io"},
 	},
 }
 
@@ -244,6 +256,34 @@ violations contains msg if {
 	_env
 	not _seller_discom_id
 	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+}
+
+# DISCOM LEDGER ENDPOINTS: both discoms record the trade against a ledger;
+# each discom participant's ledgerUrl must be a recognized endpoint for the
+# environment (production = the canonical IES P2P energy ledger). Shape-gated
+# on the participant being present — participant completeness is the
+# schema/network policy's job, not this rule's.
+_discom_ledger_roles := {"buyerDiscom", "sellerDiscom"}
+
+violations contains msg if {
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	url := p.participantAttributes.ledgerUrl
+	not url in _env.allowed_ledger_urls
+	msg := sprintf(
+		"%s ledgerUrl %q is not a permitted ledger endpoint on the %s network (allowed: %v)",
+		[p.role, url, _environment, sort(_env.allowed_ledger_urls)],
+	)
+}
+
+# Fail-closed twin: a discom participant without any ledgerUrl cannot prove
+# it records against a recognized ledger → block.
+violations contains msg if {
+	_env
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	not p.participantAttributes.ledgerUrl
+	msg := sprintf("%s participant is missing participantAttributes.ledgerUrl", [p.role])
 }
 
 # SETTLEMENT CURRENCY: prices must be in a permitted currency. Gated on

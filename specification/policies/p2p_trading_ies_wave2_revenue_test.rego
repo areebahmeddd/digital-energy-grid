@@ -121,6 +121,67 @@ test_allowlist_disable_is_per_environment if {
 }
 
 # ---------------------------------------------------------------------------
+# Discom ledger endpoints
+# ---------------------------------------------------------------------------
+
+_canonical_ledger := "https://ies-p2p-energy-ledger.beckn.io"
+
+# Appends buyerDiscom + sellerDiscom participants carrying the given ledgerUrl.
+_with_discom_ledgers(inp, url) := json.patch(inp, [{
+	"op": "replace",
+	"path": "/message/contract/participants",
+	"value": array.concat(inp.message.contract.participants, [
+		{"role": "buyerDiscom", "participantAttributes": {"utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": url}},
+		{"role": "sellerDiscom", "participantAttributes": {"utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": url}},
+	]),
+}])
+
+test_canonical_ledger_url_ok if {
+	inp := _with_discom_ledgers(_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]), _canonical_ledger)
+	count(violations) == 0 with input as inp
+}
+
+test_devkit_local_ledger_url_ok_on_test_network if {
+	inp := _with_discom_ledgers(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		"http://buyer-discom-ledger.example.com:9000",
+	)
+	count(violations) == 0 with input as inp
+}
+
+test_rogue_ledger_url_is_violation if {
+	inp := _with_discom_ledgers(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		"http://rogue-ledger.example.com",
+	)
+	vs := violations with input as inp
+	count(vs) == 2 # both discom participants flagged
+	some msg in vs
+	contains(msg, "not a permitted ledger endpoint")
+}
+
+test_local_ledger_url_blocked_on_prod_network if {
+	inp := _with_discom_ledgers(
+		_input_prod("init", "BRPL", [_iv_pre(0, 12.5, 20)]),
+		"http://buyer-discom-ledger.example.com:9000",
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "not a permitted ledger endpoint on the production network")
+}
+
+test_missing_ledger_url_is_violation if {
+	inp := json.patch(_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]), [{
+		"op": "replace",
+		"path": "/message/contract/participants/0",
+		"value": {"role": "buyerDiscom", "participantAttributes": {"utilityId": "TEST_DISCOM_BUYER"}},
+	}])
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "buyerDiscom participant is missing participantAttributes.ledgerUrl")
+}
+
+# ---------------------------------------------------------------------------
 # Policy applicability (seller discom) + settlement currency
 # ---------------------------------------------------------------------------
 

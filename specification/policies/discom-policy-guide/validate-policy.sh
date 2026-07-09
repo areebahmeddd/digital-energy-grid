@@ -92,6 +92,10 @@ assert_ok = any("not a recognized" in v for v in violations)'
 assert "test-only partner blocked on prod" "init-prod-blocked-test-partner.json" '
 assert_ok = any("on the production network" in v for v in violations)'
 
+# Discoms recording against an unrecognized ledger endpoint: blocked.
+assert "rogue ledger endpoint: violation" "init-bad-ledger-url.json" '
+assert_ok = any("not a permitted ledger endpoint" in v for v in violations)'
+
 # Seller discom this policy does not apply to: applicability violation.
 assert "inapplicable seller: policy violation" "init-policy-not-applicable.json" '
 assert_ok = any("does not apply to seller discom" in v for v in violations)'

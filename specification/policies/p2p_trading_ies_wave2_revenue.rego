@@ -18,6 +18,10 @@
 #          discoms this policy is declared to apply to
 #          (applicable_seller_discoms, per environment);
 #        - settlement currency: must be in allowed_currencies (INR);
+#        - discom ledger endpoints: buyerDiscom and sellerDiscom must record
+#          against a recognized ledger (allowed_ledger_urls, per
+#          environment; production = the canonical IES P2P energy ledger
+#          https://ies-p2p-energy-ledger.beckn.io);
 #        - counterpart allowlist (when the environment's enforce_allowlist
 #          is true): the buyer's discom must be in the allowlist of the
 #          environment the networkId selects (test vs production);
@@ -41,8 +45,10 @@
 #                                   the discoms this policy applies to
 #                                   (applicable_seller_discoms), a
 #                                   per-environment enforce_allowlist switch,
-#                                   and the per-environment counterpart
-#                                   allowlist. All rules are environment-
+#                                   the per-environment counterpart
+#                                   allowlist, and the permitted discom
+#                                   ledger endpoints (allowed_ledger_urls).
+#                                   All rules are environment-
 #                                   agnostic and read their settings through
 #                                   this map — the test network can pilot
 #                                   partners not yet permitted in production
@@ -120,6 +126,13 @@ import rego.v1
 #                           list may be broader than production: pilot with a
 #                           prospective partner on the test network before
 #                           the regulator approves them for production.
+#   allowed_ledger_urls   — permitted ledgerUrl values for the buyerDiscom
+#                           and sellerDiscom participants. Both discoms must
+#                           record against a recognized ledger endpoint —
+#                           the canonical IES P2P energy ledger in
+#                           production; the test set additionally lists the
+#                           devkit-local ledger endpoints the compose
+#                           stack's cascade routing uses.
 environments := {
 	"test": {
 		"network_ids": {
@@ -132,6 +145,12 @@ environments := {
 			"TEST_DISCOM_SELLER", # intra-discom trades always allowed
 			"TEST_DISCOM_BUYER",
 		},
+		"allowed_ledger_urls": {
+			"https://ies-p2p-energy-ledger.beckn.io",
+			# devkit-local ledger endpoints (degledgerrecorder cascade targets)
+			"http://buyer-discom-ledger.example.com:9000",
+			"http://seller-discom-ledger.example.com:9000",
+		},
 	},
 	"production": {
 		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
@@ -142,6 +161,7 @@ environments := {
 			"BRPL",
 			"PVVNL",
 		},
+		"allowed_ledger_urls": {"https://ies-p2p-energy-ledger.beckn.io"},
 	},
 }
 
@@ -415,6 +435,35 @@ violations contains msg if {
 	_env
 	not _seller_discom_id
 	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+}
+
+# ---------------------------------------------------------------------------
+# Violations — discom ledger endpoints
+# ---------------------------------------------------------------------------
+# Both discoms record the trade against a ledger; their participants'
+# ledgerUrl must be a recognized endpoint for the environment (the canonical
+# IES P2P energy ledger in production). Shape-gated on the participant being
+# present — participant completeness is the schema/network policy's job.
+
+_discom_ledger_roles := {"buyerDiscom", "sellerDiscom"}
+
+violations contains msg if {
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	url := p.participantAttributes.ledgerUrl
+	not url in _env.allowed_ledger_urls
+	msg := sprintf(
+		"%s ledgerUrl %q is not a permitted ledger endpoint on the %s network (allowed: %v)",
+		[p.role, url, _environment, sort(_env.allowed_ledger_urls)],
+	)
+}
+
+violations contains msg if {
+	_env
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	not p.participantAttributes.ledgerUrl
+	msg := sprintf("%s participant is missing participantAttributes.ledgerUrl", [p.role])
 }
 
 # ---------------------------------------------------------------------------

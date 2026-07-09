@@ -16,6 +16,7 @@ discom-policy-guide/
     ├── init-blocked-discom.json           → allowlist violation (NACK)
     ├── init-unknown-network.json          → network-membership violation (NACK)
     ├── init-prod-blocked-test-partner.json→ test-only partner on prod (NACK)
+    ├── init-bad-ledger-url.json           → unrecognized discom ledger (NACK)
     ├── init-policy-not-applicable.json    → seller discom not covered (NACK)
     ├── init-wrong-currency.json           → non-INR pricing (NACK)
     └── on-status-settled.json             → 4 itemized net-zero revenue flows
@@ -47,6 +48,10 @@ artifact that declares, in one place:
   govern it.
 - **Settlement currency** — prices must be in a permitted currency (INR);
   anything else is rejected.
+- **Ledger endpoints** — both discoms (`buyerDiscom` and `sellerDiscom`
+  participants) must record the trade against a recognized ledger: in
+  production, the canonical IES P2P energy ledger
+  `https://ies-p2p-energy-ledger.beckn.io`.
 - **Trading rules** — an allowlist of counterpart discoms whose customers may
   buy energy from this discom's prosumers, **per environment**: the test
   network's allowlist can include prospective partners the discom is not yet
@@ -117,7 +122,7 @@ need to touch:
 
 | Knob | Meaning |
 |---|---|
-| `environments` | **One map holding everything that differs between test and production.** Each entry declares: `network_ids` (the `context.networkId` values that select this environment — must be disjoint across entries; an unknown networkId is a violation → NACK), `applicable_seller_discoms` (the discoms this policy applies to, declared upfront — a trade whose *selling* prosumer belongs to any other discom is NACKed as "wrong policy linked"), `enforce_allowlist` (per-environment switch; `false` means the allowlist is never even evaluated for that environment's traffic — e.g. keep production enforced while opening the test network during an onboarding drive), and `allowed_buyer_discoms` (per-environment counterpart allowlist — put a prospective partner in the **test** entry to pilot trades before the regulator approves them for **production**; include your own utilityId so intra-discom trades stay allowed). |
+| `environments` | **One map holding everything that differs between test and production.** Each entry declares: `network_ids` (the `context.networkId` values that select this environment — must be disjoint across entries; an unknown networkId is a violation → NACK), `applicable_seller_discoms` (the discoms this policy applies to, declared upfront — a trade whose *selling* prosumer belongs to any other discom is NACKed as "wrong policy linked"), `enforce_allowlist` (per-environment switch; `false` means the allowlist is never even evaluated for that environment's traffic — e.g. keep production enforced while opening the test network during an onboarding drive), `allowed_buyer_discoms` (per-environment counterpart allowlist — put a prospective partner in the **test** entry to pilot trades before the regulator approves them for **production**; include your own utilityId so intra-discom trades stay allowed), and `allowed_ledger_urls` (permitted `ledgerUrl` values for the buyerDiscom/sellerDiscom participants — production pins the canonical IES P2P energy ledger `https://ies-p2p-energy-ledger.beckn.io`; the test entry may add local/sandbox ledger endpoints). |
 | `allowed_currencies` | Permitted settlement currency — `{"INR"}`. A payload pricing energy in any other currency is a violation → NACK. |
 | `wheeling_charge_buyer_per_kwh` / `wheeling_charge_seller_per_kwh` | Wheeling charges, INR per settled kWh. Shared across environments — move them into the `environments` map (read via `_env`) if rates ever need to differ. |
 | `penalty_rate_per_kwh` | Penalty on under-delivery (REQUESTED_QTY − FINAL_ALLOC, clamped ≥ 0), INR/kWh. |
@@ -155,6 +160,7 @@ suite that evaluates the policy against every payload in
 | `init-blocked-discom.json` | Buyer discom not in the active allowlist | violation `"... not allowed to trade ..."` → NACK |
 | `init-unknown-network.json` | `networkId` not in `network_ids_test`/`prod` | violation `"... not a recognized IES P2P trading network ..."` → NACK |
 | `init-prod-blocked-test-partner.json` | Partner in the test allowlist arriving on the **production** network | violation `"... on the production network ..."` → NACK |
+| `init-bad-ledger-url.json` | Discom participants recording against an unrecognized ledger endpoint | violation `"... not a permitted ledger endpoint ..."` → NACK |
 | `init-policy-not-applicable.json` | Seller discom not in `applicable_seller_discoms` (wrong policy linked) | violation `"this policy does not apply to seller discom ..."` → NACK |
 | `init-wrong-currency.json` | `PRICE_PER_KWH` priced in EUR | violation `"settlement currency \"EUR\" is not permitted ..."` → NACK |
 | `on-status-settled.json` | Settled interval (20 of 20.5 kWh @ 12.5 INR) | `violations == []`, 4 itemized flows, values sum to 0 |
@@ -507,7 +513,8 @@ enforced actions (select/init/confirm) that rejection is itself a NACK.
 ## 8. Checklist
 
 - [ ] All edits confined to the DISCOM PARAMETERS section (everything below it is shared mechanics)
-- [ ] `environments` map edited: `network_ids`, `applicable_seller_discoms`, per-environment `enforce_allowlist`, per-environment `allowed_buyer_discoms`; currency + charge rates set
+- [ ] `environments` map edited: `network_ids`, `applicable_seller_discoms`, per-environment `enforce_allowlist`, `allowed_buyer_discoms`, `allowed_ledger_urls`; currency + charge rates set
+- [ ] Production `allowed_ledger_urls` pins the canonical IES ledger (`https://ies-p2p-energy-ledger.beckn.io`)
 - [ ] `applicable_seller_discoms` lists every discom sharing this policy
 - [ ] `network_ids` sets disjoint across environments
 - [ ] Own utilityId present in every environment's allowlist (intra-discom trades allowed)
