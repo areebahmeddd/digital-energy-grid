@@ -287,11 +287,12 @@
               }
             },
             "url": {
-              "raw": "{{bpp_caller_url}}/publish",
+              "raw": "{{bpp_caller_url}}/catalog/publish",
               "host": [
                 "{{bpp_caller_url}}"
               ],
               "path": [
+                "catalog",
                 "publish"
               ]
             },

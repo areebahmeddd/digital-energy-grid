@@ -131,6 +131,8 @@ DEVKIT_CONFIGS = {
         "structure": "flat"  # Flat file structure (like p2p-trading)
     },
     "demand-flex": {
+        # Routing configs declare the Beckn v2 compound catalog endpoint.
+        "endpoint_overrides": {"publish": "catalog/publish"},
         # {{domain}} substitutes context.networkId (and publishDirectives
         # visibleTo[0]) in v2 LTS payloads — it must hold the network id,
         # not the legacy beckn domain string.
@@ -145,6 +147,8 @@ DEVKIT_CONFIGS = {
         "structure": "flat"
     },
     "demand-flex-uc2-bid-curve-pac": {
+        # Routing configs declare the Beckn v2 compound catalog endpoint.
+        "endpoint_overrides": {"publish": "catalog/publish"},
         "domain": "nfh.global/testnet-deg",
         "bap_id": "bap.example.com",
         "bap_host_root": "http://beckn-router:9000",
@@ -168,6 +172,8 @@ DEVKIT_CONFIGS = {
         "structure": "flat"
     },
     "p2p-trading-ies-wave2": {
+        # Routing configs declare the Beckn v2 compound catalog endpoint.
+        "endpoint_overrides": {"publish": "catalog/publish"},
         "domain": "nfh.global/testnet-deg",
         # Per-node Beckn hostnames matching subscriberIds (resolve via Caddy
         # host-routing + Docker network aliases on beckn-router). Each
@@ -1074,7 +1080,9 @@ def create_postman_request(
             "url": {
                 "raw": f"{{{{{adapter_url_var}}}}}/{endpoint}",
                 "host": [f"{{{{{adapter_url_var}}}}}"],
-                "path": [endpoint]
+                # Compound endpoints (e.g. catalog/publish) become multiple
+                # path segments.
+                "path": endpoint.split("/")
             },
             "description": f"{action.capitalize()} request: {request_name}"
         },
@@ -1386,11 +1394,16 @@ def generate_collection(
     # Process each action in order (include all BAP actions, even if no examples)
     all_actions = sorted(set(list(actions_map.keys()) + list(action_mapping.keys())))
 
+    # Per-devkit endpoint overrides — e.g. Beckn v2 catalog actions are
+    # compound endpoints ("publish" → "catalog/publish") on devkits whose
+    # routing configs declare the compound form.
+    endpoint_overrides: Dict[str, str] = config.get("endpoint_overrides", {})
+
     for action in all_actions:
         if action not in action_mapping:
             continue
 
-        endpoint = action_mapping[action]
+        endpoint = endpoint_overrides.get(action, action_mapping[action])
         files_list = actions_map.get(action, [])
 
         action_items = []
