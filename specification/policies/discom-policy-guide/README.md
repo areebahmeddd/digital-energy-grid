@@ -42,9 +42,11 @@ artifact that declares, in one place:
   buy energy from this discom's prosumers, **per environment**: the test
   network's allowlist can include prospective partners the discom is not yet
   permitted to trade with under production regulations, so pilots can run
-  before regulatory approval. The whole allowlist can be switched off with
-  one boolean (`enforce_allowlist := false`) — in which case it is not merely
-  unenforced but never even evaluated.
+  before regulatory approval. Each environment has its own
+  `enforce_allowlist` switch — set it to `false` and the allowlist is not
+  merely unenforced for that environment but never even evaluated.
+  Everything environment-specific lives in one `environments` map; the rules
+  themselves are identical for test and production.
 - **Charges** — the discom's wheeling charges, delivery-shortfall penalty
   rate, and the cap on what a trading platform may retain. These feed the
   settlement computation and appear itemized in every revenue flow.
@@ -106,12 +108,15 @@ need to touch:
 
 | Knob | Meaning |
 |---|---|
-| `enforce_allowlist` | Master switch. `false` disables the counterpart allowlist entirely — it is the first guard of every allowlist rule, so nothing allowlist-related is even evaluated. Network-membership and settlement checks stay active. |
-| `network_ids_test` / `network_ids_prod` | The IES P2P trading networks you recognize (currently `nfh.global/testnet-deg` + `indiaenergystack.in/test-ies-p2p-trading-network` for test, `indiaenergystack.in/ies-p2p-trading-network` for production). A message on any other `context.networkId` is a violation → NACK. |
-| `allowed_buyer_discoms_test` / `allowed_buyer_discoms_prod` | Counterpart allowlists per environment, selected by which network set the message's networkId falls in. Put a prospective partner in the **test** list to pilot trades before the regulator approves them for the **production** list. Include your own utilityId so intra-discom trades stay allowed. |
-| `wheeling_charge_buyer_per_kwh` / `wheeling_charge_seller_per_kwh` | Wheeling charges, INR per settled kWh. |
+| `environments` | **One map holding everything that differs between test and production.** Each entry declares: `network_ids` (the `context.networkId` values that select this environment — must be disjoint across entries; an unknown networkId is a violation → NACK), `enforce_allowlist` (per-environment switch; `false` means the allowlist is never even evaluated for that environment's traffic — e.g. keep production enforced while opening the test network during an onboarding drive), and `allowed_buyer_discoms` (per-environment counterpart allowlist — put a prospective partner in the **test** entry to pilot trades before the regulator approves them for **production**; include your own utilityId so intra-discom trades stay allowed). |
+| `wheeling_charge_buyer_per_kwh` / `wheeling_charge_seller_per_kwh` | Wheeling charges, INR per settled kWh. Shared across environments — move them into the `environments` map (read via `_env`) if rates ever need to differ. |
 | `penalty_rate_per_kwh` | Penalty on under-delivery (REQUESTED_QTY − FINAL_ALLOC, clamped ≥ 0), INR/kWh. |
 | `platform_charge_cap_per_kwh` | Ceiling on what a trading platform may retain; disclosed in the settlement itemization. |
+
+The design rule behind the map: **rules are environment-agnostic, data is
+environment-specific** (see [6.3](#63-vary-data-per-environment-never-rules)).
+Test and production always execute the same logic; only the `environments`
+entry they resolve to differs.
 
 Keep the package as `deg.contracts.p2p_trading` (then `policy.queryPath`
 stays `data.deg.contracts.p2p_trading`), or rename both consistently.
@@ -224,10 +229,10 @@ _trade_formation_actions := {"select", "init", "confirm"}
 _is_trade_formation if input.context.action in _trade_formation_actions
 ```
 
-The same principle powers feature switches: `enforce_allowlist` is the first
-guard of every allowlist rule, so setting it to `false` doesn't just suppress
-the violation — it prevents the buyer-discom extraction and environment
-resolution from ever being demanded.
+The same principle powers feature switches: `_env.enforce_allowlist` is the
+first guard of every allowlist rule, so an environment with the switch off
+doesn't just suppress the violation — it prevents the buyer-discom
+extraction and set lookup from ever being demanded for its traffic.
 
 ### 6.2 Scope by lifecycle stage, not only by action
 
@@ -254,7 +259,69 @@ something to inject, so trade-formation payloads stay untouched:
 revenue_flows := [...] if _settled
 ```
 
-### 6.3 Lean on OPA's laziness — rules are computed on demand and memoized
+### 6.3 Vary data per environment, never rules
+
+Test and production must stay maintainable as one policy: if each
+environment gets its own copy of a rule, every future change has to be made
+twice and the copies drift. Instead, keep **one map of environment data** and
+make every rule read its settings through the resolved entry:
+
+```rego
+environments := {
+	"test":       {"network_ids": {...}, "enforce_allowlist": true, "allowed_buyer_discoms": {...}},
+	"production": {"network_ids": {...}, "enforce_allowlist": true, "allowed_buyer_discoms": {...}},
+}
+
+# Resolution — the ONLY place environments are told apart.
+_environment := name if {
+	some name, env in environments
+	_network_id in env.network_ids
+}
+
+_env := environments[_environment]
+
+# One allowlist rule for every environment; it never mentions test or prod.
+violations contains msg if {
+	_env.enforce_allowlist
+	_buyer_discom_id
+	not _buyer_discom_id in _env.allowed_buyer_discoms
+	msg := sprintf("buyer discom %q is not allowed ... on the %s network", [_buyer_discom_id, _environment])
+}
+```
+
+What this buys you:
+
+- **Symmetry for free** — enforcement, messages, and edge-case handling are
+  identical in both environments because they are literally the same rule.
+- **Safe by construction on unknown networks** — an unrecognized networkId
+  resolves no entry, `_env` stays undefined, and every `_env`-reading rule
+  simply cannot fire; the unconditional membership violation reports the
+  problem. No rule can accidentally judge test traffic against production
+  data or vice versa.
+- **Cheap environment changes** — flipping `enforce_allowlist` for one
+  environment, adding a partner to one allowlist, or adding a whole new
+  environment (a staging network, a second testnet) is a data edit, not a
+  logic change.
+- **Testability** — unit tests exercise one environment's behavior by
+  patching the map, not by mocking rules:
+
+  ```rego
+  _envs_test_allowlist_off := json.patch(environments, [{
+  	"op": "replace", "path": "/test/enforce_allowlist", "value": false,
+  }])
+
+  test_allowlist_disabled_lets_outsider_through if {
+  	count(violations) == 0 with input as inp with environments as _envs_test_allowlist_off
+  }
+  ```
+
+Keep the `network_ids` sets disjoint across entries — a networkId in two
+environments would make `_environment` ambiguous (a rego conflict error at
+evaluation time). If a shared value (say a wheeling rate) one day needs to
+differ per environment, move it *into* the map and read it via `_env` —
+don't fork the rule that uses it.
+
+### 6.4 Lean on OPA's laziness — rules are computed on demand and memoized
 
 A complete rule (`trade_value := ...`) is **not** evaluated unless something
 in the query actually needs it, and once evaluated its result is **cached for
@@ -262,7 +329,10 @@ the rest of that evaluation**. Two consequences:
 
 - Expensive aggregates are free on actions whose rules never reference them —
   *provided* the referencing rules are action-gated (6.1). With the guard
-  first, `trade_value` is simply never demanded at init.
+  first, `trade_value` is simply never demanded at init. Same for
+  environment resolution: with `_env.enforce_allowlist` guarding the
+  allowlist rules, nothing environment-related is computed for actions where
+  those rules don't run.
 - Factor repeated expressions into named rules, not repeated inline logic:
   `total_settled_kwh` referenced by four flow descriptions is computed once,
   not four times.
@@ -271,7 +341,7 @@ the rest of that evaluation**. Two consequences:
 call — they are not memoized. Use functions for per-item logic inside
 comprehensions; use complete rules for shared scalars/aggregates.
 
-### 6.4 Make undefined a non-event, not an error
+### 6.5 Make undefined a non-event, not an error
 
 Partial-set rules (`violations contains msg if {...}`) are undefined-safe: a
 body that fails just contributes nothing. For scalars that other rules read,
@@ -288,14 +358,14 @@ accident of undefinedness:
 
 ```rego
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	_buyer_discom_id                          # defined → check the allowlist
-	not _buyer_discom_id in _active_buyer_allowlist
+	not _buyer_discom_id in _env.allowed_buyer_discoms
 	msg := sprintf("buyer discom %q is not allowed ...", [_buyer_discom_id])
 }
 
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	not _buyer_discom_id                      # undefined → its own, explicit violation
 	msg := "cannot determine buyer discom: ..."
 }
@@ -304,18 +374,18 @@ violations contains msg if {
 Only do this for data the decision genuinely requires — don't fail-closed on
 optional fields that legitimately appear later in the lifecycle.
 
-The environment selection uses the same idea defensively: an unknown
-networkId leaves `_active_buyer_allowlist` undefined, so the allowlist rule
-cannot accidentally judge against the wrong environment — the (cheap,
+The environment resolution uses the same idea defensively: an unknown
+networkId leaves `_env` undefined, so environment-dependent rules cannot
+accidentally judge against the wrong environment's settings — the (cheap,
 unconditional) network-membership violation fires instead.
 
-### 6.5 Keep the exported surface stable and the rest private
+### 6.6 Keep the exported surface stable and the rest private
 
 The network contract is `violations` + `revenue_flows` (+ the documented
 knobs). Prefix everything else with `_` so consumers and tests never couple
 to internals, and future refactors can't break payloads.
 
-### 6.6 Test each action's cost and behavior separately
+### 6.7 Test each action's cost and behavior separately
 
 Write `with input as` tests per action — including the "rule must NOT fire
 here" cases (e.g. no FINAL_ALLOC violation at init). To find rules that
@@ -424,9 +494,11 @@ enforced actions (select/init/confirm) that rejection is itself a NACK.
 
 ## 8. Checklist
 
-- [ ] Parameters edited: `enforce_allowlist`, network sets, per-environment allowlists, wheeling/penalty/platform-cap rates
-- [ ] Own utilityId present in both allowlists (intra-discom trades allowed)
-- [ ] Prospective (not-yet-regulated) partners only in `allowed_buyer_discoms_test`
+- [ ] `environments` map edited: `network_ids`, per-environment `enforce_allowlist`, per-environment `allowed_buyer_discoms`; charge rates set
+- [ ] `network_ids` sets disjoint across environments
+- [ ] Own utilityId present in every environment's allowlist (intra-discom trades allowed)
+- [ ] Prospective (not-yet-regulated) partners only in the **test** environment's allowlist
+- [ ] No environment-specific rule forks — rules read settings via `_env` only
 - [ ] `./validate-policy.sh my-discom-policy.rego` — all checks pass
 - [ ] Unit tests next to the policy (`<policy>_test.rego`), `opa test` green
 - [ ] Every rule class action-gated, guard as the first body expression

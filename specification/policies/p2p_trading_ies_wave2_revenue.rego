@@ -29,18 +29,18 @@
 #        sellerDiscom (regulated LP for seller's discom)   → receives → positive (wheeling + penalty)
 #
 # Discom-tunable knobs (edit these when authoring your discom's policy):
-#   enforce_allowlist             — false disables the counterpart allowlist
-#                                   entirely (not evaluated at all)
-#   network_ids_test /
-#   network_ids_prod              — recognized IES P2P trading networks; a
-#                                   message on any other networkId is a
-#                                   violation → NACK
-#   allowed_buyer_discoms_test /
-#   allowed_buyer_discoms_prod    — per-environment counterpart allowlists,
-#                                   selected by which set context.networkId
-#                                   falls in; lets a discom pilot trades on
-#                                   the test network with partners not yet
-#                                   permitted in production regulations
+#   environments                  — ONE map holding everything that differs
+#                                   between test and production: the
+#                                   networkIds that select the environment,
+#                                   a per-environment enforce_allowlist
+#                                   switch, and the per-environment
+#                                   counterpart allowlist. All rules are
+#                                   environment-agnostic and read their
+#                                   settings through this map — the test
+#                                   network can pilot partners not yet
+#                                   permitted in production without any rule
+#                                   diverging. A networkId outside every
+#                                   environment is a violation → NACK.
 #   wheeling_charge_buyer_per_kwh — INR/kWh charged to the buyer side
 #   wheeling_charge_seller_per_kwh— INR/kWh charged to the seller side
 #   penalty_rate_per_kwh          — INR/kWh on delivery shortfall
@@ -83,39 +83,50 @@ import rego.v1
 # Discom parameters — the knobs a discom edits when authoring its policy
 # ---------------------------------------------------------------------------
 
-# Master switch for the counterpart allowlist. When false the allowlist is
-# not imposed — and not even evaluated (it is the first guard of every
-# allowlist rule). Network-membership and settlement checks stay active.
-enforce_allowlist := true
-
-# Recognized IES P2P trading networks. context.networkId must be in one of
-# these sets; anything else is a violation → NACK. The set the networkId
-# falls in also selects which allowlist applies.
-network_ids_test := {
-	"nfh.global/testnet-deg",
-	"indiaenergystack.in/test-ies-p2p-trading-network",
+# Everything environment-specific lives in this ONE map; every rule below is
+# environment-agnostic and reads its settings through `_env`. To change how
+# an environment behaves, edit its entry here — never fork a rule per
+# environment.
+#
+# Per-environment settings:
+#   network_ids           — context.networkId values that select this
+#                           environment. Sets MUST be disjoint across
+#                           environments (a networkId in two entries would
+#                           make environment resolution ambiguous).
+#   enforce_allowlist     — false switches the counterpart allowlist off for
+#                           THIS environment only; the allowlist rules are
+#                           then never even evaluated for its traffic.
+#   allowed_buyer_discoms — utilityIds whose customers may buy from this
+#                           discom's prosumers in this environment. The test
+#                           list may be broader than production: pilot with a
+#                           prospective partner on the test network before
+#                           the regulator approves them for production.
+environments := {
+	"test": {
+		"network_ids": {
+			"nfh.global/testnet-deg",
+			"indiaenergystack.in/test-ies-p2p-trading-network",
+		},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"TEST_DISCOM_SELLER", # intra-discom trades always allowed
+			"TEST_DISCOM_BUYER",
+		},
+	},
+	"production": {
+		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"TPDDL", # intra-discom trades always allowed
+			"BRPL",
+			"PVVNL",
+		},
+	},
 }
 
-network_ids_prod := {
-	"indiaenergystack.in/ies-p2p-trading-network",
-}
-
-# utilityIds of discoms whose customers may buy energy from this discom's
-# prosumers, per environment. A buyer from any other discom is a violation →
-# NACK at select/init/confirm. The test allowlist may be broader than
-# production: a discom can pilot trades on the test network with partners it
-# is not yet permitted to trade with under production regulations.
-allowed_buyer_discoms_prod := {
-	"TPDDL", # intra-discom trades always allowed
-	"BRPL",
-	"PVVNL",
-}
-
-allowed_buyer_discoms_test := {
-	"TEST_DISCOM_SELLER", # intra-discom trades always allowed
-	"TEST_DISCOM_BUYER",
-}
-
+# Charges are shared across environments. If an environment ever needs
+# different rates, move them into the environments map and read them via
+# _env — same pattern as the allowlist, no per-environment rule forks.
 # Wheeling charges this discom levies, in currency units per settled kWh.
 wheeling_charge_buyer_per_kwh := 0.25
 
@@ -149,20 +160,21 @@ _buyer_discom_id := id if {
 	id := p.participantAttributes.utilityId
 }
 
-# Network environment: which recognized set context.networkId falls in
-# selects the active allowlist. Unknown networks match neither rule, leaving
-# _active_buyer_allowlist undefined (the membership violation fires instead).
+# Environment resolution: context.networkId selects exactly one entry of the
+# environments map; every environment-dependent rule reads settings via
+# `_env`. An unknown networkId matches no entry, leaving _env undefined — so
+# environment-dependent rules simply cannot fire and the (unconditional)
+# membership violation reports the problem instead.
 _network_id := input.context.networkId
 
-_known_network_ids := network_ids_test | network_ids_prod
+_known_network_ids := {net | some env in environments; some net in env.network_ids}
 
-_active_buyer_allowlist := allowed_buyer_discoms_test if _network_id in network_ids_test
+_environment := name if {
+	some name, env in environments
+	_network_id in env.network_ids
+}
 
-_active_buyer_allowlist := allowed_buyer_discoms_prod if _network_id in network_ids_prod
-
-_environment := "test" if _network_id in network_ids_test
-
-_environment := "production" if _network_id in network_ids_prod
+_env := environments[_environment]
 
 # ---------------------------------------------------------------------------
 # Timeseries helpers
@@ -339,30 +351,32 @@ violations contains msg if {
 	_network_id
 	not _network_id in _known_network_ids
 	msg := sprintf(
-		"networkId %q is not a recognized IES P2P trading network (test: %v, production: %v)",
-		[_network_id, sort(network_ids_test), sort(network_ids_prod)],
+		"networkId %q is not a recognized IES P2P trading network (known: %v)",
+		[_network_id, sort(_known_network_ids)],
 	)
 }
 
 # ---------------------------------------------------------------------------
 # Violations — trading eligibility (enforced at select/init/confirm)
 # ---------------------------------------------------------------------------
+# One rule per check, shared by every environment: the environment only
+# supplies data (via _env), never its own rule variant.
 
-# enforce_allowlist is the FIRST guard: when false, none of the allowlist
-# machinery (buyer-discom extraction, environment resolution) is evaluated.
+# The per-environment enforce_allowlist switch is the FIRST guard: when the
+# resolved environment has it off, none of the allowlist machinery
+# (buyer-discom extraction, set lookup) is evaluated for its traffic.
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	_buyer_discom_id
-	_active_buyer_allowlist
-	not _buyer_discom_id in _active_buyer_allowlist
+	not _buyer_discom_id in _env.allowed_buyer_discoms
 	msg := sprintf(
 		"buyer discom %q is not allowed to trade with this discom's prosumers on the %s network (allowed: %v)",
-		[_buyer_discom_id, _environment, sort(_active_buyer_allowlist)],
+		[_buyer_discom_id, _environment, sort(_env.allowed_buyer_discoms)],
 	)
 }
 
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	not _buyer_discom_id
 	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
 }

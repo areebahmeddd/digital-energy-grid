@@ -34,48 +34,60 @@ import rego.v1
 # DISCOM PARAMETERS — edit this block; everything below is mechanics
 # ============================================================================
 
-# Master switch for the counterpart allowlist. Set to false to disable the
-# allowlist entirely — because it is the FIRST guard of every allowlist rule,
-# a false value means the allowlist is not just unenforced, it is never even
-# evaluated (no buyer-discom extraction, no environment resolution). Network
-# membership and settlement checks stay active regardless.
-enforce_allowlist := true
-
-# Recognized IES P2P trading networks. Every message carries
-# context.networkId; a networkId outside these sets is a violation → NACK on
-# enforced actions. Which set it falls in also selects the allowlist below.
-# NOTE: avoid the `test_` prefix in rule names — `opa test` treats such rules
-# as unit tests (that is why these are named network_ids_test, not
-# test_network_ids).
-network_ids_test := {
-	"nfh.global/testnet-deg",
-	"indiaenergystack.in/test-ies-p2p-trading-network",
-}
-
-network_ids_prod := {
-	"indiaenergystack.in/ies-p2p-trading-network",
-}
-
-# Which discoms' customers may BUY from this discom's prosumers, PER
-# ENVIRONMENT. utilityIds as they appear in
-# participants[].participantAttributes.utilityId.
+# THE ENVIRONMENTS MAP — the single place where test and production differ.
 #
-# The two lists are independent on purpose: regulations gate who you may
-# trade with in production, but the test network is for piloting — put a
-# prospective partner in the test list to run trials before the regulator
-# approves them for the production list.
-allowed_buyer_discoms_prod := {
-	"ACME_DISCOM", # your own id: intra-discom trades stay allowed
-	"NEIGHBOR_DISCOM_A",
-	"NEIGHBOR_DISCOM_B",
-}
-
-allowed_buyer_discoms_test := {
-	"ACME_DISCOM",
-	"NEIGHBOR_DISCOM_A",
-	"NEIGHBOR_DISCOM_B",
-	"PROSPECTIVE_PARTNER_DISCOM", # piloting on test net, not yet approved for prod
-	"TEST_DISCOM_BUYER", # devkit test identity
+# Design rule: rules are environment-AGNOSTIC and data is environment-
+# SPECIFIC. Every rule below reads its settings through `_env` (the entry
+# this message's networkId resolves to), so test and production always run
+# the exact same logic — adding an environment or changing one environment's
+# behavior means editing THIS map, never forking a rule.
+#
+# Per-environment settings:
+#   network_ids           — context.networkId values that select this
+#                           environment. MUST be disjoint across entries
+#                           (a networkId in two environments would make
+#                           resolution ambiguous). A networkId outside every
+#                           entry is a violation → NACK on enforced actions.
+#   enforce_allowlist     — the allowlist switch, PER ENVIRONMENT: e.g. keep
+#                           production enforced while opening the test
+#                           network to everyone during an onboarding drive.
+#                           When false, the allowlist rules are never even
+#                           evaluated for this environment's traffic.
+#   allowed_buyer_discoms — which discoms' customers may BUY from this
+#                           discom's prosumers (utilityIds as they appear in
+#                           participants[].participantAttributes.utilityId).
+#                           The lists are independent on purpose: regulations
+#                           gate production, the test list is for piloting —
+#                           add a prospective partner there to run trials
+#                           before the regulator approves them for the
+#                           production list.
+#
+# NOTE: avoid the `test_` prefix in rule names (e.g. test_network_ids) —
+# `opa test` treats `test_`-prefixed rules as unit tests.
+environments := {
+	"test": {
+		"network_ids": {
+			"nfh.global/testnet-deg",
+			"indiaenergystack.in/test-ies-p2p-trading-network",
+		},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"ACME_DISCOM", # your own id: intra-discom trades stay allowed
+			"NEIGHBOR_DISCOM_A",
+			"NEIGHBOR_DISCOM_B",
+			"PROSPECTIVE_PARTNER_DISCOM", # piloting on test net, not yet approved for prod
+			"TEST_DISCOM_BUYER", # devkit test identity
+		},
+	},
+	"production": {
+		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"ACME_DISCOM", # your own id: intra-discom trades stay allowed
+			"NEIGHBOR_DISCOM_A",
+			"NEIGHBOR_DISCOM_B",
+		},
+	},
 }
 
 # Wheeling charge this discom levies on the BUYER side, per settled kWh.
@@ -117,21 +129,24 @@ _buyer_discom_id := id if {
 	id := p.participantAttributes.utilityId
 }
 
-# Network environment resolution. The networkId picks the active allowlist;
-# an unknown networkId matches neither rule, so _active_buyer_allowlist stays
-# undefined and the membership violation (below) fires instead — the
-# allowlist rule can never silently judge against the wrong environment.
+# Environment resolution — the ONLY place environments are told apart.
+# context.networkId selects exactly one entry of the environments map, and
+# every environment-dependent rule reads its settings through `_env`. An
+# unknown networkId matches no entry, so `_env` stays undefined: rules that
+# depend on it simply cannot fire (rego treats a failing expression as "this
+# rule contributes nothing"), and the unconditional membership violation
+# below reports the problem instead — a rule can never silently judge
+# against the wrong environment's settings.
 _network_id := input.context.networkId
 
-_known_network_ids := network_ids_test | network_ids_prod
+_known_network_ids := {net | some env in environments; some net in env.network_ids}
 
-_active_buyer_allowlist := allowed_buyer_discoms_test if _network_id in network_ids_test
+_environment := name if {
+	some name, env in environments
+	_network_id in env.network_ids
+}
 
-_active_buyer_allowlist := allowed_buyer_discoms_prod if _network_id in network_ids_prod
-
-_environment := "test" if _network_id in network_ids_test
-
-_environment := "production" if _network_id in network_ids_prod
+_env := environments[_environment]
 
 # Scalar value of a typed payload within an interval.
 _payload_val(interval, ptype) := v if {
@@ -163,32 +178,32 @@ violations contains msg if {
 	_network_id
 	not _network_id in _known_network_ids
 	msg := sprintf(
-		"networkId %q is not a recognized IES P2P trading network (test: %v, production: %v)",
-		[_network_id, sort(network_ids_test), sort(network_ids_prod)],
+		"networkId %q is not a recognized IES P2P trading network (known: %v)",
+		[_network_id, sort(_known_network_ids)],
 	)
 }
 
-# THE ALLOWLIST RULE: buyer's discom must be one we trade with in the
-# environment the networkId selects. `enforce_allowlist` is the FIRST guard:
-# when the switch is off, evaluation stops here — nothing below the guard
-# (buyer extraction, environment resolution, set lookup) ever runs.
+# THE ALLOWLIST RULE — one rule, every environment. It never mentions "test"
+# or "production": the environment only supplies data through `_env`. The
+# per-environment `enforce_allowlist` switch is the FIRST guard, so when the
+# resolved environment has it off, evaluation stops here — nothing below the
+# guard (buyer extraction, set lookup) ever runs for its traffic.
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	_buyer_discom_id
-	_active_buyer_allowlist
-	not _buyer_discom_id in _active_buyer_allowlist
+	not _buyer_discom_id in _env.allowed_buyer_discoms
 	msg := sprintf(
 		"buyer discom %q is not allowed to trade with this discom's prosumers on the %s network (allowed: %v)",
-		[_buyer_discom_id, _environment, sort(_active_buyer_allowlist)],
+		[_buyer_discom_id, _environment, sort(_env.allowed_buyer_discoms)],
 	)
 }
 
 # Fail-closed on missing data: if we cannot tell who the buyer's discom is,
 # we cannot apply the allowlist — block the trade rather than guess. Also
-# behind the enforce_allowlist switch: with the allowlist off, a missing
-# buyer discom is no longer a reason to block.
+# behind the per-environment switch: with the allowlist off, a missing buyer
+# discom is no longer a reason to block.
 violations contains msg if {
-	enforce_allowlist
+	_env.enforce_allowlist
 	not _buyer_discom_id
 	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
 }

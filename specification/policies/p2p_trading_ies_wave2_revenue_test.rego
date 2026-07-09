@@ -80,9 +80,15 @@ test_blocked_buyer_discom_violation_at_init if {
 	contains(msg, "not allowed to trade")
 }
 
+# environments with the TEST environment's allowlist enforcement switched off
+# (production untouched — the switch is per-environment).
+_envs_test_allowlist_off := json.patch(environments, [{
+	"op": "replace", "path": "/test/enforce_allowlist", "value": false,
+}])
+
 test_allowlist_disabled_lets_outsider_through if {
 	inp := _input("init", "TEST_DISCOM_OUTSIDER", [_iv_pre(0, 12.5, 20)])
-	count(violations) == 0 with input as inp with enforce_allowlist as false
+	count(violations) == 0 with input as inp with environments as _envs_test_allowlist_off
 }
 
 test_allowlist_disabled_skips_missing_buyer_discom_check if {
@@ -90,7 +96,14 @@ test_allowlist_disabled_skips_missing_buyer_discom_check if {
 		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
 		["/message/contract/participants"],
 	)
-	count(violations) == 0 with input as inp with enforce_allowlist as false
+	count(violations) == 0 with input as inp with environments as _envs_test_allowlist_off
+}
+
+test_allowlist_disable_is_per_environment if {
+	# Same switch state, but traffic on the PRODUCTION network: still enforced.
+	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "TEST_DISCOM_OUTSIDER", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as inp with environments as _envs_test_allowlist_off
+	count(vs) == 1
 }
 
 # ---------------------------------------------------------------------------
