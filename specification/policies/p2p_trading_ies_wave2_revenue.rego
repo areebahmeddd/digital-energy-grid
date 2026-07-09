@@ -10,14 +10,20 @@
 #
 #   1. VIOLATIONS — trading rules the discom enforces. The onix
 #      settlementflows step NACKs any action listed in its
-#      violationActions config (select/init/confirm in wave2) when the
-#      `violations` set is non-empty. Today that covers:
+#      violationActions config (select/init/confirm on the seller receiver,
+#      publish on the seller caller in wave2) when the `violations` set is
+#      non-empty. The rules cover BOTH message shapes — trade contracts
+#      (message.contract) and catalog publishes (message.catalogs[].offers[])
+#      — via shape-agnostic sets; catching a bad catalog at publish stops
+#      every downstream trade from failing one by one. Today that covers:
 #        - network membership: context.networkId must be a recognized IES
 #          P2P trading network (test or production);
-#        - policy applicability: the seller's discom must be one of the
-#          discoms this policy is declared to apply to
-#          (applicable_seller_discoms, per environment);
-#        - settlement currency: must be in allowed_currencies (INR);
+#        - policy applicability: every selling prosumer's discom (trade
+#          participant or catalog offer provider) must be one of the discoms
+#          this policy is declared to apply to (applicable_seller_discoms,
+#          per environment);
+#        - settlement currency: every declared PRICE_PER_KWH currency must
+#          be in allowed_currencies (INR);
 #        - discom ledger endpoints: buyerDiscom and sellerDiscom must record
 #          against a recognized ledger (allowed_ledger_urls, per
 #          environment; production = the canonical IES P2P energy ledger
@@ -202,6 +208,19 @@ _currency := c if {
 	c := d.currency
 }
 
+# Every currency the message prices energy in, as a shape-agnostic SET:
+# trade-shaped messages contribute the commitment currency, catalog
+# publishes contribute each offer's PRICE_PER_KWH currency.
+_currencies contains c if c := _currency
+
+_currencies contains c if {
+	some cat in input.message.catalogs
+	some o in cat.offers
+	some d in o.offerAttributes.commitmentAttributes.payloadDescriptors
+	d.payloadType == "PRICE_PER_KWH"
+	c := d.currency
+}
+
 # The buyer prosumer's discom: utilityId of the buyerPlatform participant.
 _buyer_discom_id := id if {
 	some p in _contract.participants
@@ -209,13 +228,23 @@ _buyer_discom_id := id if {
 	id := p.participantAttributes.utilityId
 }
 
-# The seller prosumer's discom: utilityId of the sellerPlatform participant.
-# Checked against _env.applicable_seller_discoms — this policy must actually
-# be the policy of the discom whose prosumer is selling.
-_seller_discom_id := id if {
+# The seller prosumers' discoms, as a SET so the same rules cover both
+# message shapes (each contributor is shape-gated; the other shape simply
+# contributes nothing):
+#   - trade-shaped messages: the sellerPlatform participant's utilityId;
+#   - catalog publishes: each offer's provider.providerAttributes.utilityId.
+# Every id found must be in _env.applicable_seller_discoms — this policy
+# must actually be the policy of the discom whose prosumer is selling.
+_seller_discom_ids contains id if {
 	some p in _contract.participants
 	p.role == "sellerPlatform"
 	id := p.participantAttributes.utilityId
+}
+
+_seller_discom_ids contains id if {
+	some c in input.message.catalogs
+	some o in c.offers
+	id := o.provider.providerAttributes.utilityId
 }
 
 # Environment resolution: context.networkId selects exactly one entry of the
@@ -415,26 +444,41 @@ violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# Violations — policy applicability (all environments)
+# Violations — policy applicability (all environments, both message shapes)
 # ---------------------------------------------------------------------------
 # This policy declares upfront which discoms it applies to
-# (_env.applicable_seller_discoms). If the selling prosumer's discom is not
+# (_env.applicable_seller_discoms). If a selling prosumer's discom is not
 # one of them, the catalog publisher linked the wrong policy — block the
-# trade rather than judge it under rules that don't govern it.
+# message rather than judge it under rules that don't govern it. One rule
+# covers trades and catalogs: _seller_discom_ids is shape-agnostic.
 
 violations contains msg if {
-	_seller_discom_id
-	not _seller_discom_id in _env.applicable_seller_discoms
+	some id in _seller_discom_ids
+	not id in _env.applicable_seller_discoms
 	msg := sprintf(
 		"this policy does not apply to seller discom %q (applies to: %v on the %s network)",
-		[_seller_discom_id, sort(_env.applicable_seller_discoms), _environment],
+		[id, sort(_env.applicable_seller_discoms), _environment],
 	)
+}
+
+# Fail-closed twins, one per shape (each guarded by its shape so a catalog
+# is never judged by the trade rule and vice versa):
+violations contains msg if {
+	_env
+	is_object(_contract) # trade-shaped message
+	count(_seller_discom_ids) == 0
+	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
 }
 
 violations contains msg if {
 	_env
-	not _seller_discom_id
-	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+	some c in input.message.catalogs # catalog-shaped message
+	some o in c.offers
+	not o.provider.providerAttributes.utilityId
+	msg := sprintf(
+		"catalog offer %q has no provider.providerAttributes.utilityId — cannot verify policy applicability",
+		[object.get(o, "id", "<no id>")],
+	)
 }
 
 # ---------------------------------------------------------------------------
@@ -467,16 +511,16 @@ violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# Violations — settlement currency
+# Violations — settlement currency (both message shapes)
 # ---------------------------------------------------------------------------
-# Gated on _currency being present (data-shape gate): fires only when the
-# payload actually declares a PRICE_PER_KWH currency, so payloads without
-# commitment timeseries are not falsely flagged.
+# _currencies is shape-agnostic (trade commitment currency and/or per-offer
+# catalog currencies) and only contains values the payload actually
+# declares, so messages without pricing are not falsely flagged.
 
 violations contains msg if {
-	_currency
-	not _currency in allowed_currencies
-	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [_currency, sort(allowed_currencies)])
+	some c in _currencies
+	not c in allowed_currencies
+	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [c, sort(allowed_currencies)])
 }
 
 # ---------------------------------------------------------------------------
@@ -498,15 +542,21 @@ violations contains msg if {
 	)
 }
 
+# Shape-gated on message.contract: catalogs have no buyer yet, so this
+# fail-closed rule must never fire at publish.
 violations contains msg if {
 	_env.enforce_allowlist
+	is_object(_contract)
 	not _buyer_discom_id
 	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
 }
 
 _required_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 
+# Shape-gated on contractAttributes: role completeness is a trade-contract
+# concern; catalogs carry no roles array.
 violations contains msg if {
+	is_object(_contract_attrs)
 	some role in _required_roles
 	not role in _roles
 	msg := sprintf("missing required role %q in contractAttributes.roles", [role])

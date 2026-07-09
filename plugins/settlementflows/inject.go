@@ -41,6 +41,51 @@ func ExtractPolicyRef(body []byte) *PolicyRef {
 	return &PolicyRef{URL: url, QueryPath: qp}
 }
 
+// ExtractCatalogPolicyRefs reads the per-offer policy references from a
+// catalog-publish payload: message.catalogs[].offers[].offerAttributes
+// .contractAttributes.policy. Returns the deduplicated refs (a catalog may
+// carry many offers all pointing at the same discom policy).
+func ExtractCatalogPolicyRefs(body []byte) []*PolicyRef {
+	var envelope struct {
+		Message struct {
+			Catalogs []struct {
+				Offers []struct {
+					OfferAttributes struct {
+						ContractAttributes struct {
+							Policy struct {
+								URL       string `json:"url"`
+								QueryPath string `json:"queryPath"`
+							} `json:"policy"`
+						} `json:"contractAttributes"`
+					} `json:"offerAttributes"`
+				} `json:"offers"`
+			} `json:"catalogs"`
+		} `json:"message"`
+	}
+
+	if err := json.Unmarshal(body, &envelope); err != nil {
+		return nil
+	}
+
+	var refs []*PolicyRef
+	seen := map[string]bool{}
+	for _, c := range envelope.Message.Catalogs {
+		for _, o := range c.Offers {
+			p := o.OfferAttributes.ContractAttributes.Policy
+			if p.URL == "" || p.QueryPath == "" {
+				continue
+			}
+			key := p.URL + "\x00" + p.QueryPath
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			refs = append(refs, &PolicyRef{URL: p.URL, QueryPath: p.QueryPath})
+		}
+	}
+	return refs
+}
+
 // ExtractAction reads the beckn action from the URL path or context.action.
 func ExtractAction(urlPath string, body []byte) string {
 	// Try URL path first (e.g., /bpp/caller/on_status → on_status)

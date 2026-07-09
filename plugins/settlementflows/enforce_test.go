@@ -222,6 +222,104 @@ func TestRun_SoftFailure_FetchErrorNotEnforced(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// Catalog publish: per-offer policy refs, compound-action matching
+// ---------------------------------------------------------------------------
+
+// catalogBody builds a two-offer catalog payload; both offers reference the
+// same policy URL (exercising dedupe) and carry the given buyer marker the
+// test policy keys off.
+func catalogBody(policyURL, marker string) []byte {
+	offer := fmt.Sprintf(`{
+		"provider": {"providerAttributes": {"utilityId": "SELLER_DISCOM"}},
+		"offerAttributes": {"contractAttributes": {"policy": {"url": %q, "queryPath": "data.test.policy"}}}
+	}`, policyURL)
+	return []byte(fmt.Sprintf(`{
+		"context": {"action": "catalog/publish"},
+		"message": {
+			"buyerDiscom": %q,
+			"catalogs": [{"offers": [%s, %s]}]
+		}
+	}`, marker, offer, offer))
+}
+
+func TestExtractCatalogPolicyRefs_Dedupes(t *testing.T) {
+	refs := ExtractCatalogPolicyRefs(catalogBody("https://example.com/p.rego", "X"))
+	if len(refs) != 1 {
+		t.Fatalf("expected 1 deduplicated ref, got %d", len(refs))
+	}
+	if refs[0].URL != "https://example.com/p.rego" || refs[0].QueryPath != "data.test.policy" {
+		t.Errorf("unexpected ref: %+v", refs[0])
+	}
+}
+
+func TestMatchesAction_CompoundForms(t *testing.T) {
+	cfg, err := ParseConfig(map[string]string{
+		"actions":          "publish,on_status",
+		"violationActions": "publish",
+		"outputPath":       "x.y",
+		"outputMode":       "raw",
+	})
+	if err != nil {
+		t.Fatalf("ParseConfig: %v", err)
+	}
+	for _, action := range []string{"publish", "catalog/publish"} {
+		if !cfg.IsActionEnabled(action) || !cfg.IsViolationEnforced(action) {
+			t.Errorf("%q should be enabled and enforced", action)
+		}
+	}
+	if cfg.IsViolationEnforced("on_status") {
+		t.Error("on_status must not be enforced")
+	}
+}
+
+func TestRun_PublishNackOnViolations(t *testing.T) {
+	srv := servePolicy(t, enforceTestPolicy)
+	p := newEnforcingPlugin(t, map[string]string{
+		"actions":          "publish,on_status",
+		"violationActions": "publish",
+	})
+
+	body := catalogBody(srv.URL, "BLOCKED_DISCOM")
+	err := p.Run(stepCtx(t, "catalog/publish", body))
+	if err == nil {
+		t.Fatal("expected NACK: catalog policy violation on enforced publish")
+	}
+	var badReq *model.BadReqErr
+	if !errors.As(err, &badReq) {
+		t.Errorf("expected *model.BadReqErr, got %T: %v", err, err)
+	}
+}
+
+func TestRun_PublishCleanCatalogPasses(t *testing.T) {
+	srv := servePolicy(t, enforceTestPolicy)
+	p := newEnforcingPlugin(t, map[string]string{
+		"actions":          "publish,on_status",
+		"violationActions": "publish",
+	})
+
+	if err := p.Run(stepCtx(t, "catalog/publish", catalogBody(srv.URL, "ALLOWED_DISCOM"))); err != nil {
+		t.Fatalf("clean catalog must pass, got: %v", err)
+	}
+}
+
+func TestRun_PublishFailClosed_NoOfferPolicy(t *testing.T) {
+	p := newEnforcingPlugin(t, map[string]string{
+		"actions":          "publish,on_status",
+		"violationActions": "publish",
+	})
+
+	body := []byte(`{"context":{"action":"catalog/publish"},"message":{"catalogs":[{"offers":[{"id":"o1"}]}]}}`)
+	err := p.Run(stepCtx(t, "catalog/publish", body))
+	if err == nil {
+		t.Fatal("expected NACK: enforced publish without any offer policy ref")
+	}
+	var badReq *model.BadReqErr
+	if !errors.As(err, &badReq) {
+		t.Errorf("expected *model.BadReqErr, got %T: %v", err, err)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // extractViolations
 // ---------------------------------------------------------------------------
 

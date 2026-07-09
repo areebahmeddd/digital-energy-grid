@@ -1,0 +1,42 @@
+{
+  "context": {
+    "action": "catalog/publish",
+    "networkId": "nfh.global/testnet-deg"
+  },
+  "message": {
+    "catalogs": [
+      {
+        "offers": [
+          {
+            "id": "offer-solar-001",
+            "provider": {
+              "providerAttributes": {
+                "utilityId": "OTHER_DISCOM"
+              }
+            },
+            "offerAttributes": {
+              "contractAttributes": {
+                "policy": {
+                  "url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/example-discom-policy-v1",
+                  "queryPath": "data.deg.contracts.p2p_trading"
+                }
+              },
+              "commitmentAttributes": {
+                "payloadDescriptors": [
+                  {
+                    "payloadType": "PRICE_PER_KWH",
+                    "currency": "INR"
+                  },
+                  {
+                    "payloadType": "AVAILABLE_QTY",
+                    "units": "KWH"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

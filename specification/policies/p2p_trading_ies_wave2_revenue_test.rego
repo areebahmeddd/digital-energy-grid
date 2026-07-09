@@ -182,6 +182,71 @@ test_missing_ledger_url_is_violation if {
 }
 
 # ---------------------------------------------------------------------------
+# Catalog publish (message.catalogs shape)
+# ---------------------------------------------------------------------------
+
+_catalog_offer(provider_utility, ccy) := {
+	"id": "offer-1",
+	"provider": {"providerAttributes": {"utilityId": provider_utility}},
+	"offerAttributes": {
+		"contractAttributes": {"policy": {
+			"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/x",
+			"queryPath": "data.deg.contracts.p2p_trading",
+		}},
+		"commitmentAttributes": {"payloadDescriptors": [
+			{"payloadType": "PRICE_PER_KWH", "currency": ccy},
+			{"payloadType": "AVAILABLE_QTY", "units": "KWH"},
+		]},
+	},
+}
+
+_catalog_input(provider_utility, ccy) := {
+	"context": {"action": "catalog/publish", "networkId": "nfh.global/testnet-deg"},
+	"message": {"catalogs": [{"offers": [_catalog_offer(provider_utility, ccy)]}]},
+}
+
+# The crucial regression guard: a clean catalog must produce ZERO violations
+# — no buyer-allowlist, roles-completeness, or ledger rules may leak into
+# the catalog shape.
+test_publish_clean_catalog_no_violations if {
+	count(violations) == 0 with input as _catalog_input("TEST_DISCOM_SELLER", "INR")
+}
+
+test_publish_inapplicable_provider_is_violation if {
+	vs := violations with input as _catalog_input("OTHER_DISCOM", "INR")
+	count(vs) == 1
+	some msg in vs
+	contains(msg, "does not apply to seller discom \"OTHER_DISCOM\"")
+}
+
+test_publish_wrong_currency_is_violation if {
+	vs := violations with input as _catalog_input("TEST_DISCOM_SELLER", "EUR")
+	count(vs) == 1
+	some msg in vs
+	contains(msg, "settlement currency \"EUR\" is not permitted")
+}
+
+test_publish_offer_missing_provider_is_violation if {
+	inp := json.remove(
+		_catalog_input("TEST_DISCOM_SELLER", "INR"),
+		["/message/catalogs/0/offers/0/provider"],
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "cannot verify policy applicability")
+}
+
+test_publish_unknown_network_is_violation if {
+	inp := json.patch(
+		_catalog_input("TEST_DISCOM_SELLER", "INR"),
+		[{"op": "replace", "path": "/context/networkId", "value": "rogue.example/net"}],
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "not a recognized IES P2P trading network")
+}
+
+# ---------------------------------------------------------------------------
 # Policy applicability (seller discom) + settlement currency
 # ---------------------------------------------------------------------------
 

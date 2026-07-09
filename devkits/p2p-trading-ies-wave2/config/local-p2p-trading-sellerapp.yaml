@@ -261,12 +261,17 @@ modules:
               role: bpp
         steps:
           # First step: injects settlement flows so validateSchema sees the
-          # enriched payload and sign signs it.
+          # enriched payload and sign signs it. Also self-protects publishes:
+          # each catalog offer's linked seller-discom policy is evaluated
+          # (applicability, currency, network membership) and a violating
+          # catalog is NACKed before it reaches the fabric. "publish" matches
+          # the compound "catalog/publish" action.
           - id: settlementflows
             config:
-              actions: "on_status"
-              # Injection-only instance: violations are logged, never NACKed.
-              violationActions: ""
+              actions: "publish,on_status"
+              # Enforce on publish (block bad catalogs at the source);
+              # on_status stays injection-only with violations logged.
+              violationActions: "publish"
               cacheTTL: "172800"
               debugLogging: "true"
               # Only India Energy Stack policy records on DeDi are accepted.

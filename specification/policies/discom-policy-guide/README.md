@@ -19,6 +19,8 @@ discom-policy-guide/
     ├── init-bad-ledger-url.json           → unrecognized discom ledger (NACK)
     ├── init-policy-not-applicable.json    → seller discom not covered (NACK)
     ├── init-wrong-currency.json           → non-INR pricing (NACK)
+    ├── publish-allowed.json               → clean catalog publish, no violations
+    ├── publish-blocked-provider.json      → catalog by uncovered discom (NACK)
     └── on-status-settled.json             → 4 itemized net-zero revenue flows
 ```
 
@@ -92,8 +94,15 @@ controlled per pipeline in the adapter YAML:
 
 | Mode | Config | Behavior |
 |---|---|---|
-| Enforcement | `violationActions: "select,init,confirm"` | Non-empty `violations` → synchronous **400 NACK**; fail-closed (missing/unfetchable policy also NACKs) |
+| Enforcement (trades) | `violationActions: "select,init,confirm"` (receiver) | Non-empty `violations` → synchronous **400 NACK**; fail-closed (missing/unfetchable policy also NACKs) |
+| Enforcement (publish) | `violationActions: "publish"` (caller; matches the compound `catalog/publish`) | Seller-side self-protection: every catalog offer's linked policy is evaluated (applicability, currency, network membership) and a violating catalog is NACKed **before it reaches the fabric** — catching a wrongly-linked policy at publish stops every downstream trade failing one by one |
 | Injection | `violationActions: ""` | On `on_status`, once settled intervals exist, `revenue_flows` is written into the payload; violations are only logged |
+
+The policy is evaluated against **two message shapes** — trade contracts
+(`message.contract`) and catalog publishes (`message.catalogs[].offers[]`).
+The template handles both with shape-agnostic sets (see the "Shape-agnostic
+sets" block in the example policy): buyer-specific rules are shape-gated so
+they can never fire at publish, where no buyer exists yet.
 
 See the wave2 sellerapp config
 ([`devkits/p2p-trading-ies-wave2/config/local-p2p-trading-sellerapp.yaml`](../../../devkits/p2p-trading-ies-wave2/config/local-p2p-trading-sellerapp.yaml))
@@ -163,6 +172,8 @@ suite that evaluates the policy against every payload in
 | `init-bad-ledger-url.json` | Discom participants recording against an unrecognized ledger endpoint | violation `"... not a permitted ledger endpoint ..."` → NACK |
 | `init-policy-not-applicable.json` | Seller discom not in `applicable_seller_discoms` (wrong policy linked) | violation `"this policy does not apply to seller discom ..."` → NACK |
 | `init-wrong-currency.json` | `PRICE_PER_KWH` priced in EUR | violation `"settlement currency \"EUR\" is not permitted ..."` → NACK |
+| `publish-allowed.json` | Clean catalog publish (applicable provider, INR) | `violations == []`, nothing injected |
+| `publish-blocked-provider.json` | Catalog offer from a discom this policy doesn't cover | violation `"this policy does not apply to seller discom ..."` → NACK at publish |
 | `on-status-settled.json` | Settled interval (20 of 20.5 kWh @ 12.5 INR) | `violations == []`, 4 itemized flows, values sum to 0 |
 
 Expected output:
@@ -520,6 +531,7 @@ enforced actions (select/init/confirm) that rejection is itself a NACK.
 - [ ] Own utilityId present in every environment's allowlist (intra-discom trades allowed)
 - [ ] Prospective (not-yet-regulated) partners only in the **test** environment's allowlist
 - [ ] No environment-specific rule forks — rules read settings via `_env` only
+- [ ] No shape-specific rule forks — shared facts collected via shape-agnostic sets; buyer/roles rules shape-gated so a clean catalog publish yields zero violations
 - [ ] `./validate-policy.sh my-discom-policy.rego` — all checks pass
 - [ ] Unit tests next to the policy (`<policy>_test.rego`), `opa test` green
 - [ ] Every rule class action-gated, guard as the first body expression

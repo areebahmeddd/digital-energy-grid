@@ -104,6 +104,14 @@ assert_ok = any("does not apply to seller discom" in v for v in violations)'
 assert "non-INR currency: violation" "init-wrong-currency.json" '
 assert_ok = any("currency \"EUR\" is not permitted" in v for v in violations)'
 
+# Clean catalog publish: applicable provider, INR pricing → no violations.
+assert "allowed publish: no violations" "publish-allowed.json" '
+assert_ok = (violations == [] and flows is None)'
+
+# Catalog offer from a discom this policy does not apply to: blocked at source.
+assert "publish by inapplicable provider" "publish-blocked-provider.json" '
+assert_ok = any("does not apply to seller discom" in v for v in violations)'
+
 # Settled on_status: clean, four flows, net-zero.
 assert "settled: 4 itemized flows, net-zero" "on-status-settled.json" '
 assert_ok = (violations == [] and flows is not None and len(flows) == 4

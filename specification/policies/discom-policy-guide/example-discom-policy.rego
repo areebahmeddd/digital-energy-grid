@@ -165,20 +165,46 @@ _currency := c if {
 	c := d.currency
 }
 
-# The buyer prosumer's discom: utilityId of the buyerPlatform participant.
-# This is the value checked against the active allowlist.
-_buyer_discom_id := id if {
+# ── Shape-agnostic sets ──
+# The policy is evaluated against TWO message shapes: trade contracts
+# (message.contract, at select/init/confirm/on_status) and catalog
+# publishes (message.catalogs[].offers[], at publish). Rather than forking
+# rules per shape, collect the facts into SETS with one shape-gated
+# contributor each — the shape that isn't present simply contributes
+# nothing, and the violation rules stay shape-agnostic (same trick as the
+# environments map, applied to input shape).
+
+# Every currency the message prices energy in.
+_currencies contains c if c := _currency # trade shape
+
+_currencies contains c if { # catalog shape: each offer's price currency
+	some cat in input.message.catalogs
+	some o in cat.offers
+	some d in o.offerAttributes.commitmentAttributes.payloadDescriptors
+	d.payloadType == "PRICE_PER_KWH"
+	c := d.currency
+}
+
+# Every selling prosumer's discom. Checked against
+# _env.applicable_seller_discoms — this policy must actually be the policy
+# of the discom whose prosumer is selling.
+_seller_discom_ids contains id if { # trade shape: sellerPlatform participant
 	some p in _contract.participants
-	p.role == "buyerPlatform"
+	p.role == "sellerPlatform"
 	id := p.participantAttributes.utilityId
 }
 
-# The seller prosumer's discom: utilityId of the sellerPlatform participant.
-# Checked against _env.applicable_seller_discoms — this policy must actually
-# be the policy of the discom whose prosumer is selling.
-_seller_discom_id := id if {
+_seller_discom_ids contains id if { # catalog shape: each offer's provider
+	some c in input.message.catalogs
+	some o in c.offers
+	id := o.provider.providerAttributes.utilityId
+}
+
+# The buyer prosumer's discom: utilityId of the buyerPlatform participant.
+# Trade-shaped only — catalogs have no buyer yet.
+_buyer_discom_id := id if {
 	some p in _contract.participants
-	p.role == "sellerPlatform"
+	p.role == "buyerPlatform"
 	id := p.participantAttributes.utilityId
 }
 
@@ -237,25 +263,39 @@ violations contains msg if {
 }
 
 # POLICY APPLICABILITY: this policy declared upfront which discoms it
-# applies to (applicable_seller_discoms). If the selling prosumer's discom
-# is not one of them, the catalog publisher linked the wrong policy — block
-# the trade rather than judge it under rules that don't govern it.
+# applies to (applicable_seller_discoms). If a selling prosumer's discom is
+# not one of them, the catalog publisher linked the wrong policy — block the
+# message rather than judge it under rules that don't govern it. ONE rule
+# covers trades and catalogs because _seller_discom_ids is shape-agnostic.
 violations contains msg if {
-	_seller_discom_id
-	not _seller_discom_id in _env.applicable_seller_discoms
+	some id in _seller_discom_ids
+	not id in _env.applicable_seller_discoms
 	msg := sprintf(
 		"this policy does not apply to seller discom %q (applies to: %v on the %s network)",
-		[_seller_discom_id, sort(_env.applicable_seller_discoms), _environment],
+		[id, sort(_env.applicable_seller_discoms), _environment],
 	)
 }
 
-# Fail-closed twin: no identifiable seller discom → cannot confirm the
-# policy applies → block. (Guarded on _env so it cannot double-report on
-# unknown networks — the membership violation already covers those.)
+# Fail-closed twins, one per shape — each guarded by its own shape so a
+# catalog is never judged by the trade rule and vice versa. (Also guarded on
+# _env so they cannot double-report on unknown networks — the membership
+# violation already covers those.)
 violations contains msg if {
 	_env
-	not _seller_discom_id
+	is_object(_contract) # trade-shaped message
+	count(_seller_discom_ids) == 0
 	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+}
+
+violations contains msg if {
+	_env
+	some c in input.message.catalogs # catalog-shaped message
+	some o in c.offers
+	not o.provider.providerAttributes.utilityId
+	msg := sprintf(
+		"catalog offer %q has no provider.providerAttributes.utilityId — cannot verify policy applicability",
+		[object.get(o, "id", "<no id>")],
+	)
 }
 
 # DISCOM LEDGER ENDPOINTS: both discoms record the trade against a ledger;
@@ -286,14 +326,14 @@ violations contains msg if {
 	msg := sprintf("%s participant is missing participantAttributes.ledgerUrl", [p.role])
 }
 
-# SETTLEMENT CURRENCY: prices must be in a permitted currency. Gated on
-# _currency being present (data-shape gate, see README 6.2): fires only when
-# the payload actually declares a PRICE_PER_KWH currency, so payloads
-# without commitment timeseries are not falsely flagged.
+# SETTLEMENT CURRENCY: prices must be in a permitted currency. The
+# shape-agnostic _currencies set only contains values the payload actually
+# declares (data-shape gate, see README 6.2), so messages without pricing
+# are not falsely flagged — and one rule covers trades and catalogs.
 violations contains msg if {
-	_currency
-	not _currency in allowed_currencies
-	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [_currency, sort(allowed_currencies)])
+	some c in _currencies
+	not c in allowed_currencies
+	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [c, sort(allowed_currencies)])
 }
 
 # THE ALLOWLIST RULE — one rule, every environment. It never mentions "test"
@@ -314,17 +354,24 @@ violations contains msg if {
 # Fail-closed on missing data: if we cannot tell who the buyer's discom is,
 # we cannot apply the allowlist — block the trade rather than guess. Also
 # behind the per-environment switch: with the allowlist off, a missing buyer
-# discom is no longer a reason to block.
+# discom is no longer a reason to block. Shape-gated on message.contract:
+# catalogs have no buyer yet, so this must never fire at publish.
 violations contains msg if {
 	_env.enforce_allowlist
+	is_object(_contract)
 	not _buyer_discom_id
 	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
 }
 
 # Contract completeness: all four settlement roles must be declared up front.
+# Shape-gated on contractAttributes existing — role completeness is a
+# trade-contract concern; catalogs carry no roles array. (Without the guard,
+# the comprehension over the missing array would be EMPTY — not undefined —
+# and all four roles would be reported "missing" on every publish.)
 _required_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 
 violations contains msg if {
+	is_object(_contract.contractAttributes)
 	some role in _required_roles
 	not role in {r.role | some r in _contract.contractAttributes.roles}
 	msg := sprintf("missing required role %q in contractAttributes.roles", [role])
