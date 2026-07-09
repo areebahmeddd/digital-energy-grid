@@ -1,0 +1,33 @@
+{
+  "context": {"action": "init", "networkId": "nfh.global/testnet-deg"},
+  "message": {
+    "contract": {
+      "contractAttributes": {
+        "roles": [
+          {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
+          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
+          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
+        ]
+      },
+      "participants": [
+        {"role": "sellerPlatform", "participantAttributes": {"utilityId": "TEST_DISCOM_SELLER"}},
+        {"role": "buyerPlatform", "participantAttributes": {"utilityId": "TEST_DISCOM_BUYER"}}
+      ],
+      "commitments": [
+        {
+          "id": "commitment-example-001",
+          "commitmentAttributes": {
+            "payloadDescriptors": [
+              {"payloadType": "PRICE_PER_KWH", "currency": "INR"},
+              {"payloadType": "REQUESTED_QTY", "units": "KWH"}
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "PRICE_PER_KWH", "values": [12.5]}, {"type": "REQUESTED_QTY", "values": [20.5]}]}
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

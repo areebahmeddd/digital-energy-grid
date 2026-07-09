@@ -48,14 +48,17 @@ _ts(intervals) := {
 	"intervals": intervals,
 }
 
-_input(action, buyer_utility, intervals) := {
-	"context": {"action": action},
+_input_on(action, network_id, buyer_utility, intervals) := {
+	"context": {"action": action, "networkId": network_id},
 	"message": {"contract": {
 		"contractAttributes": {"roles": _all_roles},
 		"participants": _participants(buyer_utility),
 		"commitments": [{"id": "commitment-p2p-001", "commitmentAttributes": _ts(intervals)}],
 	}},
 }
+
+# Default test-network input.
+_input(action, buyer_utility, intervals) := _input_on(action, "nfh.global/testnet-deg", buyer_utility, intervals)
 
 # ---------------------------------------------------------------------------
 # Allowlist
@@ -75,6 +78,60 @@ test_blocked_buyer_discom_violation_at_init if {
 	some msg in vs
 	contains(msg, "TEST_DISCOM_OUTSIDER")
 	contains(msg, "not allowed to trade")
+}
+
+test_allowlist_disabled_lets_outsider_through if {
+	inp := _input("init", "TEST_DISCOM_OUTSIDER", [_iv_pre(0, 12.5, 20)])
+	count(violations) == 0 with input as inp with enforce_allowlist as false
+}
+
+test_allowlist_disabled_skips_missing_buyer_discom_check if {
+	inp := json.remove(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		["/message/contract/participants"],
+	)
+	count(violations) == 0 with input as inp with enforce_allowlist as false
+}
+
+# ---------------------------------------------------------------------------
+# Network membership + per-environment allowlists
+# ---------------------------------------------------------------------------
+
+test_unknown_network_is_violation if {
+	inp := _input_on("init", "rogue.example/some-network", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "not a recognized IES P2P trading network")
+}
+
+test_missing_network_id_is_violation if {
+	inp := json.remove(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		["/context/networkId"],
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "context.networkId is missing")
+}
+
+test_prod_network_uses_prod_allowlist if {
+	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "BRPL", [_iv_pre(0, 12.5, 20)])
+	count(violations) == 0 with input as inp
+}
+
+test_test_only_partner_blocked_on_prod_network if {
+	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as inp
+	count(vs) == 1
+	some msg in vs
+	contains(msg, "on the production network")
+}
+
+test_prod_partner_not_in_test_allowlist_blocked_on_test_network if {
+	inp := _input("init", "BRPL", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "on the test network")
 }
 
 test_missing_buyer_discom_is_violation if {
