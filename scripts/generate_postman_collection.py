@@ -131,7 +131,10 @@ DEVKIT_CONFIGS = {
         "structure": "flat"  # Flat file structure (like p2p-trading)
     },
     "demand-flex": {
-        "domain": "beckn.one:deg:demand-flex:2.0.0",
+        # {{domain}} substitutes context.networkId (and publishDirectives
+        # visibleTo[0]) in v2 LTS payloads — it must hold the network id,
+        # not the legacy beckn domain string.
+        "domain": "nfh.global/testnet-deg",
         "bap_id": "bap.example.com",
         "bap_host_root": "http://beckn-router:9000",
         "bpp_id": "bpp.example.com",
