@@ -13,7 +13,9 @@ type Config struct {
 	Enabled bool
 
 	// Actions is the list of beckn actions that trigger settlement flow computation.
-	// Default: ["on_status"]
+	// Entries match the message action exactly OR the final segment of a
+	// compound action — "publish" matches both "publish" and
+	// "catalog/publish". Default: ["on_status"]
 	Actions []string
 
 	// ViolationActions is the subset of Actions on which policy violations
@@ -283,25 +285,31 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 	return config, nil
 }
 
-// IsActionEnabled checks if the given action is in the configured list.
-func (c *Config) IsActionEnabled(action string) bool {
-	for _, a := range c.Actions {
-		if a == action {
+// matchesAction reports whether the action is in the list. A list entry
+// matches the action exactly or its final compound segment, so "publish"
+// covers the compound "catalog/publish" form.
+func matchesAction(list []string, action string) bool {
+	last := action
+	if i := strings.LastIndex(action, "/"); i >= 0 {
+		last = action[i+1:]
+	}
+	for _, a := range list {
+		if a == action || a == last {
 			return true
 		}
 	}
 	return false
 }
 
+// IsActionEnabled checks if the given action is in the configured list.
+func (c *Config) IsActionEnabled(action string) bool {
+	return matchesAction(c.Actions, action)
+}
+
 // IsViolationEnforced reports whether policy violations must block the
 // message (NACK) for the given action.
 func (c *Config) IsViolationEnforced(action string) bool {
-	for _, a := range c.ViolationActions {
-		if a == action {
-			return true
-		}
-	}
-	return false
+	return matchesAction(c.ViolationActions, action)
 }
 
 // IsPolicyURLAllowed checks if the policy URL starts with one of the

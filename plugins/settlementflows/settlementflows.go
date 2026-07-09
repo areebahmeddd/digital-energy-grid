@@ -2,10 +2,12 @@
 // from a rego policy referenced by the contract and injects them into the message.
 //
 // It reads the policy URL and query path from
-// message.contract.contractAttributes.policy, resolves the rego source (the
-// URL may serve a bare .rego file or a DeDi public-dataset record pointing
-// at one — see source.go), evaluates it against the full message, and writes
-// the resulting flows at the configured outputPath.
+// message.contract.contractAttributes.policy (trade-shaped messages) or from
+// each offer's offerAttributes.contractAttributes.policy (catalog publishes),
+// resolves the rego source (the URL may serve a bare .rego file or a DeDi
+// public-dataset record pointing at one — see source.go), evaluates it
+// against the full message, and writes the resulting flows at the configured
+// outputPath.
 //
 // Besides revenue flows, the policy may export a `violations` set (error
 // strings). On actions listed in violationActions the step ENFORCES the
@@ -72,44 +74,28 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 	// the policy fetch.
 	enforced := rf.config.IsViolationEnforced(action)
 
-	// Extract policy reference from the message
-	ref := ExtractPolicyRef(ctx.Body)
-	if ref == nil {
+	// Collect policy references. Trade-shaped messages carry exactly one at
+	// message.contract.contractAttributes.policy; catalog publishes carry
+	// one per offer at message.catalogs[].offers[].offerAttributes
+	// .contractAttributes.policy (deduplicated).
+	var refs []*PolicyRef
+	if ref := ExtractPolicyRef(ctx.Body); ref != nil {
+		refs = append(refs, ref)
+	} else {
+		refs = ExtractCatalogPolicyRefs(ctx.Body)
+	}
+	if len(refs) == 0 {
 		if enforced {
 			return model.NewBadReqErr(fmt.Errorf(
-				"settlementflows: action %q requires a contractAttributes.policy reference", action))
+				"settlementflows: action %q requires a policy reference (contractAttributes.policy or per-offer offerAttributes.contractAttributes.policy)", action))
 		}
 		if rf.config.DebugLogging {
-			log.Debug(ctx, "SettlementFlows: no contractAttributes.policy in message, skipping")
+			log.Debug(ctx, "SettlementFlows: no policy reference in message, skipping")
 		}
 		return nil
 	}
 
-	// Check URL-prefix allowlist
-	if !rf.config.IsPolicyURLAllowed(ref.URL) {
-		if enforced {
-			return model.NewBadReqErr(fmt.Errorf(
-				"settlementflows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL))
-		}
-		log.Warnf(ctx, "SettlementFlows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL)
-		return nil
-	}
-
-	if rf.config.DebugLogging {
-		log.Debugf(ctx, "SettlementFlows: evaluating %s with query %s", ref.URL, ref.QueryPath)
-	}
-
-	// Get or compile the policy
-	pq, err := rf.cache.GetOrCompile(context.Background(), ref.URL, ref.QueryPath)
-	if err != nil {
-		if enforced {
-			return fmt.Errorf("settlementflows: failed to load policy %s: %w", ref.URL, err)
-		}
-		log.Warnf(ctx, "SettlementFlows: failed to load policy: %v", err)
-		return nil // soft failure
-	}
-
-	// Parse message as OPA input
+	// Parse message as OPA input (once; shared by every policy evaluation).
 	var input interface{}
 	if err := json.Unmarshal(ctx.Body, &input); err != nil {
 		if enforced {
@@ -119,18 +105,54 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 		return nil
 	}
 
-	// Evaluate
-	rs, err := pq.Eval(context.Background(), rego.EvalInput(input))
-	if err != nil {
-		if enforced {
-			return fmt.Errorf("settlementflows: rego evaluation of %s failed: %w", ref.URL, err)
+	// Evaluate every referenced policy; violations accumulate across
+	// policies, flows come from the first policy that yields them (trade
+	// messages have a single ref anyway).
+	var violations []string
+	var flows []interface{}
+	for _, ref := range refs {
+		// Check URL-prefix allowlist
+		if !rf.config.IsPolicyURLAllowed(ref.URL) {
+			if enforced {
+				return model.NewBadReqErr(fmt.Errorf(
+					"settlementflows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL))
+			}
+			log.Warnf(ctx, "SettlementFlows: policy URL does not match allowedPolicyUrlPrefixes: %s", ref.URL)
+			continue
 		}
-		log.Warnf(ctx, "SettlementFlows: rego evaluation failed: %v", err)
-		return nil // soft failure
+
+		if rf.config.DebugLogging {
+			log.Debugf(ctx, "SettlementFlows: evaluating %s with query %s", ref.URL, ref.QueryPath)
+		}
+
+		// Get or compile the policy
+		pq, err := rf.cache.GetOrCompile(context.Background(), ref.URL, ref.QueryPath)
+		if err != nil {
+			if enforced {
+				return fmt.Errorf("settlementflows: failed to load policy %s: %w", ref.URL, err)
+			}
+			log.Warnf(ctx, "SettlementFlows: failed to load policy: %v", err)
+			continue // soft failure
+		}
+
+		// Evaluate
+		rs, err := pq.Eval(context.Background(), rego.EvalInput(input))
+		if err != nil {
+			if enforced {
+				return fmt.Errorf("settlementflows: rego evaluation of %s failed: %w", ref.URL, err)
+			}
+			log.Warnf(ctx, "SettlementFlows: rego evaluation failed: %v", err)
+			continue // soft failure
+		}
+
+		violations = append(violations, extractViolations(rs)...)
+		if flows == nil {
+			flows = extractFlows(rs)
+		}
 	}
 
 	// Violations gate delivery on enforced actions.
-	if violations := extractViolations(rs); len(violations) > 0 {
+	if len(violations) > 0 {
 		if enforced {
 			log.Warnf(ctx, "SettlementFlows: NACKing %s — %d policy violation(s): %s",
 				action, len(violations), strings.Join(violations, "; "))
@@ -140,9 +162,6 @@ func (rf *SettlementFlows) Run(ctx *model.StepContext) error {
 		log.Warnf(ctx, "SettlementFlows: %d policy violation(s) on %s (not enforced): %s",
 			len(violations), action, strings.Join(violations, "; "))
 	}
-
-	// Extract revenue_flows from result
-	flows := extractFlows(rs)
 	if flows == nil {
 		if rf.config.DebugLogging {
 			log.Debug(ctx, "SettlementFlows: no revenue_flows in rego result, skipping injection")

@@ -10,10 +10,27 @@
 #
 #   1. VIOLATIONS — trading rules the discom enforces. The onix
 #      settlementflows step NACKs any action listed in its
-#      violationActions config (select/init/confirm in wave2) when the
-#      `violations` set is non-empty. Today that covers:
-#        - counterpart allowlist: the buyer's discom must be in
-#          allowed_buyer_discoms;
+#      violationActions config (select/init/confirm on the seller receiver,
+#      publish on the seller caller in wave2) when the `violations` set is
+#      non-empty. The rules cover BOTH message shapes — trade contracts
+#      (message.contract) and catalog publishes (message.catalogs[].offers[])
+#      — via shape-agnostic sets; catching a bad catalog at publish stops
+#      every downstream trade from failing one by one. Today that covers:
+#        - network membership: context.networkId must be a recognized IES
+#          P2P trading network (test or production);
+#        - policy applicability: every selling prosumer's discom (trade
+#          participant or catalog offer provider) must be one of the discoms
+#          this policy is declared to apply to (applicable_seller_discoms,
+#          per environment);
+#        - settlement currency: every declared PRICE_PER_KWH currency must
+#          be in allowed_currencies (INR);
+#        - discom ledger endpoints: buyerDiscom and sellerDiscom must record
+#          against a recognized ledger (allowed_ledger_urls, per
+#          environment; production = the canonical IES P2P energy ledger
+#          https://ies-p2p-energy-ledger.beckn.io);
+#        - counterpart allowlist (when the environment's enforce_allowlist
+#          is true): the buyer's discom must be in the allowlist of the
+#          environment the networkId selects (test vs production);
 #        - contract completeness (required roles present);
 #        - settlement integrity checks (on_status only).
 #
@@ -25,8 +42,27 @@
 #        buyerDiscom  (regulated LP for buyer's discom)    → receives → positive (wheeling)
 #        sellerDiscom (regulated LP for seller's discom)   → receives → positive (wheeling + penalty)
 #
-# Discom-tunable knobs (edit these when authoring your discom's policy):
-#   allowed_buyer_discoms         — utilityIds whose customers may buy here
+# Discom-tunable knobs — ALL of them live together in the "Discom
+# parameters" section right below the package line; nothing after that
+# section needs editing:
+#   environments                  — ONE map holding everything that differs
+#                                   between test and production: the
+#                                   networkIds that select the environment,
+#                                   the discoms this policy applies to
+#                                   (applicable_seller_discoms), a
+#                                   per-environment enforce_allowlist switch,
+#                                   the per-environment counterpart
+#                                   allowlist, and the permitted discom
+#                                   ledger endpoints (allowed_ledger_urls).
+#                                   All rules are environment-
+#                                   agnostic and read their settings through
+#                                   this map — the test network can pilot
+#                                   partners not yet permitted in production
+#                                   without any rule diverging. A networkId
+#                                   outside every environment is a violation
+#                                   → NACK.
+#   allowed_currencies            — permitted settlement currency (INR); any
+#                                   other PRICE_PER_KWH currency → NACK
 #   wheeling_charge_buyer_per_kwh — INR/kWh charged to the buyer side
 #   wheeling_charge_seller_per_kwh— INR/kWh charged to the seller side
 #   penalty_rate_per_kwh          — INR/kWh on delivery shortfall
@@ -66,16 +102,82 @@ package deg.contracts.p2p_trading
 import rego.v1
 
 # ---------------------------------------------------------------------------
-# Discom parameters — the knobs a discom edits when authoring its policy
+# Discom parameters — EVERY constant a discom edits lives in this section.
+# Everything after the end-of-parameters line is shared mechanics: if you
+# find yourself editing a rule body, the change probably belongs here as
+# data instead.
 # ---------------------------------------------------------------------------
 
-# utilityIds of discoms whose customers may buy energy from this discom's
-# prosumers. A buyer from any other discom is a violation → NACK at
-# select/init/confirm.
-allowed_buyer_discoms := {
-	"TEST_DISCOM_SELLER", # intra-discom trades always allowed
-	"TEST_DISCOM_BUYER",
+# Everything environment-specific lives in this ONE map; every rule below is
+# environment-agnostic and reads its settings through `_env`. To change how
+# an environment behaves, edit its entry here — never fork a rule per
+# environment.
+#
+# Per-environment settings:
+#   network_ids           — context.networkId values that select this
+#                           environment. Sets MUST be disjoint across
+#                           environments (a networkId in two entries would
+#                           make environment resolution ambiguous).
+#   applicable_seller_discoms — the discoms this policy APPLIES TO, declared
+#                           upfront: utilityIds of every discom that shares
+#                           this policy as its common seller-discom policy.
+#                           A trade whose selling prosumer belongs to any
+#                           other discom is a violation → NACK (the catalog
+#                           publisher linked the wrong policy).
+#   enforce_allowlist     — false switches the counterpart allowlist off for
+#                           THIS environment only; the allowlist rules are
+#                           then never even evaluated for its traffic.
+#   allowed_buyer_discoms — utilityIds whose customers may buy from this
+#                           discom's prosumers in this environment. The test
+#                           list may be broader than production: pilot with a
+#                           prospective partner on the test network before
+#                           the regulator approves them for production.
+#   allowed_ledger_urls   — permitted ledgerUrl values for the buyerDiscom
+#                           and sellerDiscom participants. Both discoms must
+#                           record against a recognized ledger endpoint —
+#                           the canonical IES P2P energy ledger in
+#                           production; the test set additionally lists the
+#                           devkit-local ledger endpoints the compose
+#                           stack's cascade routing uses.
+environments := {
+	"test": {
+		"network_ids": {
+			"nfh.global/testnet-deg",
+			"indiaenergystack.in/test-ies-p2p-trading-network",
+		},
+		"applicable_seller_discoms": {"TEST_DISCOM_SELLER"},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"TEST_DISCOM_SELLER", # intra-discom trades always allowed
+			"TEST_DISCOM_BUYER",
+		},
+		"allowed_ledger_urls": {
+			"https://ies-p2p-energy-ledger.beckn.io",
+			# devkit-local ledger endpoints (degledgerrecorder cascade targets)
+			"http://buyer-discom-ledger.example.com:9000",
+			"http://seller-discom-ledger.example.com:9000",
+		},
+	},
+	"production": {
+		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
+		"applicable_seller_discoms": {"TPDDL"},
+		"enforce_allowlist": true,
+		"allowed_buyer_discoms": {
+			"TPDDL", # intra-discom trades always allowed
+			"BRPL",
+			"PVVNL",
+		},
+		"allowed_ledger_urls": {"https://ies-p2p-energy-ledger.beckn.io"},
+	},
 }
+
+# Settlement currency this policy permits. Shared across environments (INR
+# is national); move into the environments map via _env if that ever changes.
+allowed_currencies := {"INR"}
+
+# Charges are shared across environments. If an environment ever needs
+# different rates, move them into the environments map and read them via
+# _env — same pattern as the allowlist, no per-environment rule forks.
 
 # Wheeling charges this discom levies, in currency units per settled kWh.
 wheeling_charge_buyer_per_kwh := 0.25
@@ -88,6 +190,9 @@ penalty_rate_per_kwh := 0.50
 # Ceiling on what the trading platform may retain per kWh from trades under
 # this discom's jurisdiction. Disclosed in the settlement itemization.
 platform_charge_cap_per_kwh := 0.42
+
+# ═══════════════════ END OF DISCOM PARAMETERS ═══════════════════
+# Everything below is mechanics — no discom-specific values past this line.
 
 # ---------------------------------------------------------------------------
 # Input extraction
@@ -103,12 +208,60 @@ _currency := c if {
 	c := d.currency
 }
 
+# Every currency the message prices energy in, as a shape-agnostic SET:
+# trade-shaped messages contribute the commitment currency, catalog
+# publishes contribute each offer's PRICE_PER_KWH currency.
+_currencies contains c if c := _currency
+
+_currencies contains c if {
+	some cat in input.message.catalogs
+	some o in cat.offers
+	some d in o.offerAttributes.commitmentAttributes.payloadDescriptors
+	d.payloadType == "PRICE_PER_KWH"
+	c := d.currency
+}
+
 # The buyer prosumer's discom: utilityId of the buyerPlatform participant.
 _buyer_discom_id := id if {
 	some p in _contract.participants
 	p.role == "buyerPlatform"
 	id := p.participantAttributes.utilityId
 }
+
+# The seller prosumers' discoms, as a SET so the same rules cover both
+# message shapes (each contributor is shape-gated; the other shape simply
+# contributes nothing):
+#   - trade-shaped messages: the sellerPlatform participant's utilityId;
+#   - catalog publishes: each offer's provider.providerAttributes.utilityId.
+# Every id found must be in _env.applicable_seller_discoms — this policy
+# must actually be the policy of the discom whose prosumer is selling.
+_seller_discom_ids contains id if {
+	some p in _contract.participants
+	p.role == "sellerPlatform"
+	id := p.participantAttributes.utilityId
+}
+
+_seller_discom_ids contains id if {
+	some c in input.message.catalogs
+	some o in c.offers
+	id := o.provider.providerAttributes.utilityId
+}
+
+# Environment resolution: context.networkId selects exactly one entry of the
+# environments map; every environment-dependent rule reads settings via
+# `_env`. An unknown networkId matches no entry, leaving _env undefined — so
+# environment-dependent rules simply cannot fire and the (unconditional)
+# membership violation reports the problem instead.
+_network_id := input.context.networkId
+
+_known_network_ids := {net | some env in environments; some net in env.network_ids}
+
+_environment := name if {
+	some name, env in environments
+	_network_id in env.network_ids
+}
+
+_env := environments[_environment]
 
 # ---------------------------------------------------------------------------
 # Timeseries helpers
@@ -273,26 +426,137 @@ _contract_attrs := _contract.contractAttributes
 _roles := {r.role | some r in _contract_attrs.roles}
 
 # ---------------------------------------------------------------------------
-# Violations — trading eligibility (enforced at select/init/confirm)
+# Violations — network membership (all actions; cheap)
 # ---------------------------------------------------------------------------
 
 violations contains msg if {
-	_buyer_discom_id
-	not _buyer_discom_id in allowed_buyer_discoms
+	not _network_id
+	msg := "context.networkId is missing — cannot determine the trading network"
+}
+
+violations contains msg if {
+	_network_id
+	not _network_id in _known_network_ids
 	msg := sprintf(
-		"buyer discom %q is not allowed to trade with this discom's prosumers (allowed: %v)",
-		[_buyer_discom_id, sort(allowed_buyer_discoms)],
+		"networkId %q is not a recognized IES P2P trading network (known: %v)",
+		[_network_id, sort(_known_network_ids)],
+	)
+}
+
+# ---------------------------------------------------------------------------
+# Violations — policy applicability (all environments, both message shapes)
+# ---------------------------------------------------------------------------
+# This policy declares upfront which discoms it applies to
+# (_env.applicable_seller_discoms). If a selling prosumer's discom is not
+# one of them, the catalog publisher linked the wrong policy — block the
+# message rather than judge it under rules that don't govern it. One rule
+# covers trades and catalogs: _seller_discom_ids is shape-agnostic.
+
+violations contains msg if {
+	some id in _seller_discom_ids
+	not id in _env.applicable_seller_discoms
+	msg := sprintf(
+		"this policy does not apply to seller discom %q (applies to: %v on the %s network)",
+		[id, sort(_env.applicable_seller_discoms), _environment],
+	)
+}
+
+# Fail-closed twins, one per shape (each guarded by its shape so a catalog
+# is never judged by the trade rule and vice versa):
+violations contains msg if {
+	_env
+	is_object(_contract) # trade-shaped message
+	count(_seller_discom_ids) == 0
+	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+}
+
+violations contains msg if {
+	_env
+	some c in input.message.catalogs # catalog-shaped message
+	some o in c.offers
+	not o.provider.providerAttributes.utilityId
+	msg := sprintf(
+		"catalog offer %q has no provider.providerAttributes.utilityId — cannot verify policy applicability",
+		[object.get(o, "id", "<no id>")],
+	)
+}
+
+# ---------------------------------------------------------------------------
+# Violations — discom ledger endpoints
+# ---------------------------------------------------------------------------
+# Both discoms record the trade against a ledger; their participants'
+# ledgerUrl must be a recognized endpoint for the environment (the canonical
+# IES P2P energy ledger in production). Shape-gated on the participant being
+# present — participant completeness is the schema/network policy's job.
+
+_discom_ledger_roles := {"buyerDiscom", "sellerDiscom"}
+
+violations contains msg if {
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	url := p.participantAttributes.ledgerUrl
+	not url in _env.allowed_ledger_urls
+	msg := sprintf(
+		"%s ledgerUrl %q is not a permitted ledger endpoint on the %s network (allowed: %v)",
+		[p.role, url, _environment, sort(_env.allowed_ledger_urls)],
 	)
 }
 
 violations contains msg if {
+	_env
+	some p in _contract.participants
+	p.role in _discom_ledger_roles
+	not p.participantAttributes.ledgerUrl
+	msg := sprintf("%s participant is missing participantAttributes.ledgerUrl", [p.role])
+}
+
+# ---------------------------------------------------------------------------
+# Violations — settlement currency (both message shapes)
+# ---------------------------------------------------------------------------
+# _currencies is shape-agnostic (trade commitment currency and/or per-offer
+# catalog currencies) and only contains values the payload actually
+# declares, so messages without pricing are not falsely flagged.
+
+violations contains msg if {
+	some c in _currencies
+	not c in allowed_currencies
+	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [c, sort(allowed_currencies)])
+}
+
+# ---------------------------------------------------------------------------
+# Violations — trading eligibility (enforced at select/init/confirm)
+# ---------------------------------------------------------------------------
+# One rule per check, shared by every environment: the environment only
+# supplies data (via _env), never its own rule variant.
+
+# The per-environment enforce_allowlist switch is the FIRST guard: when the
+# resolved environment has it off, none of the allowlist machinery
+# (buyer-discom extraction, set lookup) is evaluated for its traffic.
+violations contains msg if {
+	_env.enforce_allowlist
+	_buyer_discom_id
+	not _buyer_discom_id in _env.allowed_buyer_discoms
+	msg := sprintf(
+		"buyer discom %q is not allowed to trade with this discom's prosumers on the %s network (allowed: %v)",
+		[_buyer_discom_id, _environment, sort(_env.allowed_buyer_discoms)],
+	)
+}
+
+# Shape-gated on message.contract: catalogs have no buyer yet, so this
+# fail-closed rule must never fire at publish.
+violations contains msg if {
+	_env.enforce_allowlist
+	is_object(_contract)
 	not _buyer_discom_id
 	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
 }
 
 _required_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
 
+# Shape-gated on contractAttributes: role completeness is a trade-contract
+# concern; catalogs carry no roles array.
 violations contains msg if {
+	is_object(_contract_attrs)
 	some role in _required_roles
 	not role in _roles
 	msg := sprintf("missing required role %q in contractAttributes.roles", [role])
