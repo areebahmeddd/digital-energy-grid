@@ -184,6 +184,14 @@ DEVKIT_CONFIGS = {
         "bap_host_root": "http://buyerapp.example.com:9000",
         "bpp_id": "sellerapp.example.com",
         "bpp_host_root": "http://sellerapp.example.com:9000",
+        # Platform identities under their business names — emitted for the
+        # ledger/discom collections too, so contract-body participantId /
+        # platformUrl substitutions resolve in every collection (BUYER/SELLER
+        # already get these via var_names renaming of bap_/bpp_).
+        "buyerplatform_id": "buyerapp.example.com",
+        "buyerplatform_host_root": "http://buyerapp.example.com:9000",
+        "sellerplatform_id": "sellerapp.example.com",
+        "sellerplatform_host_root": "http://sellerapp.example.com:9000",
         "bap_caller_url": "http://localhost:8081/bap/caller",
         "bpp_caller_url": "http://localhost:8082/bpp/caller",
         # Endpoint sellerapp exposes when it initiates a sub-tx (seller-initiated
@@ -1282,6 +1290,16 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         variables.append({"key": "ledger_buyer_discom_id", "value": config["ledger_buyer_discom_id"]})
     if "ledger_seller_discom_id" in config:
         variables.append({"key": "ledger_seller_discom_id", "value": config["ledger_seller_discom_id"]})
+
+    # Trading-platform subscriber IDs / host roots — emitted for every role
+    # that doesn't already define them (BUYER/SELLER get them via var_names
+    # renaming), so contract-body participantId / platformUrl fields can
+    # reference them in ledger/discom collections too.
+    existing_keys = {v["key"] for v in variables}
+    for key in ("buyerplatform_id", "sellerplatform_id",
+                "buyerplatform_host_root", "sellerplatform_host_root"):
+        if key in config and key not in existing_keys:
+            variables.append({"key": key, "value": config[key]})
 
     return variables
 
