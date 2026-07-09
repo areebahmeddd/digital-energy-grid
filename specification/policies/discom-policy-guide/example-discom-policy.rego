@@ -31,8 +31,18 @@ package deg.contracts.p2p_trading
 import rego.v1
 
 # ============================================================================
-# DISCOM PARAMETERS — edit this block; everything below is mechanics
+# DISCOM PARAMETERS — every constant a discom edits lives in THIS section
 # ============================================================================
+# This is the ONLY part of the file you touch when adopting the template:
+#   environments                  — networks, policy applicability, allowlist
+#                                   switch + allowlist, per environment
+#   allowed_currencies            — permitted settlement currency (INR)
+#   wheeling_charge_*_per_kwh     — your wheeling rates
+#   penalty_rate_per_kwh          — your under-delivery penalty rate
+#   platform_charge_cap_per_kwh   — your platform-fee ceiling
+# Everything below the closing line of this section is mechanics — if you
+# find yourself editing a rule body, the change probably belongs here as
+# data instead.
 
 # THE ENVIRONMENTS MAP — the single place where test and production differ.
 #
@@ -48,6 +58,14 @@ import rego.v1
 #                           (a networkId in two environments would make
 #                           resolution ambiguous). A networkId outside every
 #                           entry is a violation → NACK on enforced actions.
+#   applicable_seller_discoms — the discoms this policy APPLIES TO, declared
+#                           upfront. Several discoms may share one common
+#                           policy — list every one of them here. A trade
+#                           whose SELLING prosumer belongs to any other
+#                           discom is a violation → NACK: it means the
+#                           catalog publisher linked the wrong policy, and
+#                           blocking is safer than judging a trade under
+#                           rules that don't govern it.
 #   enforce_allowlist     — the allowlist switch, PER ENVIRONMENT: e.g. keep
 #                           production enforced while opening the test
 #                           network to everyone during an onboarding drive.
@@ -70,6 +88,10 @@ environments := {
 			"nfh.global/testnet-deg",
 			"indiaenergystack.in/test-ies-p2p-trading-network",
 		},
+		"applicable_seller_discoms": {
+			"ACME_DISCOM",
+			"TEST_DISCOM_SELLER", # devkit test identity
+		},
 		"enforce_allowlist": true,
 		"allowed_buyer_discoms": {
 			"ACME_DISCOM", # your own id: intra-discom trades stay allowed
@@ -81,6 +103,7 @@ environments := {
 	},
 	"production": {
 		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
+		"applicable_seller_discoms": {"ACME_DISCOM"},
 		"enforce_allowlist": true,
 		"allowed_buyer_discoms": {
 			"ACME_DISCOM", # your own id: intra-discom trades stay allowed
@@ -89,6 +112,11 @@ environments := {
 		},
 	},
 }
+
+# Settlement currency this policy permits. A payload pricing energy in any
+# other currency is a violation → NACK. Shared across environments (INR is
+# national); move into the environments map via _env if that ever changes.
+allowed_currencies := {"INR"}
 
 # Wheeling charge this discom levies on the BUYER side, per settled kWh.
 wheeling_charge_buyer_per_kwh := 0.25
@@ -104,6 +132,10 @@ penalty_rate_per_kwh := 0.50
 # this discom's jurisdiction. Disclosed in the settlement itemization so
 # every party sees the cap alongside the net amounts.
 platform_charge_cap_per_kwh := 0.42
+
+# ═══════════════════ END OF DISCOM PARAMETERS ═══════════════════
+# Everything below is mechanics shared by every discom using this
+# template — you should not need to edit past this line.
 
 # ============================================================================
 # INPUT EXTRACTION — where the facts come from in the Beckn message
@@ -126,6 +158,15 @@ _currency := c if {
 _buyer_discom_id := id if {
 	some p in _contract.participants
 	p.role == "buyerPlatform"
+	id := p.participantAttributes.utilityId
+}
+
+# The seller prosumer's discom: utilityId of the sellerPlatform participant.
+# Checked against _env.applicable_seller_discoms — this policy must actually
+# be the policy of the discom whose prosumer is selling.
+_seller_discom_id := id if {
+	some p in _contract.participants
+	p.role == "sellerPlatform"
 	id := p.participantAttributes.utilityId
 }
 
@@ -181,6 +222,38 @@ violations contains msg if {
 		"networkId %q is not a recognized IES P2P trading network (known: %v)",
 		[_network_id, sort(_known_network_ids)],
 	)
+}
+
+# POLICY APPLICABILITY: this policy declared upfront which discoms it
+# applies to (applicable_seller_discoms). If the selling prosumer's discom
+# is not one of them, the catalog publisher linked the wrong policy — block
+# the trade rather than judge it under rules that don't govern it.
+violations contains msg if {
+	_seller_discom_id
+	not _seller_discom_id in _env.applicable_seller_discoms
+	msg := sprintf(
+		"this policy does not apply to seller discom %q (applies to: %v on the %s network)",
+		[_seller_discom_id, sort(_env.applicable_seller_discoms), _environment],
+	)
+}
+
+# Fail-closed twin: no identifiable seller discom → cannot confirm the
+# policy applies → block. (Guarded on _env so it cannot double-report on
+# unknown networks — the membership violation already covers those.)
+violations contains msg if {
+	_env
+	not _seller_discom_id
+	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+}
+
+# SETTLEMENT CURRENCY: prices must be in a permitted currency. Gated on
+# _currency being present (data-shape gate, see README 6.2): fires only when
+# the payload actually declares a PRICE_PER_KWH currency, so payloads
+# without commitment timeseries are not falsely flagged.
+violations contains msg if {
+	_currency
+	not _currency in allowed_currencies
+	msg := sprintf("settlement currency %q is not permitted (allowed: %v)", [_currency, sort(allowed_currencies)])
 }
 
 # THE ALLOWLIST RULE — one rule, every environment. It never mentions "test"

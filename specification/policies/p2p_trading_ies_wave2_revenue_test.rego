@@ -17,10 +17,12 @@ _all_roles := [
 	{"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"},
 ]
 
-_participants(buyer_utility) := [
+_participants_full(seller_utility, buyer_utility) := [
 	{"role": "buyerPlatform", "participantAttributes": {"utilityId": buyer_utility}},
-	{"role": "sellerPlatform", "participantAttributes": {"utilityId": "TEST_DISCOM_SELLER"}},
+	{"role": "sellerPlatform", "participantAttributes": {"utilityId": seller_utility}},
 ]
+
+_participants(buyer_utility) := _participants_full("TEST_DISCOM_SELLER", buyer_utility)
 
 # Pre-settlement interval: price + requested qty, no FINAL_ALLOC yet.
 _iv_pre(iid, price, req) := {"id": iid, "payloads": [
@@ -60,6 +62,16 @@ _input_on(action, network_id, buyer_utility, intervals) := {
 # Default test-network input.
 _input(action, buyer_utility, intervals) := _input_on(action, "nfh.global/testnet-deg", buyer_utility, intervals)
 
+# Production-network input with an applicable seller discom (TPDDL).
+_input_prod(action, buyer_utility, intervals) := json.patch(
+	_input_on(action, "indiaenergystack.in/ies-p2p-trading-network", buyer_utility, intervals),
+	[{
+		"op": "replace",
+		"path": "/message/contract/participants",
+		"value": _participants_full("TPDDL", buyer_utility),
+	}],
+)
+
 # ---------------------------------------------------------------------------
 # Allowlist
 # ---------------------------------------------------------------------------
@@ -92,18 +104,63 @@ test_allowlist_disabled_lets_outsider_through if {
 }
 
 test_allowlist_disabled_skips_missing_buyer_discom_check if {
+	# Drop only the buyerPlatform participant (index 0) — the seller stays,
+	# so the (allowlist-independent) applicability check is satisfied.
 	inp := json.remove(
 		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
-		["/message/contract/participants"],
+		["/message/contract/participants/0"],
 	)
 	count(violations) == 0 with input as inp with environments as _envs_test_allowlist_off
 }
 
 test_allowlist_disable_is_per_environment if {
 	# Same switch state, but traffic on the PRODUCTION network: still enforced.
-	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "TEST_DISCOM_OUTSIDER", [_iv_pre(0, 12.5, 20)])
+	inp := _input_prod("init", "TEST_DISCOM_OUTSIDER", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp with environments as _envs_test_allowlist_off
 	count(vs) == 1
+}
+
+# ---------------------------------------------------------------------------
+# Policy applicability (seller discom) + settlement currency
+# ---------------------------------------------------------------------------
+
+test_policy_not_applicable_to_seller_discom if {
+	inp := json.patch(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		[{
+			"op": "replace",
+			"path": "/message/contract/participants",
+			"value": _participants_full("OTHER_DISCOM", "TEST_DISCOM_BUYER"),
+		}],
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "does not apply to seller discom \"OTHER_DISCOM\"")
+}
+
+test_missing_seller_discom_is_violation if {
+	inp := json.remove(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		["/message/contract/participants"],
+	)
+	vs := violations with input as inp
+	some msg in vs
+	contains(msg, "cannot determine seller discom")
+}
+
+test_non_inr_currency_is_violation if {
+	inp := json.patch(
+		_input("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)]),
+		[{
+			"op": "replace",
+			"path": "/message/contract/commitments/0/commitmentAttributes/payloadDescriptors/0/currency",
+			"value": "EUR",
+		}],
+	)
+	vs := violations with input as inp
+	count(vs) == 1
+	some msg in vs
+	contains(msg, "settlement currency \"EUR\" is not permitted")
 }
 
 # ---------------------------------------------------------------------------
@@ -128,12 +185,12 @@ test_missing_network_id_is_violation if {
 }
 
 test_prod_network_uses_prod_allowlist if {
-	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "BRPL", [_iv_pre(0, 12.5, 20)])
+	inp := _input_prod("init", "BRPL", [_iv_pre(0, 12.5, 20)])
 	count(violations) == 0 with input as inp
 }
 
 test_test_only_partner_blocked_on_prod_network if {
-	inp := _input_on("init", "indiaenergystack.in/ies-p2p-trading-network", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)])
+	inp := _input_prod("init", "TEST_DISCOM_BUYER", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp
 	count(vs) == 1
 	some msg in vs

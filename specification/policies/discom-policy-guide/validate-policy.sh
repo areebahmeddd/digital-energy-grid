@@ -92,6 +92,14 @@ assert_ok = any("not a recognized" in v for v in violations)'
 assert "test-only partner blocked on prod" "init-prod-blocked-test-partner.json" '
 assert_ok = any("on the production network" in v for v in violations)'
 
+# Seller discom this policy does not apply to: applicability violation.
+assert "inapplicable seller: policy violation" "init-policy-not-applicable.json" '
+assert_ok = any("does not apply to seller discom" in v for v in violations)'
+
+# PRICE_PER_KWH priced in EUR: currency violation.
+assert "non-INR currency: violation" "init-wrong-currency.json" '
+assert_ok = any("currency \"EUR\" is not permitted" in v for v in violations)'
+
 # Settled on_status: clean, four flows, net-zero.
 assert "settled: 4 itemized flows, net-zero" "on-status-settled.json" '
 assert_ok = (violations == [] and flows is not None and len(flows) == 4
