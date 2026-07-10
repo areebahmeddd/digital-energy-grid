@@ -174,7 +174,10 @@ DEVKIT_CONFIGS = {
     "p2p-trading-ies-wave2": {
         # Routing configs declare the Beckn v2 compound catalog endpoint.
         "endpoint_overrides": {"publish": "catalog/publish"},
-        "domain": "nfh.global/testnet-deg",
+        # Default trading network for the devkit. nfh.global/testnet-deg is
+        # still recognized everywhere (configs, policy, sandbox fixture
+        # mounts) — override the {{domain}} variable to use it.
+        "domain": "indiaenergystack.in/test-ies-p2p-trading-network",
         # Per-node Beckn hostnames matching subscriberIds (resolve via Caddy
         # host-routing + Docker network aliases on beckn-router). Each
         # participant lives on its own host; standard Beckn paths (/bap/receiver,

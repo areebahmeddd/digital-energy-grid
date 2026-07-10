@@ -1,3 +1,7 @@
+# run using: 
+#   cp ngrok.yml.example ngrok.yml
+# add ngrok auth code to the ngrok.yml
+#   ngrok start --all --config ngrok.yml
 version: "3"
 agent:
   authtoken: REPLACE_WITH_YOUR_NGROK_AUTHTOKEN

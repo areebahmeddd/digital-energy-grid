@@ -7,7 +7,7 @@
 # to fail the run on any NACK. Redocly Respect crashes with "Maximum call
 # stack size exceeded" in 2.14+ (successCriteria evaluator bug) and requires
 # --stack-size=65536 for its spec dereferencer on the beckn OpenAPI spec.
-# Pinned to 2.13.0 via a cached npm install; NACK and sandbox-callback
+# Pinned to 2.38.0 via a cached npm install; NACK and sandbox-callback
 # checks are done out-of-band below.
 #
 # Usage from a wrapper:
@@ -58,7 +58,7 @@ run_arazzo() {
 
   # Shared cache directory for both the pinned Redocly install and the
   # processed beckn.yaml (both persist across runs in /tmp).
-  local redocly_cache="/tmp/redocly-cli-2.13.0"
+  local redocly_cache="/tmp/redocly-cli-2.38.0"
   local redocly_bin="$redocly_cache/node_modules/.bin/redocly"
 
   # Prepare a circular-ref-free copy of beckn.yaml for Redocly's dereferencer.
@@ -236,9 +236,9 @@ for f in sorted(src.rglob("*.json")):
   # Install a pinned Redocly into the shared cache (also used for beckn-processed.yaml).
   # Redocly 2.14+ has a successCriteria evaluator bug ("Maximum call stack size exceeded").
   if [ ! -x "$redocly_bin" ]; then
-    echo "Installing @redocly/cli@2.13.0 into $redocly_cache ..."
+    echo "Installing @redocly/cli@2.38.0 into $redocly_cache ..."
     mkdir -p "$redocly_cache"
-    npm install --prefix "$redocly_cache" "@redocly/cli@2.13.0" \
+    npm install --prefix "$redocly_cache" "@redocly/cli@2.38.0" \
       --no-save --no-audit --no-fund --silent
   fi
 

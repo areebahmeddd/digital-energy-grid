@@ -125,11 +125,13 @@ services:
       - "3002:3002"
     volumes:
       - ./sandbox-ack-status-route.js:/startup/sandbox-ack-status-route.js:ro
-      # Mock on_* responses for the testnet-deg network (the image ships no
-      # fixtures for it): without these the sandbox answers init/confirm/
-      # status with a context-only body that fails schema validation at the
-      # seller's /bpp/caller. Same mount pattern as the ledger sandboxes;
-      # PERSONA=bpp resolves the bpp/ subdir.
+      # Mock on_* responses (the image ships no fixtures for these networks):
+      # without them the sandbox answers init/confirm/status with a
+      # context-only body that fails schema validation at the seller's
+      # /bpp/caller. The sandbox resolves fixtures by context.networkId, so
+      # mount the same dir for BOTH recognized test networks; PERSONA=bpp
+      # resolves the bpp/ subdir. Same mount pattern as the ledger sandboxes.
+      - ../responses/sellerapp:/app/dist/webhook/jsons/indiaenergystack.in/test-ies-p2p-trading-network/response/bpp
       - ../responses/sellerapp:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/bpp
     command: ["sh", "-c", "node /startup/sandbox-ack-status-route.js && npm start"]
     healthcheck:
@@ -187,6 +189,9 @@ services:
     ports:
       - "3003:3003"
     volumes:
+      # Mounted for BOTH recognized test networks (fixture lookup is by
+      # context.networkId).
+      - ../responses/sellerdiscom:/app/dist/webhook/jsons/indiaenergystack.in/test-ies-p2p-trading-network/response/ledger
       - ../responses/sellerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3003/api/health"]
@@ -229,6 +234,9 @@ services:
     ports:
       - "3004:3004"
     volumes:
+      # Mounted for BOTH recognized test networks (fixture lookup is by
+      # context.networkId).
+      - ../responses/buyerdiscom:/app/dist/webhook/jsons/indiaenergystack.in/test-ies-p2p-trading-network/response/ledger
       - ../responses/buyerdiscom:/app/dist/webhook/jsons/nfh.global/testnet-deg/response/ledger
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3004/api/health"]

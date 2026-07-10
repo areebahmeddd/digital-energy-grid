@@ -1,6 +1,6 @@
 {
   "context": {
-    "networkId": "nfh.global/testnet-deg",
+    "networkId": "indiaenergystack.in/test-ies-p2p-trading-network",
     "version": "2.0.0",
     "action": "catalog/publish",
     "bppId": "sellerapp.example.com",
@@ -17,7 +17,7 @@
     ]
   },
   "message": {
-    "publishDirectives": [{"catalogId": "catalog-p2p-energy-2026-04", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["nfh.global/testnet-deg"]}],
+    "publishDirectives": [{"catalogId": "catalog-p2p-energy-2026-04", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["indiaenergystack.in/test-ies-p2p-trading-network"]}],
     "catalogs": [
       {
         "id": "catalog-p2p-energy-2026-04",
