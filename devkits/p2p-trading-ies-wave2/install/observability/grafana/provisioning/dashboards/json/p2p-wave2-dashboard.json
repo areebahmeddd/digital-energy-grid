@@ -61,11 +61,6 @@
           "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (sender_id, recipient_id)",
           "legendFormat": "{{sender_id}} -> {{recipient_id}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate({__name__=~\".*http_request_count(_total)?\"}[5m])) by (sender_id, recipient_id)",
-          "hide": true,
-          "refId": "B"
         }
       ],
       "title": "Participant traffic",
@@ -87,20 +82,234 @@
       "title": "ONIX step p95 latency",
       "type": "timeseries"
     },
-    { "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }, "id": 6, "title": "Logs", "type": "row" },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }, "id": 20, "title": "Participant Audit Logs", "type": "row" },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 18 },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 18 },
+      "id": 21,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} |~ \".*${search}.*\"[1m])",
+          "instant": false,
+          "legendFormat": "{{producer}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Log volume by participant",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 22 },
+      "id": 22,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showCommonLabels": true,
+        "showLabels": true,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} |~ \".*${search}.*\" |~ \".*${action}.*\" |~ \".*${transactionId}.*\"",
+          "refId": "A"
+        }
+      ],
+      "title": "Audit logs by participant (OTLP — structured, per-participant)",
+      "type": "logs"
+    },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 }, "id": 6, "title": "Container Logs (stdout)", "type": "row" },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
       "id": 10,
       "options": { "dedupStrategy": "none", "enableLogDetails": true, "showCommonLabels": false, "showLabels": false, "wrapLogMessage": true },
       "targets": [
         {
+          "datasource": { "type": "loki", "uid": "loki" },
           "expr": "{service=~\"onix-.*\"} |= `${transactionId}`",
           "refId": "A"
         }
       ],
-      "title": "ONIX logs by transaction ID",
+      "title": "Container stdout logs (Promtail — raw process output)",
       "type": "logs"
+    },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 43 }, "id": 30, "title": "NP Call Summary", "type": "row" },
+
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "displayMode": "color-background", "align": "center" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "noValue": "-"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Participant" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "auto" },
+              { "id": "custom.width", "value": 220 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Last Call At" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "auto" },
+              { "id": "unit", "value": "dateTimeAsLocal" },
+              { "id": "custom.width", "value": 180 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Flow Status" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-background" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red", "value": null },
+                    { "color": "orange", "value": 1 },
+                    { "color": "green", "value": 6 }
+                  ]
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": { "6": { "color": "green", "index": 0, "text": "✓ Completed" } }
+                  },
+                  {
+                    "type": "special",
+                    "options": { "match": "null+nan", "result": { "color": "red", "index": 1, "text": "No calls" } }
+                  }
+                ]
+              },
+              { "id": "custom.width", "value": 140 }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 44 },
+      "id": 31,
+      "options": { "footer": { "show": false }, "showHeader": true },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"discover\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "discover", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"on_discover\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "on_discover", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"init\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "init", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"on_init\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "on_init", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"confirm\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "confirm", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"on_confirm\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "on_confirm", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"status\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "status", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action=\"on_status\" | http_response_status_code=\"200\" [$__range]))",
+          "instant": true, "range": false, "refId": "on_status", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "max by (service_name) (last_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action != \"\" | http_response_status_code=\"200\" | unwrap observed_timestamp [$__range])) / 1000000",
+          "instant": true, "range": false, "refId": "lastCall", "legendFormat": ""
+        },
+        {
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "count by (service_name) (sum by (service_name, context_action) (count_over_time({service_name=~\".+\", service_name!~\"grafana|loki|prometheus|promtail|otel-collector-.*|onix-.*|redis.*\"} | json | context_action =~ \"init|on_init|confirm|on_confirm|status|on_status\" | http_response_status_code=\"200\" [$__range])) > 0)",
+          "instant": true, "range": false, "refId": "flowDone", "legendFormat": ""
+        }
+      ],
+      "title": "NP Call Summary",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": { "mode": "columns" }
+        },
+        {
+          "id": "joinByField",
+          "options": { "byField": "service_name", "mode": "outer" }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "service_name": "Participant",
+              "Value #discover": "discover",
+              "Value #on_discover": "on_discover",
+              "Value #init": "init",
+              "Value #on_init": "on_init",
+              "Value #confirm": "confirm",
+              "Value #on_confirm": "on_confirm",
+              "Value #status": "status",
+              "Value #on_status": "on_status",
+              "Value #lastCall": "Last Call At",
+              "Value #flowDone": "Flow Status"
+            },
+            "excludeByName": {
+              "Time": true, "Time 1": true, "Time 2": true, "Time 3": true,
+              "Time 4": true, "Time 5": true, "Time 6": true, "Time 7": true,
+              "Time 8": true, "Time 9": true
+            },
+            "indexByName": {
+              "Participant": 0,
+              "Last Call At": 1,
+              "Flow Status": 2,
+              "discover": 3,
+              "on_discover": 4,
+              "init": 5,
+              "on_init": 6,
+              "confirm": 7,
+              "on_confirm": 8,
+              "status": 9,
+              "on_status": 10
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "10s",
@@ -109,6 +318,34 @@
   "tags": ["p2p-wave2", "otel", "beckn"],
   "templating": {
     "list": [
+      {
+        "current": { "selected": false, "text": "", "value": "" },
+        "hide": 0,
+        "label": "Search",
+        "name": "search",
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "allValue": "",
+        "label": "Action",
+        "multi": false,
+        "name": "action",
+        "options": [],
+        "query": "discover,on_discover,init,on_init,confirm,on_confirm,status,on_status,catalog/publish,catalog/on_publish",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "custom"
+      },
       {
         "current": { "selected": false, "text": "", "value": "" },
         "hide": 0,
@@ -124,6 +361,6 @@
   "timezone": "",
   "title": "P2P Wave 2 Observability",
   "uid": "p2p-wave2-observability",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
