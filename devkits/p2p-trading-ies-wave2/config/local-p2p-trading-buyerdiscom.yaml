@@ -102,7 +102,7 @@ modules:
           id: dediregistry
           config:
             registryName: subscribers.beckn.one
-            allowedNetworkIDs: "nfh.global/testnet-deg"
+            allowedNetworkIDs: "indiaenergystack.in/test-ies-p2p-trading-network,nfh.global/testnet-deg"
             timeout: 10
         keyManager:
           id: simplekeymanager

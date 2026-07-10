@@ -1,6 +1,6 @@
 {
   "context": {
-    "networkId": "nfh.global/testnet-deg",
+    "networkId": "indiaenergystack.in/test-ies-p2p-trading-network",
     "version": "2.0.0",
     "action": "on_confirm",
     "bapId": "buyerapp.example.com",

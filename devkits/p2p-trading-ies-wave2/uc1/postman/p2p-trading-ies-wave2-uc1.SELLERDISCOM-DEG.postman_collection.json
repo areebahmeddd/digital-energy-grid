@@ -57,7 +57,7 @@
   "variable": [
     {
       "key": "domain",
-      "value": "nfh.global/testnet-deg"
+      "value": "indiaenergystack.in/test-ies-p2p-trading-network"
     },
     {
       "key": "version",
@@ -118,6 +118,22 @@
     {
       "key": "ledger_seller_discom_id",
       "value": "ies-p2p-energy-ledger.beckn.io"
+    },
+    {
+      "key": "buyerplatform_id",
+      "value": "buyerapp.example.com"
+    },
+    {
+      "key": "sellerplatform_id",
+      "value": "sellerapp.example.com"
+    },
+    {
+      "key": "buyerplatform_host_root",
+      "value": "http://buyerapp.example.com:9000"
+    },
+    {
+      "key": "sellerplatform_host_root",
+      "value": "http://sellerapp.example.com:9000"
     }
   ]
 }
