@@ -4,13 +4,6 @@ How a distribution company (discom) authors, tests, versions, and publishes
 the policy that governs P2P energy trades involving its prosumers — and how
 the network enforces it.
 
-> Starting from scratch (rules in English + example payloads)? The
-> step-by-step authoring process — including the test-suite matrix and DeDi
-> publishing — is captured as a reusable skill:
-> [`.claude/skills/author-discom-policy/SKILL.md`](../../../.claude/skills/author-discom-policy/SKILL.md)
-> (`/author-discom-policy` in Claude Code). This guide is its reference
-> material.
-
 What's in this directory:
 
 ```

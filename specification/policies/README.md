@@ -10,11 +10,6 @@
 | [`test/`](./test/) | OPA unit tests (`<policy>_test.rego`) for the policies above |
 | [`discom-policy-guide/`](./discom-policy-guide/) | How a discom authors, versions, and publishes its own policy (checksum, release tag, DeDi record) |
 
-Authoring a **new** policy from rules in English + example payloads? Follow the
-step-by-step process in
-[`.claude/skills/author-discom-policy/SKILL.md`](../../.claude/skills/author-discom-policy/SKILL.md)
-— in Claude Code, `/author-discom-policy` runs it interactively.
-
 Run each policy against its own test file (a whole-directory `opa test .` trips over cross-package helper name clashes):
 
 ```bash
