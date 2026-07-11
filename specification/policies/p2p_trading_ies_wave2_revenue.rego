@@ -160,7 +160,7 @@ environments := {
 	},
 	"production": {
 		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
-		"applicable_seller_discoms": {"TPDDL"},
+		"applicable_seller_discoms": {"TPDDL","BRPL","PVVNL"},
 		"enforce_allowlist": true,
 		"allowed_buyer_discoms": {
 			"TPDDL", # intra-discom trades always allowed
@@ -180,12 +180,12 @@ allowed_currencies := {"INR"}
 # _env — same pattern as the allowlist, no per-environment rule forks.
 
 # Wheeling charges this discom levies, in currency units per settled kWh.
-wheeling_charge_buyer_per_kwh := 0.25
+wheeling_charge_buyer_per_kwh := 0.0
 
-wheeling_charge_seller_per_kwh := 0.30
+wheeling_charge_seller_per_kwh := 0.0
 
 # Penalty on under-delivery, per kWh of shortfall (REQUESTED_QTY − FINAL_ALLOC).
-penalty_rate_per_kwh := 0.50
+penalty_rate_per_kwh := 0.0
 
 # Ceiling on what the trading platform may retain per kWh from trades under
 # this discom's jurisdiction. Disclosed in the settlement itemization.

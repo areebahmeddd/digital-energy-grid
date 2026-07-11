@@ -4,8 +4,9 @@ api/l2.yaml
 # OS artifacts
 .DS_Store
 
-# IDE / Claude Code
-.claude/
+# IDE / Claude Code — local settings stay ignored; shared skills are checked in
+.claude/*
+!.claude/skills/
 CLAUDE.md
 
 # Environment files
