@@ -1,7 +1,7 @@
 // Tests for violation enforcement (violationActions): NACK on policy
 // violations and fail-closed behavior on enforced actions.
 // All HTTP traffic goes to local httptest servers.
-package settlementflows
+package contractpolicyenforcer
 
 import (
 	"context"
@@ -57,7 +57,7 @@ func enforceBody(action, policyURL, buyerDiscom string) []byte {
 	}`, action, buyerDiscom, policyURL))
 }
 
-func newEnforcingPlugin(t *testing.T, extra map[string]string) *SettlementFlows {
+func newEnforcingPlugin(t *testing.T, extra map[string]string) *ContractPolicyEnforcer {
 	t.Helper()
 	cfg := map[string]string{
 		"actions":          "init,on_status",
@@ -218,6 +218,31 @@ func TestRun_SoftFailure_FetchErrorNotEnforced(t *testing.T) {
 	body := enforceBody("on_status", srv.URL, "ALLOWED_DISCOM")
 	if err := p.Run(stepCtx(t, "on_status", body)); err != nil {
 		t.Fatalf("fetch failure on non-enforced action must stay soft, got: %v", err)
+	}
+}
+
+// A checksum mismatch against the DeDi record on an enforced action must NACK
+// with the cause in the message — a typed BadReqErr, not a generic internal
+// error.
+func TestRun_FailClosed_ChecksumMismatchIsTypedError(t *testing.T) {
+	regoSrv, _ := serve(t, http.StatusOK, enforceTestPolicy)
+	dediSrv, _ := serve(t, http.StatusOK, dediBody(t, map[string]string{
+		"data_url":               regoSrv.URL,
+		"data_url_checksum":      sha256Hex("tampered"),
+		"data_url_checksum_type": "sha256",
+	}))
+	p := newEnforcingPlugin(t, nil)
+
+	err := p.Run(stepCtx(t, "init", enforceBody("init", dediSrv.URL, "ALLOWED_DISCOM")))
+	if err == nil {
+		t.Fatal("expected error: checksum mismatch on enforced action must be blocked")
+	}
+	var badReq *model.BadReqErr
+	if !errors.As(err, &badReq) {
+		t.Errorf("expected *model.BadReqErr (400 NACK), got %T: %v", err, err)
+	}
+	if !strings.Contains(err.Error(), "mismatch") {
+		t.Errorf("error must surface the checksum mismatch cause, got: %v", err)
 	}
 }
 

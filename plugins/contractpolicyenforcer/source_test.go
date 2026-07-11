@@ -1,4 +1,4 @@
-package settlementflows
+package contractpolicyenforcer
 
 // Tests for policy source resolution: bare rego, DeDi record indirection,
 // checksum verification, retry behavior, and the policy cache built on top.

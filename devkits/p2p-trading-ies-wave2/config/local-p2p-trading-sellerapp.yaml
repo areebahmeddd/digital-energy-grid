@@ -80,7 +80,7 @@ modules:
           # unfetchable policy also NACKs. No revenue flows exist
           # pre-settlement, so nothing is injected here (output settings are
           # required config and mirror the bppTxnCaller instance).
-          - id: settlementflows
+          - id: contractpolicyenforcer
             config:
               actions: "select,init,confirm"
               violationActions: "select,init,confirm"
@@ -117,7 +117,7 @@ modules:
         - checkPolicy
         - addRoute
         - validateSchema
-        - settlementflows
+        - contractpolicyenforcer
         - degledgerrecorder
 
   # /bap/receiver — seller acts as BAP towards sellerDiscom. Receives /on_status
@@ -266,7 +266,7 @@ modules:
           # (applicability, currency, network membership) and a violating
           # catalog is NACKed before it reaches the fabric. "publish" matches
           # the compound "catalog/publish" action.
-          - id: settlementflows
+          - id: contractpolicyenforcer
             config:
               actions: "publish,on_status"
               # Enforce on publish (block bad catalogs at the source);
@@ -300,7 +300,7 @@ modules:
               networkParticipant: sellerapp.example.com
               keyId: 76EU9BVtj4VYcQvBdpDr84T6AbiLe2PkBdJLaJRBUsZnFgD8joffqz
       steps:
-        - settlementflows
+        - contractpolicyenforcer
         - validateSchema
         - checkPolicy
         - addRoute
@@ -366,7 +366,29 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          # Seller-initiated sub-transactions (status towards the buyer or
+          # the seller's own discom ledger). Runs soft: status requests may
+          # not carry a policy reference, so nothing is enforced here —
+          # violations are logged and flows are injected only if the policy
+          # yields them.
+          - id: contractpolicyenforcer
+            config:
+              actions: "status"
+              violationActions: ""
+              cacheTTL: "172800"
+              debugLogging: "true"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
+        - contractpolicyenforcer
         - validateSchema
         - checkPolicy
         - addRoute

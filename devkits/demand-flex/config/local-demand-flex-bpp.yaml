@@ -136,7 +136,7 @@ modules:
         steps:
           # First step: injects settlement flows so validateSchema sees the
           # enriched payload and sign signs it.
-          - id: settlementflows
+          - id: contractpolicyenforcer
             config:
               actions: "on_status"
               # Injection-only instance: violations are logged, never NACKed.
@@ -155,7 +155,7 @@ modules:
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
-        - settlementflows
+        - contractpolicyenforcer
         - validateSchema
         - checkPolicy
         - addRoute

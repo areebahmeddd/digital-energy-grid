@@ -151,7 +151,7 @@ workflows:
           Revenue = delivered flex × clearing price:
           (50 kWh + 45 kWh) × 3.5 INR/kWh = 332.5 INR payable to GreenFlex.
           Revenue flows are appended to contract.consideration by the
-          settlementflows step after policy evaluation.
+          contractpolicyenforcer step after policy evaluation.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
           contentType: application/json

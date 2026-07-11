@@ -12,7 +12,7 @@ info:
     Contract.participants[*].participantAttributes (Beckn-native).
 
     Computed revenue flows can land in either of two destinations,
-    selected by the BPP-side `settlementflows` plugin's `outputPath` config:
+    selected by the BPP-side `contractpolicyenforcer` plugin's `outputPath` config:
       - "raw" / contractAttributes.revenueFlows  — legacy shape, used by
         demand-flex; the array is declared below as an optional property.
       - "jsonld" / Contract.consideration[*].considerationAttributes —
@@ -71,7 +71,7 @@ components:
           type: array
           description: >
             Optional. Settlement-time per-role flows written by the
-            `settlementflows` plugin when it is configured with
+            `contractpolicyenforcer` plugin when it is configured with
             outputMode: raw and outputPath ending at this property
             (the legacy demand-flex shape). Wave2 P2P trading instead
             uses Contract.consideration[*].considerationAttributes

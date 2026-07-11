@@ -1,4 +1,4 @@
-package settlementflows
+package contractpolicyenforcer
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Config holds configuration for the SettlementFlows plugin.
+// Config holds configuration for the ContractPolicyEnforcer plugin.
 type Config struct {
 	// Enabled controls whether the plugin is active.
 	Enabled bool
@@ -211,7 +211,7 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 	if r, ok := cfg["fetchRetries"]; ok && r != "" {
 		n, err := strconv.Atoi(r)
 		if err != nil || n < 0 {
-			return nil, fmt.Errorf("settlementflows: invalid fetchRetries %q (want integer >= 0)", r)
+			return nil, fmt.Errorf("contractpolicyenforcer: invalid fetchRetries %q (want integer >= 0)", r)
 		}
 		config.FetchRetries = n
 	}
@@ -235,7 +235,7 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		case OutputModeRaw, OutputModeJSONLD, "":
 			config.OutputMode = m
 		default:
-			return nil, fmt.Errorf("settlementflows: invalid outputMode %q (allowed: %q, %q)",
+			return nil, fmt.Errorf("contractpolicyenforcer: invalid outputMode %q (allowed: %q, %q)",
 				m, OutputModeRaw, OutputModeJSONLD)
 		}
 	}
@@ -260,25 +260,25 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 	// the destination explicitly so behavior is visible from the config.
 	if config.OutputPath == "" {
 		return nil, fmt.Errorf(
-			"settlementflows: outputPath is required (e.g. " +
+			"contractpolicyenforcer: outputPath is required (e.g. " +
 				"\"message.contract.contractAttributes.revenueFlows\" or " +
 				"\"message.contract.consideration[id=auto-settlement-flows].considerationAttributes\")")
 	}
 	if config.OutputMode == "" {
 		return nil, fmt.Errorf(
-			"settlementflows: outputMode is required (allowed: %q, %q)",
+			"contractpolicyenforcer: outputMode is required (allowed: %q, %q)",
 			OutputModeRaw, OutputModeJSONLD)
 	}
 	for _, va := range config.ViolationActions {
 		if !config.IsActionEnabled(va) {
 			return nil, fmt.Errorf(
-				"settlementflows: violationActions entry %q is not in actions %v — violations can only be enforced on actions the step runs on",
+				"contractpolicyenforcer: violationActions entry %q is not in actions %v — violations can only be enforced on actions the step runs on",
 				va, config.Actions)
 		}
 	}
 	if config.CacheTTL < MinCacheTTL {
 		return nil, fmt.Errorf(
-			"settlementflows: cacheTTL %s is below the minimum %s (policies are fetched from a registry; short TTLs hammer it)",
+			"contractpolicyenforcer: cacheTTL %s is below the minimum %s (policies are fetched from a registry; short TTLs hammer it)",
 			config.CacheTTL, MinCacheTTL)
 	}
 

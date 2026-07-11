@@ -95,7 +95,7 @@ each trade end to end.
 
 ## 2. How the network enforces it
 
-The ONIX adapter's `settlementflows` pipeline step resolves `policy.url`,
+The ONIX adapter's `contractpolicyenforcer` pipeline step resolves `policy.url`,
 compiles the rego, and evaluates it against the full message. Two modes,
 controlled per pipeline in the adapter YAML:
 
@@ -117,7 +117,7 @@ for a working example of both.
 
 ## 3. The interface your policy must export
 
-The `settlementflows` step queries the package named by `policy.queryPath`
+The `contractpolicyenforcer` step queries the package named by `policy.queryPath`
 and reads two keys from the result:
 
 | Rule | Type | Contract |
@@ -448,7 +448,7 @@ shasum -a 256 my-discom-policy.rego
 ```
 
 That hex digest goes into the record's `data_url_checksum`, with
-`data_url_checksum_type: sha256`. The `settlementflows` step recomputes the
+`data_url_checksum_type: sha256`. The `contractpolicyenforcer` step recomputes the
 hash on every fetch and rejects the policy on mismatch — so the checksum, not
 the hosting location, is what consumers trust.
 
@@ -514,12 +514,12 @@ Publish your record in the **India Energy Stack** namespace/registry —
 - **Uniform quality control**: IES reviews records entering `ies-policies`,
   so consumers get a consistent bar for policy quality and metadata.
 - **A single root of trust**: adapters pin the namespace once via the
-  `settlementflows` step's `allowedPolicyUrlPrefixes` config and thereby
+  `contractpolicyenforcer` step's `allowedPolicyUrlPrefixes` config and thereby
   accept any discom's policy published under it — no per-discom
   configuration:
 
   ```yaml
-  - id: settlementflows
+  - id: contractpolicyenforcer
     config:
       # Only India Energy Stack policy records on DeDi are accepted.
       allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
