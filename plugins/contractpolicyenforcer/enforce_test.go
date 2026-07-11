@@ -221,6 +221,31 @@ func TestRun_SoftFailure_FetchErrorNotEnforced(t *testing.T) {
 	}
 }
 
+// A checksum mismatch against the DeDi record on an enforced action must NACK
+// with the cause in the message — a typed BadReqErr, not a generic internal
+// error.
+func TestRun_FailClosed_ChecksumMismatchIsTypedError(t *testing.T) {
+	regoSrv, _ := serve(t, http.StatusOK, enforceTestPolicy)
+	dediSrv, _ := serve(t, http.StatusOK, dediBody(t, map[string]string{
+		"data_url":               regoSrv.URL,
+		"data_url_checksum":      sha256Hex("tampered"),
+		"data_url_checksum_type": "sha256",
+	}))
+	p := newEnforcingPlugin(t, nil)
+
+	err := p.Run(stepCtx(t, "init", enforceBody("init", dediSrv.URL, "ALLOWED_DISCOM")))
+	if err == nil {
+		t.Fatal("expected error: checksum mismatch on enforced action must be blocked")
+	}
+	var badReq *model.BadReqErr
+	if !errors.As(err, &badReq) {
+		t.Errorf("expected *model.BadReqErr (400 NACK), got %T: %v", err, err)
+	}
+	if !strings.Contains(err.Error(), "mismatch") {
+		t.Errorf("error must surface the checksum mismatch cause, got: %v", err)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Catalog publish: per-offer policy refs, compound-action matching
 // ---------------------------------------------------------------------------
