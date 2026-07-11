@@ -1972,7 +1972,7 @@ The demand-flex rego policy ([demand_flex_revenue.rego](../../../../specificatio
 
 ```bash
 # Run OPA tests
-cd specification/policies && opa test demand_flex_revenue.rego demand_flex_revenue_test.rego -v
+cd specification/policies && opa test demand_flex_revenue.rego test/demand_flex_revenue_test.rego -v
 
 # Evaluate against an example
 python3 scripts/evaluate_demand_flex_settlement.py examples/demand-flex/v2/on-status-response-settled.json

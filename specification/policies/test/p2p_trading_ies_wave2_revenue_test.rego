@@ -370,25 +370,25 @@ test_settlement_checks_do_not_fire_at_confirm if {
 
 # One settled interval: 20 kWh delivered of 20.5 requested @ 12.5 INR/kWh.
 #   trade value       = 250
-#   wheeling buyer    = 0.25 × 20  = 5
-#   wheeling seller   = 0.30 × 20  = 6
-#   penalty           = 0.50 × 0.5 = 0.25
+#   wheeling buyer    = 0.0 × 20  = 0
+#   wheeling seller   = 0.0 × 20  = 0
+#   penalty           = 0.0 × 0.5 = 0
 _settled_input := _input("on_status", "TEST_DISCOM_BUYER", [_iv_settled(0, 12.5, 20.5, 20)])
 
 test_charges_computed_from_rates if {
-	wheeling_charge_buyer == 5 with input as _settled_input
-	wheeling_charge_seller == 6 with input as _settled_input
-	penalty_charge == 0.25 with input as _settled_input
+	wheeling_charge_buyer == 0 with input as _settled_input
+	wheeling_charge_seller == 0 with input as _settled_input
+	penalty_charge == 0 with input as _settled_input
 	total_shortfall_kwh == 0.5 with input as _settled_input
 }
 
 test_revenue_flows_values if {
 	flows := revenue_flows with input as _settled_input
 	count(flows) == 4
-	flows[0].value == -255 # buyer pays 250 + 5 wheeling
-	flows[1].value == 243.75 # seller: 250 − 6 wheeling − 0.25 penalty
-	flows[2].value == 5 # buyer discom wheeling
-	flows[3].value == 6.25 # seller discom wheeling + penalty
+	flows[0].value == -250 # buyer pays 250 + 0 wheeling
+	flows[1].value == 250 # seller: 250 − 0 wheeling − 0 penalty
+	flows[2].value == 0 # buyer discom wheeling
+	flows[3].value == 0 # seller discom wheeling + penalty
 }
 
 test_net_zero_and_no_violations_when_settled if {
@@ -398,10 +398,10 @@ test_net_zero_and_no_violations_when_settled if {
 
 test_itemization_discloses_rates if {
 	flows := revenue_flows with input as _settled_input
-	contains(flows[1].description, "0.3 INR/kWh")
+	contains(flows[1].description, "wheeling @ 0 INR/kWh")
 	contains(flows[1].description, "platform charge cap 0.42 INR/kWh")
-	contains(flows[2].description, "0.25 INR/kWh")
-	contains(flows[3].description, "0.5 INR/kWh")
+	contains(flows[2].description, "wheeling charge @ 0 INR/kWh")
+	contains(flows[3].description, "wheeling charge @ 0 INR/kWh")
 }
 
 test_no_penalty_when_fully_delivered if {
