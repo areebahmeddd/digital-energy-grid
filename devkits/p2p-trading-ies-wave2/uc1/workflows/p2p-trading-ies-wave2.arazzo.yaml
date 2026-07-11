@@ -173,7 +173,7 @@ workflows:
       - stepId: on-status-settled
         description: >
           Phase 5 — after physical delivery and discom-ledger reconciliation,
-          Seller TP reports allocations + settled qty. The settlementflows
+          Seller TP reports allocations + settled qty. The contractpolicyenforcer
           step evaluates the linked rego and emits revenueFlows.
         operationId: beckn-bpp-caller.onStatus
         requestBody:
@@ -186,14 +186,14 @@ workflows:
   - workflowId: init-blocked-by-policy
     summary: >
       Negative path: the buyer's discom (TEST_DISCOM_OUTSIDER) is not in the
-      seller-discom policy's allowed_buyer_discoms, so the settlementflows
+      seller-discom policy's allowed_buyer_discoms, so the contractpolicyenforcer
       step on seller/bpp/receiver NACKs the init with the policy violation.
     steps:
       - stepId: init-blocked
         description: >
           Same init as select-through-settlement but with the buyerPlatform
           participant's utilityId set to TEST_DISCOM_OUTSIDER. The seller-side
-          settlementflows step evaluates the linked seller-discom rego,
+          contractpolicyenforcer step evaluates the linked seller-discom rego,
           finds a non-empty violations set, and returns a 400 NACK instead of
           an ACK — the trade never forms.
         operationId: beckn-bap-caller.init

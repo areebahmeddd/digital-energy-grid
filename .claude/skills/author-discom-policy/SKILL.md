@@ -141,7 +141,7 @@ query paths exist, and whether each **blocks** (violations) or **produces**
 #                   (select/init/confirm). Query: data.deg.contracts.p2p_trading.violations
 #   revenue_flows — [{role, value, currency, description}], net-zero;
 #                   only defined once settled intervals exist (on_status).
-#                   Injected into the payload by the settlementflows step.
+#                   Injected into the payload by the contractpolicyenforcer step.
 # Everything prefixed `_` is private — do not query it.
 ```
 
@@ -234,7 +234,7 @@ payload.
    ```
 
 2. **Tag a release; use the tag-pinned raw URL.** Never a branch URL — the
-   `settlementflows` step recomputes the hash on every fetch and rejects on
+   `contractpolicyenforcer` step recomputes the hash on every fetch and rejects on
    mismatch. Changing the policy means a new tag + a new record (version).
 
    ```bash

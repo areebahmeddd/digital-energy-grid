@@ -2,7 +2,7 @@
 
 # Multi-Architecture Docker Build Script for DEG Plugins
 # ======================================================================
-# Builds onix-adapter with DEG plugins (degledgerrecorder, settlementflows)
+# Builds onix-adapter with DEG plugins (degledgerrecorder, contractpolicyenforcer)
 # for linux/amd64 and linux/arm64
 #
 # Prerequisites:
@@ -126,7 +126,7 @@ else
 fi
 
 echo "============================================"
-echo "Multi-Arch Build: DEG Plugins (ledgerrecorder + settlementflows)"
+echo "Multi-Arch Build: DEG Plugins (ledgerrecorder + contractpolicyenforcer)"
 echo "============================================"
 echo "DEG Root:        $DEG_ROOT"
 echo "Beckn-ONIX Root: $BECKN_ONIX_ROOT"

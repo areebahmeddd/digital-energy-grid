@@ -1,4 +1,4 @@
-package settlementflows
+package contractpolicyenforcer
 
 // Resolution of rego source from a payload policy URL.
 //

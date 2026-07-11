@@ -1,4 +1,4 @@
-package settlementflows
+package contractpolicyenforcer
 
 import (
 	"fmt"

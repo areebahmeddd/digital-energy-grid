@@ -154,7 +154,29 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          # Buyer-side self-protection: outgoing trade-formation calls are
+          # checked against the seller-discom policy linked in the payload
+          # (contractAttributes.policy); a non-empty `violations` set NACKs
+          # locally before the message is signed and sent. Fail-closed on
+          # these actions — a missing or unfetchable policy also NACKs.
+          - id: contractpolicyenforcer
+            config:
+              actions: "select,init,confirm"
+              violationActions: "select,init,confirm"
+              cacheTTL: "172800"
+              debugLogging: "true"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
+        - contractpolicyenforcer
         - validateSchema
         - checkPolicy
         - addRoute
@@ -304,7 +326,29 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
+        steps:
+          # Reverse-cascade leg: buyerapp forwards on_status acting as a BPP.
+          # Injection-only (violations logged, never enforced): a settled
+          # on_status passing through the buyer side carries the
+          # policy-computed revenue flows; pre-settlement payloads pass
+          # through untouched.
+          - id: contractpolicyenforcer
+            config:
+              actions: "on_status"
+              violationActions: ""
+              cacheTTL: "172800"
+              debugLogging: "true"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
+        - contractpolicyenforcer
         - validateSchema
         - checkPolicy
         - addRoute

@@ -1,7 +1,7 @@
 // Tests for violation enforcement (violationActions): NACK on policy
 // violations and fail-closed behavior on enforced actions.
 // All HTTP traffic goes to local httptest servers.
-package settlementflows
+package contractpolicyenforcer
 
 import (
 	"context"
@@ -57,7 +57,7 @@ func enforceBody(action, policyURL, buyerDiscom string) []byte {
 	}`, action, buyerDiscom, policyURL))
 }
 
-func newEnforcingPlugin(t *testing.T, extra map[string]string) *SettlementFlows {
+func newEnforcingPlugin(t *testing.T, extra map[string]string) *ContractPolicyEnforcer {
 	t.Helper()
 	cfg := map[string]string{
 		"actions":          "init,on_status",
