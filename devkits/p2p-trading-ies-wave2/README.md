@@ -73,6 +73,7 @@ Mode flags in the [buyerapp](./config/local-p2p-trading-buyerapp.yaml) and [sell
 
 ## Related
 
+- [DEG Ledger UI client](../p2p-trading-ies-ledger-ui-client/) — visualizer for discom/platform trade reports
 - [Inter Energy Retailer P2P Trading Implementation Guide](../../docs/implementation-guides/v2/P2P_Trading/Inter_energy_retailer_P2P_trading.md) — Sequence diagram, ledger data structures, reconciliation logic
 - [P2PTrade Schema](../../specification/schema/P2PTrade/v2.0/) — Contract type
 - [EnergyTrade Schema (deprecated)](../../specification/schema/EnergyTrade/v2.0/) — Predecessor; kept for backward compatibility

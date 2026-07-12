@@ -61,4 +61,4 @@ See [`./beckn-signing-kit/`](./beckn-signing-kit/) for language-specific signing
 ## Related
 
 - [P2P Trading Devkit](../p2p-trading/) — pre-router layout with explicit UtilityBPP container, kept as-is
-- [DEG Ledger UI kit](./deg-ledger-ui-kit/) — visualizer for discom/platform trade reports
+- [DEG Ledger UI client](../p2p-trading-ies-ledger-ui-client/) — visualizer for discom/platform trade reports (moved out to its own devkit)
