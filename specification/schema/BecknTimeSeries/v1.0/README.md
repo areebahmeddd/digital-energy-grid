@@ -113,7 +113,7 @@ layer):
   [PR #1125](https://github.com/getkin/kin-openapi/pull/1125) lands)
 - cross-field membership ("every type used in `intervals` is declared in
   `payloadDescriptors`") — same vehicle as above, or run it in Rego;
-  see [`specification/policies/demand_flex_revenue.rego`](../../../policies/demand_flex_revenue.rego)
+  see [`specification/policies/demand_flex_contractpolicy.rego`](../../../policies/demand_flex_contractpolicy.rego)
 - value-conditioned cardinality (e.g. "PRICE rows must have exactly one
   number, FORECAST_BAND must have exactly one point")
 - cross-row alignment ("every interval carries the same set of `type`

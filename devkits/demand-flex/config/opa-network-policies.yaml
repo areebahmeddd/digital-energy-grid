@@ -20,10 +20,10 @@
 networkPolicies:
   default:
     type: file
-    location: ./policies/demand_flex_network.rego
+    location: ./policies/demand_flex_networkpolicy.rego
     query: data.deg.policy.demand_flex_network.violations
 
   nfh.global/testnet-deg:
     type: file
-    location: ./policies/demand_flex_network.rego
+    location: ./policies/demand_flex_networkpolicy.rego
     query: data.deg.policy.demand_flex_network.violations

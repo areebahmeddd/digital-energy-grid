@@ -132,7 +132,7 @@
         "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_revenue.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
       "consideration": [
