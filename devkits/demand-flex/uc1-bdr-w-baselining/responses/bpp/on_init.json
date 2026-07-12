@@ -119,7 +119,7 @@
           }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_revenue.rego",
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_contractpolicy.rego",
           "queryPath": "data.deg.contracts.demand_flex"
         }
       },

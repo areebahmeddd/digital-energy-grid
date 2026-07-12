@@ -17,7 +17,7 @@ info:
     The bid curve is preserved alongside the clearing result for a full audit trail.
 
     Post-event: TPDDL publishes pre-event baselines (5-of-10), then measured
-    actuals. Settlement is computed by the demand_flex_pac_revenue.rego policy
+    actuals. Settlement is computed by the demand_flex_pac_contractpolicy.rego policy
     from baseline, actuals, and cleared allocation. Revenue = delivered flex
     (capped at CLEARED_POWER per interval) × CLEARING_PRICE.
 
