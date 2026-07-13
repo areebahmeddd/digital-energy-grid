@@ -1,6 +1,6 @@
-# Unit tests for demand_flex_pac_revenue.rego pay-as-clear settlement
+# Unit tests for demand-flex-pac-contractpolicy.rego pay-as-clear settlement
 #
-# Run:  cd specification/policies && opa test demand_flex_pac_revenue.rego demand_flex_pac_revenue_test.rego -v
+# Run:  cd specification/policies && opa test demand-flex-pac-contractpolicy.rego test/demand-flex-pac-contractpolicy_test.rego -v
 
 package deg.contracts.demand_flex_pac
 

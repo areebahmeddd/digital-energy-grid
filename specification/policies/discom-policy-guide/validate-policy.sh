@@ -44,7 +44,7 @@ if [ -f "$TEST_FILE" ]; then
   opa test "$POLICY" "$TEST_FILE"
 else
   echo "[2/3] no unit-test file next to the policy ($(basename "$TEST_FILE")) — skipped."
-  echo "      (Recommended: copy the pattern from specification/policies/p2p_trading_ies_wave2_contractpolicy_test.rego)"
+  echo "      (Recommended: copy the pattern from specification/policies/p2p-trading-ies-wave2-contractpolicy_test.rego)"
 fi
 
 # ── 3. Behavioral suite against example payloads ────────────────────────────

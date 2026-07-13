@@ -196,7 +196,7 @@
           { "role": "seller", "participantId": "greenflex-agg" }
         ],
         "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand_flex_pac_contractpolicy.rego",
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego",
           "queryPath": "data.deg.contracts.demand_flex_pac"
         }
       },

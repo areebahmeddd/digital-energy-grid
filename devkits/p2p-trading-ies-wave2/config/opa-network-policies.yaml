@@ -9,8 +9,11 @@
 # Plugin docs:
 #   https://github.com/beckn/beckn-onix/blob/main/pkg/plugin/implementation/opapolicychecker/README.md
 
+# The ./policies directory inside the container is a docker-compose mount of
+# the repository's specification/policies/ — the single source of truth.
+
 networkPolicies:
   default:
     type: file
-    location: ./policies/p2p-trading-ies-wave2_networkpolicy.rego
+    location: ./policies/p2p-trading-ies-wave2-networkpolicy.rego
     query: data.deg.policy.p2p_trading_network.violations

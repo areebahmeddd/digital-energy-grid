@@ -1,12 +1,15 @@
-# P2P Trading Inter-DISCOM – Policy Rules & Tests
+# IES Policies – Rego Rules & Tests
+
+The single source of truth for every policy in this repository. The `p2p-trading-ies-wave2` devkit mounts this directory into its containers (`/app/policies`); the demand-flex devkit still carries a local copy of its network policy.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
 | `p2p-trading-interdiscom.rego` | Policy rules (domain, version, order, catalog, test-ID consistency) |
-| `p2p_trading_ies_wave2_contractpolicy.rego` | Wave2 **seller-discom policy**: buyer-discom allowlist (`violations` → NACK at select/init/confirm) + itemized settlement `revenue_flows` (wheeling, shortfall penalty, platform charge cap) |
-| `p2p_trading_ies_wave2_networkpolicy.rego` | Wave2 network policy run by `opapolicychecker` |
+| `p2p-trading-ies-wave2-contractpolicy.rego` | Wave2 **seller-discom policy**: buyer-discom allowlist (`violations` → NACK at select/init/confirm) + itemized settlement `revenue_flows` (wheeling, shortfall penalty, platform charge cap) |
+| `p2p-trading-ies-wave2-networkpolicy.rego` | Wave2 network policy run by `opapolicychecker` (mounted into the wave2 devkit containers) |
+| `demand-flex-networkpolicy.rego` / `demand-flex-contractpolicy.rego` / `demand-flex-pac-contractpolicy.rego` | Demand-flexibility network + contract policies |
 | [`test/`](./test/) | OPA unit tests (`<policy>_test.rego`) for the policies above |
 | [`discom-policy-guide/`](./discom-policy-guide/) | How a discom authors, versions, and publishes its own policy (checksum, release tag, DeDi record) |
 
@@ -14,7 +17,7 @@ Run each policy against its own test file (a whole-directory `opa test .` trips 
 
 ```bash
 cd specification/policies
-opa test p2p_trading_ies_wave2_contractpolicy.rego test/p2p_trading_ies_wave2_contractpolicy_test.rego -v
+opa test p2p-trading-ies-wave2-contractpolicy.rego test/p2p-trading-ies-wave2-contractpolicy_test.rego -v
 ```
 
 ## Prerequisites

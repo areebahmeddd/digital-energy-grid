@@ -25,7 +25,7 @@
 #      rule transparently passes traffic that lacks a seller
 #      `reportDescriptors` declaration.
 #
-# Canonical source: specification/policies/demand_flex_network.rego
+# Canonical source: specification/policies/demand-flex-networkpolicy.rego
 
 package deg.policy.demand_flex_network
 

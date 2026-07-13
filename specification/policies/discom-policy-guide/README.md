@@ -203,7 +203,7 @@ discoms).
 
 Write `with input as` tests per action, including the "must NOT fire here"
 cases. The wave2 policy's test file
-([`p2p_trading_ies_wave2_contractpolicy_test.rego`](../test/p2p_trading_ies_wave2_contractpolicy_test.rego))
+([`p2p-trading-ies-wave2-contractpolicy_test.rego`](../test/p2p-trading-ies-wave2-contractpolicy_test.rego))
 is the reference pattern — it covers allowlist pass/fail per environment,
 the `enforce_allowlist` switch (`with enforce_allowlist as false`), network
 membership, charge math, shortfall penalty, and action scoping.

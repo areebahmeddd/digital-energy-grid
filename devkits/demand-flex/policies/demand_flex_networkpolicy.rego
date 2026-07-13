@@ -1,6 +1,6 @@
 # DEG Network Policy — Demand Flex
 #
-# Canonical source: specification/policies/demand_flex_network.rego
+# Canonical source: specification/policies/demand-flex-networkpolicy.rego
 # This file is a copy. Keep in sync.
 #
 # Network-level gate evaluated by the BPP's `checkPolicy` step.
