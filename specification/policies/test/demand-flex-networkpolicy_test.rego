@@ -1,6 +1,6 @@
-# Unit tests for demand_flex_network.rego
+# Unit tests for demand-flex-networkpolicy.rego
 #
-# Run:  cd specification/policies && opa test demand_flex_network.rego demand_flex_network_test.rego -v
+# Run:  cd specification/policies && opa test demand-flex-networkpolicy.rego test/demand-flex-networkpolicy_test.rego -v
 
 package deg.policy.demand_flex_network
 

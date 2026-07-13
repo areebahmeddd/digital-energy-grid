@@ -24,7 +24,7 @@
 #   3. Test with `opa test`, publish per the README (checksum → tag → DeDi).
 #
 # The full production version of this template (multi-interval math,
-# completeness checks) is specification/policies/p2p_trading_ies_wave2_contractpolicy.rego.
+# completeness checks) is specification/policies/p2p-trading-ies-wave2-contractpolicy.rego.
 
 package deg.contracts.p2p_trading
 

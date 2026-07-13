@@ -1,6 +1,6 @@
-# Unit tests for p2p_trading_ies_wave2_revenue.rego (seller-discom policy)
+# Unit tests for p2p-trading-ies-wave2-contractpolicy.rego (seller-discom policy)
 #
-# Run:  cd specification/policies && opa test p2p_trading_ies_wave2_revenue.rego p2p_trading_ies_wave2_revenue_test.rego -v
+# Run:  cd specification/policies && opa test p2p-trading-ies-wave2-contractpolicy.rego test/p2p-trading-ies-wave2-contractpolicy_test.rego -v
 
 package deg.contracts.p2p_trading
 

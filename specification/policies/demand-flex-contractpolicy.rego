@@ -268,6 +268,6 @@ violations contains msg if {
 
 # Cross-field type-coverage (every type used in intervals must be
 # declared in payloadDescriptors) lives in the network policy
-# (specification/policies/demand_flex_network.rego) — that's the policy
+# (specification/policies/demand-flex-networkpolicy.rego) — that's the policy
 # the BPP's checkPolicy step actually evaluates. This file's `violations`
 # set is computed only as enrichment metadata, never gates ACK/NACK.

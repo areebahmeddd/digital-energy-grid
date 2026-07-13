@@ -53,7 +53,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-buyerapp.yaml"]
     networks:
       - bap_side
@@ -108,7 +108,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-sellerapp.yaml"]
     networks:
       - bpp_side
@@ -167,7 +167,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-ledger-sellerdiscom.yaml"]
     networks:
       - bpp_side
@@ -213,7 +213,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-ledger-buyerdiscom.yaml"]
     networks:
       - bap_side
@@ -273,7 +273,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-buyerdiscom.yaml"]
     networks:
       - bap_side
@@ -308,7 +308,7 @@ services:
     volumes:
       - ../config:/app/config
       - ../schemas:/app/schemas
-      - ../policies:/app/policies
+      - ../../../specification/policies:/app/policies
     command: ["./server", "--config=/app/config/local-p2p-trading-sellerdiscom.yaml"]
     networks:
       - bpp_side

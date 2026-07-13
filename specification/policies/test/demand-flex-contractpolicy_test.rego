@@ -1,6 +1,6 @@
-# Unit tests for demand_flex_revenue.rego role-based settlement
+# Unit tests for demand-flex-contractpolicy.rego role-based settlement
 #
-# Run:  cd specification/policies && opa test demand_flex_revenue.rego demand_flex_revenue_test.rego -v
+# Run:  cd specification/policies && opa test demand-flex-contractpolicy.rego test/demand-flex-contractpolicy_test.rego -v
 
 package deg.contracts.demand_flex
 
