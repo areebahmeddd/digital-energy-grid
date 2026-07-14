@@ -75,7 +75,7 @@
           "status": { "code": "ACTIVE" },
           "commitmentIds": ["commitment-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1/context.jsonld",
+            "@context": "https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld",
             "@type": "DatasetFulfillment",
             "fulfillment:accessMethod": "INLINE",
             "fulfillment:accessUrl": "https://data.example.com/ds-resource-001.json",

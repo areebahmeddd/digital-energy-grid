@@ -75,7 +75,7 @@
           "status": { "code": "ACTIVE" },
           "commitmentIds": ["commitment-stream-mqtt-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
+            "@context": "https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld",
             "@type": "DatasetFulfillment",
             "fulfillment:accessMethod": "MQTT",
             "fulfillment:accessStart": "2026-06-06T09:05:00Z"

@@ -10,7 +10,7 @@
     "transactionId": "f7a8b9c0-d1e2-3456-f123-567890123456",
     "messageId": "f7a8b9c0-d1e2-3456-f123-567890123457",
     "timestamp": "2026-05-07T09:03:05Z",
-    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"]
+    "schemaContext": ["https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -27,7 +27,7 @@
             "descriptor": {"name": "Monthly S3 live-append subscription"},
             "resourceIds": ["stream-meter-history-datalake-s3"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
+              "@context": "https://schema.beckn.io/DatasetItem/1.1/context.jsonld",
               "@type": "DatasetItem",
               "schema:identifier": "stream-meter-history-datalake-s3",
               "schema:name": "Meter History Data Lake — S3",
@@ -60,7 +60,7 @@
           "status": {"code": "ACTIVE"},
           "commitmentIds": ["commitment-stream-datalake-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
+            "@context": "https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld",
             "@type": "DatasetFulfillment",
             "fulfillment:accessMethod": "DATA_LAKE",
             "fulfillment:accessStart": "2026-05-07T09:03:05Z",
