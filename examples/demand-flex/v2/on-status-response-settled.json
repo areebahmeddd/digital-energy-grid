@@ -11,10 +11,10 @@
     "messageId": "msg-on-status-settled-001",
     "timestamp": "2026-04-01T11:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+      "https://schema.beckn.io/DemandFlexPerformance/2.0/context.jsonld",
+      "https://schema.beckn.io/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.beckn.io/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.beckn.io/DEGContract/2.0/context.jsonld",
       "https://schema.beckn.io/Quantity/context.jsonld"
     ]
   },
@@ -41,7 +41,7 @@
                 "@type": "Quantity"
               },
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.beckn.io/DemandFlexNeed/2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {
@@ -59,7 +59,7 @@
               "flex-need-north-delhi-apr1"
             ],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -109,7 +109,7 @@
             "commitment-flex-001"
           ],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.beckn.io/DemandFlexPerformance/2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "5of10",
@@ -134,7 +134,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.beckn.io/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {

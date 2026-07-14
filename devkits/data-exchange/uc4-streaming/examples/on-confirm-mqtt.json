@@ -37,7 +37,7 @@
                 "dataset:streamProtocol": "MQTT",
                 "dataset:messageFormat": "JSON",
                 "dataset:updateFrequency": "PT15M",
-                "dataset:messageSchemaUrl": "https://raw.githubusercontent.com/beckn/DEG/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml"
+                "dataset:messageSchemaUrl": "https://schema.beckn.io/BecknTimeSeries/1.0/attributes.yaml"
               }
             }
           }
@@ -47,12 +47,12 @@
         {
           "id": "consideration-stream-001",
           "status": {"code": "ACTIVE"},
-          "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 12000.0}
+          "considerationAttributes": {"@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 12000.0}
         }
       ],
       "participants": [
-        {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "intelligrid-amisp-001", "name": "IntelliGrid AMI Services"}},
-        {"id": "bescom-analytics-001", "descriptor": {"name": "BESCOM Analytics Team"}, "participantAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Organization/v2.0/context.jsonld", "@type": "Organization", "id": "bescom-analytics-001", "name": "BESCOM Analytics Team"}}
+        {"id": "intelligrid-amisp-001", "descriptor": {"name": "IntelliGrid AMI Services"}, "participantAttributes": {"@context": "https://schema.beckn.io/Organization/2.0/context.jsonld", "@type": "Organization", "id": "intelligrid-amisp-001", "name": "IntelliGrid AMI Services"}},
+        {"id": "bescom-analytics-001", "descriptor": {"name": "BESCOM Analytics Team"}, "participantAttributes": {"@context": "https://schema.beckn.io/Organization/2.0/context.jsonld", "@type": "Organization", "id": "bescom-analytics-001", "name": "BESCOM Analytics Team"}}
       ],
       "performance": [
         {
@@ -88,7 +88,7 @@
           "considerationId": "consideration-stream-001",
           "status": "COMPLETE",
           "settlementAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
+            "@context": "https://schema.beckn.io/Payment/2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
             "beckn:amount": {"currency": "INR", "value": 12000.0},

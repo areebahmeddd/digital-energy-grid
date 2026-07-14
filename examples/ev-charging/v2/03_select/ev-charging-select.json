@@ -61,7 +61,7 @@
         }
       ],
       "beckn:orderAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingSession/v1.0/context.jsonld",
+        "@context": "https://schema.beckn.io/EvChargingSession/1.0/context.jsonld",
         "@type": "ChargingSession",
         "buyerFinderFee": {
           "feeType": "PERCENTAGE",

@@ -38,7 +38,7 @@
                 "dataset:streamProtocol": "MQTT",
                 "dataset:messageFormat": "JSON",
                 "dataset:updateFrequency": "PT15M",
-                "dataset:messageSchemaUrl": "https://raw.githubusercontent.com/beckn/DEG/main/specification/schema/BecknTimeSeries/v1.0/attributes.yaml"
+                "dataset:messageSchemaUrl": "https://schema.beckn.io/BecknTimeSeries/1.0/attributes.yaml"
               }
             }
           },
@@ -113,7 +113,7 @@
               {
                 "id": "consideration-mqtt-monthly",
                 "status": {"code": "ACTIVE"},
-                "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 12000}
+                "considerationAttributes": {"@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 12000}
               }
             ]
           },
@@ -126,7 +126,7 @@
               {
                 "id": "consideration-kafka-monthly",
                 "status": {"code": "ACTIVE"},
-                "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 25000}
+                "considerationAttributes": {"@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 25000}
               }
             ]
           },
@@ -139,7 +139,7 @@
               {
                 "id": "consideration-api-monthly",
                 "status": {"code": "ACTIVE"},
-                "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 8000}
+                "considerationAttributes": {"@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 8000}
               }
             ]
           },
@@ -152,7 +152,7 @@
               {
                 "id": "consideration-datalake-monthly",
                 "status": {"code": "ACTIVE"},
-                "considerationAttributes": {"@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 18000}
+                "considerationAttributes": {"@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld", "@type": "PriceSpecification", "currency": "INR", "value": 18000}
               }
             ]
           }

@@ -68,7 +68,7 @@
           "id": "consideration-ami-existing-contract",
           "status": { "code": "ACTIVE" },
           "considerationAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
+            "@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld",
             "@type": "PriceSpecification",
             "currency": "INR",
             "value": 0,

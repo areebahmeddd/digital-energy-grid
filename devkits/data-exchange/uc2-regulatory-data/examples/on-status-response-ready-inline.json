@@ -90,7 +90,7 @@
           "considerationId": "consideration-arr-regulatory-mandate",
           "status": "COMPLETE",
           "settlementAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
+            "@context": "https://schema.beckn.io/Payment/2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
             "beckn:amount": {"currency": "INR", "value": 0}

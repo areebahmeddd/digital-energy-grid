@@ -92,7 +92,7 @@ modules:
               outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
-              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputContextURL: "https://schema.beckn.io/RevenueFlow/2.0/context.jsonld"
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
           - id: degledgerrecorder
@@ -280,7 +280,7 @@ modules:
               outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
-              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputContextURL: "https://schema.beckn.io/RevenueFlow/2.0/context.jsonld"
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
           - id: degledgerrecorder
@@ -384,7 +384,7 @@ modules:
               outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
               outputMode: "jsonld"
               outputType: "RevenueFlow"
-              outputContextURL: "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/RevenueFlow/v2.0/context.jsonld"
+              outputContextURL: "https://schema.beckn.io/RevenueFlow/2.0/context.jsonld"
               outputArrayKey: "revenueFlows"
               entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:

@@ -28,7 +28,7 @@
         "beckn:mode": "RESERVATION",
         "trackingAction": {"@type": "beckn:TrackAction", "target": {"@type": "schema:EntryPoint", "url": "https://track.bluechargenet-aggregator.io/session/SESSION-9876543210"}},
         "beckn:deliveryAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingSession/v1.0/context.jsonld",
+          "@context": "https://schema.beckn.io/EvChargingSession/1.0/context.jsonld",
           "@type": "ChargingSession",
           "sessionStatus": "ACTIVE",
           "chargingTelemetry": [
