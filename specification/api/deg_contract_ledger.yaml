@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: DEG Ledger Service API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     DEG Ledger Service stores an immutable, multi-party ledger view of a DEG trade lifecycle.
 
@@ -106,6 +106,8 @@ paths:
                     - tradeType: ENERGY
                       tradeQty: 12.5
                       tradeUnit: KWH
+                      pricePerUnit: 14.5
+                      priceCurrency: INR
                   clientReference: "buyer-create-0001"
       responses:
         "200":
@@ -210,6 +212,34 @@ paths:
               schema:
                 $ref: "#/components/schemas/ledgerGetResponse"
               examples:
+                single:
+                  summary: One record including per-line price and networkId
+                  value:
+                    records:
+                      - creationTime: "2026-01-15T10:20:31Z"
+                        recordId: "rec-9f8a2c"
+                        transactionId: "tx-123"
+                        orderItemId: "item-1"
+                        platformIdBuyer: "bap.buyer-platform.example"
+                        platformIdSeller: "bpp.seller-platform.example"
+                        discomIdBuyer: "DISCOM_A"
+                        discomIdSeller: "DISCOM_B"
+                        buyerId: "CA-0000123"
+                        sellerId: "DER-9981"
+                        tradeTime: "2026-01-15T10:20:30Z"
+                        deliveryStartTime: "2026-01-15T11:00:00Z"
+                        deliveryEndTime: "2026-01-15T11:30:00Z"
+                        tradeDetails:
+                          - tradeType: ENERGY
+                            tradeQty: 12.5
+                            tradeUnit: KWH
+                            pricePerUnit: 14.5
+                            priceCurrency: INR
+                        statusBuyerDiscom: COMPLETED
+                        statusSellerDiscom: COMPLETED
+                        networkId: "indiaenergystack.in/test-ies-p2p-trading-network"
+                        rowDigest: "sha256:6d7a...f09c"
+                    count: 1
                 empty:
                   value:
                     records: []
@@ -577,6 +607,12 @@ components:
           $ref: "#/components/schemas/tradeType"
         tradeUnit:
           $ref: "#/components/schemas/tradeUnit"
+        pricePerUnit:
+          type: number
+          description: Agreed price per tradeUnit (e.g., per KWH) for this trade line
+        priceCurrency:
+          type: string
+          description: ISO 4217 currency code for pricePerUnit (e.g., INR)
 
     validationMetric:
       type: object
@@ -666,6 +702,14 @@ components:
           $ref: "#/components/schemas/tradeStatus"
         statusSellerDiscom:
           $ref: "#/components/schemas/tradeStatus"
+        networkId:
+          type: string
+          description: >
+            Identifier of the network the trade was executed on
+            (e.g., "indiaenergystack.in/p2p-trading-network").
+            By convention, a network name segment beginning with "test"
+            (e.g., "indiaenergystack.in/test-ies-p2p-trading-network")
+            marks the trade as a test trade.
         rowDigest:
           type: string
           description: Digest of the canonical row state (implementation-specific)
