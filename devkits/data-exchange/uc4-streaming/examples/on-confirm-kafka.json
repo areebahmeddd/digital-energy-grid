@@ -10,7 +10,7 @@
     "transactionId": "d4e5f6a7-b8c9-0123-def0-234567890123",
     "messageId": "d4e5f6a7-b8c9-0123-def0-234567890124",
     "timestamp": "2026-05-07T09:03:05Z",
-    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"]
+    "schemaContext": ["https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -27,7 +27,7 @@
             "descriptor": {"name": "Monthly Kafka consumer subscription"},
             "resourceIds": ["stream-grid-events-kafka-india"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
+              "@context": "https://schema.beckn.io/DatasetItem/1.1/context.jsonld",
               "@type": "DatasetItem",
               "schema:identifier": "stream-grid-events-kafka-india",
               "schema:name": "Grid Event Stream — India",
@@ -60,7 +60,7 @@
           "status": {"code": "ACTIVE"},
           "commitmentIds": ["commitment-stream-kafka-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
+            "@context": "https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld",
             "@type": "DatasetFulfillment",
             "fulfillment:accessMethod": "KAFKA",
             "fulfillment:accessStart": "2026-05-07T09:03:05Z",

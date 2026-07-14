@@ -11,7 +11,7 @@
     "messageId": "sdledger-status-msg-001",
     "timestamp": "2026-04-26T05:35:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+      "https://schema.beckn.io/DatasetItem/1.1/context.jsonld",
       "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld"
     ]
   },
@@ -29,7 +29,7 @@
               "descriptor": {"name": "Meter energy consumption request - seller discom"},
               "quantity": {"@type": "Quantity", "unitText": "request", "unitCode": "EA", "value": "1"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+                "@context": "https://schema.beckn.io/DatasetItem/1.1/context.jsonld",
                 "@type": "DatasetItem",
                 "schema:identifier": "ds-meter-request-seller-001",
                 "schema:name": "Meter energy consumption request - seller discom",

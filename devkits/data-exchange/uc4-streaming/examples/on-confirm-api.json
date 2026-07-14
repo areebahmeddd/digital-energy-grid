@@ -10,7 +10,7 @@
     "transactionId": "e5f6a7b8-c9d0-1234-ef01-345678901234",
     "messageId": "e5f6a7b8-c9d0-1234-ef01-345678901235",
     "timestamp": "2026-05-07T09:03:05Z",
-    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld"]
+    "schemaContext": ["https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -27,7 +27,7 @@
             "descriptor": {"name": "Monthly API subscription — 60 req/min"},
             "resourceIds": ["stream-solar-forecast-api"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1.1/context.jsonld",
+              "@context": "https://schema.beckn.io/DatasetItem/1.1/context.jsonld",
               "@type": "DatasetItem",
               "schema:identifier": "stream-solar-forecast-api",
               "schema:name": "Solar Generation Forecast API",
@@ -55,7 +55,7 @@
           "status": {"code": "ACTIVE"},
           "commitmentIds": ["commitment-stream-api-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetFulfillment/v1.1/context.jsonld",
+            "@context": "https://schema.beckn.io/DatasetFulfillment/1.1/context.jsonld",
             "@type": "DatasetFulfillment",
             "fulfillment:accessMethod": "API",
             "fulfillment:accessStart": "2026-05-07T09:03:05Z",
