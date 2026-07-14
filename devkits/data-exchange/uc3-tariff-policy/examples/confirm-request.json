@@ -38,7 +38,7 @@
           "id": "consideration-tariff-public-good",
           "status": {"code": "ACTIVE"},
           "considerationAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/PriceSpecification/v2.1/context.jsonld",
+            "@context": "https://schema.beckn.io/PriceSpecification/2.1/context.jsonld",
             "@type": "PriceSpecification",
             "currency": "INR",
             "value": 0,
@@ -54,7 +54,7 @@
           "considerationId": "consideration-tariff-public-good",
           "status": "COMPLETE",
           "settlementAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/schemas/refs/heads/main/schema/Payment/v2.0/context.jsonld",
+            "@context": "https://schema.beckn.io/Payment/2.0/context.jsonld",
             "@type": "Payment",
             "beckn:paymentStatus": "COMPLETED",
             "beckn:amount": {"currency": "INR", "value": 0}

@@ -82,7 +82,7 @@
         "beckn:id": "fulfillment-001",
         "beckn:mode": "RESERVATION",
         "beckn:deliveryAttributes": {
-          "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/EvChargingSession/v1.0/context.jsonld",
+          "@context": "https://schema.beckn.io/EvChargingSession/1.0/context.jsonld",
           "@type": "ChargingSession",
           "connectorType": "CCS2",
           "maxPowerKW": 50,
