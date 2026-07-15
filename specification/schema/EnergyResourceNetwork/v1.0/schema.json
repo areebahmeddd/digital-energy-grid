@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceNetwork/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceNetwork/v1.0",
   "title": "EnergyResourceNetwork",
   "description": "Typed schema for grid-network infrastructure energy resources acting as topology anchors (distribution transformer, busbar, feeder, microgrid). CIM: DT → cim:PowerTransformer, BUS → cim:BusbarSection, FEEDER → cim:Feeder, MICROGRID → cim:Substation (IEC 61970-301). Common fields inherited from EnergyResourceCommon/v1.0.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceNetworkAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

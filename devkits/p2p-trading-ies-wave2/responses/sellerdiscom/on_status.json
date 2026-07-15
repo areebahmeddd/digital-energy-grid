@@ -11,11 +11,11 @@
     "messageId": "0027cb22-edf7-4545-9c97-45cc11460750",
     "timestamp": "2026-04-26T06:30:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld"
+      "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -44,7 +44,7 @@
                 "unitQuantity": 35.0
               },
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
                 "type": "SOLAR",
                 "id": "TEST_METER_SELLER_001"
@@ -58,7 +58,7 @@
             ]
           },
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {
               "start": "2026-04-26T04:30:00Z",
@@ -188,7 +188,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
@@ -218,7 +218,7 @@
           "role": "sellerPlatform",
           "participantId": "sellerapp.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_SELLER_001",
             "utilityId": "TEST_DISCOM_SELLER",
@@ -230,7 +230,7 @@
           "role": "buyerPlatform",
           "participantId": "buyerapp.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_BUYER_001",
             "utilityId": "TEST_DISCOM_BUYER",
@@ -242,7 +242,7 @@
           "role": "buyerDiscom",
           "participantId": "buyer-discom-ledger.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
             "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
@@ -254,7 +254,7 @@
           "role": "sellerDiscom",
           "participantId": "seller-discom-ledger.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUrl": "http://seller-discom-ledger.example.com:9000",

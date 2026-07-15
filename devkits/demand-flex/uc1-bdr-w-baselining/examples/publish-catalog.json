@@ -8,7 +8,7 @@
     "transactionId": "b1c2d3e4-f5a6-7890-abcd-ef1122334455",
     "messageId": "c1d2e3f4-a5b6-7890-abcd-ef2233445566",
     "timestamp": "2026-03-28T06:00:00Z",
-    "schemaContext": ["https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld", "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld", "https://schema.beckn.io/Quantity/context.jsonld"]
+    "schemaContext": ["https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld", "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld", "https://schema.nfh.global/Quantity/context.jsonld"]
   },
   "message": {
     "publishDirectives": [{"catalogId": "catalog-flex-tpddl-2026-04", "catalogType": "REGULAR", "updateMode": "MERGE", "visibleTo": ["nfh.global/testnet-deg"]}],
@@ -24,7 +24,7 @@
             "id": "flex-need-north-delhi-apr1",
             "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
             "resourceAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
               "@type": "DemandFlexNeed",
               "direction": "REDUCE",
               "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
@@ -42,10 +42,10 @@
             "validity": {"startDate": "2026-03-28T00:00:00Z", "endDate": "2026-04-01T08:30:00Z"},
             "availableTo": [],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "contractAttributes": {
-                "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}],
                 "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}

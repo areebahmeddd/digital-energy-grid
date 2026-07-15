@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../) · [DEGContract](../README.md)
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 components.schemas.`DEGContract` (JSON Schema 2020-12 body) |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.beckn.io/deg/DEGContract/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.nfh.global/deg/DEGContract/v2.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `DEGContract` terms |
 
 ## Properties

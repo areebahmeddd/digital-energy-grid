@@ -26,8 +26,8 @@ This schema provides the core metering and billing types used by the Meter Data 
 |----------|-----|
 | Namespace IRI | `http://naesb.org/espi#` |
 | Source XSD | `https://www.naesb.org/espi.xsd` |
-| JSON-LD context | `https://schema.beckn.io/espiGreenButton/v1.0/context.jsonld` |
-| RDF vocabulary | `https://schema.beckn.io/espiGreenButton/v1.0/vocab.jsonld` |
+| JSON-LD context | `https://schema.nfh.global/espiGreenButton/v1.0/context.jsonld` |
+| RDF vocabulary | `https://schema.nfh.global/espiGreenButton/v1.0/vocab.jsonld` |
 | Green Button docs | [utilityapi.com/docs/greenbutton/xml](https://utilityapi.com/docs/greenbutton/xml) |
 
 ## Types

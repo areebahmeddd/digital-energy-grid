@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceLoad/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceLoad/v1.1",
   "title": "EnergyResourceLoad",
   "description": "Typed schema for controllable load energy resources. v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport as QuantitativeValue). CIM: EnergyConsumer / ConformLoad (IEC 61970-301).",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceLoadAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

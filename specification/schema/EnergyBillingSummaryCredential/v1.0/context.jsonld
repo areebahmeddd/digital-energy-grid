@@ -1,7 +1,7 @@
 {
     "@context": [
-        "https://schema.beckn.io/espiGreenButton/v1.0/context.jsonld",
-        "https://schema.beckn.io/EnergyCustomerProfile/context.jsonld",
+        "https://schema.nfh.global/espiGreenButton/v1.0/context.jsonld",
+        "https://schema.nfh.global/EnergyCustomerProfile/context.jsonld",
         {
             "@version": 1.1,
             "@protected": true,
@@ -9,7 +9,7 @@
             "type": "@type",
             "schema": "https://schema.org/",
             "xsd": "http://www.w3.org/2001/XMLSchema#",
-            "deg": "https://schema.beckn.io/deg/",
+            "deg": "https://schema.nfh.global/deg/",
 
             "EnergyBillingSummaryCredential": {
                 "@id": "deg:EnergyBillingSummaryCredential",

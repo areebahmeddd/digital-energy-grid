@@ -1,4 +1,4 @@
-$id: "https://schema.beckn.io/EnergyGift/v0.3"
+$id: "https://schema.nfh.global/EnergyGift/v0.3"
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: EnergyGift
 description: >

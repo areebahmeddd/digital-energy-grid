@@ -5,7 +5,7 @@
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "beckn": "https://schema.beckn.io/core/v2.0/",
+    "beckn": "https://schema.nfh.global/core/v2.0/",
     "name": "schema:name",
     "description": "schema:description",
     "price": "schema:price",
@@ -88,13 +88,13 @@
     "CONGESTION": "deg:CurtailmentReasonCongestion",
     "MAINTENANCE": "deg:CurtailmentReasonMaintenance",
     "OTHER": "deg:CurtailmentReasonOther",
-    "deg": "https://schema.beckn.io/deg/EnergyTrade/v2.0/",
+    "deg": "https://schema.nfh.global/deg/EnergyTrade/v2.0/",
     "owl": "http://www.w3.org/2002/07/owl#"
   },
   "@graph": [
     {
       "@id": "deg:EnergyTrade",
-      "owl:equivalentClass": { "@id": "https://schema.beckn.io/deg/P2PTrade/v2.0#P2PTrade" },
+      "owl:equivalentClass": { "@id": "https://schema.nfh.global/deg/P2PTrade/v2.0#P2PTrade" },
       "@comment": "deg:EnergyTrade is deprecated and equivalent to deg:P2PTrade. All new implementations should use P2PTrade/v2.0. See beckn:Order owl:equivalentClass beckn:Contract for the parent-class migration."
     }
   ]

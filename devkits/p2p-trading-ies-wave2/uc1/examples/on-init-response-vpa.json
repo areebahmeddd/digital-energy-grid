@@ -11,13 +11,13 @@
     "messageId": "f3a91c4e-7d02-4b88-a315-9e52d0c84f17",
     "timestamp": "2026-04-25T10:05:05Z",
     "schemaContext": [
-      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -32,12 +32,12 @@
               "id": "energy-resource-solar-001",
               "descriptor": {"name": "Solar energy slot - 2026-04-26 10:00-12:00 IST"},
               "quantity": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 35.0},
-              "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}
+              "resourceAttributes": {"@context": "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}
             }
           ],
           "offer": {"id": "offer-p2p-001", "resourceIds": ["energy-resource-solar-001"]},
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
@@ -52,7 +52,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
@@ -63,16 +63,16 @@
         "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}
       },
       "participants": [
-        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
-        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
-        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
-        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
+        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
+        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_BUYER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
+        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
+        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
       "consideration": [
         {
           "id": "payment-term-p2p-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 481.0},
             "settlementStatus": "PENDING",

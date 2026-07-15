@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceCommon/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceCommon/v1.1",
   "title": "EnergyResourceCommon",
   "description": "Canonical base schemas shared by all typed EnergyResource kinds. v1.1: power fields use QuantitativeValue {value, unit} with short unit aliases (kW, MW, kWh, kVA, kVAR, kV) mapped to QUDT IRIs via JSON-LD context. Contains typed QV variants (QVPower, QVEnergy, QVApparentPower, QVReactivePower, QVVoltage), EnergyResourceCommonAttributes, and EnergyResourceCommon. Optional admin fields on the attributes bag: serialNumber (CIM EndDeviceInfo.serialNumber), inspection (IEEE 1547-2018 / CEA commissioning record), aggregator (IEEE 2030.5 / IEC 61850-7-420 demand-flex enrolment).",
   "$defs": {
@@ -72,7 +72,7 @@
         "maxImport":         { "$ref": "#/$defs/QVPower",  "description": "Maximum power drawn from the grid (absorbs/charges). Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
-        "location":          { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." },
+        "location":          { "$ref": "https://schema.nfh.global/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." },
         "serialNumber":      { "type": "string", "minLength": 1, "description": "Manufacturer-assigned device serial number from the equipment nameplate. Distinct from id (the network-issued DID). CIM: cim:EndDeviceInfo.serialNumber (IEC 61968-9)." },
         "inspection": {
           "type": "object",
@@ -111,7 +111,7 @@
           "items": {
             "oneOf": [
               { "type": "string", "minLength": 1 },
-              { "$ref": "https://schema.beckn.io/EnergyResource/v2.1#/components/schemas/EnergyResource" }
+              { "$ref": "https://schema.nfh.global/EnergyResource/v2.1#/components/schemas/EnergyResource" }
             ]
           }
         },

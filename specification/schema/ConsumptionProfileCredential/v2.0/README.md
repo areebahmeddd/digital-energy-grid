@@ -1,6 +1,6 @@
 # ConsumptionProfileCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/ConsumptionProfileCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/ConsumptionProfileCredential/v2.0`
 
 **Status:** Current
 

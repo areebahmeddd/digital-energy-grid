@@ -529,7 +529,7 @@ components:
           x-jsonld:
             '@id': logReference
       deprecated: true
-      x-supersededBy: https://schema.beckn.io/EnergyProgramEnrollment/v2.0
+      x-supersededBy: https://schema.nfh.global/EnergyProgramEnrollment/v2.0
       x-owl-equivalentClass: deg:EnergyProgramEnrollment
       $defs:
         VerifiableCredential:

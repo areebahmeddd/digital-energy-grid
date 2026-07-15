@@ -2,7 +2,7 @@
 
 Canonical base schemas shared by all typed `EnergyResource` kinds.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceCommon/v1.1`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceCommon/v1.1`
 
 ---
 
@@ -69,7 +69,7 @@ The attribute bag base inherited inside every kind's `<Kind>Attributes` object v
 ```yaml
 EnergyResourceMeter:
   allOf:
-    - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
+    - $ref: "https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon"
     - type: object
       properties:
         type:
@@ -83,7 +83,7 @@ EnergyResourceMeter:
 ```yaml
 EnergyResourceMeterAttributes:
   allOf:
-    - $ref: "https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
+    - $ref: "https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes"
     - type: object
       additionalProperties: true
       properties:
@@ -97,10 +97,10 @@ EnergyResourceMeterAttributes:
 
 | Kind | Canonical IRI | Types |
 |---|---|---|
-| EnergyResourceMeter | `schema.beckn.io/EnergyResourceMeter/v1.1` | `METER` |
-| EnergyResourceGenerator | `schema.beckn.io/EnergyResourceGenerator/v1.1` | `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` |
-| EnergyResourceStorage | `schema.beckn.io/EnergyResourceStorage/v1.1` | `BESS` |
-| EnergyResourceEVCharger | `schema.beckn.io/EnergyResourceEVCharger/v1.1` | `EV_CHARGER`, `EV_V2G` |
-| EnergyResourceInverter | `schema.beckn.io/EnergyResourceInverter/v1.1` | `INVERTER` |
-| EnergyResourceLoad | `schema.beckn.io/EnergyResourceLoad/v1.1` | `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` |
-| EnergyResourceNetwork | `schema.beckn.io/EnergyResourceNetwork/v1.1` | `DT`, `BUS`, `FEEDER`, `MICROGRID` |
+| EnergyResourceMeter | `schema.nfh.global/EnergyResourceMeter/v1.1` | `METER` |
+| EnergyResourceGenerator | `schema.nfh.global/EnergyResourceGenerator/v1.1` | `SOLAR_PV`, `WIND`, `HYDRO`, `BIOGAS`, `CHP`, `FUEL_CELL` |
+| EnergyResourceStorage | `schema.nfh.global/EnergyResourceStorage/v1.1` | `BESS` |
+| EnergyResourceEVCharger | `schema.nfh.global/EnergyResourceEVCharger/v1.1` | `EV_CHARGER`, `EV_V2G` |
+| EnergyResourceInverter | `schema.nfh.global/EnergyResourceInverter/v1.1` | `INVERTER` |
+| EnergyResourceLoad | `schema.nfh.global/EnergyResourceLoad/v1.1` | `SMART_HVAC`, `SMART_WATER_HEATER`, `CONTROLLABLE_LOAD` |
+| EnergyResourceNetwork | `schema.nfh.global/EnergyResourceNetwork/v1.1` | `DT`, `BUS`, `FEEDER`, `MICROGRID` |

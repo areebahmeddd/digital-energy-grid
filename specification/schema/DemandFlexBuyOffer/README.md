@@ -2,9 +2,9 @@
 
 Offer attributes for demand-flex contracts.
 
-**Canonical IRI:** `https://schema.beckn.io/DemandFlexBuyOffer/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/DemandFlexBuyOffer/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DemandFlexBuyOffer/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DemandFlexBuyOffer/v2.0/`
 
 ---
 

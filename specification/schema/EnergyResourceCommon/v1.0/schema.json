@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceCommon/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceCommon/v1.0",
   "title": "EnergyResourceCommon",
   "description": "Canonical base schemas shared by all typed EnergyResource kinds. Contains EnergyResourceCommon (structural envelope: id, type, subResources, parentResources, attributes) and EnergyResourceCommonAttributes (attributes bag base: make, model, maxExportKw, maxImportKw, ratedPowerKw, telemetryProvider, commissioningDate, location).",
   "$defs": {
@@ -17,7 +17,7 @@
         "maxImportKw": { "type": "number", "minimum": 0, "description": "Maximum power drawn from the grid (absorbs / charges), kW. Always ≥0. CIM: PowerElectronicsConnection.maxP (absorption)." },
         "telemetryProvider": { "type": "string", "description": "Vendor API / data source identifier for telemetry." },
         "commissioningDate": { "type": "string", "format": "date-time", "description": "ISO 8601 date-time the asset was commissioned." },
-        "location": { "$ref": "https://schema.beckn.io/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
+        "location": { "$ref": "https://schema.nfh.global/Location/2.0/schema.json#/$defs/Location", "description": "Physical location of this asset." }
       }
     },
     "EnergyResourceCommon": {
@@ -41,7 +41,7 @@
           "items": {
             "oneOf": [
               { "type": "string", "minLength": 1 },
-              { "$ref": "https://schema.beckn.io/EnergyResource/v2.0#/components/schemas/EnergyResource" }
+              { "$ref": "https://schema.nfh.global/EnergyResource/v2.0#/components/schemas/EnergyResource" }
             ]
           }
         },

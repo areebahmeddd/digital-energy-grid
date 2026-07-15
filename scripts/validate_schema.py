@@ -24,12 +24,12 @@ finds the right schema by content, not by URL path heuristics.
 Supported URL patterns
 ----------------------
   GitHub raw    : .../refs/heads/<branch>/schema/<Name>/<ver>/attributes.yaml
-  schema.beckn.io : schema.beckn.io/<Name>/<ver>/attributes.yaml
+  schema.nfh.global : schema.nfh.global/<Name>/<ver>/attributes.yaml
 
 External $ref resolution
 ------------------------
 The referencing.Registry is configured with an on-demand URL retriever so that
-$ref values pointing to schema.beckn.io (e.g. Address/v2.0, GeoJSONGeometry/v2.0)
+$ref values pointing to schema.nfh.global (e.g. Address/v2.0, GeoJSONGeometry/v2.0)
 are fetched and resolved automatically without pre-registration.
 
 Usage
@@ -97,7 +97,7 @@ def extract_schema_info_from_url(url):
 
     Supports:
       GitHub : .../schema/<Name>/<ver>/attributes.yaml
-      beckn  : schema.beckn.io/<Name>/<ver>/attributes.yaml
+      beckn  : schema.nfh.global/<Name>/<ver>/attributes.yaml
     Returns (None, None) when neither pattern matches.
     """
     m = re.search(r'/schema/([^/]+)/([^/]+)/attributes\.yaml', url)
@@ -112,7 +112,7 @@ def extract_schema_info_from_url(url):
 def extract_branch_from_context_url(context_url):
     """
     Extract the Git branch embedded in a GitHub raw @context URL.
-    Returns None for canonical URLs (e.g. schema.beckn.io) with no branch.
+    Returns None for canonical URLs (e.g. schema.nfh.global) with no branch.
     """
     m = re.search(r'/refs/heads/([^/]+)/(?:specification/)?schema/', context_url)
     if m:
@@ -142,15 +142,15 @@ def _retrieve_url(uri):
     Fetch and parse a schema from *uri* on demand.
 
     The referencing.Registry calls this whenever it encounters an unregistered
-    $ref URI (e.g. https://schema.beckn.io/Address/v2.0/attributes.yaml#/…).
+    $ref URI (e.g. https://schema.nfh.global/Address/v2.0/attributes.yaml#/…).
 
-    Bare schema.beckn.io URLs without a filename extension (e.g. the allOf
-    $ref "https://schema.beckn.io/EnergyCredential/v2.0") are probed first
+    Bare schema.nfh.global URLs without a filename extension (e.g. the allOf
+    $ref "https://schema.nfh.global/EnergyCredential/v2.0") are probed first
     with /attributes.yaml, then /schema.json.
     """
     uri_str = str(uri)
 
-    if "schema.beckn.io" in uri_str and not uri_str.endswith((".yaml", ".json")):
+    if "schema.nfh.global" in uri_str and not uri_str.endswith((".yaml", ".json")):
         candidates = [f"{uri_str}/attributes.yaml", f"{uri_str}/schema.json"]
     else:
         candidates = [uri_str]
@@ -198,7 +198,7 @@ def load_schema_for_context_url(context_url, attribute_schemas_map, registry_lis
 
     Converts context.jsonld → attributes.yaml, fetches the schema, and
     registers it in the referencing Registry.  Works with both GitHub branch
-    URLs and canonical schema.beckn.io URLs.
+    URLs and canonical schema.nfh.global URLs.
 
     Returns (schema_name, schema_data, attributes_url), or None on failure.
     """

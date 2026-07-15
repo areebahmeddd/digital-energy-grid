@@ -11,13 +11,13 @@
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef6789012346",
     "timestamp": "2026-06-15T12:05:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -34,7 +34,7 @@
               "descriptor": {"name": "Evening Peak Demand Flex - North Delhi"},
               "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
@@ -48,7 +48,7 @@
             "id": "offer-pac-001",
             "resourceIds": ["flex-need-north-delhi-jun15"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -68,7 +68,7 @@
             }
           },
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
@@ -85,7 +85,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
@@ -95,7 +95,7 @@
         {
           "id": "payment-term-pac-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 332.5},
             "settlementStatus": "PENDING",

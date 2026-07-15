@@ -46,7 +46,7 @@ human readers.
 ```yaml
 # In the parent attributes.yaml
 telemetry:
-  $ref: "https://schema.beckn.io/BecknTimeSeries/v1.0#/components/schemas/BecknTimeSeries"
+  $ref: "https://schema.nfh.global/BecknTimeSeries/v1.0#/components/schemas/BecknTimeSeries"
 ```
 
 **(b) Discovery via `@context` — for polymorphic carriers.** Parent
@@ -122,7 +122,7 @@ layer):
 ## Why this lives in DEG
 
 OpenADR's `report.resources[].intervals[]` is the most battle-tested
-shape for interval-aligned energy data. Published at `schema.beckn.io/openadr/3.1.0` (source in
+shape for interval-aligned energy data. Published at `schema.nfh.global/openadr/3.1.0` (source in
 [`specification/schema/openadr/v3.1.0/`](../../openadr/v3.1.0/))
 and `$ref`-imported via that URL, giving DEG schemas a uniform time-series idiom
 without copying types. Each domain schema (e.g. `DemandFlexPerformance`)

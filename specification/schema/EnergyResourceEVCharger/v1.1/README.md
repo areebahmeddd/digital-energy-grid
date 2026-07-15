@@ -1,6 +1,6 @@
 # EnergyResourceEVCharger v1.1
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceEVCharger/v1.1`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceEVCharger/v1.1`
 **CIM:** `ElectricVehicleChargingStation` (CIM17+)
 **Status:** Current
 

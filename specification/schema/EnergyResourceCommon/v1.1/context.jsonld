@@ -1,8 +1,8 @@
 {
   "@context": {
     "@version": 1.1,
-    "deg":   "https://schema.beckn.io/deg#",
-    "erDeg": "https://schema.beckn.io/erDeg#",
+    "deg":   "https://schema.nfh.global/deg#",
+    "erDeg": "https://schema.nfh.global/erDeg#",
     "qudt":  "http://qudt.org/schema/qudt/",
     "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",

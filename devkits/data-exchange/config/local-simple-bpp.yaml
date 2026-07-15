@@ -58,7 +58,7 @@ modules:
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
-            extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.beckn.io,india-energy-stack.github.io"
+            extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.nfh.global,india-energy-stack.github.io"
         signValidator:
           id: signvalidator
         router:
@@ -140,7 +140,7 @@ modules:
             extendedSchema_cacheTTL: "86400"
             extendedSchema_maxCacheSize: "100"
             extendedSchema_downloadTimeout: "30"
-            extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.beckn.io,india-energy-stack.github.io"
+            extendedSchema_allowedDomains: "raw.githubusercontent.com,schema.nfh.global,india-energy-stack.github.io"
         router:
           id: router
           config:

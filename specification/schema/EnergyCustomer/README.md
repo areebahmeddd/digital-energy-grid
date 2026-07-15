@@ -2,9 +2,9 @@
 
 Customer attributes for energy flows — meter ID, sanctioned load, and utility account information for consumers, producers, and prosumers.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyCustomer/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyCustomer/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyCustomer/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyCustomer/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `energy-enrollment` · `customer`
 

@@ -11,11 +11,11 @@
     "messageId": "a0b1c2d3-e4f5-6789-abcd-ef5678901235",
     "timestamp": "2026-06-14T09:10:05Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -31,7 +31,7 @@
               "descriptor": { "name": "Evening Peak Demand Flex - North Delhi" },
               "quantity": { "unitCode": "kW", "unitQuantity": 90, "@type": "Quantity" },
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {
@@ -48,7 +48,7 @@
             "id": "offer-pac-001",
             "resourceIds": ["flex-need-north-delhi-jun15"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -75,7 +75,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           { "role": "buyer", "participantId": "tpddl-north-delhi" },
@@ -94,7 +94,7 @@
         {
           "id": "payment-term-pac-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "settlementStatus": "PENDING",
             "paymentTrigger": "ON_FULFILLMENT",

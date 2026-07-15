@@ -2,9 +2,9 @@
 
 Settlement-time revenue-flow attributes for energy contracts.
 
-**Canonical IRI:** `https://schema.beckn.io/RevenueFlow/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/RevenueFlow/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/RevenueFlow/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/RevenueFlow/v2.0/`
 
 ---
 

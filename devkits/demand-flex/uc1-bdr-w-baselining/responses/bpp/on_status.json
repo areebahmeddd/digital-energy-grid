@@ -11,12 +11,12 @@
     "messageId": "b76df16d-cd8d-454e-94ce-6233db819934",
     "timestamp": "2026-04-01T08:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -42,7 +42,7 @@
                 "@type": "Quantity"
               },
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {
@@ -60,7 +60,7 @@
               "flex-need-north-delhi-apr1"
             ],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -110,7 +110,7 @@
             "commitment-flex-001"
           ],
           "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "5of10",
@@ -162,7 +162,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {

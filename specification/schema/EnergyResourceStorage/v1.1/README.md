@@ -1,6 +1,6 @@
 # EnergyResourceStorage v1.1
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceStorage/v1.1`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceStorage/v1.1`
 **CIM:** `cim:BatteryUnit` (IEC 61970-302)
 **Status:** Current
 

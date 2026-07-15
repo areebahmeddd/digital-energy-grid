@@ -2,9 +2,9 @@
   "@context": [
     "https://www.w3.org/ns/credentials/v2",
     "https://schema.org/",
-    "https://schema.beckn.io/programEnrollment",
-    "https://schema.beckn.io/customerProfile",
-    "https://schema.beckn.io/customerDetails"
+    "https://schema.nfh.global/programEnrollment",
+    "https://schema.nfh.global/customerProfile",
+    "https://schema.nfh.global/customerDetails"
   ],
   "id": "urn:uuid:7f8e9d0c-5678-1234-abcd-123456789abc",
   "type": [

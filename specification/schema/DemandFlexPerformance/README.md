@@ -2,9 +2,9 @@
 
 Attribute schemas for demand-flex M&V (Performance.performanceAttributes).
 
-**Canonical IRI:** `https://schema.beckn.io/DemandFlexPerformance/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/DemandFlexPerformance/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DemandFlexPerformance/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DemandFlexPerformance/v2.0/`
 
 ---
 

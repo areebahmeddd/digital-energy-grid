@@ -2,16 +2,16 @@
 """Bundle a credential's attributes.yaml into a self-contained schema.json.
 
 The canonical source of truth is the per-schema ``attributes.yaml`` files (this
-repo) plus the reserved Beckn core schemas published at schema.beckn.io
+repo) plus the reserved Beckn core schemas published at schema.nfh.global
 (Location, GeoJSONGeometry, Address, …). Those leaf schemas reference each other
-by ``https://schema.beckn.io/<Schema>/<ver>#/components/schemas/<Name>`` URLs.
+by ``https://schema.nfh.global/<Schema>/<ver>#/components/schemas/<Name>`` URLs.
 
 This tool resolves that whole reference graph into one flat ``$defs`` map and
 rewrites every ``$ref`` to ``#/$defs/<Name>`` so the result validates with no
 network access. Resolution is **local-first**: a ref is read from
 ``specification/schema/<Schema>/<ver>/attributes.yaml`` when that file exists
 (so unpublished local edits win), otherwise it is fetched live from
-schema.beckn.io and cached for the run.
+schema.nfh.global and cached for the run.
 
 The curated W3C-VC **root envelope** (``@context``, ``id`` pattern, ``issuer``,
 ``validFrom``/``validUntil``, ``proof`` …) is NOT mechanically derivable from the
@@ -40,7 +40,7 @@ import urllib.request
 
 import yaml
 
-BECKN = "https://schema.beckn.io/"
+BECKN = "https://schema.nfh.global/"
 STRIP_KEYS = {"x-jsonld", "x-tags", "$id", "x-iri", "x-id", "example", "servers", "$schema"}
 SCHEMA_ROOT = os.path.dirname(os.path.abspath(__file__)).replace(
     os.path.join("specification", "scripts"), os.path.join("specification", "schema")
@@ -77,9 +77,9 @@ def parse_ref(ref: str, ctx: tuple[str, str] | None):
     ctx is the (schema, ver) the ref appears in, used for internal/anchor refs.
     Handles:
       #/components/schemas/X, #X (anchor)                 -> internal to ctx
-      https://schema.beckn.io/<S>/<v>[/attributes.yaml]#/components/schemas/X
-      https://schema.beckn.io/<S>/<v>#X                   -> anchor in <S>/<v>
-      https://schema.beckn.io/<S>/<v>                     -> whole-schema (name = S)
+      https://schema.nfh.global/<S>/<v>[/attributes.yaml]#/components/schemas/X
+      https://schema.nfh.global/<S>/<v>#X                   -> anchor in <S>/<v>
+      https://schema.nfh.global/<S>/<v>                     -> whole-schema (name = S)
     """
     if ref.startswith("#"):
         frag = ref[1:]

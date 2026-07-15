@@ -2,9 +2,9 @@
 
 Verifiable Credential containing aggregated billing period data using ESPI/Green Button types. Issued by distribution utilities to consumers. Combines customer identity with billing summary data within a W3C VC 2.0 envelope.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyBillingSummaryCredential/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyBillingSummaryCredential/v1.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `billing` · `green-button` · `espi`
 

@@ -4,7 +4,7 @@ Typed energy resource schema for generation DERs: solar PV, wind, hydro, biogas,
 
 `EnergyResourceGenerator` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceGenerator/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceGenerator/v1.0`
 
 **CIM alignment:** `cim:GeneratingUnit` and subtypes — `PhotovoltaicUnit`, `WindGeneratingUnit`, `HydroGeneratingUnit`, `ThermalGeneratingUnit` (IEC 61970-301/302)
 

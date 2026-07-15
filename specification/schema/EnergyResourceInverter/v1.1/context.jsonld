@@ -1,9 +1,9 @@
 {
   "@context": [
-    "https://schema.beckn.io/EnergyResourceCommon/v1.1/context.jsonld",
+    "https://schema.nfh.global/EnergyResourceCommon/v1.1/context.jsonld",
     {
       "@version": 1.1,
-      "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
+      "erDeg": "https://schema.nfh.global/deg/EnergyResource/",
       "EnergyResourceInverter": {
         "@id": "erDeg:EnergyResourceInverter",
         "@context": {

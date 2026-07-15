@@ -1,7 +1,7 @@
 {
   "@context": {
     "@version": 1.1,
-    "deg": "https://schema.beckn.io/deg#",
+    "deg": "https://schema.nfh.global/deg#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "MeterServiceProfile": {
       "@id": "deg:MeterServiceProfile"

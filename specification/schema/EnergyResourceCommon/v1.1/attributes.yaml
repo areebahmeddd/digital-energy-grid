@@ -26,18 +26,18 @@ info:
     EnergyResourceCommonAttributes — the attributes bag base.
     EnergyResourceCommon — the structural envelope inherited by every kind.
 
-    Canonical IRI: https://schema.beckn.io/EnergyResourceCommon/v1.1
+    Canonical IRI: https://schema.nfh.global/EnergyResourceCommon/v1.1
 
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
-  - url: https://schema.beckn.io
+  - url: https://schema.nfh.global
     description: Canonical schema registry
 paths: {}
 components:
   schemas:
 
     QuantitativeValue:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QuantitativeValue
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QuantitativeValue
       type: object
       description: >
         A dimensioned quantity. value is the numeric magnitude; unit is a QUDT
@@ -58,7 +58,7 @@ components:
             V, kV (voltage). Mapped to QUDT IRIs via JSON-LD context.
 
     QVPower:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVPower
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QVPower
       type: object
       description: >
         Active-power quantity {value, unit}. unit is a QUDT power alias
@@ -73,7 +73,7 @@ components:
           enum: [W, kW, MW]
 
     QVEnergy:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVEnergy
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QVEnergy
       type: object
       description: >
         Energy quantity {value, unit}. unit is a QUDT energy alias
@@ -89,7 +89,7 @@ components:
           enum: [kWh, MWh]
 
     QVApparentPower:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVApparentPower
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QVApparentPower
       type: object
       description: >
         Apparent-power quantity {value, unit}. unit is a QUDT apparent-power
@@ -105,7 +105,7 @@ components:
           enum: [kVA, MVA]
 
     QVReactivePower:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVReactivePower
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QVReactivePower
       type: object
       description: >
         Reactive-power quantity {value, unit}. unit is a QUDT reactive-power
@@ -121,7 +121,7 @@ components:
           enum: [kVAR, MVAR]
 
     QVVoltage:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/QVVoltage
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/QVVoltage
       type: object
       description: >
         Voltage quantity {value, unit}. unit is a QUDT voltage alias
@@ -137,7 +137,7 @@ components:
           enum: [V, kV]
 
     EnergyResourceCommonAttributes:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommonAttributes
       type: object
       additionalProperties: true
       description: >
@@ -203,7 +203,7 @@ components:
             "@id": deg:commissioningDate
 
         location:
-          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          $ref: "https://schema.nfh.global/Location/2.0/attributes.yaml#/components/schemas/Location"
           description: Physical location of this asset.
           x-jsonld:
             "@id": deg:location
@@ -278,7 +278,7 @@ components:
             "@id": deg:aggregator
 
     EnergyResourceCommon:
-      $id: https://schema.beckn.io/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon
+      $id: https://schema.nfh.global/EnergyResourceCommon/v1.1#/components/schemas/EnergyResourceCommon
       type: object
       additionalProperties: true
       description: >
@@ -314,7 +314,7 @@ components:
           items:
             oneOf:
               - type: string
-              - $ref: "https://schema.beckn.io/EnergyResource/v2.1#/components/schemas/EnergyResource"
+              - $ref: "https://schema.nfh.global/EnergyResource/v2.1#/components/schemas/EnergyResource"
           x-jsonld:
             "@id": deg:subResources
 

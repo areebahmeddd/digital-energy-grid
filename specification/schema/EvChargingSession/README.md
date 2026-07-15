@@ -1,8 +1,8 @@
 # EvChargingSession
 
-> **Canonical IRI:** [`https://schema.beckn.io/EvChargingSession`](https://schema.beckn.io/EvChargingSession)
+> **Canonical IRI:** [`https://schema.nfh.global/EvChargingSession`](https://schema.nfh.global/EvChargingSession)
 > **Tags:** `ev-charging, session, fulfillment, telemetry, billing, reservation, ocpp, energy, beckn`
-> **Namespace:** `https://schema.beckn.io/`
+> **Namespace:** `https://schema.nfh.global/`
 > Part of the [DEG Schema](../../README.md)
 
 ---
@@ -36,9 +36,9 @@
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EvChargingSession` |
-| JSON Schema (latest) | `https://schema.beckn.io/EvChargingSession/v2.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EvChargingSession/v2.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EvChargingSession/v2.0/vocab.jsonld` |
-| Root context.jsonld | `https://schema.beckn.io/context.jsonld` |
-| Root vocab.jsonld | `https://schema.beckn.io/vocab.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EvChargingSession` |
+| JSON Schema (latest) | `https://schema.nfh.global/EvChargingSession/v2.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EvChargingSession/v2.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EvChargingSession/v2.0/vocab.jsonld` |
+| Root context.jsonld | `https://schema.nfh.global/context.jsonld` |
+| Root vocab.jsonld | `https://schema.nfh.global/vocab.jsonld` |

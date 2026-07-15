@@ -1,6 +1,6 @@
 # CustomerDetails v1.0
 
-**Schema ID:** `https://schema.beckn.io/CustomerDetails/v1.0`  
+**Schema ID:** `https://schema.nfh.global/CustomerDetails/v1.0`  
 **CIM:** `cim:Customer` (IEC 61968-1)  
 **Status:** Current
 

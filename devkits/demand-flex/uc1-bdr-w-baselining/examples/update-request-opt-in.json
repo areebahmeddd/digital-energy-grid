@@ -11,10 +11,10 @@
     "messageId": "0ad4f2d6-a48a-4a61-ad57-eb0d2a8a6795",
     "timestamp": "2026-04-01T06:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
@@ -29,7 +29,7 @@
               "id": "flex-need-north-delhi-apr1",
               "quantity": {"unitCode": "kW", "unitQuantity": 120, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
@@ -43,7 +43,7 @@
             "id": "offer-flex-001",
             "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -62,7 +62,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}

@@ -1,6 +1,6 @@
 # MeterServiceProfile v1.1
 
-**Schema ID:** `https://schema.beckn.io/MeterServiceProfile/v1.1`
+**Schema ID:** `https://schema.nfh.global/MeterServiceProfile/v1.1`
 **CIM:** `cim:UsagePoint` (IEC 61968-9)
 **Status:** Current
 

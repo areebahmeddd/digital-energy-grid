@@ -2,7 +2,7 @@
 
 Typed energy resource schema for EV charging stations. An `EV_CHARGER` resource is the EVSE hardware at the grid connection point — a **flexible load**, not a storage resource. `EV_V2G` is a specialisation with ISO 15118-20 / OCPP 2.1 BPT Vehicle-to-Grid capability.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceEVCharger/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceEVCharger/v1.0`
 
 **CIM alignment:** `ElectricVehicleChargingStation` (CIM17+)
 

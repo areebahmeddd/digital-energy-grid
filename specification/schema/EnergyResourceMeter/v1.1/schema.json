@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceMeter/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceMeter/v1.1",
   "title": "EnergyResourceMeter",
   "description": "Typed schema for metering-point energy resources (type = METER). v1.1: inherits EnergyResourceCommon/v1.1 so common power fields (ratedPower, maxExport, maxImport) are now QuantitativeValue objects. CIM: cim:Meter extends cim:EndDevice (IEC 61968-9).",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceMeterAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

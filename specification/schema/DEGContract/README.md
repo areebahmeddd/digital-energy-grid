@@ -2,9 +2,9 @@
 
 Standard contract schema for all DEG energy contracts.
 
-**Canonical IRI:** `https://schema.beckn.io/DEGContract/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/DEGContract/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DEGContract/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DEGContract/v2.0/`
 
 ---
 

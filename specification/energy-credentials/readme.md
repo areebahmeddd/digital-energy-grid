@@ -145,17 +145,17 @@ All schemas follow:
 
 ## @context Resolution
 
-Each credential's `@context` array lists the W3C VC context, Schema.org, and individual `schema.beckn.io` URLs for each object type used:
+Each credential's `@context` array lists the W3C VC context, Schema.org, and individual `schema.nfh.global` URLs for each object type used:
 
 ```json
 "@context": [
   "https://www.w3.org/ns/credentials/v2",
   "https://schema.org/",
-  "https://schema.beckn.io/customerCredential",
-  "https://schema.beckn.io/customerProfile",
-  "https://schema.beckn.io/customerDetails",
-  "https://schema.beckn.io/consumptionProfile",
-  "https://schema.beckn.io/generationProfile",
-  "https://schema.beckn.io/storageProfile"
+  "https://schema.nfh.global/customerCredential",
+  "https://schema.nfh.global/customerProfile",
+  "https://schema.nfh.global/customerDetails",
+  "https://schema.nfh.global/consumptionProfile",
+  "https://schema.nfh.global/generationProfile",
+  "https://schema.nfh.global/storageProfile"
 ]
 ```

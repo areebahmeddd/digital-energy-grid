@@ -1,8 +1,8 @@
 # EnergyEnrollment
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyEnrollment`](https://schema.beckn.io/EnergyEnrollment)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyEnrollment`](https://schema.nfh.global/EnergyEnrollment)
 > **Tags:** `energy, enrollment, program, vpp, demand-response, p2p, credentials, w3c-vc, beckn, deg`
-> **Namespace:** `https://schema.beckn.io/`
+> **Namespace:** `https://schema.nfh.global/`
 > Part of the [DEG Schema](../../README.md)
 
 ---
@@ -44,9 +44,9 @@ The BPP verifies provided W3C Verifiable Credentials, checks for conflicts with 
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyEnrollment` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyEnrollment/v2.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyEnrollment/v2.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyEnrollment/v2.0/vocab.jsonld` |
-| Root context.jsonld | `https://schema.beckn.io/context.jsonld` |
-| Root vocab.jsonld | `https://schema.beckn.io/vocab.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EnergyEnrollment` |
+| JSON Schema (latest) | `https://schema.nfh.global/EnergyEnrollment/v2.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EnergyEnrollment/v2.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EnergyEnrollment/v2.0/vocab.jsonld` |
+| Root context.jsonld | `https://schema.nfh.global/context.jsonld` |
+| Root vocab.jsonld | `https://schema.nfh.global/vocab.jsonld` |

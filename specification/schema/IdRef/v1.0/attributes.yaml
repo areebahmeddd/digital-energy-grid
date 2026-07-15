@@ -10,14 +10,14 @@ info:
 
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
-  - url: https://schema.beckn.io
+  - url: https://schema.nfh.global
     description: Canonical schema registry
 paths: {}
 components:
   schemas:
 
     IdRef:
-      $id: https://schema.beckn.io/IdRef/v1.0
+      $id: https://schema.nfh.global/IdRef/v1.0
       title: IdRef
       type: object
       description: >

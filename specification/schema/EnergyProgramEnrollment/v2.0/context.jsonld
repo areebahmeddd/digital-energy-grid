@@ -124,8 +124,8 @@
       "utilityCustomerId": "deg:utilityCustomerId",
       "connectionType": "deg:connectionType",
       "sanctionedLoad": "deg:sanctionedLoad",
-      "beckn": "https://schema.beckn.io/core/v2.0/",
-      "deg": "https://schema.beckn.io/deg/EnergyProgramEnrollment/v2.0/",
+      "beckn": "https://schema.nfh.global/core/v2.0/",
+      "deg": "https://schema.nfh.global/deg/EnergyProgramEnrollment/v2.0/",
       "@comment": "deg:EnergyProgramEnrollment is the successor to deg:EnergyEnrollment. owl:equivalentClass declared in vocab.jsonld."
     }
   ]

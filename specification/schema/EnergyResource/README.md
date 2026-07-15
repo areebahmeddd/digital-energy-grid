@@ -4,9 +4,9 @@ Canonical, technology-neutral class for any asset that produces, consumes, store
 
 `EnergyResource` is the shared asset-description class used by every DEG domain schema — P2P-trading, demand-flex, EV-charging, and ElectricityCredential all reference it to describe the physical asset a transaction or credential is about.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResource/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResource/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyResource/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyResource/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `demand-flex` · `item` · `energy-resource`
 
