@@ -2,9 +2,9 @@
 
 Verifiable Credential for energy program enrollment. Issued by distribution utilities when consumers enroll in programs such as P2P energy trading, demand flexibility, virtual power plants, or time-of-use tariffs.
 
-**Canonical IRI:** `https://schema.beckn.io/ProgramEnrollmentCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/ProgramEnrollmentCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/ProgramEnrollmentCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/ProgramEnrollmentCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `program-enrollment`
 

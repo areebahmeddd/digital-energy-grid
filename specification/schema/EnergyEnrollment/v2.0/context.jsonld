@@ -124,8 +124,8 @@
       "utilityCustomerId": "deg:utilityCustomerId",
       "connectionType": "deg:connectionType",
       "sanctionedLoad": "deg:sanctionedLoad",
-      "beckn": "https://schema.beckn.io/core/v2.0/",
-      "deg": "https://schema.beckn.io/deg/EnergyEnrollment/v2.0/",
+      "beckn": "https://schema.nfh.global/core/v2.0/",
+      "deg": "https://schema.nfh.global/deg/EnergyEnrollment/v2.0/",
       "@comment": "DEPRECATED: deg:EnergyEnrollment is superseded by deg:EnergyProgramEnrollment. owl:equivalentClass declared in vocab.jsonld. Use EnergyProgramEnrollment/v2.0 for new implementations."
     }
   ]

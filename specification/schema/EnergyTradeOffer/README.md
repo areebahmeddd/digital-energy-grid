@@ -2,9 +2,9 @@
 
 Offer attributes for P2P energy trading, specifying pricing model, availability windows, and optional gift parameters.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyTradeOffer/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyTradeOffer/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyTradeOffer/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `offer`
 
@@ -24,9 +24,9 @@ Offer attributes for P2P energy trading, specifying pricing model, availability 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `pricingModel` | `string` enum | ✅ | Pricing model classification: `PER_KWH`, `TIME_OF_DAY`, `SUBSCRIPTION`, `FIXED` |
-| `validityWindow` | [TimePeriod](https://schema.beckn.io/TimePeriod/v2.0) | | Time window when this offer can be selected/accepted |
-| `deliveryWindow` | [TimePeriod](https://schema.beckn.io/TimePeriod/v2.0) | | Actual time window when energy delivery occurs (UTC) |
-| `gift` | [EnergyGift](https://schema.beckn.io/EnergyGift/v2.0) | | Optional gift parameters for energy gifting flows |
+| `validityWindow` | [TimePeriod](https://schema.nfh.global/TimePeriod/v2.0) | | Time window when this offer can be selected/accepted |
+| `deliveryWindow` | [TimePeriod](https://schema.nfh.global/TimePeriod/v2.0) | | Actual time window when energy delivery occurs (UTC) |
+| `gift` | [EnergyGift](https://schema.nfh.global/EnergyGift/v2.0) | | Optional gift parameters for energy gifting flows |
 
 ---
 

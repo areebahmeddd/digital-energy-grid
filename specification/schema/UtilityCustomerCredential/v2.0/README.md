@@ -1,6 +1,6 @@
 # UtilityCustomerCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/UtilityCustomerCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/UtilityCustomerCredential/v2.0`
 
 **Status:** Current
 

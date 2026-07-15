@@ -2,9 +2,9 @@
 
 Barebones identity credential for privacy-preserving customer identification. Issued by distribution utilities as the base identity anchor for all other DEG energy credentials.
 
-**Canonical IRI:** `https://schema.beckn.io/UtilityCustomerCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/UtilityCustomerCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/UtilityCustomerCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/UtilityCustomerCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `identity`
 

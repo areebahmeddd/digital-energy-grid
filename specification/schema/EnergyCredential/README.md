@@ -2,9 +2,9 @@
 
 Base class for all DEG energy-sector Verifiable Credentials issued by electricity distribution utilities.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential`
 

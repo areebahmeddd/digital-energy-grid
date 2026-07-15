@@ -1,6 +1,6 @@
 # EnergyCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/EnergyCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/EnergyCredential/v2.0`
 
 **Status:** Current
 

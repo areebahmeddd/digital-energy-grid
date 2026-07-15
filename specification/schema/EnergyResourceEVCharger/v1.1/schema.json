@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceEVCharger/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceEVCharger/v1.1",
   "title": "EnergyResourceEVCharger",
   "description": "Typed schema for EV charging station energy resources (EV_CHARGER, EV_V2G). v1.1: inherits EnergyResourceCommon/v1.1 (ratedPower, maxExport, maxImport as QuantitativeValue). CIM: ElectricVehicleChargingStation (CIM17+).",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceEVChargerAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

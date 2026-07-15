@@ -9,13 +9,13 @@ info:
     combines a customer profile with meter data within a W3C VC 2.0 envelope.
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
-  - url: https://schema.beckn.io
+  - url: https://schema.nfh.global
     description: Canonical schema registry
 paths: {}
 components:
   schemas:
     EnergyMeterDataCredential:
-      $id: https://schema.beckn.io/EnergyMeterDataCredential/v1.0
+      $id: https://schema.nfh.global/EnergyMeterDataCredential/v1.0
       title: EnergyMeterDataCredential
       description: >
         Verifiable Credential containing historical time-series interval meter
@@ -32,7 +32,7 @@ components:
       type: object
       additionalProperties: true
       allOf:
-        - $ref: "https://schema.beckn.io/EnergyCredential/v2.0"
+        - $ref: "https://schema.nfh.global/EnergyCredential/v2.0"
       x-jsonld:
         "@context": ./context.jsonld
         "@type": EnergyMeterDataCredential

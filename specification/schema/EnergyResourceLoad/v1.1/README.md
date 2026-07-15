@@ -1,6 +1,6 @@
 # EnergyResourceLoad v1.1
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceLoad/v1.1`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceLoad/v1.1`
 **CIM:** `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301)
 **Status:** Current
 

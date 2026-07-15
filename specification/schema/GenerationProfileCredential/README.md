@@ -2,9 +2,9 @@
 
 Verifiable Credential for DER (Distributed Energy Resource) generation capability. Issued by distribution utilities to prosumers with solar, wind, or other generation assets for grid management, net metering, and renewable energy tracking.
 
-**Canonical IRI:** `https://schema.beckn.io/GenerationProfileCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/GenerationProfileCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/GenerationProfileCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/GenerationProfileCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `generation` · `der`
 

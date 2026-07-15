@@ -2,7 +2,7 @@
 
 Typed energy resource schema for grid-connected power-electronics inverters. An `INVERTER` resource is a grid-connected converter without a dedicated fuel source — capturing reactive-power and frequency-support capabilities per IEEE 1547-2018 and SunSpec DER Models 702–714.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceInverter/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceInverter/v1.0`
 
 **CIM alignment:** `PowerElectronicsConnection` (IEC 61970-302)
 

@@ -2,7 +2,7 @@
 
 Order attributes for P2P energy trading — identifies BAP/BPP participants and total contracted energy quantity.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyTradeOrder/v0.3`
+**Canonical IRI:** `https://schema.nfh.global/EnergyTradeOrder/v0.3`
 
 **Namespace prefix:** `beckn:` → `https://raw.githubusercontent.com/beckn/protocol-specifications-v2/refs/heads/main/schema/EnergyTrade/v0.3/#`
 
@@ -24,7 +24,7 @@ Order attributes for P2P energy trading — identifies BAP/BPP participants and 
 |----------|------|----------|-------------|
 | `bap_id` | `string` | ✅ | Beckn Application Platform subscriber ID (buyer side) |
 | `bpp_id` | `string` | ✅ | Beckn Provider Platform subscriber ID (seller side) |
-| `total_quantity` | [Quantity](https://schema.beckn.io/Quantity/v2.0) | | Total energy quantity for the order (kWh) |
+| `total_quantity` | [Quantity](https://schema.nfh.global/Quantity/v2.0) | | Total energy quantity for the order (kWh) |
 
 ---
 

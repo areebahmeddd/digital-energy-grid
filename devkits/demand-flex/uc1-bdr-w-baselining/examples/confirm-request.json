@@ -11,12 +11,12 @@
     "messageId": "54fb3f15-48aa-4408-bca4-52486b767679",
     "timestamp": "2026-03-30T10:10:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
@@ -32,7 +32,7 @@
               "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
               "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
@@ -46,7 +46,7 @@
             "id": "offer-flex-001",
             "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -91,7 +91,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}

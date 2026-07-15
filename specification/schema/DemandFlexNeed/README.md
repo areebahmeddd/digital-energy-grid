@@ -2,9 +2,9 @@
 
 Attribute schemas for demand-flex needs (Resource.resourceAttributes). Describes what the utility needs from the network: direction, event timing, capacity, and location.
 
-**Canonical IRI:** `https://schema.beckn.io/DemandFlexNeed/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/DemandFlexNeed/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DemandFlexNeed/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DemandFlexNeed/v2.0/`
 
 ---
 

@@ -8,7 +8,7 @@ This version introduces no additional properties beyond those inherited from `be
 
 | Field       | Value                                              |
 |-------------|----------------------------------------------------|
-| **Schema ID** | `https://schema.beckn.io/EnergyContract/v2.0`    |
+| **Schema ID** | `https://schema.nfh.global/EnergyContract/v2.0`    |
 | **Version** | `2.0`                                              |
 | **Status**  | Current                                            |
 | **Extends** | `beckn:Contract`                                   |
@@ -42,7 +42,7 @@ beckn:Contract
 
 ```yaml
 allOf:
-  - $ref: "https://schema.beckn.io/Contract/v2.0"
+  - $ref: "https://schema.nfh.global/Contract/v2.0"
 ```
 
 All properties from `beckn:Contract` are inherited. No additional properties are defined at this level.
@@ -62,8 +62,8 @@ All properties from `beckn:Contract` are inherited. No additional properties are
 
 | Prefix | IRI |
 |--------|-----|
-| `deg`  | `https://schema.beckn.io/deg/EnergyContract/v2.0/` |
-| `beckn` | `https://schema.beckn.io/core/v2.0/` |
+| `deg`  | `https://schema.nfh.global/deg/EnergyContract/v2.0/` |
+| `beckn` | `https://schema.nfh.global/core/v2.0/` |
 
 ---
 
@@ -71,4 +71,4 @@ All properties from `beckn:Contract` are inherited. No additional properties are
 
 - [Root schema folder README](../README.md)
 - [P2PTrade v2.0](../../P2PTrade/v2.0/README.md)
-- [Beckn Protocol core specification](https://schema.beckn.io/core/v2.0)
+- [Beckn Protocol core specification](https://schema.nfh.global/core/v2.0)

@@ -9,7 +9,7 @@
 ---
 
 OpenADR 3.1.0 time-series primitives vendored here so DEG schemas can `$ref`
-them via `schema.beckn.io/openadr/3.1.0` without depending on upstream
+them via `schema.nfh.global/openadr/3.1.0` without depending on upstream
 availability. Only the schema types used by DEG are included; the full OpenADR
 REST API paths are omitted.
 
@@ -36,11 +36,11 @@ REST API paths are omitted.
 
 ## Usage from DEG schemas
 
-DEG schemas reference these types via the canonical `schema.beckn.io` URL:
+DEG schemas reference these types via the canonical `schema.nfh.global` URL:
 
 ```yaml
 intervalPeriod:
-  $ref: "https://schema.beckn.io/openadr/3.1.0#/components/schemas/intervalPeriod"
+  $ref: "https://schema.nfh.global/openadr/3.1.0#/components/schemas/intervalPeriod"
 ```
 
 `BecknTimeSeries` uses `interval`, `intervalPeriod`, `eventPayloadDescriptor`,

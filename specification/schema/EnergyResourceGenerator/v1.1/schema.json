@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceGenerator/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceGenerator/v1.1",
   "title": "EnergyResourceGenerator",
   "description": "Typed schema for generation DER energy resources (solar PV, wind, hydro, biogas, CHP, fuel cell). v1.1: nominalPowerKw → nominalPower (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: GeneratingUnit subtypes (IEC 61970-301/302). SOLAR is a deprecated alias for SOLAR_PV. Optional admin field dcArrayCapacity (QVPower) carries the DC-side nameplate (industry 'kWp') for SOLAR_PV — distinct from AC-side maxExport; IS 16221 / IEC 61727.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,13 +21,13 @@
   "$defs": {
     "EnergyResourceGeneratorAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,
           "properties": {
             "nominalPower": {
-              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVPower",
+              "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#QVPower",
               "description": "Nominal (nameplate) power output. unit: W | kW | MW. CIM: GeneratingUnit.nominalP."
             },
             "efficiency": {
@@ -37,7 +37,7 @@
               "description": "Conversion efficiency as a percentage (0–100). Most relevant for FUEL_CELL and CHP."
             },
             "dcArrayCapacity": {
-              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVPower",
+              "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#QVPower",
               "description": "DC-side nameplate capacity of a PV array at Standard Test Conditions (industry 'kWp'). Distinct from AC-side maxExport. Relevant for SOLAR_PV. unit: W | kW | MW. IS 16221; IEC 61727."
             }
           }

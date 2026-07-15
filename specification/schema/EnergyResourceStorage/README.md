@@ -4,7 +4,7 @@ Typed energy resource schema for storage DERs: battery energy storage systems (B
 
 `EnergyResourceStorage` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`. It is the **only** kind that carries `storageCapacityKwh`.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceStorage/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceStorage/v1.0`
 
 **CIM alignment:** `cim:BatteryUnit` (BESS/BATTERY), `cim:ElectricVehicleChargingStation` (EV_CHARGER/EV_V2G) — IEC 61970-302
 

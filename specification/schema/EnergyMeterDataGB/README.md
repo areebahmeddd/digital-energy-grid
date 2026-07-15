@@ -1,8 +1,8 @@
 # MeterDataGB
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyMeterDataGB`](https://schema.beckn.io/EnergyMeterDataGB)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyMeterDataGB`](https://schema.nfh.global/EnergyMeterDataGB)
 > **Tags:** `energy`, `metering`, `green-button`, `espi`, `deg`
-> **Namespace:** `https://schema.beckn.io/deg/`
+> **Namespace:** `https://schema.nfh.global/deg/`
 > Part of the [DEG Specification](../../../README.md)
 
 ---
@@ -29,9 +29,9 @@ ESPI/Green Button meter reading data for a single meter. Contains ServiceCategor
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyMeterDataGB` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyMeterDataGB/v1.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyMeterDataGB/v1.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyMeterDataGB/v1.0/vocab.jsonld` |
-| ESPI context (imported) | `https://schema.beckn.io/espiGreenButton/v1.0/context.jsonld` |
-| CustomerProfile (imported) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0/context.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EnergyMeterDataGB` |
+| JSON Schema (latest) | `https://schema.nfh.global/EnergyMeterDataGB/v1.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EnergyMeterDataGB/v1.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EnergyMeterDataGB/v1.0/vocab.jsonld` |
+| ESPI context (imported) | `https://schema.nfh.global/espiGreenButton/v1.0/context.jsonld` |
+| CustomerProfile (imported) | `https://schema.nfh.global/EnergyCustomerProfile/v1.0/context.jsonld` |

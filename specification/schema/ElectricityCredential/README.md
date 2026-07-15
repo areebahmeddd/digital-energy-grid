@@ -2,9 +2,9 @@
 
 Unified W3C Verifiable Credential (VC Data Model 2.0) issued per meter by electricity distribution utilities. Combines customer identity with optional consumption, generation, and storage profiles in a single credential.
 
-**Canonical IRI:** `https://schema.beckn.io/ElectricityCredential/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/ElectricityCredential/v1.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `electricity` · `customer` · `deg`
 

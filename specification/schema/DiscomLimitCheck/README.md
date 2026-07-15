@@ -2,9 +2,9 @@
 
 Optional Phase-2 limit-check performance attributes for inter-discom P2P energy trades.
 
-**Canonical IRI:** `https://schema.beckn.io/DiscomLimitCheck/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/DiscomLimitCheck/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DiscomLimitCheck/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DiscomLimitCheck/v2.0/`
 
 ---
 

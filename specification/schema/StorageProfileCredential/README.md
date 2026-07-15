@@ -2,9 +2,9 @@
 
 Verifiable Credential for battery/energy storage capability. Issued by distribution utilities to customers with home batteries, EV batteries, or other storage assets for virtual power plant participation and demand response programs.
 
-**Canonical IRI:** `https://schema.beckn.io/StorageProfileCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/StorageProfileCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/StorageProfileCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/StorageProfileCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `storage` · `battery`
 

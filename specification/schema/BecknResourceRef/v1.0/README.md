@@ -62,7 +62,7 @@ properties:
     type: array
     items: { type: string }
   participatingMetersRef:
-    $ref: "https://schema.beckn.io/BecknResourceRef/v1.0#/components/schemas/BecknResourceRef"
+    $ref: "https://schema.nfh.global/BecknResourceRef/v1.0#/components/schemas/BecknResourceRef"
 ```
 
 ## Minimal example — bulk meter enrollment at confirm
@@ -79,7 +79,7 @@ properties:
       "contentHash": "sha256:5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
       "count": 25000,
       "contentType": "application/ld+json",
-      "schemaContext": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld",
+      "schemaContext": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld",
       "sizeBytes": 1850000,
       "expiresAt": "2026-04-08T00:00:00Z"
     },

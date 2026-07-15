@@ -2,9 +2,9 @@
 
 Verifiable Credential for electricity connection and consumption characteristics. Issued by distribution utilities to consumers and prosumers for load management and tariff determination.
 
-**Canonical IRI:** `https://schema.beckn.io/ConsumptionProfileCredential/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/ConsumptionProfileCredential/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/ConsumptionProfileCredential/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/ConsumptionProfileCredential/v2.0/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `consumption`
 

@@ -11,13 +11,13 @@
     "messageId": "b82f4c19-3a1d-4e72-9d45-fc871a230087",
     "timestamp": "2026-04-26T07:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -46,7 +46,7 @@
                 "unitQuantity": 35.0
               },
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
                 "@type": "EnergyResource",
                 "type": "SOLAR",
                 "id": "TEST_METER_SELLER_001"
@@ -60,7 +60,7 @@
             ]
           },
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {
               "start": "2026-04-26T04:30:00Z",
@@ -210,7 +210,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
           {
@@ -240,7 +240,7 @@
           "role": "sellerPlatform",
           "participantId": "sellerapp.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_SELLER_001",
             "utilityId": "TEST_DISCOM_SELLER",
@@ -252,7 +252,7 @@
           "role": "buyerPlatform",
           "participantId": "buyerapp.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
             "@type": "EnergyCustomer",
             "meterId": "TEST_METER_BUYER_001",
             "utilityId": "TEST_DISCOM_BUYER",
@@ -264,7 +264,7 @@
           "role": "buyerDiscom",
           "participantId": "buyer-discom-ledger.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_BUYER",
             "ledgerUrl": "http://buyer-discom-ledger.example.com:9000",
@@ -276,7 +276,7 @@
           "role": "sellerDiscom",
           "participantId": "seller-discom-ledger.example.com",
           "participantAttributes": {
-            "@context": "https://schema.beckn.io/DiscomLedgerProvider/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
             "@type": "DiscomLedgerProvider",
             "utilityId": "TEST_DISCOM_SELLER",
             "ledgerUrl": "http://seller-discom-ledger.example.com:9000",
@@ -289,7 +289,7 @@
         {
           "id": "payment-term-p2p-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 450.26},
             "settlementStatus": "COMPLETE",
@@ -301,7 +301,7 @@
         {
           "id": "auto-settlement-flows",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/RevenueFlow/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
             "@type": "RevenueFlow",
             "revenueFlows": [
               {"role": "sellerPlatform", "value": 437.15, "currency": "INR", "description": "Energy sale proceeds (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"},
@@ -315,7 +315,7 @@
           "id": "settlement-p2p-001",
           "considerationId": "payment-term-p2p-001",
           "status": "COMPLETE",
-          "settlementAttributes": {"@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST", "energyValue": 437.15, "sellerPlatformFee": 13.11, "buyerPlatformFee": 8.74, "totalPayable": 459.0, "paidAt": "2026-04-26T07:30:00Z", "txnRef": "TXN-P2P-001-SETTLED"}
+          "settlementAttributes": {"@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST", "energyValue": 437.15, "sellerPlatformFee": 13.11, "buyerPlatformFee": 8.74, "totalPayable": 459.0, "paidAt": "2026-04-26T07:30:00Z", "txnRef": "TXN-P2P-001-SETTLED"}
         }
       ]
     }

@@ -1,6 +1,6 @@
 # GenerationProfileCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/GenerationProfileCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/GenerationProfileCredential/v2.0`
 
 **Status:** Current
 

@@ -1,8 +1,8 @@
 {
   "@context": {
     "@version": 1.1,
-    "erDeg": "https://schema.beckn.io/deg/EnergyResource/",
-    "deg":   "https://schema.beckn.io/deg#",
+    "erDeg": "https://schema.nfh.global/deg/EnergyResource/",
+    "deg":   "https://schema.nfh.global/deg#",
     "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "EnergyResourceGenerator": {
       "@id": "erDeg:EnergyResourceGenerator",
@@ -11,7 +11,7 @@
         "attributes": {
           "@id": "deg:attributes",
           "@context": {
-            "@import": "https://schema.beckn.io/EnergyResourceCommon/v1.0/attributes-context.jsonld",
+            "@import": "https://schema.nfh.global/EnergyResourceCommon/v1.0/attributes-context.jsonld",
             "nominalPowerKw": { "@id": "erDeg:nominalPowerKw", "@type": "xsd:decimal" },
             "efficiency":     { "@id": "erDeg:efficiency",     "@type": "xsd:decimal" }
           }

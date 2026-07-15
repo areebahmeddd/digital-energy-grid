@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../../specification/schema/) · [EnergyTradeOffer](.
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 schema for `EnergyTradeOffer` |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.beckn.io/deg/EnergyTradeOffer/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.nfh.global/deg/EnergyTradeOffer/v2.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `EnergyTradeOffer` terms |
 
 ## Design: commitmentAttributes as the contract table

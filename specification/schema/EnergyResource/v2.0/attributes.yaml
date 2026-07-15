@@ -32,31 +32,31 @@ components:
 
     # ── Canonical kind aliases ────────────────────────────────────────────
     # Each kind lives in its own specification/schema/<Kind>/v1.0/ folder
-    # and is published to schema.beckn.io/<Kind>/v1.0.
+    # and is published to schema.nfh.global/<Kind>/v1.0.
     # Common base schemas (EnergyResourceCommon, EnergyResourceCommonAttributes)
-    # live at schema.beckn.io/EnergyResourceCommon/v1.0 and are referenced
+    # live at schema.nfh.global/EnergyResourceCommon/v1.0 and are referenced
     # directly by the kind schemas — not re-aliased here.
 
     EnergyResourceMeter:
-      $ref: "https://schema.beckn.io/EnergyResourceMeter/v1.0#/components/schemas/EnergyResourceMeter"
+      $ref: "https://schema.nfh.global/EnergyResourceMeter/v1.0#/components/schemas/EnergyResourceMeter"
 
     EnergyResourceGenerator:
-      $ref: "https://schema.beckn.io/EnergyResourceGenerator/v1.0#/components/schemas/EnergyResourceGenerator"
+      $ref: "https://schema.nfh.global/EnergyResourceGenerator/v1.0#/components/schemas/EnergyResourceGenerator"
 
     EnergyResourceStorage:
-      $ref: "https://schema.beckn.io/EnergyResourceStorage/v1.0#/components/schemas/EnergyResourceStorage"
+      $ref: "https://schema.nfh.global/EnergyResourceStorage/v1.0#/components/schemas/EnergyResourceStorage"
 
     EnergyResourceEVCharger:
-      $ref: "https://schema.beckn.io/EnergyResourceEVCharger/v1.0#/components/schemas/EnergyResourceEVCharger"
+      $ref: "https://schema.nfh.global/EnergyResourceEVCharger/v1.0#/components/schemas/EnergyResourceEVCharger"
 
     EnergyResourceInverter:
-      $ref: "https://schema.beckn.io/EnergyResourceInverter/v1.0#/components/schemas/EnergyResourceInverter"
+      $ref: "https://schema.nfh.global/EnergyResourceInverter/v1.0#/components/schemas/EnergyResourceInverter"
 
     EnergyResourceLoad:
-      $ref: "https://schema.beckn.io/EnergyResourceLoad/v1.0#/components/schemas/EnergyResourceLoad"
+      $ref: "https://schema.nfh.global/EnergyResourceLoad/v1.0#/components/schemas/EnergyResourceLoad"
 
     EnergyResourceNetwork:
-      $ref: "https://schema.beckn.io/EnergyResourceNetwork/v1.0#/components/schemas/EnergyResourceNetwork"
+      $ref: "https://schema.nfh.global/EnergyResourceNetwork/v1.0#/components/schemas/EnergyResourceNetwork"
 
     # ── Union entry point ─────────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ components:
       description: >
         Discriminated union of all typed EnergyResource kinds. Dispatched by
         the 'type' field. Each kind lives in its own schema at
-        schema.beckn.io/<Kind>/v1.0 and is referenced above.
+        schema.nfh.global/<Kind>/v1.0 and is referenced above.
 
         EnergyResourceCommon (id, type, subResources, parentResources,
         attributes) and EnergyResourceCommonAttributes (make, model,

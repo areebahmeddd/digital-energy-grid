@@ -2,9 +2,9 @@
 
 OpenADR 3.1.0-aligned time-series envelope for beckn payloads.
 
-**Canonical IRI:** `https://schema.beckn.io/BecknTimeSeries/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/BecknTimeSeries/v1.0`
 
-**Namespace prefix:** `bts:` → `https://schema.beckn.io/deg/BecknTimeSeries/v1.0/`
+**Namespace prefix:** `bts:` → `https://schema.nfh.global/deg/BecknTimeSeries/v1.0/`
 
 ---
 

@@ -9,11 +9,11 @@
     "messageId": "b1c2d3e4-f5a6-7890-abcd-ef2233445566",
     "timestamp": "2026-04-25T06:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld"
+      "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
+      "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld"
     ]
   },
   "message": {
@@ -29,7 +29,7 @@
           {
             "id": "energy-resource-solar-001",
             "descriptor": {"name": "Solar energy - 2026-04-26 10:00-12:00 IST (2 hourly slots)", "shortDesc": "Up to 30 kWh @ 12 INR/kWh (slot 0) and 25 kWh @ 14 INR/kWh (slot 1)"},
-            "resourceAttributes": {"@context": "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}
+            "resourceAttributes": {"@context": "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld", "@type": "EnergyResource", "type": "SOLAR", "id": "TEST_METER_SELLER_001"}
           }
         ],
         "offers": [
@@ -40,11 +40,11 @@
             "validity": {"startDate": "2026-04-25T06:00:00Z", "endDate": "2026-04-26T00:30:00Z"},
             "availableTo": [],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/EnergyTradeOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
               "@type": "EnergyTradeOffer",
               "validityWindow": {"@type": "beckn:TimePeriod", "schema:startTime": "2026-04-25T06:00:00Z", "schema:endTime": "2026-04-26T00:30:00Z"},
               "contractAttributes": {
-                "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
                   {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
@@ -54,7 +54,7 @@
                 "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}
               },
               "commitmentAttributes": {
-                "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+                "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
                 "@type": "TimeSeries",
                 "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
                 "payloadDescriptors": [
@@ -77,7 +77,7 @@
               "id": "sellerapp.example.com",
               "descriptor": {"name": "Prosumer Solar Farm - North Delhi"},
               "providerAttributes": {
-                "@context": "https://schema.beckn.io/EnergyCustomer/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld",
                 "@type": "EnergyCustomer",
                 "meterId": "TEST_METER_SELLER_001",
                 "utilityId": "TEST_DISCOM_SELLER",

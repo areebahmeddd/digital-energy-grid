@@ -1,6 +1,6 @@
 # StorageProfileCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/StorageProfileCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/StorageProfileCredential/v2.0`
 
 **Status:** Current
 

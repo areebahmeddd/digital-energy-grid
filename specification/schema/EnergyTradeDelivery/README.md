@@ -2,9 +2,9 @@
 
 Fulfillment attributes for P2P energy trade deliveries — tracks delivery status, meter readings, and energy allocation.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyTradeDelivery/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyTradeDelivery/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyTradeDelivery/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyTradeDelivery/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `fulfillment` · `delivery`
 

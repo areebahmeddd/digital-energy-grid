@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceLoad/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceLoad/v1.0",
   "title": "EnergyResourceLoad",
   "description": "Typed schema for controllable load energy resources (smart HVAC, smart water heater, generic controllable load). Participate in demand-response and demand-flexibility programs. CIM: cim:EnergyConsumer / cim:ConformLoad (IEC 61970-301). Common fields inherited from EnergyResourceCommon/v1.0.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceLoadAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

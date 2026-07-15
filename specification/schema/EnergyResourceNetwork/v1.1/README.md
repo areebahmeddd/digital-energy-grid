@@ -1,6 +1,6 @@
 # EnergyResourceNetwork v1.1
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceNetwork/v1.1`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceNetwork/v1.1`
 **CIM:** `PowerTransformer`, `BusbarSection`, `Feeder`, `Substation` (IEC 61970-301)
 **Status:** Current
 

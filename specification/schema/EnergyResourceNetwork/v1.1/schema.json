@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceNetwork/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceNetwork/v1.1",
   "title": "EnergyResourceNetwork",
   "description": "Typed schema for grid-network infrastructure energy resources. v1.1: nominalVoltageKv → nominalVoltage (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: PowerTransformer, BusbarSection, Feeder, Substation (IEC 61970-301).",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,13 +21,13 @@
   "$defs": {
     "EnergyResourceNetworkAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,
           "properties": {
             "nominalVoltage": {
-              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVVoltage",
+              "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#QVVoltage",
               "description": "Nominal operating voltage. unit: V | kV. CIM: BaseVoltage.nominalVoltage."
             },
             "zone": {

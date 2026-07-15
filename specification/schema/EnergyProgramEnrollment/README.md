@@ -1,8 +1,8 @@
 # EnergyProgramEnrollment
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyProgramEnrollment`](https://schema.beckn.io/EnergyProgramEnrollment)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyProgramEnrollment`](https://schema.nfh.global/EnergyProgramEnrollment)
 > **Tags:** `energy, enrollment, program, demand-response, vpp, p2p, beckn, deg`
-> **Namespace:** `https://schema.beckn.io/`
+> **Namespace:** `https://schema.nfh.global/`
 > Part of the [DEG Schema](../../README.md)
 
 ---
@@ -39,4 +39,4 @@
 | Class | `deg:EnergyProgramEnrollment rdfs:subClassOf schema:ProgramMembership` |
 | Equivalent | `deg:EnergyProgramEnrollment owl:equivalentClass deg:EnergyEnrollment` |
 | Root OWL | `beckn:Order owl:equivalentClass beckn:Contract` |
-| Namespace | `deg: "https://schema.beckn.io/deg/EnergyProgramEnrollment/v2.0/"` |
+| Namespace | `deg: "https://schema.nfh.global/deg/EnergyProgramEnrollment/v2.0/"` |

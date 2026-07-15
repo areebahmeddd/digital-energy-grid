@@ -2,7 +2,7 @@
 
 PII identity and address details for a utility service customer.
 
-**Canonical IRI:** `https://schema.beckn.io/CustomerDetails/v1.0`  
+**Canonical IRI:** `https://schema.nfh.global/CustomerDetails/v1.0`  
 **CIM:** `cim:Customer` (IEC 61968-1)
 
 ---

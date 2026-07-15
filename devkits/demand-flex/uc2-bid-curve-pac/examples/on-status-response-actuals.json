@@ -11,14 +11,14 @@
     "messageId": "d7e8f9a0-b1c2-3456-abcd-ef2345678902",
     "timestamp": "2026-06-15T16:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -34,7 +34,7 @@
               "id": "flex-need-north-delhi-jun15",
               "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "direction": "REDUCE",
                 "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
@@ -47,7 +47,7 @@
             "id": "offer-pac-001",
             "resourceIds": ["flex-need-north-delhi-jun15"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
@@ -67,7 +67,7 @@
             }
           },
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
@@ -89,7 +89,7 @@
           "status": {"code": "DELIVERY_COMPLETE", "name": "Event completed, actuals measured"},
           "commitmentIds": ["commitment-pac-001"],
           "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-06-15-001",
             "methodology": "5of10",
@@ -129,7 +129,7 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
@@ -139,7 +139,7 @@
         {
           "id": "payment-term-pac-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 332.5},
             "settlementStatus": "PENDING",

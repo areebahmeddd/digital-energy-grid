@@ -2,9 +2,9 @@
 
 Identity attributes for a regulated discom ledger Technical Service Provider (TSP), used on `buyerDiscom` and `sellerDiscom` participants in a DEG contract.
 
-**Canonical IRI:** `https://schema.beckn.io/DiscomLedgerProvider/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/DiscomLedgerProvider/v1.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/DiscomLedgerProvider/v1.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/DiscomLedgerProvider/v1.0/`
 
 ---
 

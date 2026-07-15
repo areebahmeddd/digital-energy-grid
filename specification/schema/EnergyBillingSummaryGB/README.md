@@ -1,8 +1,8 @@
 # BillingSummary
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyBillingSummaryGB`](https://schema.beckn.io/EnergyBillingSummaryGB)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyBillingSummaryGB`](https://schema.nfh.global/EnergyBillingSummaryGB)
 > **Tags:** `energy`, `billing`, `green-button`, `espi`, `deg`
-> **Namespace:** `https://schema.beckn.io/deg/`
+> **Namespace:** `https://schema.nfh.global/deg/`
 > Part of the [DEG Specification](../../../README.md)
 
 ---
@@ -28,9 +28,9 @@ ESPI/Green Button billing summary data for a single meter. Contains ServiceCateg
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyBillingSummaryGB` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyBillingSummaryGB/v1.0/vocab.jsonld` |
-| ESPI context (imported) | `https://schema.beckn.io/espiGreenButton/v1.0/context.jsonld` |
-| CustomerProfile (imported) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0/context.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EnergyBillingSummaryGB` |
+| JSON Schema (latest) | `https://schema.nfh.global/EnergyBillingSummaryGB/v1.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EnergyBillingSummaryGB/v1.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EnergyBillingSummaryGB/v1.0/vocab.jsonld` |
+| ESPI context (imported) | `https://schema.nfh.global/espiGreenButton/v1.0/context.jsonld` |
+| CustomerProfile (imported) | `https://schema.nfh.global/EnergyCustomerProfile/v1.0/context.jsonld` |

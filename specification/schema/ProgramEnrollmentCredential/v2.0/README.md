@@ -1,6 +1,6 @@
 # ProgramEnrollmentCredential v2.0
 
-**Schema ID:** `https://schema.beckn.io/ProgramEnrollmentCredential/v2.0`
+**Schema ID:** `https://schema.nfh.global/ProgramEnrollmentCredential/v2.0`
 
 **Status:** Current
 

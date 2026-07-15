@@ -2,7 +2,7 @@
 
 Tariff, regulatory load, and connection profile for a single meter connection point.
 
-**Canonical IRI:** `https://schema.beckn.io/MeterServiceProfile/v1.0`  
+**Canonical IRI:** `https://schema.nfh.global/MeterServiceProfile/v1.0`  
 **CIM:** `cim:UsagePoint` (IEC 61968-9)
 
 ---

@@ -1,6 +1,6 @@
 # EnergyResourceInverter v1.0
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceInverter/v1.0`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceInverter/v1.0`
 **CIM:** `PowerElectronicsConnection` (IEC 61970-302)
 **Status:** Current
 
