@@ -9,5 +9,5 @@
     "messageId": "e2f3a4b5-c6d7-8901-abcd-ef7890123456",
     "timestamp": "2026-06-14T09:00:00Z"
   },
-  "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].resources[*] ? (@.resourceAttributes.direction == 'REDUCE')"}}}
+  "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*] ? (@.provider.id == 'tpddl-north-delhi' && exists(@.resources) && @.offers[*].validity.endDate >= '2026-06-13T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start >= '2026-06-15T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start < '2026-06-16T00:00:00Z')"}}}
 }
