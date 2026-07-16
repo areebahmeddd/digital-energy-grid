@@ -1,236 +1,153 @@
-# DEG Contract Policy — Demand Flex Revenue Flows
+# DEG Contract Policy — Demand Flex Revenue Flows (per-interval, per-meter)
 #
-# Computes per-meter incentive payouts from utility-provided M&V baselines
-# and actuals, and produces signed revenue flows per ROLE (buyer/seller),
-# not per participant ID.
+# The utility (buyer) publishes a DemandFlexNeed time series — one interval per
+# tranche, carrying per-slot PRICE and SHORTFALL_PENALTY (and CAPACITY_REQUESTED,
+# which is a discovery signal only and NOT used here). The aggregator (seller)
+# adds a CAPACITY_OFFERED column on Commitment.commitmentAttributes. Per-meter
+# BASELINE / USAGE telemetry arrives on DemandFlexPerformance. All three series
+# share one intervalPeriod grid and join on interval id.
 #
-# buyer  (utility/DISCOM) → pays     → negative value
-# seller (aggregator)     → receives → positive value
-# Sum of all revenue_flows values MUST equal zero (net-zero).
+# Settlement is UTILITY-ONLY and PER-METER, summed per interval:
+#   delivered_i = Σ_meter clamp0(BASELINE_i − USAGE_i)          (aggregate kW)
+#   eligible_i  = min(delivered_i, CAPACITY_OFFERED_i)
+#   pay_i       = eligible_i × durationHours × PRICE_i
+#   penalty_i   = clamp0(CAPACITY_OFFERED_i − delivered_i) × durationHours × SHORTFALL_PENALTY_i
+#   net_i       = pay_i − penalty_i          →   total = Σ net_i
 #
-# Settlement is UTILITY-ONLY. Only `performance[*]` records whose
-# `performanceAttributes` were authored by the utility (BPP) — grid-meter
-# BASELINE + USAGE in a BecknTimeSeries — are eligible inputs.
-# EnergyResource telemetry (`methodology: "RESOURCE_TELEMETRY"`, emitted
-# as a separate `on_status` push carrying per-resource reconciliation
-# data — EV chargers, batteries, solar PV, etc.) is EXPLICITLY EXCLUDED
-# from this rego's computation. It is allowed on the wire as proof-of-
-# performance / reconciliation evidence, but it is not settlement-grade
-# and never feeds the revenue flow.
+# buyer pays (negative), seller receives (positive), net zero.
+# EnergyResource telemetry (methodology RESOURCE_TELEMETRY) is reconciliation-
+# only and excluded from settlement.
 #
-# Input: full beckn contract payload with:
-#   - contractAttributes.roles[].role             → buyer / seller
-#   - commitments[0].offer.offerAttributes.inputs → incentive terms (role-tagged)
-#   - commitments[0].resources[0].resourceAttributes.eventWindow → hours
-#   - performance[*].performanceAttributes.meters[*].telemetry  → BecknTimeSeries
-#
-# Per-meter telemetry is a BecknTimeSeries; mean of BASELINE values across
-# intervals is used as the meter's baseline kW; mean of USAGE values is used
-# as the meter's actual kW (USAGE is absent before the event has completed).
-#
-# Exported rules:
-#   revenue_flows          — [{role, value, currency, description}]
-#   settlement_components  — per-meter [{lineId, lineSummary, value, currency}]
-#   total_settlement       — sum of all meter incentives
-#   event_hours            — derived from eventWindow
-#   net_zero_ok            — bool: sum of revenue_flows == 0
-#   violations             — set of error/warning strings
+# Exported: revenue_flows, settlement_components, total_settlement,
+#           net_zero_ok, violations.
 
 package deg.contracts.demand_flex
 
 import rego.v1
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
+# non-settlement methodologies — perf records authored by the seller's
+# EnergyResource fleet (out-of-band vendor APIs), excluded from settlement.
+_non_settlement_methodologies := {"RESOURCE_TELEMETRY"}
 
-ns_per_hour := (1000 * 1000 * 1000) * 60 * 60
-
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Input extraction
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 _commitment := input.message.contract.commitments[0]
 
-_offer_attrs := _commitment.offer.offerAttributes
+# DemandFlexNeed time series — buyer's CAPACITY_REQUESTED / PRICE / SHORTFALL_PENALTY
+_need := _commitment.resources[0].resourceAttributes
 
-_inputs := _offer_attrs.inputs
+# commitment series — seller's CAPACITY_OFFERED column
+_offered := _commitment.commitmentAttributes
 
-_buyer_inputs := [i.inputs | some i in _inputs; i.role == "buyer"][0]
+_buyer_inputs := [i.inputs | some i in _commitment.offer.offerAttributes.inputs; i.role == "buyer"][0]
 
-_incentive_per_kwh := _buyer_inputs.incentivePerKwh
+_currency := object.get(_buyer_inputs, "currency", "INR")
 
-_currency := _buyer_inputs.currency
-
-# Non-settlement methodologies — perf records authored by sources other
-# than the utility (currently the seller's EnergyResource fleet via
-# out-of-band vendor APIs) carry one of these methodologies and MUST be
-# excluded from settlement input. Keep this list short and explicit;
-# new non-settlement methodologies must be added here AND documented
-# in the devkit README's settlement section.
-_non_settlement_methodologies := {"RESOURCE_TELEMETRY"}
-
-# Settlement-eligible perf records: utility-authored M&V data only.
-# Filters out EnergyResource (proof-of-performance) telemetry by
-# `methodology`. If a payload carries a single utility perf record (the
-# common case) this picks it; if multiple are present (e.g. baselines +
-# actuals on the same message) the FIRST is used — callers SHOULD
-# invoke this rego against the actuals (or settled) message.
+# first settlement-eligible performance record (utility M&V, not RESOURCE_TELEMETRY)
 _settlement_perf := perf if {
 	some perf in input.message.contract.performance
 	not perf.performanceAttributes.methodology in _non_settlement_methodologies
 }
 
-_perf_attrs := _settlement_perf.performanceAttributes
+_meters := _settlement_perf.performanceAttributes.meters
 
-_meters := _perf_attrs.meters
+_roles := {r.role | some r in input.message.contract.contractAttributes.roles}
 
-_event_window := _commitment.resources[0].resourceAttributes.eventWindow
+# --------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------
 
-# ---------------------------------------------------------------------------
-# Roles — extracted from contractAttributes (DEGContract)
-# ---------------------------------------------------------------------------
-
-_contract_attrs := input.message.contract.contractAttributes
-
-_roles := {r.role | some r in _contract_attrs.roles}
-
-# ---------------------------------------------------------------------------
-# Event hours
-# ---------------------------------------------------------------------------
-
-_start_ns := time.parse_rfc3339_ns(_event_window.startDate)
-
-_end_ns := time.parse_rfc3339_ns(_event_window.endDate)
-
-event_hours := (_end_ns - _start_ns) / ns_per_hour
-
-# ---------------------------------------------------------------------------
-# BecknTimeSeries readers
-#
-# Per-meter telemetry is a BecknTimeSeries. Each interval carries one or
-# more typed payloads ({type, values}). For demand-flex, BASELINE is
-# always present; USAGE appears once the event has completed.
-# ---------------------------------------------------------------------------
-
-_payload_values(meter, ptype) := vals if {
-	vals := [v |
-		some interval in meter.telemetry.intervals
-		some payload in interval.payloads
-		payload.type == ptype
-		some v in payload.values
-	]
+# scalar value of payload `ptype` at interval `ivid` in a series' intervals[]
+_val(intervals, ivid, ptype) := v if {
+	some iv in intervals
+	iv.id == ivid
+	some p in iv.payloads
+	p.type == ptype
+	v := p.values[0]
 }
 
-_payload_mean(meter, ptype) := mean if {
-	vals := _payload_values(meter, ptype)
-	count(vals) > 0
-	mean := sum(vals) / count(vals)
+_clamp0(x) := x if x >= 0
+
+_clamp0(x) := 0 if x < 0
+
+_numz(s) := to_number(s) if s != ""
+
+_numz("") := 0
+
+# duration of one interval in hours, parsed from ISO 8601 (PT#H / PT#M / PT#H#M)
+_dur_hours := h if {
+	m := regex.find_all_string_submatch_n(`^PT(?:([0-9]+)H)?(?:([0-9]+)M)?$`, _need.intervalPeriod.duration, 1)[0]
+	h := _numz(m[1]) + (_numz(m[2]) / 60)
 }
 
-_has_actual(meter) if count(_payload_values(meter, "USAGE")) > 0
+# per-meter clamped reduction at an interval; undefined if BASELINE or USAGE absent
+_meter_reduction(meter, ivid) := _clamp0(base - use) if {
+	base := _val(meter.telemetry.intervals, ivid, "BASELINE")
+	use := _val(meter.telemetry.intervals, ivid, "USAGE")
+}
 
-# ---------------------------------------------------------------------------
-# Per-meter settlement
-# ---------------------------------------------------------------------------
+_delivered(ivid) := sum([_meter_reduction(m, ivid) | some m in _meters])
 
-_clamp_zero(x) := x if x >= 0
+# --------------------------------------------------------------------------
+# Per-interval settlement
+# --------------------------------------------------------------------------
 
-_clamp_zero(x) := 0 if x < 0
-
-_meter_settlement[i] := result if {
-	meter := _meters[i]
-	_has_actual(meter)
-	baseline_kw := _payload_mean(meter, "BASELINE")
-	actual_kw := _payload_mean(meter, "USAGE")
-	reduction_kw := _clamp_zero(baseline_kw - actual_kw)
-	reduction_kwh := reduction_kw * event_hours
-	incentive := reduction_kwh * _incentive_per_kwh
-	result := {
-		"meterId": meter.meterId,
-		"baselineKw": baseline_kw,
-		"actualKw": actual_kw,
-		"reductionKw": reduction_kw,
-		"reductionKwh": reduction_kwh,
-		"incentive": incentive,
+_settle[ivid] := row if {
+	some iv in _need.intervals
+	ivid := iv.id
+	price := _val(_need.intervals, ivid, "PRICE")
+	penalty_rate := _val(_need.intervals, ivid, "SHORTFALL_PENALTY")
+	offered := _val(_offered.intervals, ivid, "CAPACITY_OFFERED")
+	delivered := _delivered(ivid)
+	eligible := min([delivered, offered])
+	pay := (eligible * _dur_hours) * price
+	penalty := (_clamp0(offered - delivered) * _dur_hours) * penalty_rate
+	net := pay - penalty
+	row := {
+		"id": ivid, "price": price, "offered": offered,
+		"delivered": delivered, "eligible": eligible,
+		"pay": pay, "penalty": penalty, "net": net,
 	}
 }
-
-# ---------------------------------------------------------------------------
-# Settlement components (per-meter line items)
-# ---------------------------------------------------------------------------
 
 settlement_components := [comp |
-	some i
-	s := _meter_settlement[i]
-	comp := {
-		"lineId": sprintf("incentive-%s", [s.meterId]),
-		"lineSummary": sprintf("%s: (%g - %g) kW × %vh × %g %s/kWh",
-			[s.meterId, s.baselineKw, s.actualKw, event_hours, _incentive_per_kwh, _currency]),
-		"value": s.incentive,
-		"currency": _currency,
-	}
+	some ivid
+	s := _settle[ivid]
+	line_id := sprintf("slot-%d", [ivid])
+	summary := sprintf("slot %d: min(%v delivered, %v offered) kW x %vh x %v %s/kWh - penalty %v", [ivid, s.delivered, s.offered, _dur_hours, s.price, _currency, s.penalty])
+	comp := {"lineId": line_id, "lineSummary": summary, "value": s.net, "currency": _currency}
 ]
 
-total_settlement := sum([s.incentive | some i; s := _meter_settlement[i]])
+total_settlement := sum([s.net | some ivid; s := _settle[ivid]])
 
-# ---------------------------------------------------------------------------
-# Revenue flows by role (the core output)
-#
-#   buyer pays  → negative
-#   seller receives → positive
-#   sum = 0
-# ---------------------------------------------------------------------------
+_slot_count := count(_settle)
 
-_total_kwh := sum([s.reductionKwh | some i; s := _meter_settlement[i]])
+_buyer_value := total_settlement * -1
 
-_buyer_desc := sprintf("Incentive payable for %v kWh verified curtailment", [_total_kwh])
+_buyer_desc := sprintf("Net payable across %d flex slots", [_slot_count])
 
-_seller_desc := sprintf("Incentive receivable for %v kWh verified curtailment", [_total_kwh])
+_seller_desc := sprintf("Net receivable across %d flex slots", [_slot_count])
 
-_flow_defs := [
-	["buyer", -1],
-	["seller", 1],
+revenue_flows := [
+	{"role": "buyer", "value": _buyer_value, "currency": _currency, "description": _buyer_desc},
+	{"role": "seller", "value": total_settlement, "currency": _currency, "description": _seller_desc},
 ]
-
-revenue_flows := [flow |
-	some def in _flow_defs
-	role := def[0]
-	sign := def[1]
-	desc := sprintf("Incentive %s for %v kWh verified curtailment", [_flow_label[role], _total_kwh])
-	flow := object.union(
-		object.union(
-			object.union({"role": role}, {"value": sign * total_settlement}),
-			{"currency": _currency},
-		),
-		{"description": desc},
-	)
-]
-
-_flow_label["buyer"] := "payable"
-
-_flow_label["seller"] := "receivable"
 
 _revenue_sum := sum([f.value | some f in revenue_flows])
 
 net_zero_ok if _revenue_sum == 0
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Violations
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 violations contains msg if {
-	# Defense-in-depth: invoking the rego against a payload whose only
-	# perf records are non-settlement (EnergyResource telemetry) is a
-	# programming error — the settlement-eligibility filter silently
-	# selects nothing and the downstream rules would compute nonsense
-	# or NaN. Flag explicitly.
 	count(input.message.contract.performance) > 0
 	not _settlement_perf
-	seen_methodologies := [perf.performanceAttributes.methodology |
-		some perf in input.message.contract.performance
-	]
-	msg := sprintf("no settlement-eligible performance record found — all records are non-settlement (methodologies: %v). Settlement requires utility-provided meter telemetry; EnergyResource telemetry is reconciliation-only.", [seen_methodologies])
+	ms := [p.performanceAttributes.methodology | some p in input.message.contract.performance]
+	msg := sprintf("no settlement-eligible performance record found — all records are non-settlement (methodologies: %v)", [ms])
 }
 
 violations contains msg if {
@@ -243,31 +160,51 @@ violations contains msg if {
 	msg := "no participant with role 'seller' found"
 }
 
+# column const (uc1 demand_flex profile) — the schema leaves columns open;
+# this rego is the hard lock. Self-skips when the series is absent.
 violations contains msg if {
-	some i
-	meter := _meters[i]
-	not _has_actual(meter)
-	msg := sprintf("meter %s: missing USAGE telemetry — cannot compute settlement", [meter.meterId])
+	descs := _need.payloadDescriptors
+	cols := {d.payloadType | some d in descs}
+	cols != {"CAPACITY_REQUESTED", "PRICE", "SHORTFALL_PENALTY"}
+	msg := sprintf("DemandFlexNeed columns must be exactly {CAPACITY_REQUESTED, PRICE, SHORTFALL_PENALTY}, got %v", [cols])
 }
 
 violations contains msg if {
-	some i
-	meter := _meters[i]
-	_has_actual(meter)
-	baseline_kw := _payload_mean(meter, "BASELINE")
-	actual_kw := _payload_mean(meter, "USAGE")
-	actual_kw > baseline_kw
-	msg := sprintf("meter %s: actualKw (%g) > baselineKw (%g) — reduction clamped to zero",
-		[meter.meterId, actual_kw, baseline_kw])
+	descs := _offered.payloadDescriptors
+	cols := {d.payloadType | some d in descs}
+	cols != {"CAPACITY_OFFERED"}
+	msg := sprintf("commitment column must be exactly {CAPACITY_OFFERED}, got %v", [cols])
+}
+
+# shared intervalPeriod grid — CAPACITY_OFFERED series
+violations contains msg if {
+	_offered.intervalPeriod != _need.intervalPeriod
+	msg := "CAPACITY_OFFERED series intervalPeriod does not match the DemandFlexNeed grid"
+}
+
+# shared intervalPeriod grid — each meter's telemetry
+violations contains msg if {
+	some m in _meters
+	m.telemetry.intervalPeriod != _need.intervalPeriod
+	msg := sprintf("meter %s: telemetry intervalPeriod does not match the DemandFlexNeed grid", [m.meterId])
+}
+
+# every slot needs a seller CAPACITY_OFFERED
+violations contains msg if {
+	some iv in _need.intervals
+	not _val(_offered.intervals, iv.id, "CAPACITY_OFFERED")
+	msg := sprintf("interval %d: missing CAPACITY_OFFERED", [iv.id])
+}
+
+# every meter needs USAGE on every settled slot
+violations contains msg if {
+	some iv in _need.intervals
+	some m in _meters
+	not _val(m.telemetry.intervals, iv.id, "USAGE")
+	msg := sprintf("meter %s: missing USAGE at interval %d — cannot settle", [m.meterId, iv.id])
 }
 
 violations contains msg if {
 	not net_zero_ok
 	msg := sprintf("net-zero failed: revenue sum = %g (expected 0)", [_revenue_sum])
 }
-
-# Cross-field type-coverage (every type used in intervals must be
-# declared in payloadDescriptors) lives in the network policy
-# (specification/policies/demand-flex-networkpolicy.rego) — that's the policy
-# the BPP's checkPolicy step actually evaluates. This file's `violations`
-# set is computed only as enrichment metadata, never gates ACK/NACK.

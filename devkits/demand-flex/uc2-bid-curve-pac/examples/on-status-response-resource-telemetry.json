@@ -37,10 +37,20 @@
               "resourceAttributes": {
                 "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 200
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]},
+                  {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]}
+                ]
               }
             }
           ],
@@ -54,7 +64,13 @@
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
+                  "inputs": {
+                    "clearingMethod": "PAY-AS-CLEAR",
+                    "clearingTime": "2026-06-15T12:00:00Z",
+                    "currency": "INR",
+                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
+                    "penaltyRate": 0.5
+                  }
                 },
                 {
                   "role": "seller",
@@ -66,22 +82,58 @@
                         "@type": "EnergyResource",
                         "id": "did:web:tatamotors.com:vin:VIN001",
                         "type": "EV_CHARGER",
-                        "attributes": {"make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
+                        "attributes": {
+                          "make": "Tata",
+                          "model": "Nexon EV",
+                          "ratedPowerKw": 7.0,
+                          "energyCapacityKwh": 30.0,
+                          "telemetryProvider": "tata-evp-telematics"
+                        },
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:mgmotor.co.in:vin:VIN002",
                         "type": "EV_CHARGER",
-                        "attributes": {"make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
+                        "attributes": {
+                          "make": "MG",
+                          "model": "ZS EV",
+                          "ratedPowerKw": 7.0,
+                          "energyCapacityKwh": 44.5,
+                          "telemetryProvider": "mg-imotion"
+                        },
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       }
                     ],
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "cardinality": "PER_INTERVAL"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "SOC_END",
+                        "readingType": "DIRECT_READ",
+                        "units": "KWH",
+                        "cardinality": "PER_INTERVAL"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "GPS_LAT",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "cardinality": "PER_EVENT"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "GPS_LON",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "cardinality": "PER_EVENT"
+                      }
                     ]
                   }
                 }
@@ -116,7 +168,15 @@
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [20.5]}, {"type": "GPS_LAT", "values": [28.6139]}, {"type": "GPS_LON", "values": [77.209]}]},
+                    {
+                      "id": 0,
+                      "payloads": [
+                        {"type": "USAGE", "values": [1.0]},
+                        {"type": "SOC_END", "values": [20.5]},
+                        {"type": "GPS_LAT", "values": [28.6139]},
+                        {"type": "GPS_LON", "values": [77.209]}
+                      ]
+                    },
                     {"id": 1, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.5]}]}
                   ]
                 }
@@ -133,7 +193,15 @@
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}, {"type": "GPS_LAT", "values": [28.628]}, {"type": "GPS_LON", "values": [77.241]}]},
+                    {
+                      "id": 0,
+                      "payloads": [
+                        {"type": "USAGE", "values": [0.0]},
+                        {"type": "SOC_END", "values": [31.0]},
+                        {"type": "GPS_LAT", "values": [28.628]},
+                        {"type": "GPS_LON", "values": [77.241]}
+                      ]
+                    },
                     {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]}
                   ]
                 }
@@ -145,8 +213,14 @@
       "contractAttributes": {
         "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
+        "roles": [
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego",
+          "queryPath": "data.deg.contracts.demand_flex_pac"
+        }
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }

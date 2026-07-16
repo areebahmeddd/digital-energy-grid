@@ -18,10 +18,14 @@ Attribute schemas for demand-flex needs (Resource.resourceAttributes). Describes
 
 ## Properties
 
+DemandFlexNeed is an **OpenADR 3.1.0-aligned time series** (one interval per
+tranche) — the single, unified Need shape for uc1 (monopsony, DISCOM fixes the
+clearing price) and uc2 (pay-as-clear auction). Columns are open in the schema;
+each contract policy rego imposes its own hard-`const` column set.
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `direction` | `string` enum | ✅ | Whether the utility needs demand increase or demand reduction. REDUCE = curtailment (ty... |
-| `eventWindow` | `object` | ✅ | The time window during which the flex event occurs. All times MUST be in UTC (ISO 8601 ... |
-| `capacityType` | `string` enum |  | Type of flex capacity. CURTAILMENT = reduce consumption. SHIFT = move consumption to di... |
-| `maxCapacityKw` | `number` | ✅ | Maximum flex capacity needed in kW. |
-| `location` | `object` |  | Geographic area where flex is needed (GeoJSON). |
+| `location` | Beckn Location |  | GeoJSON geometry (`geo`) + optional `address` |
+| `intervalPeriod` | OpenADR intervalPeriod | ✅ | `start` + `duration` (e.g. `PT30M`) — the tranche grid |
+| `payloadDescriptors` | array | ✅ | Buyer column descriptors (profile-specific; rego-locked) |
+| `intervals` | OpenADR interval[] | ✅ | One row per tranche — `id` + typed `payloads` |

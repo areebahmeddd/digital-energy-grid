@@ -6,26 +6,30 @@
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "beckn": "https://schema.nfh.global/core/v2.0/",
+    "oadr": "https://schema.nfh.global/openadr/v3.1.0/",
     "deg": "https://schema.nfh.global/deg/DemandFlexNeed/v2.0/",
-    "startDate": "beckn:startDate",
-    "endDate": "beckn:endDate",
     "DemandFlexNeed": "deg:DemandFlexNeed",
-    "direction": {
-      "@id": "deg:direction",
-      "@type": "@id"
-    },
-    "eventWindow": "deg:eventWindow",
-    "capacityType": {
-      "@id": "deg:capacityType",
-      "@type": "@id"
-    },
-    "maxCapacityKw": "deg:maxCapacityKw",
     "location": "deg:location",
-    "INCREASE": "deg:DirectionIncrease",
-    "REDUCE": "deg:DirectionReduce",
-    "CURTAILMENT": "deg:CapacityTypeCurtailment",
-    "SHIFT": "deg:CapacityTypeShift",
-    "GENERATION": "deg:CapacityTypeGeneration"
+    "geo": "deg:geo",
+    "address": "deg:address",
+    "intervalPeriod": "oadr:intervalPeriod",
+    "start": "oadr:start",
+    "duration": "oadr:duration",
+    "payloadDescriptors": "oadr:payloadDescriptors",
+    "objectType": "oadr:objectType",
+    "payloadType": "oadr:payloadType",
+    "units": "oadr:units",
+    "currency": "oadr:currency",
+    "insertedBy": "deg:insertedBy",
+    "intervals": "oadr:intervals",
+    "id": "oadr:id",
+    "payloads": "oadr:payloads",
+    "type": "oadr:type",
+    "values": "oadr:values",
+    "CAPACITY_REQUESTED": "deg:CapacityRequested",
+    "CAPACITY_OFFERED": "deg:CapacityOffered",
+    "PRICE": "deg:Price",
+    "SHORTFALL_PENALTY": "deg:ShortfallPenalty"
   },
   "@graph": []
 }
