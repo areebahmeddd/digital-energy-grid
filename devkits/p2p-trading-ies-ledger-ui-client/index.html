@@ -122,6 +122,13 @@
           </select>
           <div class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple. Filters trades where both buyer and seller discom are in the selection.</div>
         </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Networks</label>
+          <select id="networkFilter" multiple class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm min-h-[100px]" size="8">
+            <!-- Populated dynamically -->
+          </select>
+          <div class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple. Filters trades by network. Trades without a networkId appear under "(unknown)".</div>
+        </div>
       </div>
     </section>
 
@@ -173,7 +180,7 @@
             <!-- Rendered dynamically by renderTableHeader() -->
           </thead>
           <tbody id="recordsBody" class="divide-y divide-slate-100">
-            <tr><td colspan="13" class="px-3 py-8 text-center text-slate-400">Loading records...</td></tr>
+            <tr><td colspan="16" class="px-3 py-8 text-center text-slate-400">Loading records...</td></tr>
           </tbody>
         </table>
       </div>
@@ -184,12 +191,15 @@
   <script>
     // ── State ──
     const API_URL = '/api/ledger/get';
+    const NO_NETWORK_ID = '(unknown)'; // bucket label for trades without a networkId
     const POLL_INTERVAL = 3600; // seconds (60 minutes)
     let allRecords = [];
     let filteredRecords = null; // null = no filter
     let selectedPair = null; // { buyer, seller }
     let selectedDiscoms = []; // Array of selected discoms (applies to both buyer and seller)
     let allDiscoms = []; // All available discoms
+    let selectedNetworkIds = []; // Array of selected networkIds
+    let allNetworkIds = []; // All available networkIds
     let tradeTimeStart = null; // Start date for trade time filter
     let tradeTimeEnd = null; // End date for trade time filter
     let sortCol = 'tradeTime';
@@ -242,6 +252,19 @@
 
         if (selectedDiscoms.length === 0) {
           selectedDiscoms = allDiscoms.filter(d => !d.startsWith('TEST'));
+        }
+
+        const networkSet = new Set();
+        let hasMissingNetwork = false;
+        records.forEach(r => {
+          if (r.networkId) networkSet.add(r.networkId);
+          else hasMissingNetwork = true;
+        });
+        allNetworkIds = Array.from(networkSet).sort();
+        if (hasMissingNetwork) allNetworkIds.push(NO_NETWORK_ID);
+
+        if (selectedNetworkIds.length === 0) {
+          selectedNetworkIds = [...allNetworkIds];
         }
 
         filteredRecords = null;
@@ -327,6 +350,22 @@
       return record.tradeDetails.map(d => d.tradeType).join(', ');
     }
 
+    // Returns { value, currency } for the first tradeDetail with a price, or null
+    function getPrice(record) {
+      if (!record.tradeDetails || !record.tradeDetails.length) return null;
+      const detail = record.tradeDetails.find(d => d.pricePerUnit != null);
+      if (!detail) return null;
+      const value = parseFloat(detail.pricePerUnit);
+      if (isNaN(value)) return null;
+      return { value, currency: detail.priceCurrency || '' };
+    }
+
+    function formatPrice(record) {
+      const p = getPrice(record);
+      if (!p) return 'unknown';
+      return `${p.value.toFixed(2)}${p.currency ? ' ' + p.currency : ''}`;
+    }
+
     function getStatus(record) {
       const s = record.statusSellerDiscom || record.statusBuyerDiscom || null;
       return s;
@@ -401,6 +440,7 @@
 
       // Populate filter dropdowns
       populateDiscomFilters(stats);
+      populateNetworkFilters();
 
       // Histogram
       renderHourlyHistogram();
@@ -579,6 +619,44 @@
       applyFilters();
     }
 
+    function populateNetworkFilters() {
+      const networkSelect = document.getElementById('networkFilter');
+      if (!networkSelect) return;
+
+      // Default: select all networks if nothing chosen yet
+      if (selectedNetworkIds.length === 0 && allNetworkIds.length > 0) {
+        selectedNetworkIds = [...allNetworkIds];
+      }
+
+      networkSelect.innerHTML = '';
+      allNetworkIds.forEach(networkId => {
+        const option = document.createElement('option');
+        option.value = networkId;
+        option.textContent = networkId;
+        if (selectedNetworkIds.includes(networkId)) {
+          option.selected = true;
+        }
+        networkSelect.appendChild(option);
+      });
+
+      networkSelect.onchange = applyNetworkFilters;
+    }
+
+    function applyNetworkFilters() {
+      const networkSelect = document.getElementById('networkFilter');
+      const selected = Array.from(networkSelect.selectedOptions).map(opt => opt.value);
+
+      // If nothing selected, select all (don't allow empty selection)
+      if (selected.length === 0 && allNetworkIds.length > 0) {
+        selectedNetworkIds = [...allNetworkIds];
+        Array.from(networkSelect.options).forEach(opt => opt.selected = true);
+      } else {
+        selectedNetworkIds = selected;
+      }
+
+      applyFilters();
+    }
+
     function applyFilters() {
       let records = allRecords;
 
@@ -612,6 +690,19 @@
         }
       }
 
+      // Apply network filter
+      // Filter if selectedNetworkIds is a strict subset of allNetworkIds.
+      // Records without a networkId fall into the NO_NETWORK_ID "(unknown)" bucket.
+      let networkFilterApplied = false;
+      if (selectedNetworkIds.length > 0 && allNetworkIds.length > 0) {
+        const allNetworksSelected = selectedNetworkIds.length === allNetworkIds.length &&
+                                    allNetworkIds.every(n => selectedNetworkIds.includes(n));
+        if (!allNetworksSelected) {
+          networkFilterApplied = true;
+          records = records.filter(r => selectedNetworkIds.includes(r.networkId || NO_NETWORK_ID));
+        }
+      }
+
       // Apply matrix pair filter (if any)
       if (selectedPair) {
         records = records.filter(
@@ -631,7 +722,7 @@
       const hasPairFilter = selectedPair !== null;
       
       // Always set filteredRecords if any filter was applied
-      if (hasTimeFilter || hasDiscomFilter || hasPairFilter) {
+      if (hasTimeFilter || hasDiscomFilter || hasPairFilter || networkFilterApplied) {
         filteredRecords = records;
       } else {
         filteredRecords = null;
@@ -731,7 +822,16 @@
       Array.from(discomSelect.options).forEach(opt => {
         opt.selected = selectedDiscoms.includes(opt.value);
       });
-      
+
+      // Reset to all networks selected
+      selectedNetworkIds = [...allNetworkIds];
+      const networkSelect = document.getElementById('networkFilter');
+      if (networkSelect) {
+        Array.from(networkSelect.options).forEach(opt => {
+          opt.selected = selectedNetworkIds.includes(opt.value);
+        });
+      }
+
       // Reset time range to default (1 month ago to 2 days from now)
       setDefaultDateRange();
     }
@@ -739,7 +839,8 @@
     function updateFilterUI() {
       const hasTimeFilter = tradeTimeStart && tradeTimeEnd;
       const hasDiscomFilter = selectedDiscoms.length > 0 && selectedDiscoms.length < allDiscoms.length;
-      const hasFilters = hasTimeFilter || selectedPair || hasDiscomFilter;
+      const hasNetworkFilter = selectedNetworkIds.length > 0 && selectedNetworkIds.length < allNetworkIds.length;
+      const hasFilters = hasTimeFilter || selectedPair || hasDiscomFilter || hasNetworkFilter;
       document.getElementById('clearAllFilters').classList.toggle('hidden', !hasFilters);
       document.getElementById('clearFilter').classList.toggle('hidden', !selectedPair);
       if (!selectedPair) {
@@ -988,6 +1089,7 @@
       html += '<th class="px-2 py-2 font-semibold" onclick="sortTable(\'deliveryStartTime\')">Delivery Start<span id="sort-deliveryStartTime" class="text-xs"></span></th>';
       html += '<th class="px-2 py-2 font-semibold text-right" onclick="sortTable(\'deliveryDuration\')">Dur(h)<span id="sort-deliveryDuration" class="text-xs"></span></th>';
       html += '<th class="px-2 py-2 font-semibold text-right" onclick="sortTable(\'energy\')">Qty(KWH)<span id="sort-energy" class="text-xs"></span></th>';
+      html += '<th class="px-2 py-2 font-semibold text-right" onclick="sortTable(\'price\')">Price<span id="sort-price" class="text-xs"></span></th>';
       html += '<th class="px-2 py-2 font-semibold text-right" onclick="sortTable(\'buyerDiscomAllocation\')">Buyer Alloc<span id="sort-buyerDiscomAllocation" class="text-xs"></span></th>';
       html += '<th class="px-2 py-2 font-semibold text-right" onclick="sortTable(\'sellerDiscomAllocation\')">Seller Alloc<span id="sort-sellerDiscomAllocation" class="text-xs"></span></th>';
       html += '<th class="px-2 py-2 font-semibold" onclick="sortTable(\'statusBuyerDiscom\')">B.Status<span id="sort-statusBuyerDiscom" class="text-xs"></span></th>';
@@ -1008,7 +1110,7 @@
     }
 
     function getTableColSpan() {
-      return showParticipantIds ? 17 : 15;
+      return showParticipantIds ? 18 : 16;
     }
 
     function renderTable() {
@@ -1062,6 +1164,7 @@
           <td class="px-2 py-1.5 whitespace-nowrap text-slate-700">${escHtml(deliveryStartTimeStr)}</td>
           <td class="px-2 py-1.5 text-right font-mono text-slate-700">${escHtml(deliveryDurationStr)}</td>
           <td class="px-2 py-1.5 text-right font-mono font-semibold text-slate-800">${energy.toFixed(2)}</td>
+          <td class="px-2 py-1.5 text-right font-mono text-slate-800 whitespace-nowrap">${escHtml(formatPrice(r))}</td>
           <td class="px-2 py-1.5 text-right font-mono text-slate-800">${getBuyerDiscomAllocation(r) !== null ? getBuyerDiscomAllocation(r).toFixed(2) : '--'}</td>
           <td class="px-2 py-1.5 text-right font-mono text-slate-800">${getSellerDiscomAllocation(r) !== null ? getSellerDiscomAllocation(r).toFixed(2) : '--'}</td>
           <td class="px-2 py-1.5"><span class="px-1.5 py-0.5 rounded-full text-xs font-semibold ${statusClassBuyer}">${escHtml(statusLabelBuyer)}</span></td>
@@ -1104,6 +1207,9 @@
             break;
           case 'energy':
             va = getEnergy(a); vb = getEnergy(b);
+            return sortAsc ? va - vb : vb - va;
+          case 'price':
+            va = getPrice(a)?.value ?? -1; vb = getPrice(b)?.value ?? -1;
             return sortAsc ? va - vb : vb - va;
           case 'tradeType':
             va = getTradeType(a); vb = getTradeType(b);
