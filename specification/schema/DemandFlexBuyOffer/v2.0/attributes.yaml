@@ -52,14 +52,21 @@ components:
           type: object
           additionalProperties: true
           description: >
-            Role-specific inputs. Structure varies by role and contract type.
-            For buyer: incentivePerKwh, currency, penaltyRate, baselineMethodology, etc.
-            For seller: plannedDemandChange (beckn:Quantity),
-            participatingMeters (or participatingMetersRef when the
+            Role-specific scalar inputs. Per-slot commercial terms are NOT
+            here — they ride the DemandFlexNeed time series (buyer columns
+            CAPACITY_REQUESTED / PRICE / SHORTFALL_PENALTY) and the commitment
+            series (seller column CAPACITY_OFFERED); these inputs carry only
+            what does not vary by interval.
+            For buyer: currency and baselineMethodology (a negative PRICE
+            column pays for increased consumption, so there is no scalar
+            incentive/penalty field).
+            For seller: participatingMeters (or participatingMetersRef when the
             cohort is bulk), energyResources (or energyResourcesRef) —
             EnergyResource objects each linked to a
             participatingMeters[*] entry via meterId — and
-            reportDescriptors (see below).
+            reportDescriptors (see below). The seller's per-slot
+            CAPACITY_OFFERED is added as a column on
+            Commitment.commitmentAttributes at confirm, not here.
 
             Bulk delivery: the offer is bound at confirm and cannot
             span Beckn messages, so when the seller's cohort would
