@@ -2,7 +2,7 @@
 
 Canonical base schemas shared by all typed `EnergyResource` kinds.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceCommon/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceCommon/v1.0`
 
 ---
 

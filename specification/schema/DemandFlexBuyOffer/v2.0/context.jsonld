@@ -5,8 +5,8 @@
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "beckn": "https://schema.beckn.io/core/v2.0/",
-    "deg": "https://schema.beckn.io/deg/DemandFlexBuyOffer/v2.0/",
+    "beckn": "https://schema.nfh.global/core/v2.0/",
+    "deg": "https://schema.nfh.global/deg/DemandFlexBuyOffer/v2.0/",
     "DemandFlexBuyOffer": "deg:DemandFlexBuyOffer",
     "DemandFlexProvider": "deg:DemandFlexProvider",
     "incentivePerKwh": "deg:incentivePerKwh",
@@ -25,14 +25,14 @@
     "bundleUrl": "deg:bundleUrl",
     "plannedDemandChange": "deg:plannedDemandChange",
     "participatingMeters": "deg:participatingMeters",
-    "participatingMetersRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
-    "energyResources":    { "@id": "https://schema.beckn.io/deg/energyResources", "@container": "@set" },
-    "energyResourcesRef": "https://schema.beckn.io/core/v2.0/BecknResourceRef",
+    "participatingMetersRef": "https://schema.nfh.global/core/v2.0/BecknResourceRef",
+    "energyResources":    { "@id": "https://schema.nfh.global/deg/energyResources", "@container": "@set" },
+    "energyResourcesRef": "https://schema.nfh.global/core/v2.0/BecknResourceRef",
     "participatingMetersDigest": {
       "@id": "deg:participatingMetersDigest",
       "@context": {
-        "count": { "@id": "https://schema.beckn.io/core/v2.0/count", "@type": "xsd:integer" },
-        "sha256OfSortedIds": { "@id": "https://schema.beckn.io/core/v2.0/sha256OfSortedIds", "@type": "xsd:string" }
+        "count": { "@id": "https://schema.nfh.global/core/v2.0/count", "@type": "xsd:integer" },
+        "sha256OfSortedIds": { "@id": "https://schema.nfh.global/core/v2.0/sha256OfSortedIds", "@type": "xsd:string" }
       }
     }
   },

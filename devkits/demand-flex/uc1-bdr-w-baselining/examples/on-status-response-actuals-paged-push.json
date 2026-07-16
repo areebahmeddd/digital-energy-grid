@@ -12,15 +12,15 @@
     "messageId": "6be09267-c5b0-43a1-b2ec-02c34f9f2cfb",
     "timestamp": "2026-04-01T10:35:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/BecknPageInfo/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/BecknResourceRef/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/BecknPageInfo/v1.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/BecknResourceRef/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -36,12 +36,48 @@
               "id": "flex-need-north-delhi-apr1-bulk",
               "quantity": {"unitCode": "kW", "unitQuantity": 6000, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 20000
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
@@ -49,19 +85,18 @@
             "id": "offer-flex-bulk-001",
             "resourceIds": ["flex-need-north-delhi-apr1-bulk"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 6000.0},
                     "_comment_bulk_cohort": "Cohort of 12,000 meters is too large to inline on confirm — delivered via participatingMetersRef and pinned by participatingMetersDigest. Performance-side pagination below references the same cohort.",
                     "participatingMetersRef": {
                       "@type": "ResourceRef",
@@ -69,18 +104,50 @@
                       "contentHash": "sha256:5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
                       "count": 12000,
                       "contentType": "application/ld+json",
-                      "schemaContext": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld",
+                      "schemaContext": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/participatingMeters.jsonld",
                       "sizeBytes": 920000
                     },
-                    "participatingMetersDigest": {"count": 12000, "sha256OfSortedIds": "sha256:b3a8e0e1f9ab1bfe3a14b4e95f3a0e1c2d3f4e5a6b7c8d9e0f1a2b3c4d5e6f7a"},
+                    "participatingMetersDigest": {
+                      "count": 12000,
+                      "sha256OfSortedIds": "sha256:b3a8e0e1f9ab1bfe3a14b4e95f3a0e1c2d3f4e5a6b7c8d9e0f1a2b3c4d5e6f7a"
+                    },
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "BASELINE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "cardinality": "PER_INTERVAL"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "cardinality": "PER_INTERVAL"
+                      }
                     ]
                   }
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
@@ -90,52 +157,85 @@
           "status": {"code": "DELIVERY_COMPLETE_PARTIAL", "name": "Actuals page 1 of 3 (4,000 of 12,000 meters)"},
           "commitmentIds": ["commitment-flex-bulk-001"],
           "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-bulk-001",
             "methodology": "5of10",
             "_comment_meters_slice": "In the wire payload this array carries 4,000 meters (this page's slice). Two are shown here as a representative sample of the shape.",
             "meters": [
               {
-                "meterId": "did:web:tpddl.delhi.gov.in:meters:00001",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
                   "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "USAGE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [46.0]}, {"type": "USAGE", "values": [22.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [44.0]}, {"type": "USAGE", "values": [18.0]}]}
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}, {"type": "USAGE", "values": [5]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}, {"type": "USAGE", "values": [50]}]}
                   ]
                 }
               },
               {
-                "meterId": "did:web:tpddl.delhi.gov.in:meters:00002",
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
                 "telemetry": {
                   "@type": "TimeSeries",
-                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
                   "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "USAGE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [39.0]}, {"type": "USAGE", "values": [16.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [37.0]}, {"type": "USAGE", "values": [14.0]}]}
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}, {"type": "USAGE", "values": [5]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}, {"type": "USAGE", "values": [45]}]}
                   ]
                 }
               }
             ],
-            "pageInfo": {"@type": "PageInfo", "sequence": 0, "pageSize": 4000, "total": 12000, "isLast": false, "collectionId": "perf-evt-bulk-001-actuals"}
+            "pageInfo": {
+              "@type": "PageInfo",
+              "sequence": 0,
+              "pageSize": 4000,
+              "total": 12000,
+              "isLast": false,
+              "collectionId": "perf-evt-bulk-001-actuals"
+            }
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}
+        "roles": [
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
+          "queryPath": "data.deg.contracts.demand_flex"
+        }
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }

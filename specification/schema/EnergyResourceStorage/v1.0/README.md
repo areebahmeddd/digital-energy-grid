@@ -1,6 +1,6 @@
 # EnergyResourceStorage v1.0
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceStorage/v1.0`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceStorage/v1.0`
 **CIM:** `cim:BatteryUnit`, `cim:ElectricVehicleChargingStation` (IEC 61970-302)
 **Status:** Current
 

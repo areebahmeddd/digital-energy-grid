@@ -11,9 +11,9 @@ import rego.v1
 # ---------------------------------------------------------------------------
 
 _mkt(iid, cleared_kw, clearing_price) := {"id": iid, "payloads": [
-	{"type": "BID_PRICE", "values": [1.5, 2.5, 3.5, 5.0]},
-	{"type": "BID_POWER", "values": [90, 70, 50, 30]},
-	{"type": "CLEARED_POWER", "values": [cleared_kw]},
+	{"type": "OFFER_PRICE", "values": [1.5, 2.5, 3.5, 5.0]},
+	{"type": "CAPACITY_OFFERED", "values": [90, 70, 50, 30]},
+	{"type": "CAPACITY_CLEARED", "values": [cleared_kw]},
 	{"type": "CLEARING_PRICE", "values": [clearing_price]},
 ]}
 
@@ -177,4 +177,39 @@ test_penalty_rate_defaults_to_zero if {
 	no_rate := json.patch(_under, [{"op": "remove", "path": "/message/contract/commitments/0/offer/offerAttributes/inputs/0/inputs/penaltyRate"}])
 	total_penalty == 0 with input as no_rate
 	seller_net == 140 with input as no_rate
+}
+
+# column const (uc2 profile) — enforced in-rego, not schema
+_need_ok := {"payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED", "units": "KW", "insertedBy": "buyer"}]}
+
+_market_ok := {"payloadDescriptors": [
+	{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "OFFER_PRICE"},
+	{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_OFFERED"},
+	{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_CLEARED"},
+	{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CLEARING_PRICE"},
+]}
+
+_col_input(need, market) := {"message": {"contract": {"commitments": [{
+	"resources": [{"resourceAttributes": need}],
+	"commitmentAttributes": market,
+	"offer": {"offerAttributes": {"inputs": []}},
+}]}}}
+
+test_need_column_const_ok if {
+	vs := violations with input as _col_input(_need_ok, _market_ok)
+	every v in vs { not contains(v, "columns must be") }
+}
+
+test_need_column_const_violation if {
+	bad := {"payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "MAX_CAPACITY"}]}
+	vs := violations with input as _col_input(bad, _market_ok)
+	some v in vs
+	contains(v, "CAPACITY_REQUESTED")
+}
+
+test_market_column_const_violation if {
+	bad := {"payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "OFFER_PRICE"}]}
+	vs := violations with input as _col_input(_need_ok, bad)
+	some v in vs
+	contains(v, "OFFER_PRICE")
 }

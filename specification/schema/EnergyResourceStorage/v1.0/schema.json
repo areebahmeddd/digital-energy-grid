@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceStorage/v1.0",
   "title": "EnergyResourceStorage",
   "description": "Typed schema for stationary battery energy storage resources (BESS). CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. EV charging stations (EV_CHARGER, EV_V2G) moved to EnergyResourceEVCharger/v1.0. storageCapacityKwh is exclusive to this kind. Common fields inherited from EnergyResourceCommon/v1.0.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceStorageAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

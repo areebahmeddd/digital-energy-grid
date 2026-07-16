@@ -2,9 +2,9 @@
 
 Domain-neutral pagination envelope embedded alongside any collection that needs multi-message delivery.
 
-**Canonical IRI:** `https://schema.beckn.io/BecknPageInfo/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/BecknPageInfo/v1.0`
 
-**Namespace prefix:** `bpi:` → `https://schema.beckn.io/core/v2.0/`
+**Namespace prefix:** `bpi:` → `https://schema.nfh.global/core/v2.0/`
 
 ---
 

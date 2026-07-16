@@ -1,6 +1,6 @@
 {
   "@context": {
-    "deg":   "https://schema.beckn.io/deg#",
+    "deg":   "https://schema.nfh.global/deg#",
     "rdfs":  "http://www.w3.org/2000/01/rdf-schema#",
     "xsd":   "http://www.w3.org/2001/XMLSchema#",
     "owl":   "http://www.w3.org/2002/07/owl#"

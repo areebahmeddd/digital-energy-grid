@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../) · [DemandFlexBuyOffer](../README.md)
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 components.schemas.`DemandFlexBuyOffer` (JSON Schema 2020-12 body) |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.beckn.io/deg/DemandFlexBuyOffer/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.nfh.global/deg/DemandFlexBuyOffer/v2.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `DemandFlexBuyOffer` terms |
 
 ## Properties

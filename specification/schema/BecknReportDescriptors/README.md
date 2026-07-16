@@ -2,9 +2,9 @@
 
 OpenADR 3.1.0-aligned sidecar schema declaring which telemetry signals a seller commits to reporting under a DEG contract. Embedded as `inputs[seller].inputs.reportDescriptors` in offer attributes (e.g. `DemandFlexBuyOffer`).
 
-**Canonical IRI:** `https://schema.beckn.io/BecknReportDescriptors/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/BecknReportDescriptors/v1.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/BecknReportDescriptors/v1.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/BecknReportDescriptors/v1.0/`
 
 ---
 

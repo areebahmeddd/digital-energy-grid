@@ -1,6 +1,6 @@
 # EnergyProgramEnrollment — v2.0
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyProgramEnrollment`](https://schema.beckn.io/EnergyProgramEnrollment)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyProgramEnrollment`](https://schema.nfh.global/EnergyProgramEnrollment)
 > **Tags:** `energy, enrollment, program, demand-response, vpp, p2p, beckn`
 > **OWL:** `deg:EnergyProgramEnrollment owl:equivalentClass deg:EnergyEnrollment` (successor schema)
 > Part of the [DEG Schema](../../../README.md) · [EnergyProgramEnrollment](../README.md)

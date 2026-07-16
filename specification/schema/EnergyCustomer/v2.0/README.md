@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../../specification/schema/) · [EnergyCustomer](../
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | JSON Schema 2020-12 definition for `EnergyCustomer` |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.beckn.io/deg/EnergyCustomer/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.nfh.global/deg/EnergyCustomer/v2.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `EnergyCustomer` terms |
 
 ## Properties

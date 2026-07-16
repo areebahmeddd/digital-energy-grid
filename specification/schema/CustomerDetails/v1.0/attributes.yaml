@@ -15,21 +15,21 @@ info:
       serviceConnectionDate → cim:ServiceLocation.firstAddressDetail (activation date)
       installationAddress   → cim:ServiceLocation
 
-    Canonical IRI: https://schema.beckn.io/CustomerDetails/v1.0
+    Canonical IRI: https://schema.nfh.global/CustomerDetails/v1.0
 
     Used by ElectricityCredential/v1.2 credentialSubject.customerDetails.
     May be reused by any utility credential that carries customer PII.
 
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
-  - url: https://schema.beckn.io
+  - url: https://schema.nfh.global
     description: Canonical schema registry
 paths: {}
 components:
   schemas:
 
     CustomerDetails:
-      $id: https://schema.beckn.io/CustomerDetails/v1.0#/components/schemas/CustomerDetails
+      $id: https://schema.nfh.global/CustomerDetails/v1.0#/components/schemas/CustomerDetails
       type: object
       description: >
         PII identity and address details for a utility customer.
@@ -90,7 +90,7 @@ components:
                 "@id": deg:relationship
 
         installationAddress:
-          $ref: "https://schema.beckn.io/Location/2.0/attributes.yaml#/components/schemas/Location"
+          $ref: "https://schema.nfh.global/Location/2.0/attributes.yaml#/components/schemas/Location"
           description: >
             Physical location of the metered installation. geo (GeoJSON Point,
             coordinates [longitude, latitude]) is required; address

@@ -1,6 +1,6 @@
 # EnergyResourceMeter v1.0
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceMeter/v1.0`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceMeter/v1.0`
 **CIM:** `cim:Meter` extends `cim:EndDevice` (IEC 61968-9)
 **Status:** Current
 

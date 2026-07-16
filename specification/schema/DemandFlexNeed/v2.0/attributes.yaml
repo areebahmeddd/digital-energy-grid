@@ -3,89 +3,113 @@ info:
   title: Demand Flex — Need Attributes (v2.0)
   version: 2.0.0
   description: >
-    Attribute schemas for demand-flex needs (Resource.resourceAttributes).
-    Describes what the utility needs from the network: direction, event timing,
-    capacity, and location.
+    Attribute schema for a demand-flex procurement schedule
+    (Resource.resourceAttributes), authored by the utility (buyer) and
+    published on the catalog resource.
+
+    DemandFlexNeed is structurally a BecknTimeSeries (OpenADR 3.1.0 interval
+    grid) whose columns are locked, via a const payloadDescriptors set, to the
+    buyer's three per-slot terms — one interval per tranche / timeslot:
+
+      CAPACITY_REQUESTED  kW           how much flex the utility wants that slot
+      PRICE               INR_PER_KWH  incentive that slot; a NEGATIVE price
+                                       pays for INCREASED consumption (soak),
+                                       so the sign carries reduce-vs-increase
+                                       intent and no separate `direction` field
+                                       is needed
+      SHORTFALL_PENALTY   INR_PER_KWH  per-kWh charge on under-delivery vs the
+                                       aggregator's CAPACITY_OFFERED that slot
+
+    The same `intervalPeriod` grid is reused downstream by the seller's
+    CAPACITY_OFFERED column (Commitment.commitmentAttributes) and by per-meter
+    BASELINE / USAGE telemetry (DemandFlexPerformance) — settlement joins the
+    three on interval `id`. Because DemandFlexNeed IS the time series, there is
+    no nested resourceAttributes.resourceAttributes.
+
+    CAPACITY_REQUESTED is a discovery/matching signal only; it drifts as
+    aggregators confirm and is NOT resent at confirm nor consumed by
+    settlement. Settlement is bound by CAPACITY_OFFERED.
 
 components:
   schemas:
     DemandFlexNeed:
       type: object
-      description: >
-        Resource attributes describing a demand-flex need. Attached to
-        Resource.resourceAttributes to describe what the utility needs from the network.
-        Captures the direction (increase/reduce), event timing, capacity, and location.
       additionalProperties: false
-      required: [direction, eventWindow, maxCapacityKw]
+      required: [intervalPeriod, payloadDescriptors, intervals]
+      description: >
+        Buyer-authored demand-flex procurement schedule as an OpenADR-aligned
+        time series — one interval per tranche. This is the single, unified
+        Need shape for every demand-flex market, from full price discovery
+        (uc2 pay-as-clear auction: many aggregators bid, market clears) down to
+        its monopsony degenerate (uc1: a single buyer, the DISCOM, fixes one
+        clearing price for any quantity — a flat, self-cleared curve).
+
+        The column set is intentionally NOT fixed by this schema. Each market
+        profile carries different columns, and the governing CONTRACT POLICY
+        REGO imposes the exact required set as a hard const:
+          uc1 (deg.contracts.demand_flex)     — CAPACITY_REQUESTED, PRICE,
+                                                 SHORTFALL_PENALTY
+          uc2 (deg.contracts.demand_flex_pac) — CAPACITY_REQUESTED
+      x-standard: "OpenADR 3.1.0 (event time series)"
       x-jsonld:
         "@context": ./context.jsonld
         "@type": DemandFlexNeed
       properties:
 
-        direction:
+        "@type":
           type: string
-          enum: [INCREASE, REDUCE]
-          description: >
-            Whether the utility needs demand increase or demand reduction.
-            REDUCE = curtailment (typical DR). INCREASE = load shifting to off-peak.
-          example: "REDUCE"
-          x-jsonld:
-            "@id": direction
-            "@type": "@id"
+          enum: [DemandFlexNeed]
+          description: JSON-LD type discriminator.
 
-        eventWindow:
-          description: >
-            The time window during which the flex event occurs.
-            All times MUST be in UTC (ISO 8601 with Z suffix).
-          x-jsonld:
-            "@id": eventWindow
-          type: object
-          required: ["startDate", "endDate"]
-          properties:
-            startDate:
-              type: string
-              format: date-time
-              x-standard: "ISO 8601 (UTC, RFC 3339 profile)"
-              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-              description: Event start time in UTC.
-              example: "2026-04-01T14:00:00Z"
-            endDate:
-              type: string
-              format: date-time
-              x-standard: "ISO 8601 (UTC, RFC 3339 profile)"
-              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
-              description: Event end time in UTC.
-              example: "2026-04-01T16:00:00Z"
-
-        capacityType:
+        "@context":
           type: string
-          enum: [CURTAILMENT, SHIFT, GENERATION]
+          format: uri
           description: >
-            Type of flex capacity. CURTAILMENT = reduce consumption.
-            SHIFT = move consumption to different time. GENERATION = increase local generation.
-          example: "CURTAILMENT"
-          x-jsonld:
-            "@id": capacityType
-            "@type": "@id"
-
-        maxCapacityKw:
-          type: number
-          minimum: 0
-          description: Maximum flex capacity needed in kW.
-          example: 500
-          x-jsonld:
-            "@id": maxCapacityKw
+            Optional JSON-LD context URL — usually omitted, carried once at
+            the envelope level via context.schemaContext[].
 
         location:
-          description: Geographic area where flex is needed (GeoJSON).
+          $ref: "https://schema.nfh.global/Location/2.0/attributes.yaml#/components/schemas/Location"
+          description: >
+            Geographic area where flex is needed. Beckn Location — GeoJSON
+            geometry (geo) plus optional address.
           x-standard: "GeoJSON (RFC 7946)"
           x-jsonld:
             "@id": location
-          type: object
-          properties:
-            type:
-              type: string
-              enum: [Point, Polygon]
-            coordinates:
-              type: array
-              items: {}
+
+        intervalPeriod:
+          $ref: "https://schema.nfh.global/openadr/v3.1.0#/components/schemas/intervalPeriod"
+          description: >
+            Default temporal bounds of the schedule — ISO 8601 `start` and
+            `duration` (e.g. PT30M). Interval `id` 0..n-1 index sequential
+            tranches off this grid. This exact grid MUST be shared by the
+            seller's CAPACITY_OFFERED series and by every meter's telemetry.
+          x-jsonld:
+            "@id": intervalPeriod
+
+        payloadDescriptors:
+          type: array
+          minItems: 1
+          description: >
+            Buyer-authored column descriptors (OpenADR eventPayloadDescriptor).
+            The set is profile-specific and NOT fixed here — the governing
+            contract policy rego imposes the exact required columns as a hard
+            const (uc1: CAPACITY_REQUESTED / PRICE / SHORTFALL_PENALTY; uc2:
+            CAPACITY_REQUESTED). Downstream series extend the grid with
+            CAPACITY_OFFERED (seller, on commitmentAttributes) and BASELINE /
+            USAGE (meter telemetry).
+          items:
+            $ref: "https://schema.nfh.global/openadr/v3.1.0#/components/schemas/eventPayloadDescriptor"
+          x-jsonld:
+            "@id": payloadDescriptors
+
+        intervals:
+          type: array
+          minItems: 1
+          description: >
+            One row per tranche. Each row carries integer `id` and typed
+            `payloads` — CAPACITY_REQUESTED, PRICE, SHORTFALL_PENALTY.
+          items:
+            $ref: "https://schema.nfh.global/openadr/v3.1.0#/components/schemas/interval"
+          x-jsonld:
+            "@id": intervals

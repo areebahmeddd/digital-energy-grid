@@ -5,7 +5,7 @@
 > **OWL Migration:** `deg:EnergyTrade owl:equivalentClass deg:P2PTrade` · `beckn:Order owl:equivalentClass beckn:Contract`
 > See [vocab.jsonld](./vocab.jsonld) for the machine-readable deprecation declaration.
 
-P2P energy trade contract — a subclass of [`Contract`](https://schema.beckn.io/Contract/v2.0) specialised for energy delivery between prosumers on a DEG network.
+P2P energy trade contract — a subclass of [`Contract`](https://schema.nfh.global/Contract/v2.0) specialised for energy delivery between prosumers on a DEG network.
 
 Part of the [DEG Schema](../../../README.md) · [EnergyTrade](../README.md)
 
@@ -30,10 +30,10 @@ Part of the [DEG Schema](../../../README.md) · [EnergyTrade](../README.md)
 
 | Property | References | Description |
 |----------|-----------|-------------|
-| `energyResource` | [`EnergyResource/v2.0`](https://schema.beckn.io/EnergyResource/v2.0) | Energy source characteristics |
-| `delivery` | [`EnergyTradeDelivery/v2.0`](https://schema.beckn.io/EnergyTradeDelivery/v2.0) | Delivery tracking attributes |
-| `offer` | [`EnergyTradeOffer/v2.0`](https://schema.beckn.io/EnergyTradeOffer/v2.0) | Offer terms (pricing model, windows) |
-| `customer` | [`EnergyCustomer/v2.0`](https://schema.beckn.io/EnergyCustomer/v2.0) | Customer info (meter, utility, load) |
+| `energyResource` | [`EnergyResource/v2.0`](https://schema.nfh.global/EnergyResource/v2.0) | Energy source characteristics |
+| `delivery` | [`EnergyTradeDelivery/v2.0`](https://schema.nfh.global/EnergyTradeDelivery/v2.0) | Delivery tracking attributes |
+| `offer` | [`EnergyTradeOffer/v2.0`](https://schema.nfh.global/EnergyTradeOffer/v2.0) | Offer terms (pricing model, windows) |
+| `customer` | [`EnergyCustomer/v2.0`](https://schema.nfh.global/EnergyCustomer/v2.0) | Customer info (meter, utility, load) |
 
 ## Properties
 
@@ -64,4 +64,4 @@ This table maps deprecated `EnergyTrade/v2.0` concepts to their successors in `P
 - **Format**: Converted from OpenAPI 3.1 combined file to JSON Schema 2020-12 single-schema file
 - **Structure**: `EnergyTrade` is now a proper subclass of `Contract` via `allOf`
 - **Domain schemas**: Each of the 7 sub-schemas from the v0.3 combined file is now an independent schema folder under `specification/schema/`
-- **References**: Internal schemas use canonical `https://schema.beckn.io/<SchemaName>/v2.0` URIs
+- **References**: Internal schemas use canonical `https://schema.nfh.global/<SchemaName>/v2.0` URIs

@@ -10,7 +10,7 @@
     "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
     "messageId": "bdiscom-msg-001",
     "timestamp": "2026-04-26T06:30:00Z",
-    "schemaContext": ["https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld", "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld"]
+    "schemaContext": ["https://schema.nfh.global/DatasetItem/1.1/context.jsonld", "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -26,13 +26,13 @@
               "descriptor": {"name": "Buyer-discom meter actuals"},
               "quantity": {"@type": "Quantity", "unitText": "report", "unitCode": "EA", "value": "1"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DDM/main/specification/schema/DatasetItem/v1/context.jsonld",
+                "@context": "https://schema.nfh.global/DatasetItem/1.1/context.jsonld",
                 "@type": "DatasetItem",
                 "schema:identifier": "ds-actuals-buyer-001",
                 "schema:name": "Buyer-discom meter actuals",
                 "schema:temporalCoverage": "2026-04-26T04:30:00Z/2026-04-26T05:30:00Z",
                 "dataPayload": {
-                  "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+                  "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
                   "@type": "TimeSeries",
                   "resourceName": "TEST_METER_BUYER_001",
                   "clientName": "TEST_DISCOM_BUYER",

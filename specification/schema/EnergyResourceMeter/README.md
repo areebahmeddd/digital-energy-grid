@@ -4,7 +4,7 @@ Typed energy resource schema for metering points. A `METER` resource anchors all
 
 `EnergyResourceMeter` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceMeter/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceMeter/v1.0`
 
 **CIM alignment:** `cim:Meter` extends `cim:EndDevice` (IEC 61968-9)
 

@@ -4,7 +4,7 @@ Typed energy resource schema for controllable load DERs: smart HVAC, smart water
 
 `EnergyResourceLoad` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceLoad/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceLoad/v1.0`
 
 **CIM alignment:** `cim:EnergyConsumer` / `cim:ConformLoad` (IEC 61970-301)
 

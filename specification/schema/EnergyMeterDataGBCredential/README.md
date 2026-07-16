@@ -2,9 +2,9 @@
 
 Verifiable Credential containing historical time-series interval meter readings using ESPI/Green Button types. Issued by distribution utilities to consumers. Combines customer identity with meter data within a W3C VC 2.0 envelope.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyMeterDataCredential/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyMeterDataCredential/v1.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/`
 
 **Tags:** `energy` · `credential` · `verifiable-credential` · `metering` · `green-button` · `espi`
 

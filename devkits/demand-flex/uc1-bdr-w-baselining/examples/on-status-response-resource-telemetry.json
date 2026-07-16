@@ -12,14 +12,14 @@
     "messageId": "022e188f-cdc9-4eb4-af1a-21447e9bacbc",
     "timestamp": "2026-04-01T10:45:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/EnergyResource/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -35,12 +35,48 @@
               "id": "flex-need-north-delhi-apr1",
               "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"},
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
@@ -48,53 +84,115 @@
             "id": "offer-flex-001",
             "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {"incentivePerKwh": 3.5, "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 1.5, "premiumForGuaranteed": 5.0, "optOutDefault": false}
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "plannedDemandChange": {"@type": "Quantity", "unitCode": "KWH", "unitQuantity": 150.0},
-                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002", "did:web:tpddl.delhi.gov.in:meters:003"],
+                    "participatingMeters": [
+                      "did:web:tpddl.delhi.gov.in:meters:001",
+                      "did:web:tpddl.delhi.gov.in:meters:002",
+                      "did:web:tpddl.delhi.gov.in:meters:003"
+                    ],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:tatamotors.com:vin:VIN001",
                         "type": "EV_CHARGER",
-                        "attributes": {"make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
+                        "attributes": {
+                          "make": "Tata",
+                          "model": "Nexon EV",
+                          "ratedPowerKw": 7.0,
+                          "energyCapacityKwh": 30.0,
+                          "telemetryProvider": "tata-evp-telematics"
+                        },
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:mgmotor.co.in:vin:VIN002",
                         "type": "EV_CHARGER",
-                        "attributes": {"make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
+                        "attributes": {
+                          "make": "MG",
+                          "model": "ZS EV",
+                          "ratedPowerKw": 7.0,
+                          "energyCapacityKwh": 44.5,
+                          "telemetryProvider": "mg-imotion"
+                        },
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       },
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:tatamotors.com:vin:VIN003",
                         "type": "EV_CHARGER",
-                        "attributes": {"make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"},
+                        "attributes": {
+                          "make": "Tata",
+                          "model": "Tigor EV",
+                          "ratedPowerKw": 7.0,
+                          "energyCapacityKwh": 26.0,
+                          "telemetryProvider": "tata-evp-telematics"
+                        },
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:003"]
                       }
                     ],
                     "reportDescriptors": [
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
-                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "cardinality": "PER_INTERVAL"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "SOC_END",
+                        "readingType": "DIRECT_READ",
+                        "units": "KWH",
+                        "cardinality": "PER_INTERVAL"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "GPS_LAT",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "cardinality": "PER_EVENT"
+                      },
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "GPS_LON",
+                        "readingType": "DIRECT_READ",
+                        "units": "DEGREES",
+                        "cardinality": "PER_EVENT"
+                      }
                     ]
                   }
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
@@ -107,7 +205,7 @@
           },
           "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "RESOURCE_TELEMETRY",
@@ -124,7 +222,15 @@
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [20.5]}, {"type": "GPS_LAT", "values": [28.6139]}, {"type": "GPS_LON", "values": [77.209]}]},
+                    {
+                      "id": 0,
+                      "payloads": [
+                        {"type": "USAGE", "values": [1.0]},
+                        {"type": "SOC_END", "values": [20.5]},
+                        {"type": "GPS_LAT", "values": [28.6139]},
+                        {"type": "GPS_LON", "values": [77.209]}
+                      ]
+                    },
                     {"id": 1, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.0]}]},
                     {"id": 2, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [21.5]}]},
                     {"id": 3, "payloads": [{"type": "USAGE", "values": [1.0]}, {"type": "SOC_END", "values": [22.0]}]}
@@ -143,7 +249,15 @@
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}, {"type": "GPS_LAT", "values": [28.628]}, {"type": "GPS_LON", "values": [77.241]}]},
+                    {
+                      "id": 0,
+                      "payloads": [
+                        {"type": "USAGE", "values": [0.0]},
+                        {"type": "SOC_END", "values": [31.0]},
+                        {"type": "GPS_LAT", "values": [28.628]},
+                        {"type": "GPS_LON", "values": [77.241]}
+                      ]
+                    },
                     {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
                     {"id": 2, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]},
                     {"id": 3, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [31.0]}]}
@@ -162,7 +276,15 @@
                     {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "units": "DEGREES"}
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [12.5]}, {"type": "GPS_LAT", "values": [28.545]}, {"type": "GPS_LON", "values": [77.1925]}]},
+                    {
+                      "id": 0,
+                      "payloads": [
+                        {"type": "USAGE", "values": [0.0]},
+                        {"type": "SOC_END", "values": [12.5]},
+                        {"type": "GPS_LAT", "values": [28.545]},
+                        {"type": "GPS_LON", "values": [77.1925]}
+                      ]
+                    },
                     {"id": 1, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [12.0]}]},
                     {"id": 2, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [11.5]}]},
                     {"id": 3, "payloads": [{"type": "USAGE", "values": [0.0]}, {"type": "SOC_END", "values": [11.0]}]}
@@ -174,10 +296,16 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}
+        "roles": [
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
+          "queryPath": "data.deg.contracts.demand_flex"
+        }
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }

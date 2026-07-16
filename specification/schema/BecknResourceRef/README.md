@@ -2,9 +2,9 @@
 
 Content-addressed, BPP-hosted reference for delivering bulk JSON bodies off-protocol while keeping the on-protocol payload small and tamper-evident.
 
-**Canonical IRI:** `https://schema.beckn.io/BecknResourceRef/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/BecknResourceRef/v1.0`
 
-**Namespace prefix:** `brr:` → `https://schema.beckn.io/core/v2.0/`
+**Namespace prefix:** `brr:` → `https://schema.nfh.global/core/v2.0/`
 
 ---
 

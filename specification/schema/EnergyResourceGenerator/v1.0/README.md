@@ -1,6 +1,6 @@
 # EnergyResourceGenerator v1.0
 
-**Schema ID:** `https://schema.beckn.io/EnergyResourceGenerator/v1.0`
+**Schema ID:** `https://schema.nfh.global/EnergyResourceGenerator/v1.0`
 **CIM:** `cim:GeneratingUnit` and subtypes (IEC 61970-301/302)
 **Status:** Current
 

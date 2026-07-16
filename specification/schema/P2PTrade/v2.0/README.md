@@ -1,6 +1,6 @@
 # P2PTrade v2.0
 
-**Schema ID:** `https://schema.beckn.io/P2PTrade/v2.0`
+**Schema ID:** `https://schema.nfh.global/P2PTrade/v2.0`
 
 **Status:** Current
 

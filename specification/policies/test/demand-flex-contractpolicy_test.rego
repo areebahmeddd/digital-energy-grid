@@ -1,4 +1,4 @@
-# Unit tests for demand-flex-contractpolicy.rego role-based settlement
+# Unit tests for demand-flex-contractpolicy.rego (per-interval, per-meter)
 #
 # Run:  cd specification/policies && opa test demand-flex-contractpolicy.rego test/demand-flex-contractpolicy_test.rego -v
 
@@ -6,343 +6,143 @@ package deg.contracts.demand_flex
 
 import rego.v1
 
-# ---------------------------------------------------------------------------
-# Helpers: build a mock contract payload with BecknTimeSeries telemetry
-#
-# For brevity, _meter(meterId, baselineKw, actualKw) wraps the scalars in
-# a single-interval BecknTimeSeries; tests stay readable while still
-# exercising the policy's BecknTimeSeries readers end-to-end.
-# ---------------------------------------------------------------------------
+_ip := {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"}
 
-_meter_with_actual(meter_id, baseline_kw, actual_kw) := {
-	"meterId": meter_id,
+_need_ts := {
+	"intervalPeriod": _ip,
+	"payloadDescriptors": [
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED", "units": "KW", "insertedBy": "buyer"},
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE", "units": "INR_PER_KWH", "insertedBy": "buyer"},
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "SHORTFALL_PENALTY", "units": "INR_PER_KWH", "insertedBy": "buyer"},
+	],
+	"intervals": [
+		{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+		{"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}, {"type": "PRICE", "values": [4.0]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+	],
+}
+
+_offered_ts := {
+	"intervalPeriod": _ip,
+	"payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_OFFERED", "units": "KW", "insertedBy": "seller"}],
+	"intervals": [
+		{"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+		{"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]},
+	],
+}
+
+_meter(id, b0, u0, b1, u1) := {
+	"meterId": id,
 	"telemetry": {
-		"@type": "TimeSeries",
-		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
+		"intervalPeriod": _ip,
 		"payloadDescriptors": [
-			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"},
+			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW"},
+			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
 		],
-		"intervals": [{"id": 0, "payloads": [
-			{"type": "BASELINE", "values": [baseline_kw]},
-			{"type": "USAGE", "values": [actual_kw]},
-		]}],
-	},
-}
-
-_meter_baseline_only(meter_id, baseline_kw) := {
-	"meterId": meter_id,
-	"telemetry": {
-		"@type": "TimeSeries",
-		"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
-		"payloadDescriptors": [
-			{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
+		"intervals": [
+			{"id": 0, "payloads": [{"type": "BASELINE", "values": [b0]}, {"type": "USAGE", "values": [u0]}]},
+			{"id": 1, "payloads": [{"type": "BASELINE", "values": [b1]}, {"type": "USAGE", "values": [u1]}]},
 		],
-		"intervals": [{"id": 0, "payloads": [
-			{"type": "BASELINE", "values": [baseline_kw]},
-		]}],
 	},
 }
 
-_deg_contract := {
-	"@context": "test", "@type": "DEGContract",
-	"roles": [{"role": "buyer"}, {"role": "seller"}],
-	"policy": {"url": "test", "queryPath": "test"},
+_mk(meters, offered, methodology) := {"message": {"contract": {
+	"commitments": [{
+		"resources": [{"id": "r1", "resourceAttributes": _need_ts}],
+		"offer": {"offerAttributes": {"inputs": [
+			{"role": "buyer", "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}},
+			{"role": "seller", "inputs": {"participatingMeters": ["m1"]}},
+		]}},
+		"commitmentAttributes": offered,
+	}],
+	"performance": [{"performanceAttributes": {"methodology": methodology, "meters": meters}}],
+	"contractAttributes": {"roles": [{"role": "buyer"}, {"role": "seller"}]},
+}}}
+
+# meter m1: slot0 reduction 140, slot1 reduction 105
+_std := _mk([_meter("m1", 150, 10, 200, 95)], _offered_ts, "5of10")
+
+# slot0: min(140,150)=140 x0.5h x3.5 = 245; shortfall (150-140)=10 x0.5x1.5 = 7.5 -> 237.5
+# slot1: min(105,120)=105 x0.5h x4.0 = 210; shortfall (120-105)=15 x0.5x1.5 = 11.25 -> 198.75
+# total = 436.25
+test_total_settlement if {
+	total_settlement == 436.25 with input as _std
 }
 
-_default_inputs := [
-	{"role": "buyer", "participantId": "utility-test", "inputs": {
-		"incentivePerKwh": 3.50,
-		"currency": "INR",
-		"penaltyRate": 1.50,
-		"premiumForGuaranteed": 5.00,
-		"maxEventsPerMonth": 5,
-		"baselineMethodology": {"bestOf": 5, "outOf": 10},
-		"optOutDefault": false,
-	}},
-	{"role": "seller", "participantId": "agg-test", "inputs": {
-		"plannedDemandChange": 150.0,
-		"participatingMeters": ["m1", "m2", "m3"],
-	}},
-]
-
-_default_window := {"startDate": "2026-04-01T08:30:00Z", "endDate": "2026-04-01T10:30:00Z"}
-
-_mock_input(role_inputs, meters, event_window, contract_attrs) := {
-	"message": {"contract": {
-		"id": "test",
-		"status": {"code": "ACTIVE"},
-		"commitments": [{
-			"id": "c1",
-			"status": {"descriptor": {"code": "ACTIVE"}},
-			"resources": [{
-				"id": "r1",
-				"quantity": {"unitCode": "kW", "unitQuantity": 150},
-				"resourceAttributes": {
-					"@context": "test", "@type": "DemandFlexNeed",
-					"direction": "REDUCE", "eventWindow": event_window,
-					"capacityType": "CURTAILMENT", "maxCapacityKw": 500,
-				},
-			}],
-			"offer": {
-				"id": "o1", "resourceIds": ["r1"],
-				"offerAttributes": {
-					"@context": "test", "@type": "DemandFlexBuyOffer",
-					"inputs": role_inputs,
-				},
-			},
-		}],
-		"performance": [{"id": "p1", "status": {"code": "DELIVERY_COMPLETE"}, "commitmentIds": ["c1"], "performanceAttributes": {
-			"@context": "test", "@type": "DemandFlexPerformance",
-			"eventId": "evt-test", "methodology": "5of10", "meters": meters,
-		}}],
-		"contractAttributes": contract_attrs,
-	}},
+test_net_zero if {
+	net_zero_ok with input as _std
 }
 
-_std_input(meters) := _mock_input(_default_inputs, meters, _default_window, _deg_contract)
-
-# ---------------------------------------------------------------------------
-# Test: happy path — revenue flows sum to zero
-# ---------------------------------------------------------------------------
-
-test_revenue_flows_net_zero if {
-	inp := _std_input([
-		_meter_with_actual("m1", 45.0, 20.0),
-		_meter_with_actual("m2", 38.0, 15.0),
-		_meter_with_actual("m3", 52.0, 25.0),
-	])
-
-	flows := revenue_flows with input as inp
-	count(flows) == 2
-
-	some bf in flows; bf.role == "buyer"; bf.value == -525
-	some sf in flows; sf.role == "seller"; sf.value == 525
-
-	net_zero_ok with input as inp
-	count(violations) == 0 with input as inp
+test_revenue_flows if {
+	rf := revenue_flows with input as _std
+	some b in rf
+	b.role == "buyer"
+	b.value == -436.25
+	some s in rf
+	s.role == "seller"
+	s.value == 436.25
 }
 
-# ---------------------------------------------------------------------------
-# Test: roles extracted from contractAttributes
-# ---------------------------------------------------------------------------
-
-test_roles_detected if {
-	inp := _std_input([_meter_with_actual("m1", 45.0, 20.0)])
-	roles := _roles with input as inp
-	"buyer" in roles
-	"seller" in roles
+test_two_line_items if {
+	count(settlement_components) == 2 with input as _std
 }
 
-# ---------------------------------------------------------------------------
-# Test: missing role → violation
-# ---------------------------------------------------------------------------
+# two meters each delivering half -> same aggregate -> same total
+test_per_meter_aggregation if {
+	inp := _mk([_meter("m1", 75, 5, 100, 47.5), _meter("m2", 75, 5, 100, 47.5)], _offered_ts, "5of10")
+	total_settlement == 436.25 with input as inp
+}
 
-test_missing_seller_violation if {
-	no_seller := {"@context": "test", "@type": "DEGContract", "roles": [{"role": "buyer"}], "policy": {"url": "t", "queryPath": "t"}}
-	inp := _mock_input(_default_inputs, [_meter_with_actual("m1", 45.0, 20.0)], _default_window, no_seller)
+# telemetry grid mismatch -> violation
+test_intervalperiod_mismatch if {
+	bad := json.patch(_meter("m1", 150, 10, 200, 95), [{"op": "replace", "path": "/telemetry/intervalPeriod/duration", "value": "PT1H"}])
+	vs := violations with input as _mk([bad], _offered_ts, "5of10")
+	some v in vs
+	contains(v, "intervalPeriod")
+}
+
+# missing USAGE on a settled slot -> violation
+test_missing_usage if {
+	m := {"meterId": "m1", "telemetry": {"intervalPeriod": _ip, "payloadDescriptors": [], "intervals": [
+		{"id": 0, "payloads": [{"type": "BASELINE", "values": [150]}]},
+		{"id": 1, "payloads": [{"type": "BASELINE", "values": [200]}, {"type": "USAGE", "values": [95]}]},
+	]}}
+	vs := violations with input as _mk([m], _offered_ts, "5of10")
+	some v in vs
+	contains(v, "USAGE")
+}
+
+# missing CAPACITY_OFFERED for a slot -> violation
+test_missing_offered if {
+	off := json.patch(_offered_ts, [{"op": "remove", "path": "/intervals/1"}])
+	vs := violations with input as _mk([_meter("m1", 150, 10, 200, 95)], off, "5of10")
+	some v in vs
+	contains(v, "CAPACITY_OFFERED")
+}
+
+# RESOURCE_TELEMETRY-only payload -> excluded from settlement, explicit violation
+test_resource_telemetry_only_excluded if {
+	vs := violations with input as _mk([_meter("m1", 150, 10, 200, 95)], _offered_ts, "RESOURCE_TELEMETRY")
+	some v in vs
+	contains(v, "no settlement-eligible")
+}
+
+# hard column const (uc1 profile) enforced in-rego, not schema
+test_need_column_const_violation if {
+	bad := json.patch(_need_ts, [{"op": "add", "path": "/payloadDescriptors/-", "value": {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "EXTRA", "units": "KW", "insertedBy": "buyer"}}])
+	inp := json.patch(_std, [{"op": "replace", "path": "/message/contract/commitments/0/resources/0/resourceAttributes", "value": bad}])
 	vs := violations with input as inp
 	some v in vs
-	contains(v, "seller")
+	contains(v, "CAPACITY_REQUESTED")
 }
 
-# ---------------------------------------------------------------------------
-# Test: settlement total
-# ---------------------------------------------------------------------------
-
-test_settlement_total if {
-	inp := _std_input([
-		_meter_with_actual("m1", 45.0, 20.0),
-		_meter_with_actual("m2", 38.0, 15.0),
-		_meter_with_actual("m3", 52.0, 25.0),
-	])
-	total_settlement == 525 with input as inp
-	count(settlement_components) == 3 with input as inp
-}
-
-# ---------------------------------------------------------------------------
-# Test: negative reduction clamped
-# ---------------------------------------------------------------------------
-
-test_clamped_meter_excluded if {
-	inp := _std_input([
-		_meter_with_actual("m1", 30.0, 40.0),
-		_meter_with_actual("m2", 50.0, 20.0),
-	])
-	total_settlement == 210 with input as inp
-	flows := revenue_flows with input as inp
-	some bf in flows; bf.role == "buyer"; bf.value == -210
-}
-
-# ---------------------------------------------------------------------------
-# Test: 3-hour event scales
-# ---------------------------------------------------------------------------
-
-test_3h_event if {
-	w3h := {"startDate": "2026-04-01T08:00:00Z", "endDate": "2026-04-01T11:00:00Z"}
-	inp := _mock_input(_default_inputs, [_meter_with_actual("m1", 40.0, 20.0)], w3h, _deg_contract)
-	flows := revenue_flows with input as inp
-	some sf in flows; sf.role == "seller"; sf.value == 210
-}
-
-# ---------------------------------------------------------------------------
-# Test: BecknTimeSeries with multiple intervals — mean is used
-# ---------------------------------------------------------------------------
-
-test_multi_interval_mean if {
-	# Two intervals; mean baseline = 45, mean usage = 20 → reduction 25 kW
-	# 25 kW × 2h × 3.50 INR/kWh = 175 INR
-	multi_interval_meter := {
-		"meterId": "m1",
-		"telemetry": {
-			"@type": "TimeSeries",
-			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT1H"},
-			"payloadDescriptors": [
-				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"},
-			],
-			"intervals": [
-				{"id": 0, "payloads": [
-					{"type": "BASELINE", "values": [46.0]},
-					{"type": "USAGE", "values": [22.0]},
-				]},
-				{"id": 1, "payloads": [
-					{"type": "BASELINE", "values": [44.0]},
-					{"type": "USAGE", "values": [18.0]},
-				]},
-			],
-		},
-	}
-	inp := _std_input([multi_interval_meter])
-	total_settlement == 175 with input as inp
-}
-
-# ---------------------------------------------------------------------------
-# Test: USAGE absent → meter excluded + violation surfaced
-# ---------------------------------------------------------------------------
-
-test_baseline_only_emits_violation if {
-	inp := _std_input([
-		_meter_baseline_only("m1", 45.0),
-		_meter_with_actual("m2", 38.0, 15.0),
-	])
-	# m1 contributes nothing
-	count(settlement_components) == 1 with input as inp
-	# A violation mentions the baseline-only meter
-	vs := violations with input as inp
+test_offered_column_const_violation if {
+	bad := json.patch(_offered_ts, [{"op": "replace", "path": "/payloadDescriptors/0/payloadType", "value": "CAPACITY_PROMISED"}])
+	vs := violations with input as _mk([_meter("m1", 150, 10, 200, 95)], bad, "5of10")
 	some v in vs
-	contains(v, "m1")
+	contains(v, "CAPACITY_OFFERED")
 }
 
-# ---------------------------------------------------------------------------
-# Resource-telemetry exclusion: utility perf record alongside an
-# EnergyResource perf record should pick the utility one for settlement
-# and IGNORE the resource data entirely — even if the resource record
-# sits ahead of the utility record in the array.
-# ---------------------------------------------------------------------------
-
-_resource_perf(meters) := {
-	"id": "p-resource",
-	"status": {"code": "REPORT_DELIVERED"},
-	"commitmentIds": ["c1"],
-	"performanceAttributes": {
-		"@context": "test", "@type": "DemandFlexPerformance",
-		"eventId": "evt-test",
-		"methodology": "RESOURCE_TELEMETRY",
-		"meters": meters,
-	},
-}
-
-_utility_perf(meters) := {
-	"id": "p-utility",
-	"status": {"code": "DELIVERY_COMPLETE"},
-	"commitmentIds": ["c1"],
-	"performanceAttributes": {
-		"@context": "test", "@type": "DemandFlexPerformance",
-		"eventId": "evt-test",
-		"methodology": "5of10",
-		"meters": meters,
-	},
-}
-
-_input_with_perf_records(perf_records) := {
-	"message": {"contract": {
-		"id": "test",
-		"status": {"code": "ACTIVE"},
-		"commitments": [{
-			"id": "c1",
-			"status": {"descriptor": {"code": "ACTIVE"}},
-			"resources": [{
-				"id": "r1",
-				"quantity": {"unitCode": "kW", "unitQuantity": 150},
-				"resourceAttributes": {
-					"@context": "test", "@type": "DemandFlexNeed",
-					"direction": "REDUCE", "eventWindow": _default_window,
-					"capacityType": "CURTAILMENT", "maxCapacityKw": 500,
-				},
-			}],
-			"offer": {
-				"id": "o1", "resourceIds": ["r1"],
-				"offerAttributes": {
-					"@context": "test", "@type": "DemandFlexBuyOffer",
-					"inputs": _default_inputs,
-				},
-			},
-		}],
-		"performance": perf_records,
-		"contractAttributes": _deg_contract,
-	}},
-}
-
-# Test: EnergyResource perf record listed FIRST is ignored; settlement
-# uses the utility perf record listed second. Verifies the filter — not
-# the array index — is what picks the eligible record.
-test_resource_perf_record_excluded_from_settlement if {
-	resource_meter := {
-		"meterId": "der://ev/VIN001",
-		"telemetry": {
-			"@type": "TimeSeries",
-			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
-			"payloadDescriptors": [
-				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
-				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "units": "KWH"},
-			],
-			# 99 kW resource USAGE would, if used, blow up settlement
-			"intervals": [{"id": 0, "payloads": [
-				{"type": "USAGE", "values": [99.0]},
-				{"type": "SOC_END", "values": [21.0]},
-			]}],
-		},
-	}
-	inp := _input_with_perf_records([
-		_resource_perf([resource_meter]),
-		_utility_perf([_meter_with_actual("m1", 45.0, 20.0)]),
-	])
-	# Settlement uses utility data: (45-20) kW × 2h × 3.5 INR/kWh = 175 INR.
-	# If resource data leaked in, total would be different.
-	total_settlement == 175 with input as inp
-	# And no violations
-	count(violations) == 0 with input as inp
-}
-
-# Test: payload carrying ONLY a RESOURCE_TELEMETRY perf record triggers
-# an explicit violation; the rego refuses to compute settlement.
-test_resource_only_payload_violation if {
-	resource_meter := {
-		"meterId": "der://ev/VIN001",
-		"telemetry": {
-			"@type": "TimeSeries",
-			"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT2H"},
-			"payloadDescriptors": [
-				{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW"},
-			],
-			"intervals": [{"id": 0, "payloads": [
-				{"type": "USAGE", "values": [1.0]},
-			]}],
-		},
-	}
-	inp := _input_with_perf_records([_resource_perf([resource_meter])])
-	vs := violations with input as inp
-	some v in vs
-	contains(v, "EnergyResource telemetry")
+test_std_no_column_violation if {
+	vs := violations with input as _std
+	every v in vs { not contains(v, "columns must be") }
 }

@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../) · [DiscomLimitCheck](../README.md)
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 components.schemas.`DiscomLimitCheck` (JSON Schema 2020-12 body) |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.beckn.io/deg/DiscomLimitCheck/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.nfh.global/deg/DiscomLimitCheck/v2.0/`) |
 
 ## Properties
 

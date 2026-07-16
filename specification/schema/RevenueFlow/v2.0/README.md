@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../) · [RevenueFlow](../README.md)
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | OpenAPI 3.1.1 components.schemas.`RevenueFlow` (JSON Schema 2020-12 body) |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.beckn.io/deg/RevenueFlow/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace `https://schema.nfh.global/deg/RevenueFlow/v2.0/`) |
 
 ## Properties
 

@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../../specification/schema/) · [DiscomLedgerProvide
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | JSON Schema 2020-12 definition for `DiscomLedgerProvider` |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.beckn.io/deg/DiscomLedgerProvider/v1.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.nfh.global/deg/DiscomLedgerProvider/v1.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `DiscomLedgerProvider` terms |
 
 ## Properties

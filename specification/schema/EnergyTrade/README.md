@@ -2,14 +2,14 @@
 
 > ⚠️ **Deprecated** — `EnergyTrade` is superseded by [`P2PTrade`](../P2PTrade/). Use `P2PTrade` for all new energy contract implementations on the DEG network.
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyTrade`](https://schema.beckn.io/EnergyTrade)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyTrade`](https://schema.nfh.global/EnergyTrade)
 > **Tags:** `energy, p2p, trade, contract, prosumer, deg, beckn`
-> **Namespace:** `https://schema.beckn.io/`
+> **Namespace:** `https://schema.nfh.global/`
 > Part of the [DEG Schema](../../README.md)
 
 ---
 
-**P2P energy trade contract** — a subclass of [`Contract`](https://schema.beckn.io/Contract/v2.0) specialised for energy delivery between prosumers on a Digital Energy Grid (DEG) network. Represents the complete traded energy contract including offer terms, resource attributes, delivery tracking, and customer details.
+**P2P energy trade contract** — a subclass of [`Contract`](https://schema.nfh.global/Contract/v2.0) specialised for energy delivery between prosumers on a Digital Energy Grid (DEG) network. Represents the complete traded energy contract including offer terms, resource attributes, delivery tracking, and customer details.
 
 > **Migration:** Replace `EnergyTrade` references with [`P2PTrade`](../P2PTrade/) and [`EnergyContract`](../EnergyContract/). Domain-specific attributes (offer, delivery, resource, customer) remain available via the companion schemas listed below.
 
@@ -41,15 +41,15 @@ Related domain schemas (split from the combined energy trade specification):
 | `offer` | `EnergyTradeOffer` | — | Energy trade offer attributes (pricing model, windows). |
 | `customer` | `EnergyCustomer` | — | Energy customer attributes (meter, utility, load). |
 
-*Inherits all properties from [`Contract`](https://schema.beckn.io/Contract/v2.0) including `id`, `displayId`, `items`, `status`, `contractValue`, `participants`, `entitlements`, and `fulfillments`.*
+*Inherits all properties from [`Contract`](https://schema.nfh.global/Contract/v2.0) including `id`, `displayId`, `items`, `status`, `contractValue`, `participants`, `entitlements`, and `fulfillments`.*
 
 ## Linked Data
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyTrade` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyTrade/v2.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyTrade/v2.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyTrade/v2.0/vocab.jsonld` |
-| Root context.jsonld | `https://schema.beckn.io/context.jsonld` |
-| Root vocab.jsonld | `https://schema.beckn.io/vocab.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EnergyTrade` |
+| JSON Schema (latest) | `https://schema.nfh.global/EnergyTrade/v2.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EnergyTrade/v2.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EnergyTrade/v2.0/vocab.jsonld` |
+| Root context.jsonld | `https://schema.nfh.global/context.jsonld` |
+| Root vocab.jsonld | `https://schema.nfh.global/vocab.jsonld` |

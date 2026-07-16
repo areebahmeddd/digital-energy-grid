@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceMeter/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceMeter/v1.0",
   "title": "EnergyResourceMeter",
   "description": "Typed schema for metering-point energy resources (type = METER). CIM: cim:Meter / cim:EndDevice (IEC 61968-9). Common fields inherited from EnergyResourceCommon/v1.0.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceMeterAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

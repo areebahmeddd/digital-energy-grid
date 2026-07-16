@@ -9,7 +9,7 @@ Part of the [DEG Schema](../../../specification/schema/) · [EnergyGift](../READ
 | File | Description |
 |------|-------------|
 | [attributes.yaml](./attributes.yaml) | JSON Schema 2020-12 definition for `EnergyGift` |
-| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.beckn.io/deg/EnergyGift/v2.0/`) |
+| [context.jsonld](./context.jsonld) | JSON-LD context (namespace: `https://schema.nfh.global/deg/EnergyGift/v2.0/`) |
 | [vocab.jsonld](./vocab.jsonld) | RDF vocabulary for `EnergyGift` terms |
 
 ## Properties

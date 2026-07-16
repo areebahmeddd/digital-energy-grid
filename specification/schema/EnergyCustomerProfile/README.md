@@ -1,8 +1,8 @@
 # CustomerProfile
 
-> **Canonical IRI:** [`https://schema.beckn.io/EnergyCustomerProfile`](https://schema.beckn.io/EnergyCustomerProfile)
+> **Canonical IRI:** [`https://schema.nfh.global/EnergyCustomerProfile`](https://schema.nfh.global/EnergyCustomerProfile)
 > **Tags:** `energy`, `identity`, `deg`
-> **Namespace:** `https://schema.beckn.io/deg/`
+> **Namespace:** `https://schema.nfh.global/deg/`
 > Part of the [DEG Specification](../../../README.md)
 
 ---
@@ -28,7 +28,7 @@ Core customer identity for energy credentials — links a utility account to a p
 
 | Resource | URL |
 |----------|-----|
-| Canonical IRI | `https://schema.beckn.io/EnergyCustomerProfile` |
-| JSON Schema (latest) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0` |
-| context.jsonld (latest) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0/context.jsonld` |
-| vocab.jsonld (latest) | `https://schema.beckn.io/EnergyCustomerProfile/v1.0/vocab.jsonld` |
+| Canonical IRI | `https://schema.nfh.global/EnergyCustomerProfile` |
+| JSON Schema (latest) | `https://schema.nfh.global/EnergyCustomerProfile/v1.0` |
+| context.jsonld (latest) | `https://schema.nfh.global/EnergyCustomerProfile/v1.0/context.jsonld` |
+| vocab.jsonld (latest) | `https://schema.nfh.global/EnergyCustomerProfile/v1.0/vocab.jsonld` |

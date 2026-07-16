@@ -1,4 +1,4 @@
-$id: "https://schema.beckn.io/EnergyTradeOrder/v0.3"
+$id: "https://schema.nfh.global/EnergyTradeOrder/v0.3"
 $schema: "https://json-schema.org/draft/2020-12/schema"
 title: EnergyTradeOrder
 description: >
@@ -44,7 +44,7 @@ properties:
     x-jsonld:
       "@id": total_quantity
     allOf:
-      - $ref: "https://schema.beckn.io/Quantity/v2.0"
+      - $ref: "https://schema.nfh.global/Quantity/v2.0"
       - type: object
         description: Total energy quantity in kWh.
         properties:

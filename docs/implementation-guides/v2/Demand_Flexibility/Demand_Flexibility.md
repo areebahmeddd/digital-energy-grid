@@ -169,49 +169,64 @@ The utility publishes a flex catalog containing:
     "messageId": "msg-publish-001",
     "timestamp": "2026-03-28T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "catalogs": [
       {
         "id": "catalog-flex-tpddl-2026-04",
-        "descriptor": {
-          "name": "TPDDL Demand Flex - April 2026",
-          "shortDesc": "Peak demand reduction opportunities for North Delhi"
-        },
-        "provider": {
-          "id": "tpddl-north-delhi",
-          "descriptor": {
-            "name": "TPDDL North Delhi Distribution"
-          }
-        },
+        "descriptor": {"name": "TPDDL Demand Flex - April 2026", "shortDesc": "Peak demand reduction opportunities for North Delhi"},
+        "provider": {"id": "tpddl-north-delhi", "descriptor": {"name": "TPDDL North Delhi Distribution"}},
         "resources": [
           {
             "id": "flex-need-north-delhi-apr1",
-            "descriptor": {
-              "name": "Peak Demand Flex - North Delhi",
-              "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-            },
+            "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
             "resourceAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
               "@type": "DemandFlexNeed",
-              "direction": "REDUCE",
-              "eventWindow": {
-                "startDate": "2026-04-01T08:30:00Z",
-                "endDate": "2026-04-01T10:30:00Z"
-              },
-              "capacityType": "CURTAILMENT",
-              "maxCapacityKw": 500,
-              "location": {
-                "type": "Point",
-                "coordinates": [
-                  77.209,
-                  28.6139
-                ]
-              }
+              "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+              "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+              "payloadDescriptors": [
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "CAPACITY_REQUESTED",
+                  "units": "KW",
+                  "insertedBy": "buyer"
+                },
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "PRICE",
+                  "units": "INR_PER_KWH",
+                  "insertedBy": "buyer"
+                },
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "SHORTFALL_PENALTY",
+                  "units": "INR_PER_KWH",
+                  "insertedBy": "buyer"
+                }
+              ],
+              "intervals": [
+                {
+                  "id": 0,
+                  "payloads": [
+                    {"type": "CAPACITY_REQUESTED", "values": [150]},
+                    {"type": "PRICE", "values": [3.5]},
+                    {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                  ]
+                },
+                {
+                  "id": 1,
+                  "payloads": [
+                    {"type": "CAPACITY_REQUESTED", "values": [200]},
+                    {"type": "PRICE", "values": [4.0]},
+                    {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                  ]
+                }
+              ]
             }
           }
         ],
@@ -222,33 +237,16 @@ The utility publishes a flex catalog containing:
               "name": "Standard Flex @ 3.50 INR/kWh",
               "shortDesc": "Demand reduction with 5.00 INR/kWh premium for guaranteed flex"
             },
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
-            "validity": {
-              "startDate": "2026-03-28T00:00:00Z",
-              "endDate": "2026-04-01T08:30:00Z"
-            },
-            "availableTo": [
-              {
-                "type": "NETWORK",
-                "id": "beckn.deg.india"
-              }
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
+            "validity": {"startDate": "2026-03-28T00:00:00Z", "endDate": "2026-04-01T08:30:00Z"},
+            "availableTo": [{"type": "NETWORK", "id": "beckn.deg.india"}],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "contractTerms": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
                 "@type": "DEGContract",
-                "roles": [
-                  {
-                    "role": "buyer"
-                  },
-                  {
-                    "role": "seller"
-                  }
-                ],
+                "roles": [{"role": "buyer"}, {"role": "seller"}],
                 "policy": {
                   "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
                   "queryPath": "data.deg.contracts.demand_flex"
@@ -258,22 +256,9 @@ The utility publishes a flex catalog containing:
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
-                {
-                  "role": "seller",
-                  "participantId": null
-                }
+                {"role": "seller", "participantId": null}
               ]
             }
           }
@@ -282,7 +267,6 @@ The utility publishes a flex catalog containing:
     ]
   }
 }
-
 ```
 </details>
 
@@ -304,20 +288,8 @@ The aggregator (BAP) searches the CDS for available flex opportunities matching 
     "messageId": "msg-discover-001",
     "timestamp": "2026-03-30T09:55:00Z"
   },
-  "message": {
-    "intent": {
-      "descriptor": {
-        "name": "demand-flex"
-      },
-      "category": {
-        "descriptor": {
-          "code": "CURTAILMENT"
-        }
-      }
-    }
-  }
+  "message": {"intent": {"descriptor": {"name": "demand-flex"}, "category": {"descriptor": {"code": "CURTAILMENT"}}}}
 }
-
 ```
 </details>
 
@@ -341,46 +313,64 @@ The CDS returns matching catalogs. The offer carries the full `contractTerms` an
     "messageId": "msg-on-discover-001",
     "timestamp": "2026-03-30T09:55:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "catalogs": [
       {
         "id": "catalog-flex-tpddl-2026-04",
-        "descriptor": {
-          "name": "TPDDL Demand Flex - April 2026",
-          "shortDesc": "Peak demand reduction opportunities for North Delhi"
-        },
-        "provider": {
-          "id": "tpddl-north-delhi",
-          "descriptor": {
-            "name": "TPDDL North Delhi Distribution"
-          }
-        },
+        "descriptor": {"name": "TPDDL Demand Flex - April 2026", "shortDesc": "Peak demand reduction opportunities for North Delhi"},
+        "provider": {"id": "tpddl-north-delhi", "descriptor": {"name": "TPDDL North Delhi Distribution"}},
         "resources": [
           {
             "id": "flex-need-north-delhi-apr1",
-            "descriptor": {
-              "name": "Peak Demand Flex - North Delhi",
-              "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-            },
+            "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
             "resourceAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
               "@type": "DemandFlexNeed",
-              "direction": "REDUCE",
-              "eventWindow": {
-                "startDate": "2026-04-01T08:30:00Z",
-                "endDate": "2026-04-01T10:30:00Z"
-              },
-              "capacityType": "CURTAILMENT",
-              "maxCapacityKw": 500,
-              "location": {
-                "type": "Point",
-                "coordinates": [77.209, 28.6139]
-              }
+              "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+              "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+              "payloadDescriptors": [
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "CAPACITY_REQUESTED",
+                  "units": "KW",
+                  "insertedBy": "buyer"
+                },
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "PRICE",
+                  "units": "INR_PER_KWH",
+                  "insertedBy": "buyer"
+                },
+                {
+                  "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                  "payloadType": "SHORTFALL_PENALTY",
+                  "units": "INR_PER_KWH",
+                  "insertedBy": "buyer"
+                }
+              ],
+              "intervals": [
+                {
+                  "id": 0,
+                  "payloads": [
+                    {"type": "CAPACITY_REQUESTED", "values": [150]},
+                    {"type": "PRICE", "values": [3.5]},
+                    {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                  ]
+                },
+                {
+                  "id": 1,
+                  "payloads": [
+                    {"type": "CAPACITY_REQUESTED", "values": [200]},
+                    {"type": "PRICE", "values": [4.0]},
+                    {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                  ]
+                }
+              ]
             }
           }
         ],
@@ -392,15 +382,12 @@ The CDS returns matching catalogs. The offer carries the full `contractTerms` an
               "shortDesc": "Demand reduction with 5.00 INR/kWh premium for guaranteed flex"
             },
             "resourceIds": ["flex-need-north-delhi-apr1"],
-            "validity": {
-              "startDate": "2026-03-28T00:00:00Z",
-              "endDate": "2026-04-01T08:30:00Z"
-            },
+            "validity": {"startDate": "2026-03-28T00:00:00Z", "endDate": "2026-04-01T08:30:00Z"},
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "contractTerms": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [{"role": "buyer"}, {"role": "seller"}],
                 "policy": {
@@ -412,19 +399,9 @@ The CDS returns matching catalogs. The offer carries the full `contractTerms` an
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
-                {
-                  "role": "seller",
-                  "participantId": null
-                }
+                {"role": "seller", "participantId": null}
               ]
             }
           }
@@ -433,7 +410,6 @@ The CDS returns matching catalogs. The offer carries the full `contractTerms` an
     ]
   }
 }
-
 ```
 </details>
 
@@ -457,100 +433,91 @@ The aggregator selects an offer with a desired quantity. The `contractTerms` fro
     "messageId": "msg-select-001",
     "timestamp": "2026-03-30T10:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
+          "status": {"descriptor": {"code": "DRAFT"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi",
-                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
-                {
-                  "role": "seller",
-                  "participantId": null
-                }
+                {"role": "seller", "participantId": null}
               ]
             }
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [
-          {
-            "role": "buyer"
-          },
-          {
-            "role": "seller"
-          }
-        ],
+        "roles": [{"role": "buyer"}, {"role": "seller"}],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
           "queryPath": "data.deg.contracts.demand_flex"
@@ -559,7 +526,6 @@ The aggregator selects an offer with a desired quantity. The `contractTerms` fro
     }
   }
 }
-
 ```
 </details>
 
@@ -583,100 +549,92 @@ The BPP returns a DRAFT contract. The `contractAttributes` carries the `DEGContr
     "messageId": "msg-on-select-001",
     "timestamp": "2026-03-30T10:00:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
+          "status": {"descriptor": {"code": "DRAFT"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
-                {
-                  "role": "seller",
-                  "participantId": null
-                }
+                {"role": "seller", "participantId": null}
               ]
             }
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [
-          {
-            "role": "buyer"
-          },
-          {
-            "role": "seller"
-          }
-        ],
+        "roles": [{"role": "buyer"}, {"role": "seller"}],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
           "queryPath": "data.deg.contracts.demand_flex"
@@ -685,7 +643,6 @@ The BPP returns a DRAFT contract. The `contractAttributes` carries the `DEGContr
     }
   }
 }
-
 ```
 </details>
 
@@ -709,113 +666,115 @@ The aggregator provides their identity. The seller role in `inputs` is now fille
     "messageId": "msg-init-001",
     "timestamp": "2026-03-30T10:05:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
+          "status": {"descriptor": {"code": "DRAFT"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi",
-                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -825,7 +784,6 @@ The aggregator provides their identity. The seller role in `inputs` is now fille
     }
   }
 }
-
 ```
 </details>
 
@@ -849,112 +807,115 @@ The BPP acknowledges the seller and populates the initial set of participating m
     "messageId": "msg-on-init-001",
     "timestamp": "2026-03-30T10:05:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
+          "status": {"descriptor": {"code": "DRAFT"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -964,7 +925,6 @@ The BPP acknowledges the seller and populates the initial set of participating m
     }
   }
 }
-
 ```
 </details>
 
@@ -988,113 +948,115 @@ The aggregator confirms the contract. Same structure as init.
     "messageId": "msg-confirm-001",
     "timestamp": "2026-03-30T10:10:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
-      "status": {
-        "code": "DRAFT"
-      },
+      "status": {"code": "DRAFT"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "DRAFT"
-            }
-          },
+          "status": {"descriptor": {"code": "DRAFT"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi",
-                "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi", "shortDesc": "500 kW curtailment needed Apr 1, 2-4pm IST"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1104,7 +1066,6 @@ The aggregator confirms the contract. Same structure as init.
     }
   }
 }
-
 ```
 </details>
 
@@ -1128,113 +1089,116 @@ The BPP activates the contract. Status changes to `ACTIVE`. The contract is now 
     "messageId": "msg-on-confirm-001",
     "timestamp": "2026-03-30T10:10:05Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "descriptor": {
-                "name": "Peak Demand Flex - North Delhi"
-              },
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "descriptor": {"name": "Peak Demand Flex - North Delhi"},
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1244,7 +1208,6 @@ The BPP activates the contract. Status changes to `ACTIVE`. The contract is now 
     }
   }
 }
-
 ```
 </details>
 
@@ -1268,10 +1231,10 @@ The aggregator updates the participating meters list before an event. The seller
     "messageId": "msg-update-optin-001",
     "timestamp": "2026-04-01T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
@@ -1280,96 +1243,102 @@ The aggregator updates the participating meters list before an event. The seller
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 120,
-                "@type": "Quantity"
-              },
+              "quantity": {"unitCode": "kW", "unitQuantity": 120, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500,
-                "location": {
-                  "type": "Point",
-                  "coordinates": [
-                    77.209,
-                    28.6139
-                  ]
-                }
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 120.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-utility.example.com"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg.example.com"
-          }
+          {"role": "buyer", "participantId": "tpddl-utility.example.com"},
+          {"role": "seller", "participantId": "greenflex-agg.example.com"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1379,7 +1348,6 @@ The aggregator updates the participating meters list before an event. The seller
     }
   }
 }
-
 ```
 </details>
 
@@ -1403,137 +1371,169 @@ Before the event, the utility publishes baseline load per meter. The `DemandFlex
     "messageId": "msg-on-status-baselines-001",
     "timestamp": "2026-04-01T08:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "performance": [
         {
           "id": "perf-evt-001-baselines",
-          "status": {
-            "code": "BASELINE_PUBLISHED",
-            "name": "Baselines published for upcoming event"
-          },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
+          "status": {"code": "BASELINE_PUBLISHED", "name": "Baselines published for upcoming event"},
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
-                "baselineKw": 45.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               },
               {
-                "meterId": "der://meter/002",
-                "baselineKw": 38.0
-              },
-              {
-                "meterId": "der://meter/003",
-                "baselineKw": 52.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               }
             ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1543,7 +1543,6 @@ Before the event, the utility publishes baseline load per meter. The `DemandFlex
     }
   }
 }
-
 ```
 </details>
 
@@ -1567,140 +1566,169 @@ After the event, the utility publishes actual load per meter alongside baselines
     "messageId": "msg-on-status-actuals-001",
     "timestamp": "2026-04-01T10:35:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "@type": "Quantity",
-                      "unitCode": "KWH",
-                      "unitQuantity": 150.0
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "performance": [
         {
           "id": "perf-evt-001-actuals",
-          "status": {
-            "code": "DELIVERY_COMPLETE",
-            "name": "Event completed, actuals measured"
-          },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
+          "status": {"code": "DELIVERY_COMPLETE", "name": "Event completed, actuals measured"},
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
-                "baselineKw": 45.0,
-                "actualKw": 20.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               },
               {
-                "meterId": "der://meter/002",
-                "baselineKw": 38.0,
-                "actualKw": 15.0
-              },
-              {
-                "meterId": "der://meter/003",
-                "baselineKw": 52.0,
-                "actualKw": 25.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               }
             ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1710,7 +1738,6 @@ After the event, the utility publishes actual load per meter alongside baselines
     }
   }
 }
-
 ```
 </details>
 
@@ -1734,140 +1761,169 @@ The rego policy is evaluated against the actuals payload. Revenue flows are comp
     "messageId": "msg-on-status-settled-001",
     "timestamp": "2026-04-01T11:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "contract": {
       "id": "contract-flex-001",
-      "status": {
-        "code": "ACTIVE"
-      },
+      "status": {"code": "ACTIVE"},
       "commitments": [
         {
           "id": "commitment-flex-001",
-          "status": {
-            "descriptor": {
-              "code": "ACTIVE"
-            }
-          },
+          "status": {"descriptor": {"code": "ACTIVE"}},
           "resources": [
             {
               "id": "flex-need-north-delhi-apr1",
-              "quantity": {
-                "unitCode": "kW",
-                "unitQuantity": 150,
-                "@type": "Quantity"
-              },
+              "quantity": {"unitCode": "kW", "unitQuantity": 150, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {
-                  "startDate": "2026-04-01T08:30:00Z",
-                  "endDate": "2026-04-01T10:30:00Z"
-                },
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 500
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "PRICE",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  },
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "SHORTFALL_PENALTY",
+                    "units": "INR_PER_KWH",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {
+                    "id": 0,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [150]},
+                      {"type": "PRICE", "values": [3.5]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  },
+                  {
+                    "id": 1,
+                    "payloads": [
+                      {"type": "CAPACITY_REQUESTED", "values": [200]},
+                      {"type": "PRICE", "values": [4.0]},
+                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
+                    ]
+                  }
+                ]
               }
             }
           ],
           "offer": {
             "id": "offer-flex-001",
-            "resourceIds": [
-              "flex-need-north-delhi-apr1"
-            ],
+            "resourceIds": ["flex-need-north-delhi-apr1"],
             "offerAttributes": {
-              "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "incentivePerKwh": 3.5,
-                    "currency": "INR",
-                    "baselineMethodology": {
-                      "bestOf": 5,
-                      "outOf": 10
-                    },
-                    "penaltyRate": 1.5,
-                    "premiumForGuaranteed": 5.0,
-                    "optOutDefault": false
-                  }
+                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
-                  "inputs": {
-                    "plannedDemandChange": {
-                      "unitCode": "KWH",
-                      "unitQuantity": 120.0,
-                      "@type": "Quantity"
-                    },
-                    "participatingMeters": [
-                      "der://meter/001",
-                      "der://meter/002",
-                      "der://meter/003"
-                    ]
-                  }
+                  "inputs": {"participatingMeters": ["der://meter/001", "der://meter/002", "der://meter/003"]}
                 }
               ]
             }
+          },
+          "commitmentAttributes": {
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+            "@type": "TimeSeries",
+            "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+            "payloadDescriptors": [
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              }
+            ],
+            "intervals": [
+              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
+            ]
           }
         }
       ],
       "performance": [
         {
           "id": "perf-evt-001-actuals",
-          "status": {
-            "code": "SETTLED",
-            "name": "Settlement computed from policy evaluation"
-          },
-          "commitmentIds": [
-            "commitment-flex-001"
-          ],
+          "status": {"code": "SETTLED", "name": "Settlement computed from policy evaluation"},
+          "commitmentIds": ["commitment-flex-001"],
           "performanceAttributes": {
-            "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-04-01-001",
             "methodology": "5of10",
             "meters": [
               {
-                "meterId": "der://meter/001",
-                "baselineKw": 45.0,
-                "actualKw": 20.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:001",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               },
               {
-                "meterId": "der://meter/002",
-                "baselineKw": 38.0,
-                "actualKw": 15.0
-              },
-              {
-                "meterId": "der://meter/003",
-                "baselineKw": 52.0,
-                "actualKw": 25.0
+                "meterId": "did:web:tpddl.delhi.gov.in:meters:002",
+                "telemetry": {
+                  "@type": "TimeSeries",
+                  "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+                  "payloadDescriptors": [
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
+                  ],
+                  "intervals": [
+                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
+                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
+                  ]
+                }
               }
             ]
           }
         }
       ],
       "contractAttributes": {
-        "@context": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [
-          {
-            "role": "buyer",
-            "participantId": "tpddl-north-delhi"
-          },
-          {
-            "role": "seller",
-            "participantId": "greenflex-agg"
-          }
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
         ],
         "policy": {
           "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
@@ -1891,7 +1947,6 @@ The rego policy is evaluated against the actuals payload. Revenue flows are comp
     }
   }
 }
-
 ```
 </details>
 
@@ -1899,15 +1954,17 @@ The rego policy is evaluated against the actuals payload. Revenue flows are comp
 
 ### 6.1. DemandFlexNeed
 
-Attached to `Resource.resourceAttributes`. Describes the utility's flex requirement.
+Attached to `Resource.resourceAttributes`. A unified **OpenADR TimeSeries**
+procurement schedule (one interval per tranche). Columns are open in the schema;
+the contract policy rego imposes the required set. A negative `PRICE` pays for
+increased consumption, so there is no `direction` field.
 
 | Field | Type | Required | Description |
 |:------|:-----|:---------|:------------|
-| `direction` | string | Yes | `INCREASE` or `REDUCE` |
-| `eventWindow` | object | Yes | `{startDate, endDate}` in UTC ISO 8601 |
-| `maxCapacityKw` | number | Yes | Maximum flex capacity in kW |
-| `capacityType` | string | No | `CURTAILMENT`, `SHIFT`, or `GENERATION` |
-| `location` | object | No | GeoJSON Point or Polygon |
+| `location` | Beckn Location | No | GeoJSON geometry (`geo`) + optional `address` |
+| `intervalPeriod` | OpenADR intervalPeriod | Yes | `start` + `duration` (e.g. `PT30M`) — the tranche grid |
+| `payloadDescriptors` | array | Yes | Buyer columns; uc1 locks `CAPACITY_REQUESTED` / `PRICE` / `SHORTFALL_PENALTY` |
+| `intervals` | OpenADR interval[] | Yes | One row per tranche — `id` + typed `payloads` |
 
 ### 6.2. DemandFlexBuyOffer
 
@@ -1926,9 +1983,13 @@ Attached to `Offer.offerAttributes`. Contains the contract template and role-tag
 | `participantId` | string/null | Yes | Null until role is bound |
 | `inputs` | object | When bound | Role-specific commercial terms |
 
-**Buyer inputs:** `incentivePerKwh`, `currency`, `baselineMethodology`, `penaltyRate`, `premiumForGuaranteed`, `optOutDefault`
+**Buyer inputs:** `currency`, `baselineMethodology`. The per-slot commercial
+terms are columns on the DemandFlexNeed series (`PRICE`, `SHORTFALL_PENALTY`,
+`CAPACITY_REQUESTED`), not scalar inputs.
 
-**Seller inputs:** `plannedDemandChange` (beckn:Quantity), `participatingMeters` (string array)
+**Seller inputs:** `participatingMeters` (string array), `energyResources`,
+`reportDescriptors`. The aggregator's per-slot `CAPACITY_OFFERED` is added as a
+column on `Commitment.commitmentAttributes` at confirm.
 
 ### 6.3. DEGContract
 
@@ -1993,8 +2054,8 @@ The `contractpolicyenforcer` step plugin runs first in the BPP Caller pipeline o
 
 - Send `/discover` to the CDS to find flex opportunities matching your criteria
 - The offer's `contractTerms` contains the DEGContract template with roles and policy
-- At `/init`, fill the seller role in `inputs` with your `participantId` and `plannedDemandChange`
-- Use `/update` before each event to update `participatingMeters` and `plannedDemandChange`
+- At `/init`, fill the seller role in `inputs` with your `participantId` and `participatingMeters`, and add your per-slot `CAPACITY_OFFERED` column on `commitmentAttributes`
+- Use `/update` before each event to revise `participatingMeters` or `CAPACITY_OFFERED`
 - Revenue flows in `on_status` (settled) show what you receive — verify against the rego policy
 
 ### 8.2. For BPPs (Utility)

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceInverter/v1.0",
+  "$id": "https://schema.nfh.global/EnergyResourceInverter/v1.0",
   "title": "EnergyResourceInverter",
   "description": "Typed schema for grid-connected power-electronics inverter energy resources (type = INVERTER). Captures IEEE 1547-2018 ride-through categories, operating mode, and reactive/frequency-support capabilities per SunSpec DER Models 702-714. CIM: PowerElectronicsConnection (IEC 61970-302). Common fields inherited from EnergyResourceCommon/v1.0.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,7 +21,7 @@
   "$defs": {
     "EnergyResourceInverterAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.0#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,

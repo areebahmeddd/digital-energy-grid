@@ -255,8 +255,8 @@ mappings:
     bppMappings: |
       (
         $ctx := $.context;
-        $ltsServiceContext := "https://schema.beckn.io/EvChargingService/2.0/context.jsonld";
-        $ltsOfferContext := "https://schema.beckn.io/EvChargingOffer/2.0/context.jsonld";
+        $ltsServiceContext := "https://schema.nfh.global/EvChargingService/2.0/context.jsonld";
+        $ltsOfferContext := "https://schema.nfh.global/EvChargingOffer/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
 
         $findProviderName := function($catalog, $offer) {(
@@ -396,7 +396,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
 
         $mapOffer := function($acceptedOffer) {
@@ -457,7 +457,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -472,7 +472,7 @@ mappings:
                   },
                   "taxID": $order."beckn:buyer"."beckn:taxID",
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                    "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                     "@type": "Consumer",
                     "role": "buyer",
                     "person": {
@@ -669,7 +669,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
 
         $mapType := function($kind) {
@@ -719,7 +719,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -734,7 +734,7 @@ mappings:
                   },
                   "taxID": $order."beckn:buyer"."beckn:taxID",
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                    "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                     "@type": "Consumer",
                     "role": "buyer",
                     "person": {
@@ -767,7 +767,7 @@ mappings:
                     "code": "QUOTED"
                   },
                   "considerationAttributes": {
-                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/PriceSpecification/v2.1/context.jsonld",
                     "@type": "PriceSpecification",
                     "currency": $order."beckn:orderValue".currency,
                     "totalAmount": $order."beckn:orderValue".value,
@@ -796,7 +796,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
         $payment := $order."beckn:payment";
         $paymentAttrs := $payment."beckn:paymentAttributes";
@@ -854,7 +854,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -869,7 +869,7 @@ mappings:
                       "name": $order."beckn:buyer"."beckn:displayName"
                     },
                     "participantAttributes": {
-                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                       "@type": "Consumer",
                       "role": "buyer",
                       "person": {
@@ -909,7 +909,7 @@ mappings:
                     "code": "QUOTED"
                   },
                   "considerationAttributes": {
-                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/PriceSpecification/v2.1/context.jsonld",
                     "@type": "PriceSpecification",
                     "currency": $order."beckn:orderValue".currency,
                     "totalAmount": $order."beckn:orderValue".value,
@@ -1135,7 +1135,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
         $payment := $order."beckn:payment";
         $paymentAttrs := $payment."beckn:paymentAttributes";
@@ -1193,7 +1193,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -1208,7 +1208,7 @@ mappings:
                       "name": $order."beckn:buyer"."beckn:displayName"
                     },
                     "participantAttributes": {
-                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                       "@type": "Consumer",
                       "role": "buyer",
                       "person": {
@@ -1248,7 +1248,7 @@ mappings:
                     "code": "QUOTED"
                   },
                   "considerationAttributes": {
-                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/PriceSpecification/v2.1/context.jsonld",
                     "@type": "PriceSpecification",
                     "currency": $order."beckn:orderValue".currency,
                     "totalAmount": $order."beckn:orderValue".value,
@@ -1297,7 +1297,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
         $payment := $order."beckn:payment";
 
@@ -1354,7 +1354,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -1369,7 +1369,7 @@ mappings:
                       "name": $order."beckn:buyer"."beckn:displayName"
                     },
                     "participantAttributes": {
-                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                       "@type": "Consumer",
                       "role": "buyer",
                       "person": {
@@ -1409,7 +1409,7 @@ mappings:
                     "code": "QUOTED"
                   },
                   "considerationAttributes": {
-                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/PriceSpecification/v2.1/context.jsonld",
                     "@type": "PriceSpecification",
                     "currency": $order."beckn:orderValue".currency,
                     "totalAmount": $order."beckn:orderValue".value,
@@ -1653,7 +1653,7 @@ mappings:
       (
         $ctx := $.context;
         $order := $.message.order;
-        $sessionContext := "https://schema.beckn.io/EvChargingSession/2.0/context.jsonld";
+        $sessionContext := "https://schema.nfh.global/EvChargingSession/2.0/context.jsonld";
         $ensureArray := function($value) { $type($value) = "array" ? $value : [$value] };
         $payment := $order."beckn:payment";
         $performance := $order."beckn:fulfillment";
@@ -1711,7 +1711,7 @@ mappings:
                     "name": $order."beckn:seller"
                   },
                   "participantAttributes": {
-                    "@context": "https://schema.beckn.io/Provider/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/Provider/v2.1/context.jsonld",
                     "@type": "Provider",
                     "id": $order."beckn:seller",
                     "descriptor": {
@@ -1726,7 +1726,7 @@ mappings:
                       "name": $order."beckn:buyer"."beckn:displayName"
                     },
                     "participantAttributes": {
-                      "@context": "https://schema.beckn.io/Consumer/v2.0/context.jsonld",
+                      "@context": "https://schema.nfh.global/Consumer/v2.0/context.jsonld",
                       "@type": "Consumer",
                       "role": "buyer",
                       "person": {
@@ -1766,7 +1766,7 @@ mappings:
                     "code": "QUOTED"
                   },
                   "considerationAttributes": {
-                    "@context": "https://schema.beckn.io/PriceSpecification/v2.1/context.jsonld",
+                    "@context": "https://schema.nfh.global/PriceSpecification/v2.1/context.jsonld",
                     "@type": "PriceSpecification",
                     "currency": $order."beckn:orderValue".currency,
                     "totalAmount": $order."beckn:orderValue".value,

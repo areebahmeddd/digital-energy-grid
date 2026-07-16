@@ -11,17 +11,17 @@
     "messageId": "msg-subscribe-001",
     "timestamp": "2026-03-28T06:00:00Z",
     "schemaContext": [
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld"
+      "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld"
     ]
   },
   "message": {
     "subscription": {
       "networkIds": ["beckn.one/testnet"],
       "schemaTypes": [
-        "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexBuyOffer/v2.0/context.jsonld",
-        "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/schema/DemandFlexNeed/v2.0/context.jsonld"
+        "https://schema.nfh.global/DemandFlexBuyOffer/2.0/context.jsonld",
+        "https://schema.nfh.global/DemandFlexNeed/2.0/context.jsonld"
       ],
       "callbackUrl": "https://tpddl-utility.example.com/beckn/catalog/callback"
     }

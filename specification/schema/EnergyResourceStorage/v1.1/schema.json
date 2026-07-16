@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/EnergyResourceStorage/v1.1",
+  "$id": "https://schema.nfh.global/EnergyResourceStorage/v1.1",
   "title": "EnergyResourceStorage",
   "description": "Typed schema for stationary battery energy storage resources (BESS). v1.1: storageCapacityKwh → storageCapacity (QuantitativeValue); inherits EnergyResourceCommon/v1.1. CIM: cim:BatteryUnit (IEC 61970-302). BATTERY is a deprecated alias for BESS. Optional admin field roundTripEfficiencyPct carries AC-to-AC round-trip efficiency per IEC 62933-2-1.",
   "allOf": [
-    { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
+    { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommon" },
     {
       "type": "object",
       "required": ["id", "type"],
@@ -21,13 +21,13 @@
   "$defs": {
     "EnergyResourceStorageAttributes": {
       "allOf": [
-        { "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
+        { "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#EnergyResourceCommonAttributes" },
         {
           "type": "object",
           "additionalProperties": true,
           "properties": {
             "storageCapacity": {
-              "$ref": "https://schema.beckn.io/EnergyResourceCommon/v1.1#QVEnergy",
+              "$ref": "https://schema.nfh.global/EnergyResourceCommon/v1.1#QVEnergy",
               "description": "Rated stored-energy capacity. unit: kWh | MWh. CIM: BatteryUnit.ratedE."
             },
             "storageType": {

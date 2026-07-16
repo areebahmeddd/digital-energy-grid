@@ -5,13 +5,13 @@ info:
   description: ESPI/Green Button billing summary data for a single meter. Uses native ESPI types and enum codes.
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 servers:
-  - url: https://schema.beckn.io
+  - url: https://schema.nfh.global
     description: Canonical schema registry
 paths: {}
 components:
   schemas:
     EnergyBillingSummaryGB:
-      $id: https://schema.beckn.io/EnergyBillingSummaryGB/v1.0
+      $id: https://schema.nfh.global/EnergyBillingSummaryGB/v1.0
       title: BillingSummary
       description: ESPI/Green Button billing summary data for a single meter. Uses native ESPI types and enum codes.
       x-tags: [energy, billing, green-button, espi, deg]

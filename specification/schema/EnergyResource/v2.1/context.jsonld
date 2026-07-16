@@ -6,8 +6,8 @@
     "rdfs":    "http://www.w3.org/2000/01/rdf-schema#",
     "xsd":     "http://www.w3.org/2001/XMLSchema#",
     "qudt":    "http://qudt.org/schema/qudt/",
-    "beckn":   "https://schema.beckn.io/core/v2.0/",
-    "deg":     "https://schema.beckn.io/deg#",
+    "beckn":   "https://schema.nfh.global/core/v2.0/",
+    "deg":     "https://schema.nfh.global/deg#",
 
     "W":    "http://qudt.org/vocab/unit/W",
     "kW":   "http://qudt.org/vocab/unit/KiloW",

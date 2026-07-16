@@ -15,7 +15,7 @@ info:
     sides (see EnergyCustomer) - A contract item wrapper linking customer and delivery data (see EnergyOrderItem)
     - Optional gifting metadata (see EnergyGift)
 
-    The seven domain schemas are defined in $defs and are also published independently at https://schema.beckn.io/<SchemaName>/v2.0.'
+    The seven domain schemas are defined in $defs and are also published independently at https://schema.nfh.global/<SchemaName>/v2.0.'
 components:
   schemas:
     EnergyTrade:
@@ -85,10 +85,10 @@ components:
           allOf:
           - $ref: '#/$defs/EnergyOrderItem'
       deprecated: true
-      x-supersededBy: https://schema.beckn.io/deg/P2PTrade/v2.0
+      x-supersededBy: https://schema.nfh.global/deg/P2PTrade/v2.0
       x-owl-equivalentClass: deg:P2PTrade
       allOf:
-      - $ref: https://schema.beckn.io/Contract/v2.0
+      - $ref: https://schema.nfh.global/Contract/v2.0
       $defs:
         EnergyTradeOffer:
           type: object
@@ -126,7 +126,7 @@ components:
               x-jsonld:
                 '@id': validityWindow
               allOf:
-              - $ref: https://schema.beckn.io/TimePeriod/v2.0
+              - $ref: https://schema.nfh.global/TimePeriod/v2.0
               - type: object
                 required:
                 - schema:startTime
@@ -140,7 +140,7 @@ components:
               x-jsonld:
                 '@id': deliveryWindow
               allOf:
-              - $ref: https://schema.beckn.io/TimePeriod/v2.0
+              - $ref: https://schema.nfh.global/TimePeriod/v2.0
               - type: object
                 required:
                 - schema:startTime

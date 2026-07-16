@@ -4,7 +4,7 @@ Typed energy resource schema for grid-network infrastructure: distribution trans
 
 `EnergyResourceNetwork` is one of the seven composable kinds that make up `EnergyResource` in the `ElectricityCredential`.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyResourceNetwork/v1.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyResourceNetwork/v1.0`
 
 **CIM alignment:** `cim:PowerTransformer` (DT), `cim:BusbarSection` (BUS), `cim:Feeder` (FEEDER), `cim:Substation` (MICROGRID) — IEC 61970-301
 

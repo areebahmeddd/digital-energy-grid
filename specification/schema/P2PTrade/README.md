@@ -2,9 +2,9 @@
 
 Schema for Peer-to-Peer energy trading contracts on the DEG network. P2PTrade is a subclass of [`EnergyContract`](../EnergyContract/), which is itself a subclass of `beckn:Contract`.
 
-**Canonical IRI:** `https://schema.beckn.io/P2PTrade/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/P2PTrade/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/P2PTrade/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/P2PTrade/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `contract` · `energy`
 
@@ -32,19 +32,19 @@ P2PTrade inherits all properties from `beckn:Contract` via `EnergyContract`. Dom
 
 ## Properties
 
-`P2PTrade` inherits all properties from [`EnergyContract`](../EnergyContract/) and transitively from [`beckn:Contract`](https://schema.beckn.io/Contract/v2.0):
+`P2PTrade` inherits all properties from [`EnergyContract`](../EnergyContract/) and transitively from [`beckn:Contract`](https://schema.nfh.global/Contract/v2.0):
 
 | Property | Inherited from | Required | Description |
 |----------|---------------|----------|-------------|
-| `@type` | [Contract](https://schema.beckn.io/Contract/v2.0) | ✅ | Must be a `beckn:` prefixed IRI |
-| `participants` | [Contract](https://schema.beckn.io/Contract/v2.0) | ✅ | Contract participants (buyer, seller) |
-| `items` | [Contract](https://schema.beckn.io/Contract/v2.0) | ✅ | Energy items/resources in the contract |
-| `id` | [Contract](https://schema.beckn.io/Contract/v2.0) | | UUID for the P2P trade contract |
-| `displayId` | [Contract](https://schema.beckn.io/Contract/v2.0) | | Human-readable contract identifier |
-| `status` | [Contract](https://schema.beckn.io/Contract/v2.0) | | Current contract state |
-| `contractValue` | [Contract](https://schema.beckn.io/Contract/v2.0) | | Total energy trade contract value |
-| `entitlements` | [Contract](https://schema.beckn.io/Contract/v2.0) | | Contract entitlements |
-| `fulfillments` | [Contract](https://schema.beckn.io/Contract/v2.0) | | Energy delivery fulfillment acts |
+| `@type` | [Contract](https://schema.nfh.global/Contract/v2.0) | ✅ | Must be a `beckn:` prefixed IRI |
+| `participants` | [Contract](https://schema.nfh.global/Contract/v2.0) | ✅ | Contract participants (buyer, seller) |
+| `items` | [Contract](https://schema.nfh.global/Contract/v2.0) | ✅ | Energy items/resources in the contract |
+| `id` | [Contract](https://schema.nfh.global/Contract/v2.0) | | UUID for the P2P trade contract |
+| `displayId` | [Contract](https://schema.nfh.global/Contract/v2.0) | | Human-readable contract identifier |
+| `status` | [Contract](https://schema.nfh.global/Contract/v2.0) | | Current contract state |
+| `contractValue` | [Contract](https://schema.nfh.global/Contract/v2.0) | | Total energy trade contract value |
+| `entitlements` | [Contract](https://schema.nfh.global/Contract/v2.0) | | Contract entitlements |
+| `fulfillments` | [Contract](https://schema.nfh.global/Contract/v2.0) | | Energy delivery fulfillment acts |
 
 ---
 

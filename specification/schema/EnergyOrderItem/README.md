@@ -2,9 +2,9 @@
 
 Order item wrapper for P2P energy trading — links provider attributes and optional fulfillment tracking data.
 
-**Canonical IRI:** `https://schema.beckn.io/EnergyOrderItem/v2.0`
+**Canonical IRI:** `https://schema.nfh.global/EnergyOrderItem/v2.0`
 
-**Namespace prefix:** `deg:` → `https://schema.beckn.io/deg/EnergyOrderItem/v2.0/`
+**Namespace prefix:** `deg:` → `https://schema.nfh.global/deg/EnergyOrderItem/v2.0/`
 
 **Tags:** `energy-trade` · `p2p-trading` · `order-item`
 

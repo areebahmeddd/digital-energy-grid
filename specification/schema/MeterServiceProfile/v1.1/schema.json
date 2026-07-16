@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.beckn.io/MeterServiceProfile/v1.1",
+  "$id": "https://schema.nfh.global/MeterServiceProfile/v1.1",
   "title": "MeterServiceProfile",
   "description": "Tariff, regulatory load, and connection profile for a single meter connection point. v1.1: power/demand fields use QuantitativeValue {value, unit} with short unit aliases (W, kW, MW) mapped to QUDT IRIs. Links to a METER resource via meterId. CIM: UsagePoint (IEC 61968-9). Formerly called ConsumptionProfile in ElectricityCredential — that alias is preserved for backward compatibility. Optional admin field serviceStatus carries the connection lifecycle state (CIM UsagePoint.status).",
   "$defs": {

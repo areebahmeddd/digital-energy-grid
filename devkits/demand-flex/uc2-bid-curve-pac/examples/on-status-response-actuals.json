@@ -11,14 +11,14 @@
     "messageId": "d7e8f9a0-b1c2-3456-abcd-ef2345678902",
     "timestamp": "2026-06-15T16:00:00Z",
     "schemaContext": [
-      "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
-      "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
-      "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
-      "https://schema.beckn.io/BecknReportDescriptors/v1.0/context.jsonld",
-      "https://schema.beckn.io/Quantity/context.jsonld",
-      "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
+      "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
+      "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
+      "https://schema.nfh.global/BecknReportDescriptors/v1.0/context.jsonld",
+      "https://schema.nfh.global/Quantity/context.jsonld",
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
     ]
   },
   "message": {
@@ -34,12 +34,22 @@
               "id": "flex-need-north-delhi-jun15",
               "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
               "resourceAttributes": {
-                "@context": "https://schema.beckn.io/DemandFlexNeed/v2.0/context.jsonld",
+                "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
-                "direction": "REDUCE",
-                "eventWindow": {"startDate": "2026-06-15T13:30:00Z", "endDate": "2026-06-15T15:30:00Z"},
-                "capacityType": "CURTAILMENT",
-                "maxCapacityKw": 200
+                "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
+                "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
+                "payloadDescriptors": [
+                  {
+                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                    "payloadType": "CAPACITY_REQUESTED",
+                    "units": "KW",
+                    "insertedBy": "buyer"
+                  }
+                ],
+                "intervals": [
+                  {"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]},
+                  {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]}
+                ]
               }
             }
           ],
@@ -47,38 +57,88 @@
             "id": "offer-pac-001",
             "resourceIds": ["flex-need-north-delhi-jun15"],
             "offerAttributes": {
-              "@context": "https://schema.beckn.io/DemandFlexBuyOffer/v2.0/context.jsonld",
+              "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
+                  "inputs": {
+                    "clearingMethod": "PAY-AS-CLEAR",
+                    "clearingTime": "2026-06-15T12:00:00Z",
+                    "currency": "INR",
+                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
+                    "penaltyRate": 0.5
+                  }
                 },
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
                     "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002"],
-                    "reportDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"}]
+                    "reportDescriptors": [
+                      {
+                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                        "payloadType": "USAGE",
+                        "readingType": "DIRECT_READ",
+                        "units": "KW",
+                        "cardinality": "PER_INTERVAL"
+                      }
+                    ]
                   }
                 }
               ]
             }
           },
           "commitmentAttributes": {
-            "@context": "https://schema.beckn.io/BecknTimeSeries/v1.0/context.jsonld",
+            "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
             "payloadDescriptors": [
-              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "BID_PRICE", "units": "INR_PER_KWH", "insertedBy": "seller"},
-              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "BID_POWER", "units": "KW", "insertedBy": "seller"},
-              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CLEARED_POWER", "units": "KW", "insertedBy": "buyer"},
-              {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CLEARING_PRICE", "units": "INR_PER_KWH", "insertedBy": "buyer"}
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "OFFER_PRICE",
+                "units": "INR_PER_KWH",
+                "insertedBy": "seller"
+              },
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_OFFERED",
+                "units": "KW",
+                "insertedBy": "seller"
+              },
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CAPACITY_CLEARED",
+                "units": "KW",
+                "insertedBy": "buyer"
+              },
+              {
+                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
+                "payloadType": "CLEARING_PRICE",
+                "units": "INR_PER_KWH",
+                "insertedBy": "buyer"
+              }
             ],
             "intervals": [
-              {"id": 0, "payloads": [{"type": "BID_PRICE", "values": [1.5, 2.5, 3.5, 5.0]}, {"type": "BID_POWER", "values": [90, 70, 50, 30]}, {"type": "CLEARED_POWER", "values": [50]}, {"type": "CLEARING_PRICE", "values": [3.5]}]},
-              {"id": 1, "payloads": [{"type": "BID_PRICE", "values": [1.5, 2.5, 3.5, 5.0]}, {"type": "BID_POWER", "values": [80, 60, 45, 25]}, {"type": "CLEARED_POWER", "values": [45]}, {"type": "CLEARING_PRICE", "values": [3.5]}]}
+              {
+                "id": 0,
+                "payloads": [
+                  {"type": "OFFER_PRICE", "values": [1.5, 2.5, 3.5, 5.0]},
+                  {"type": "CAPACITY_OFFERED", "values": [90, 70, 50, 30]},
+                  {"type": "CAPACITY_CLEARED", "values": [50]},
+                  {"type": "CLEARING_PRICE", "values": [3.5]}
+                ]
+              },
+              {
+                "id": 1,
+                "payloads": [
+                  {"type": "OFFER_PRICE", "values": [1.5, 2.5, 3.5, 5.0]},
+                  {"type": "CAPACITY_OFFERED", "values": [80, 60, 45, 25]},
+                  {"type": "CAPACITY_CLEARED", "values": [45]},
+                  {"type": "CLEARING_PRICE", "values": [3.5]}
+                ]
+              }
             ]
           }
         }
@@ -89,7 +149,7 @@
           "status": {"code": "DELIVERY_COMPLETE", "name": "Event completed, actuals measured"},
           "commitmentIds": ["commitment-pac-001"],
           "performanceAttributes": {
-            "@context": "https://schema.beckn.io/DemandFlexPerformance/v2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/DemandFlexPerformance/v2.0/context.jsonld",
             "@type": "DemandFlexPerformance",
             "eventId": "evt-2026-06-15-001",
             "methodology": "5of10",
@@ -100,12 +160,28 @@
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
                   "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "USAGE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [55.0]}, {"type": "USAGE", "values": [30.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [27.5]}]}
+                    {
+                      "id": 0,
+                      "payloads": [{"type": "BASELINE", "values": [55.0]}, {"type": "USAGE", "values": [30.0]}]
+                    },
+                    {
+                      "id": 1,
+                      "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [27.5]}]
+                    }
                   ]
                 }
               },
@@ -115,12 +191,28 @@
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
                   "payloadDescriptors": [
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"},
-                    {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "units": "KW", "readingType": "DIRECT_READ"}
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "BASELINE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    },
+                    {
+                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+                      "payloadType": "USAGE",
+                      "units": "KW",
+                      "readingType": "DIRECT_READ"
+                    }
                   ],
                   "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [25.0]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [45.0]}, {"type": "USAGE", "values": [22.5]}]}
+                    {
+                      "id": 0,
+                      "payloads": [{"type": "BASELINE", "values": [50.0]}, {"type": "USAGE", "values": [25.0]}]
+                    },
+                    {
+                      "id": 1,
+                      "payloads": [{"type": "BASELINE", "values": [45.0]}, {"type": "USAGE", "values": [22.5]}]
+                    }
                   ]
                 }
               }
@@ -129,22 +221,33 @@
         }
       ],
       "contractAttributes": {
-        "@context": "https://schema.beckn.io/DEGContract/v2.0/context.jsonld",
+        "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
-        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
+        "roles": [
+          {"role": "buyer", "participantId": "tpddl-north-delhi"},
+          {"role": "seller", "participantId": "greenflex-agg"}
+        ],
+        "policy": {
+          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego",
+          "queryPath": "data.deg.contracts.demand_flex_pac"
+        }
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
       "consideration": [
         {
           "id": "payment-term-pac-001",
           "considerationAttributes": {
-            "@context": "https://schema.beckn.io/SettlementTerm/2.0/context.jsonld",
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
             "amount": {"currency": "INR", "value": 332.5},
             "settlementStatus": "PENDING",
             "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "GreenFlex Aggregator Pvt Ltd", "accountNumber": "4567890123456", "branchCode": "ICIC0002345", "bankName": "ICICI Bank"},
+            "payTo": {
+              "accountHolderName": "GreenFlex Aggregator Pvt Ltd",
+              "accountNumber": "4567890123456",
+              "branchCode": "ICIC0002345",
+              "bankName": "ICICI Bank"
+            },
             "acceptedPaymentMethods": ["BANK_TRANSFER"]
           }
         }
