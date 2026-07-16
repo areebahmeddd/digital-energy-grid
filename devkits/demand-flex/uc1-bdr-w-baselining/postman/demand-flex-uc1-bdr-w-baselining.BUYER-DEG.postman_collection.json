@@ -48,7 +48,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\"intent\": {\"filters\": {\"type\": \"jsonpath\", \"expression\": \"$.catalogs[*].resources[*] ? (@.resourceAttributes.direction == 'REDUCE')\"}}}\n}",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"bapId\": \"{{bap_id}}\",\n    \"bapUri\": \"{{bap_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\n    \"intent\": {\n      \"filters\": {\n        \"type\": \"jsonpath\",\n        \"expression\": \"$.catalogs[*] ? (@.provider.id == 'tpddl-north-delhi' && exists(@.resources) && @.offers[*].validUntil >= '2026-03-30T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start >= '2026-04-01T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start < '2026-04-02T00:00:00Z')\"\n      }\n    }\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
