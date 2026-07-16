@@ -10,7 +10,7 @@
 # Settlement rule, per market interval:
 #
 #   delivered_kwh = Σ_meters clamp0(BASELINE − USAGE) × interval_hours
-#   cleared_kwh   = CLEARED_POWER × interval_hours
+#   cleared_kwh   = CAPACITY_CLEARED × interval_hours
 #   payment       = CLEARING_PRICE × min(delivered_kwh, cleared_kwh)
 #                   (pay-as-clear: over-delivery is unpaid, under-delivery
 #                   pays only what arrived)
@@ -20,8 +20,8 @@
 #
 #   seller net = Σ payments − Σ penalties
 #
-# The seller's bid curve (BID_PRICE/BID_POWER step pairs) is NOT re-run
-# here — the buyer's published CLEARED_POWER/CLEARING_PRICE are trusted
+# The seller's bid curve (OFFER_PRICE/CAPACITY_OFFERED step pairs) is NOT re-run
+# here — the buyer's published CAPACITY_CLEARED/CLEARING_PRICE are trusted
 # for the money math. The curve is only audited: if the clearing price is
 # below the cheapest ask that covers the cleared quantity, a `violations`
 # entry is emitted (flag, not gate).
@@ -30,7 +30,7 @@
 #   - contractAttributes.roles[].role                  → buyer / seller
 #   - commitments[0].offer.offerAttributes.inputs      → penaltyRate, currency (buyer)
 #   - commitments[0].commitmentAttributes              → market BecknTimeSeries:
-#       per interval BID_PRICE[], BID_POWER[], CLEARED_POWER, CLEARING_PRICE
+#       per interval OFFER_PRICE[], CAPACITY_OFFERED[], CAPACITY_CLEARED, CLEARING_PRICE
 #   - performance[*].performanceAttributes.meters[*]   → per-meter BecknTimeSeries
 #       with per-interval BASELINE / USAGE (utility M&V; RESOURCE_TELEMETRY
 #       records are reconciliation-only and excluded, as in demand_flex)
@@ -110,7 +110,7 @@ _payload_values(interval, ptype) := [v |
 	some v in payload.values
 ]
 
-# Single scalar payload (CLEARED_POWER, CLEARING_PRICE carry one value).
+# Single scalar payload (CAPACITY_CLEARED, CLEARING_PRICE carry one value).
 _payload_val(interval, ptype) := _payload_values(interval, ptype)[0]
 
 # Mean of a meter's readings for `ptype` within market interval `iid`.
@@ -140,7 +140,7 @@ _market_interval(iid) := interval if {
 
 _cleared_ids := {interval.id |
 	some interval in _market.intervals
-	_payload_val(interval, "CLEARED_POWER")
+	_payload_val(interval, "CAPACITY_CLEARED")
 	_payload_val(interval, "CLEARING_PRICE")
 }
 
@@ -154,7 +154,7 @@ _interval_settlement[iid] := result if {
 
 	interval := _market_interval(iid)
 	clearing_price := _payload_val(interval, "CLEARING_PRICE")
-	cleared_kwh := _payload_val(interval, "CLEARED_POWER") * interval_hours
+	cleared_kwh := _payload_val(interval, "CAPACITY_CLEARED") * interval_hours
 	delivered_kwh := _delivered_kw(iid) * interval_hours
 	paid_kwh := min([delivered_kwh, cleared_kwh])
 	shortfall_kwh := _clamp_zero(cleared_kwh - delivered_kwh)
@@ -216,16 +216,16 @@ net_zero_ok if _revenue_sum == 0
 # ---------------------------------------------------------------------------
 # Bid-curve audit (flag only — never gates the money math)
 #
-# The cheapest ask covering the cleared quantity is the minimum BID_PRICE
-# whose paired BID_POWER is at least CLEARED_POWER. Pay-as-clear requires
+# The cheapest ask covering the cleared quantity is the minimum OFFER_PRICE
+# whose paired CAPACITY_OFFERED is at least CAPACITY_CLEARED. Pay-as-clear requires
 # clearing price >= that ask.
 # ---------------------------------------------------------------------------
 
 _ask_at_cleared(iid) := ask if {
 	interval := _market_interval(iid)
-	prices := _payload_values(interval, "BID_PRICE")
-	powers := _payload_values(interval, "BID_POWER")
-	cleared_kw := _payload_val(interval, "CLEARED_POWER")
+	prices := _payload_values(interval, "OFFER_PRICE")
+	powers := _payload_values(interval, "CAPACITY_OFFERED")
+	cleared_kw := _payload_val(interval, "CAPACITY_CLEARED")
 	covering := [prices[j] | some j, p in powers; p >= cleared_kw]
 	count(covering) > 0
 	ask := min(covering)
@@ -284,4 +284,28 @@ violations contains msg if {
 violations contains msg if {
 	not net_zero_ok
 	msg := sprintf("net-zero failed: revenue sum = %v (expected 0)", [_revenue_sum])
+}
+
+# ---------------------------------------------------------------------------
+# Column const (uc2 demand_flex_pac profile)
+#
+# DemandFlexNeed (shared, unified schema) leaves columns open; this rego is the
+# hard lock for the pay-as-clear market. Self-skips when a series' descriptors
+# are absent (e.g. a status round-trip carrying only ids).
+# ---------------------------------------------------------------------------
+
+_need := _commitment.resources[0].resourceAttributes
+
+violations contains msg if {
+	descs := _need.payloadDescriptors
+	cols := {d.payloadType | some d in descs}
+	cols != {"CAPACITY_REQUESTED"}
+	msg := sprintf("DemandFlexNeed columns must be exactly {CAPACITY_REQUESTED} for the demand_flex_pac profile, got %v", [cols])
+}
+
+violations contains msg if {
+	descs := _market.payloadDescriptors
+	cols := {d.payloadType | some d in descs}
+	cols != {"OFFER_PRICE", "CAPACITY_OFFERED", "CAPACITY_CLEARED", "CLEARING_PRICE"}
+	msg := sprintf("market columns must be exactly {OFFER_PRICE, CAPACITY_OFFERED, CAPACITY_CLEARED, CLEARING_PRICE}, got %v", [cols])
 }
