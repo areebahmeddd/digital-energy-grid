@@ -99,3 +99,52 @@ test_typo_isolated_to_one_meter if {
 	contains(v, "der://meter/001")
 	contains(v, "BASLN")
 }
+
+# ---------------------------------------------------------------------------
+# 1b) DemandFlexNeed cross-field type-coverage (need is itself a TimeSeries)
+# ---------------------------------------------------------------------------
+
+_valid_need := {
+	"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+	"payloadDescriptors": [
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED"},
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE"},
+		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "SHORTFALL_PENALTY"},
+	],
+	"intervals": [
+		{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+	],
+}
+
+_need_input(ra) := {"message": {"contract": {"commitments": [{"resources": [{"resourceAttributes": ra}]}]}}}
+
+# clean need → no violations
+test_need_type_coverage_ok if {
+	count(violations) == 0 with input as _need_input(_valid_need)
+}
+
+# undeclared payload type in the need → violation naming DemandFlexNeed + the type
+test_need_type_coverage_violation if {
+	bad := json.patch(_valid_need, [{"op": "add", "path": "/intervals/0/payloads/-", "value": {"type": "MYSTERY", "values": [1]}}])
+	vs := violations with input as _need_input(bad)
+	some v in vs
+	contains(v, "DemandFlexNeed")
+	contains(v, "MYSTERY")
+}
+
+# need missing payloadDescriptors → every used type flagged
+test_need_missing_descriptors_violation if {
+	bad := json.patch(_valid_need, [{"op": "remove", "path": "/payloadDescriptors"}])
+	vs := violations with input as _need_input(bad)
+	some v in vs
+	contains(v, "DemandFlexNeed")
+}
+
+# same check applies at catalog publish time
+test_need_type_coverage_catalog if {
+	bad := json.patch(_valid_need, [{"op": "add", "path": "/intervals/0/payloads/-", "value": {"type": "MYSTERY", "values": [1]}}])
+	inp := {"message": {"catalogs": [{"resources": [{"resourceAttributes": bad}]}]}}
+	vs := violations with input as inp
+	some v in vs
+	contains(v, "MYSTERY")
+}
