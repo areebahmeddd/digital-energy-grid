@@ -39,42 +39,13 @@
                 "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
                 "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
                 "payloadDescriptors": [
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "CAPACITY_REQUESTED",
-                    "units": "KW",
-                    "insertedBy": "buyer"
-                  },
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "PRICE",
-                    "units": "INR_PER_KWH",
-                    "insertedBy": "buyer"
-                  },
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "SHORTFALL_PENALTY",
-                    "units": "INR_PER_KWH",
-                    "insertedBy": "buyer"
-                  }
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED", "units": "KW", "insertedBy": "buyer"},
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE", "units": "INR_PER_KWH", "insertedBy": "buyer"},
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "SHORTFALL_PENALTY", "units": "INR_PER_KWH", "insertedBy": "buyer"}
                 ],
                 "intervals": [
-                  {
-                    "id": 0,
-                    "payloads": [
-                      {"type": "CAPACITY_REQUESTED", "values": [150]},
-                      {"type": "PRICE", "values": [3.5]},
-                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
-                    ]
-                  },
-                  {
-                    "id": 1,
-                    "payloads": [
-                      {"type": "CAPACITY_REQUESTED", "values": [200]},
-                      {"type": "PRICE", "values": [4.0]},
-                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
-                    ]
-                  }
+                  {"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+                  {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}, {"type": "PRICE", "values": [4.0]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]}
                 ]
               }
             }
@@ -86,97 +57,41 @@
               "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
               "inputs": [
-                {
-                  "role": "buyer",
-                  "participantId": "tpddl-north-delhi",
-                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
-                },
+                {"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}},
                 {
                   "role": "seller",
                   "participantId": "greenflex-agg",
                   "inputs": {
-                    "participatingMeters": [
-                      "did:web:tpddl.delhi.gov.in:meters:001",
-                      "did:web:tpddl.delhi.gov.in:meters:002",
-                      "did:web:tpddl.delhi.gov.in:meters:003"
-                    ],
+                    "participatingMeters": ["did:web:tpddl.delhi.gov.in:meters:001", "did:web:tpddl.delhi.gov.in:meters:002", "did:web:tpddl.delhi.gov.in:meters:003"],
                     "energyResources": [
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:tatamotors.com:vin:VIN001",
                         "type": "EV_CHARGER",
-                        "attributes": {
-                          "make": "Tata",
-                          "model": "Nexon EV",
-                          "ratedPowerKw": 7.0,
-                          "energyCapacityKwh": 30.0,
-                          "telemetryProvider": "tata-evp-telematics"
-                        },
+                        "attributes": {"make": "Tata", "model": "Nexon EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 30.0, "telemetryProvider": "tata-evp-telematics"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:001"]
                       },
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:mgmotor.co.in:vin:VIN002",
                         "type": "EV_CHARGER",
-                        "attributes": {
-                          "make": "MG",
-                          "model": "ZS EV",
-                          "ratedPowerKw": 7.0,
-                          "energyCapacityKwh": 44.5,
-                          "telemetryProvider": "mg-imotion"
-                        },
+                        "attributes": {"make": "MG", "model": "ZS EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 44.5, "telemetryProvider": "mg-imotion"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:002"]
                       },
                       {
                         "@type": "EnergyResource",
                         "id": "did:web:tatamotors.com:vin:VIN003",
                         "type": "EV_CHARGER",
-                        "attributes": {
-                          "make": "Tata",
-                          "model": "Tigor EV",
-                          "ratedPowerKw": 7.0,
-                          "energyCapacityKwh": 26.0,
-                          "telemetryProvider": "tata-evp-telematics"
-                        },
+                        "attributes": {"make": "Tata", "model": "Tigor EV", "ratedPowerKw": 7.0, "energyCapacityKwh": 26.0, "telemetryProvider": "tata-evp-telematics"},
                         "parentResources": ["did:web:tpddl.delhi.gov.in:meters:003"]
                       }
                     ],
                     "reportDescriptors": [
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "USAGE",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "POWER",
-                        "readingType": "DIRECT_READ",
-                        "units": "KW",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "SOC_END",
-                        "readingType": "DIRECT_READ",
-                        "units": "KWH",
-                        "cardinality": "PER_INTERVAL"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LAT",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      },
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "GPS_LON",
-                        "readingType": "DIRECT_READ",
-                        "units": "DEGREES",
-                        "cardinality": "PER_EVENT"
-                      }
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "POWER", "readingType": "DIRECT_READ", "units": "KW", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "SOC_END", "readingType": "DIRECT_READ", "units": "KWH", "cardinality": "PER_INTERVAL"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LAT", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"},
+                      {"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "GPS_LON", "readingType": "DIRECT_READ", "units": "DEGREES", "cardinality": "PER_EVENT"}
                     ]
                   }
                 }
@@ -187,18 +102,8 @@
             "@context": "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
             "@type": "TimeSeries",
             "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
-            "payloadDescriptors": [
-              {
-                "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                "payloadType": "CAPACITY_OFFERED",
-                "units": "KW",
-                "insertedBy": "seller"
-              }
-            ],
-            "intervals": [
-              {"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
-              {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}
-            ]
+            "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_OFFERED", "units": "KW", "insertedBy": "seller"}],
+            "intervals": [{"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]}, {"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]}]
           }
         }
       ],
@@ -218,18 +123,8 @@
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    }
-                  ],
-                  "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
-                  ]
+                  "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}],
+                  "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}]
                 }
               },
               {
@@ -237,18 +132,8 @@
                 "telemetry": {
                   "@type": "TimeSeries",
                   "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
-                  "payloadDescriptors": [
-                    {
-                      "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                      "payloadType": "BASELINE",
-                      "units": "KW",
-                      "readingType": "DIRECT_READ"
-                    }
-                  ],
-                  "intervals": [
-                    {"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]},
-                    {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}
-                  ]
+                  "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "BASELINE", "units": "KW", "readingType": "DIRECT_READ"}],
+                  "intervals": [{"id": 0, "payloads": [{"type": "BASELINE", "values": [75]}]}, {"id": 1, "payloads": [{"type": "BASELINE", "values": [100]}]}]
                 }
               }
             ]
@@ -258,14 +143,8 @@
       "contractAttributes": {
         "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
-        "roles": [
-          {"role": "buyer", "participantId": "tpddl-north-delhi"},
-          {"role": "seller", "participantId": "greenflex-agg"}
-        ],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
-          "queryPath": "data.deg.contracts.demand_flex"
-        }
+        "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
     }

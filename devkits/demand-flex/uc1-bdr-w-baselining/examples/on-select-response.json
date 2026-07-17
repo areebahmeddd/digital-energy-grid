@@ -35,42 +35,13 @@
                 "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
                 "intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
                 "payloadDescriptors": [
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "CAPACITY_REQUESTED",
-                    "units": "KW",
-                    "insertedBy": "buyer"
-                  },
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "PRICE",
-                    "units": "INR_PER_KWH",
-                    "insertedBy": "buyer"
-                  },
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "SHORTFALL_PENALTY",
-                    "units": "INR_PER_KWH",
-                    "insertedBy": "buyer"
-                  }
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED", "units": "KW", "insertedBy": "buyer"},
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE", "units": "INR_PER_KWH", "insertedBy": "buyer"},
+                  {"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "SHORTFALL_PENALTY", "units": "INR_PER_KWH", "insertedBy": "buyer"}
                 ],
                 "intervals": [
-                  {
-                    "id": 0,
-                    "payloads": [
-                      {"type": "CAPACITY_REQUESTED", "values": [150]},
-                      {"type": "PRICE", "values": [3.5]},
-                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
-                    ]
-                  },
-                  {
-                    "id": 1,
-                    "payloads": [
-                      {"type": "CAPACITY_REQUESTED", "values": [200]},
-                      {"type": "PRICE", "values": [4.0]},
-                      {"type": "SHORTFALL_PENALTY", "values": [1.5]}
-                    ]
-                  }
+                  {"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+                  {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}, {"type": "PRICE", "values": [4.0]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]}
                 ]
               }
             }
@@ -81,14 +52,7 @@
             "offerAttributes": {
               "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
-              "inputs": [
-                {
-                  "role": "buyer",
-                  "participantId": "tpddl-north-delhi",
-                  "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}
-                },
-                {"role": "seller", "participantId": null}
-              ]
+              "inputs": [{"role": "buyer", "participantId": "tpddl-north-delhi", "inputs": {"currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}}}, {"role": "seller", "participantId": null}]
             }
           }
         }
@@ -97,10 +61,7 @@
         "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego",
-          "queryPath": "data.deg.contracts.demand_flex"
-        }
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}]
     }
