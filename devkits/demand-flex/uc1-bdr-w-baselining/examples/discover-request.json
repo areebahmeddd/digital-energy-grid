@@ -11,7 +11,10 @@
   },
   "message": {
     "intent": {
-      "filters": {"type": "jsonpath", "expression": "$.catalogs[*] ? (@.provider.id == 'tpddl-north-delhi' && exists(@.resources) && @.offers[*].validUntil >= '2026-03-30T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start >= '2026-04-01T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start < '2026-04-02T00:00:00Z')"}
+      "filters": {
+        "type": "jsonpath",
+        "expression": "$.catalogs[*] ? (@.provider.id == 'tpddl-north-delhi' && exists(@.resources) && @.offers[*].validUntil >= '2026-03-30T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start >= '2026-04-01T00:00:00Z' && @.resources[*].resourceAttributes.intervalPeriod.start < '2026-04-02T00:00:00Z')"
+      }
     }
   }
 }

@@ -26,28 +26,15 @@
           "resources": [
             {
               "id": "flex-need-north-delhi-jun15",
-              "descriptor": {
-                "name": "Evening Peak Demand Flex - North Delhi",
-                "shortDesc": "200 kW curtailment needed Jun 15, 7-9pm IST"
-              },
+              "descriptor": {"name": "Evening Peak Demand Flex - North Delhi", "shortDesc": "200 kW curtailment needed Jun 15, 7-9pm IST"},
               "quantity": {"unitCode": "kW", "unitQuantity": 90, "@type": "Quantity"},
               "resourceAttributes": {
                 "@context": "https://schema.nfh.global/DemandFlexNeed/v2.0/context.jsonld",
                 "@type": "DemandFlexNeed",
                 "location": {"geo": {"type": "Point", "coordinates": [77.209, 28.6139]}},
                 "intervalPeriod": {"start": "2026-06-15T13:30:00Z", "duration": "PT1H"},
-                "payloadDescriptors": [
-                  {
-                    "objectType": "EVENT_PAYLOAD_DESCRIPTOR",
-                    "payloadType": "CAPACITY_REQUESTED",
-                    "units": "KW",
-                    "insertedBy": "buyer"
-                  }
-                ],
-                "intervals": [
-                  {"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]},
-                  {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]}
-                ]
+                "payloadDescriptors": [{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "CAPACITY_REQUESTED", "units": "KW", "insertedBy": "buyer"}],
+                "intervals": [{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]}, {"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}]}]
               }
             }
           ],
@@ -61,13 +48,7 @@
                 {
                   "role": "buyer",
                   "participantId": "tpddl-north-delhi",
-                  "inputs": {
-                    "clearingMethod": "PAY-AS-CLEAR",
-                    "clearingTime": "2026-06-15T12:00:00Z",
-                    "currency": "INR",
-                    "baselineMethodology": {"bestOf": 5, "outOf": 10},
-                    "penaltyRate": 0.5
-                  }
+                  "inputs": {"clearingMethod": "PAY-AS-CLEAR", "clearingTime": "2026-06-15T12:00:00Z", "currency": "INR", "baselineMethodology": {"bestOf": 5, "outOf": 10}, "penaltyRate": 0.5}
                 },
                 {"role": "seller", "participantId": null}
               ]
@@ -79,10 +60,7 @@
         "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
         "@type": "DEGContract",
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}],
-        "policy": {
-          "url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego",
-          "queryPath": "data.deg.contracts.demand_flex_pac"
-        }
+        "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
       },
       "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}]
     }
