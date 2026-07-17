@@ -10,10 +10,7 @@
     "transactionId": "bdledger-status-001",
     "messageId": "bdledger-status-msg-001",
     "timestamp": "2026-04-26T05:35:00Z",
-    "schemaContext": [
-      "https://schema.nfh.global/DatasetItem/1.1/context.jsonld",
-      "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld"
-    ]
+    "schemaContext": ["https://schema.nfh.global/DatasetItem/1.1/context.jsonld", "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld"]
   },
   "message": {
     "contract": {
@@ -41,13 +38,7 @@
                     "resourceName": "TEST_METER_BUYER_001",
                     "clientName": "TEST_DISCOM_BUYER",
                     "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
-                    "payloadDescriptors": [
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "ENERGY_CONSUMPTION",
-                        "units": "KWH"
-                      }
-                    ],
+                    "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ENERGY_CONSUMPTION", "units": "KWH"}],
                     "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": []}]}]
                   },
                   {
@@ -56,13 +47,7 @@
                     "resourceName": "TEST_METER_BUYER_002",
                     "clientName": "TEST_DISCOM_BUYER",
                     "intervalPeriod": {"start": "2026-04-26T04:30:00Z", "duration": "PT1H"},
-                    "payloadDescriptors": [
-                      {
-                        "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
-                        "payloadType": "ENERGY_CONSUMPTION",
-                        "units": "KWH"
-                      }
-                    ],
+                    "payloadDescriptors": [{"objectType": "REPORT_PAYLOAD_DESCRIPTOR", "payloadType": "ENERGY_CONSUMPTION", "units": "KWH"}],
                     "intervals": [{"id": 0, "payloads": [{"type": "ENERGY_CONSUMPTION", "values": []}]}]
                   }
                 ]

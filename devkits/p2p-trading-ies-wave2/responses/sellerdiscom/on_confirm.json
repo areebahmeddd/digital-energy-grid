@@ -11,7 +11,5 @@
     "messageId": "84757a33-45ec-47d6-8564-b02873f4d809",
     "timestamp": "2026-04-25T10:10:10Z"
   },
-  "message": {
-    "ack": { "status": "ACK" }
-  }
+  "message": {"ack": {"status": "ACK"}}
 }
