@@ -3,12 +3,16 @@
 # Network-level gate evaluated by the BPP's `checkPolicy` step.
 # Fires NACK when `violations` is non-empty.
 #
-# The `violations` rule combines two checks:
+# The `violations` rule combines these checks:
 #
 #   1. BecknTimeSeries cross-field type-coverage. Every `payloadType`
 #      used in `intervals[*].payloads[*].type` MUST be declared in
 #      `payloadDescriptors[*].payloadType`. Catches typos like
-#      "BASELIN" or undocumented signals on the wire.
+#      "BASELIN" or undocumented signals on the wire. Applied to both
+#      per-meter telemetry (1) and the DemandFlexNeed series in
+#      resourceAttributes (1b) — the need is itself a BecknTimeSeries but
+#      beckn-onix's extended validator resolves only one @type per object,
+#      so the TimeSeries structural check is enforced here.
 #
 #   2. PER_EVENT / PER_INTERVAL cardinality against the seller's
 #      committed `reportDescriptors[]` (from
@@ -82,6 +86,38 @@ violations contains msg if {
 	some payload in interval.payloads
 	not payload.type in declared_types
 	msg := sprintf("meter %s: payload type '%s' used in intervals but not declared in payloadDescriptors", [meter.meterId, payload.type])
+}
+
+# ----- 1b) DemandFlexNeed cross-field type-coverage -------------------
+# The unified DemandFlexNeed is itself a BecknTimeSeries (carried inline in
+# resourceAttributes). The beckn-onix extended schema validator resolves only a
+# single @type per object, so it cannot also validate the object against the
+# TimeSeries schema — the same structural check (1) is therefore enforced here
+# for the need series. Any resourceAttributes carrying `intervals` is treated as
+# the need TimeSeries; applies to both the bound contract and catalog publish.
+# A need with intervals but no payloadDescriptors flags every used type.
+
+_demand_flex_needs contains ra if {
+	some c in input.message.contract.commitments
+	some r in c.resources
+	ra := r.resourceAttributes
+	ra.intervals
+}
+
+_demand_flex_needs contains ra if {
+	some cat in input.message.catalogs
+	some r in cat.resources
+	ra := r.resourceAttributes
+	ra.intervals
+}
+
+violations contains msg if {
+	some ra in _demand_flex_needs
+	declared_types := {d.payloadType | some d in ra.payloadDescriptors}
+	some interval in ra.intervals
+	some payload in interval.payloads
+	not payload.type in declared_types
+	msg := sprintf("DemandFlexNeed: payload type '%s' used in intervals but not declared in payloadDescriptors", [payload.type])
 }
 
 # ----- 2a) PER_EVENT — exactly one occurrence across intervals --------
