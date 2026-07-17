@@ -73,6 +73,31 @@ modules:
               uuidKeys: transaction_id,message_id
               role: bap
         steps:
+          # Settlement injection when this app forwards a fully-settled
+          # on_status onward. The settled callback (carrying FINAL_ALLOC) is
+          # emitted by the discom ledger and reaches the app here at
+          # /bap/receiver; degledgerrecorder then forwards it to the peer
+          # (Rule 2a/2b), so this is the app's "send out on_status" point.
+          # Running before degledgerrecorder means the payload it forwards and
+          # records is already enriched. Injection-only (violationActions
+          # empty): the linked rego only yields revenueFlows once FINAL_ALLOC
+          # is present, so non-settled on_status pass through untouched and a
+          # missing/unfetchable policy logs rather than NACKing the callback.
+          - id: contractpolicyenforcer
+            config:
+              actions: "on_status"
+              violationActions: ""
+              cacheTTL: "172800"
+              debugLogging: "true"
+              # Only India Energy Stack policy records on DeDi are accepted.
+              allowedPolicyUrlPrefixes: "https://api.dedi.global/dedi/lookup/indiaenergystack.in"
+              fetchRetries: "2"
+              outputPath: "message.contract.consideration[id=auto-settlement-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://schema.nfh.global/RevenueFlow/2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
           - id: degledgerrecorder
             config:
               # Rule 2 (sender-aware): on_status forwarded based on context.bppId.
@@ -97,6 +122,7 @@ modules:
         - checkPolicy
         - addRoute
         - validateSchema
+        - contractpolicyenforcer
         - degledgerrecorder
 
   - name: bapTxnCaller
