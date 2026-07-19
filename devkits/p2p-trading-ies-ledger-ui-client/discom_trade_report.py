@@ -51,8 +51,8 @@ PAGE_SIZE = 500
 # ── Valid DISCOMs to track ──
 VALID_DISCOMS = ["PVVNL", "TPDDL", "BRPL"]
 
-# ── Number of top trading platforms to highlight ──
-TOP_PLATFORMS_N = 6
+# ── Number of top buyer/seller platforms to highlight ──
+TOP_PLATFORMS_N = 3
 
 # ── IST timezone (UTC+05:30) ──
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -285,8 +285,9 @@ def build_report(all_trades, now_ist):
     stats = {d: {"total": 0, "allocated": 0, "unallocated": 0,
                  "unalloc_days": defaultdict(int)} for d in VALID_DISCOMS}
 
-    # Trading-platform activity over the historical window (trades + energy)
-    platform_stats = defaultdict(lambda: {"trades": 0, "energy": 0.0})
+    # Buyer/seller platform activity over the historical window (trades + energy)
+    buyer_platform_stats = defaultdict(lambda: {"trades": 0, "energy": 0.0})
+    seller_platform_stats = defaultdict(lambda: {"trades": 0, "energy": 0.0})
 
     # Near-term delivery trend (unique trades involving a valid DISCOM)
     yesterday_key = (today_midnight - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -312,15 +313,18 @@ def build_report(all_trades, now_ist):
         if not (window_start_key <= sort_key < window_end_key):
             continue
 
-        # Trading-platform activity: count each trade once per platform it
-        # involves (buyer app and/or seller app), for trades touching a
-        # tracked DISCOM. A set dedupes when both sides use the same platform.
+        # Buyer/seller platform activity, for trades touching a tracked DISCOM.
+        # Each trade counts once for its buyer app and once for its seller app.
         if buyer_discom in stats or seller_discom in stats:
             energy = _get_energy(trade)
-            for platform in {trade.get("platformIdBuyer"), trade.get("platformIdSeller")}:
-                if platform:
-                    platform_stats[platform]["trades"] += 1
-                    platform_stats[platform]["energy"] += energy
+            buyer_app = trade.get("platformIdBuyer")
+            seller_app = trade.get("platformIdSeller")
+            if buyer_app:
+                buyer_platform_stats[buyer_app]["trades"] += 1
+                buyer_platform_stats[buyer_app]["energy"] += energy
+            if seller_app:
+                seller_platform_stats[seller_app]["trades"] += 1
+                seller_platform_stats[seller_app]["energy"] += energy
 
         # Buyer side
         if buyer_discom in stats:
@@ -378,17 +382,22 @@ def build_report(all_trades, now_ist):
                          in sorted(s["unalloc_days"].items())]
             lines.append(f"{d} — " + ", ".join(day_parts))
 
-    # Top trading platforms by trade count over the delivery window
-    if platform_stats:
+    # Top buyer/seller platforms by trade count over the delivery window
+    def _append_top_platforms(label, platform_stats):
+        if not platform_stats:
+            return
         top = sorted(
             platform_stats.items(),
             key=lambda kv: (kv[1]["trades"], kv[1]["energy"]),
             reverse=True,
         )[:TOP_PLATFORMS_N]
         lines.append("")
-        lines.append(f"*Top {len(top)} trading platforms ({window_str}):*")
+        lines.append(f"*Top {len(top)} {label} ({window_str}):*")
         for i, (platform, ps) in enumerate(top, 1):
             lines.append(f"{i}. {platform} — {ps['trades']} trades, {ps['energy']:.1f} KWH")
+
+    _append_top_platforms("seller platforms", seller_platform_stats)
+    _append_top_platforms("buyer platforms", buyer_platform_stats)
 
     report = "\n".join(lines)
     return report
