@@ -48,7 +48,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"bapId\": \"{{buyerplatform_id}}\",\n    \"bapUri\": \"{{buyerplatform_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\"\n  },\n  \"message\": {\"intent\": {\"filters\": {\"type\": \"jsonpath\", \"expression\": \"$.catalogs[*].offers[*] ? (@.offerAttributes.\\\"@type\\\" == \\\"EnergyTradeOffer\\\")\"}}}\n}",
+              "raw": "{\n  \"context\": {\n    \"networkId\": \"{{domain}}\",\n    \"version\": \"{{version}}\",\n    \"action\": \"discover\",\n    \"bapId\": \"{{buyerplatform_id}}\",\n    \"bapUri\": \"{{buyerplatform_host_root}}/bap/receiver\",\n    \"transactionId\": \"{{transaction_id}}\",\n    \"messageId\": \"{{$guid}}\",\n    \"timestamp\": \"{{iso_date}}\",\n    \"schemaContext\": [\n      \"https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld\",\n      \"https://schema.nfh.global/EnergyResource/v2.0/context.jsonld\",\n      \"https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld\",\n      \"https://schema.nfh.global/DEGContract/v2.0/context.jsonld\",\n      \"https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld\"\n    ]\n  },\n  \"message\": {\"intent\": {\"filters\": {\"type\": \"jsonpath\", \"expression\": \"$.catalogs[*].offers[*] ? (@.offerAttributes.\\\"@type\\\" == \\\"EnergyTradeOffer\\\")\"}}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
