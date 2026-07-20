@@ -7,7 +7,8 @@
     "bapUri": "http://buyerapp.example.com:9000/bap/receiver",
     "transactionId": "1268c204-675b-4adb-9321-b08231b147b2",
     "messageId": "258ed231-2def-4840-86ed-2970320c2294",
-    "timestamp": "2026-04-25T09:00:00Z"
+    "timestamp": "2026-04-25T09:00:00Z",
+    "schemaContext": ["https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld", "https://schema.nfh.global/EnergyResource/v2.0/context.jsonld", "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "https://schema.nfh.global/DEGContract/v2.0/context.jsonld", "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld"]
   },
   "message": {"intent": {"filters": {"type": "jsonpath", "expression": "$.catalogs[*].offers[*] ? (@.offerAttributes.\"@type\" == \"EnergyTradeOffer\")"}}}
 }
