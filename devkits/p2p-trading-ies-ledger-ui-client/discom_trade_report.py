@@ -51,6 +51,9 @@ PAGE_SIZE = 500
 # ── Valid DISCOMs to track ──
 VALID_DISCOMS = ["PVVNL", "TPDDL", "BRPL"]
 
+# ── Number of top buyer/seller platforms to highlight ──
+TOP_PLATFORMS_N = 3
+
 # ── IST timezone (UTC+05:30) ──
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -263,9 +266,28 @@ def generate_report(csv_path=None):
     print(f"Fetching trades {window_start.strftime('%d %b')} – {trend_end.strftime('%d %b %Y')} IST ...", file=sys.stderr)
     all_trades = _fetch_all_trades(api_url, private_key, start_utc, end_utc)
 
+    report = build_report(all_trades, now_ist)
+    print(report)
+
+    if csv_path:
+        write_csv(all_trades, csv_path)
+
+    return report
+
+
+def build_report(all_trades, now_ist):
+    """Build the WhatsApp-friendly DISCOM trade report string from fetched trades."""
+    today_midnight = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+    window_start = today_midnight - timedelta(days=30)
+    window_end = today_midnight - timedelta(days=2)  # exclusive
+
     # Per-discom stats: total, allocated, unallocated, unallocated by delivery day
     stats = {d: {"total": 0, "allocated": 0, "unallocated": 0,
                  "unalloc_days": defaultdict(int)} for d in VALID_DISCOMS}
+
+    # Buyer/seller platform activity over the historical window (trades + energy)
+    buyer_platform_stats = defaultdict(lambda: {"trades": 0, "energy": 0.0})
+    seller_platform_stats = defaultdict(lambda: {"trades": 0, "energy": 0.0})
 
     # Near-term delivery trend (unique trades involving a valid DISCOM)
     yesterday_key = (today_midnight - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -290,6 +312,19 @@ def generate_report(csv_path=None):
         # Existing per-DISCOM stats are limited to the historical window
         if not (window_start_key <= sort_key < window_end_key):
             continue
+
+        # Buyer/seller platform activity, for trades touching a tracked DISCOM.
+        # Each trade counts once for its buyer app and once for its seller app.
+        if buyer_discom in stats or seller_discom in stats:
+            energy = _get_energy(trade)
+            buyer_app = trade.get("platformIdBuyer")
+            seller_app = trade.get("platformIdSeller")
+            if buyer_app:
+                buyer_platform_stats[buyer_app]["trades"] += 1
+                buyer_platform_stats[buyer_app]["energy"] += energy
+            if seller_app:
+                seller_platform_stats[seller_app]["trades"] += 1
+                seller_platform_stats[seller_app]["energy"] += energy
 
         # Buyer side
         if buyer_discom in stats:
@@ -347,12 +382,24 @@ def generate_report(csv_path=None):
                          in sorted(s["unalloc_days"].items())]
             lines.append(f"{d} — " + ", ".join(day_parts))
 
+    # Top buyer/seller platforms by trade count over the delivery window
+    def _append_top_platforms(label, platform_stats):
+        if not platform_stats:
+            return
+        top = sorted(
+            platform_stats.items(),
+            key=lambda kv: (kv[1]["trades"], kv[1]["energy"]),
+            reverse=True,
+        )[:TOP_PLATFORMS_N]
+        lines.append("")
+        lines.append(f"*Top {len(top)} {label} ({window_str}):*")
+        for i, (platform, ps) in enumerate(top, 1):
+            lines.append(f"{i}. {platform} — {ps['trades']} trades, {ps['energy']:.1f} KWH")
+
+    _append_top_platforms("seller platforms", seller_platform_stats)
+    _append_top_platforms("buyer platforms", buyer_platform_stats)
+
     report = "\n".join(lines)
-    print(report)
-
-    if csv_path:
-        write_csv(all_trades, csv_path)
-
     return report
 
 
