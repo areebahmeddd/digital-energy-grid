@@ -17,7 +17,8 @@
       "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
       "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
       "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
-      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
+      "https://schema.nfh.global/PaymentAction/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -76,18 +77,6 @@
       ],
       "consideration": [
         {
-          "id": "payment-term-p2p-001",
-          "considerationAttributes": {
-            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
-            "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 450.26},
-            "settlementStatus": "COMPLETE",
-            "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
-            "acceptedPaymentMethods": ["BANK_TRANSFER"]
-          }
-        },
-        {
           "id": "auto-settlement-flows",
           "considerationAttributes": {
             "@context": "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
@@ -102,18 +91,29 @@
       "settlements": [
         {
           "id": "settlement-p2p-001",
-          "considerationId": "payment-term-p2p-001",
+          "considerationId": "auto-settlement-flows",
           "status": "COMPLETE",
           "settlementAttributes": {
             "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST",
-            "energyValue": 437.15,
-            "sellerPlatformFee": 13.11,
-            "buyerPlatformFee": 8.74,
-            "totalPayable": 459.0,
-            "paidAt": "2026-04-26T07:30:00Z",
-            "txnRef": "TXN-P2P-001-SETTLED"
+            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
+            "acceptedPaymentMethods": ["BANK_TRANSFER"],
+            "paymentTrigger": "ON_FULFILLMENT",
+            "settlementStatus": "COMPLETE"
+          }
+        },
+        {
+          "id": "payment-p2p-001",
+          "considerationId": "auto-settlement-flows",
+          "status": "COMPLETE",
+          "settlementAttributes": {
+            "@context": "https://schema.nfh.global/PaymentAction/v2.0/context.jsonld",
+            "@type": "PaymentAction",
+            "amount": {"currency": "INR", "value": 437.15},
+            "paymentMethod": {"method": "BANK_TRANSFER"},
+            "paymentStatus": "SETTLED",
+            "txnRef": "TXN-P2P-001-SETTLED",
+            "paidAt": "2026-04-26T07:30:00Z"
           }
         }
       ]
