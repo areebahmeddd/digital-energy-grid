@@ -132,7 +132,7 @@ import rego.v1
 #                           list may be broader than production: pilot with a
 #                           prospective partner on the test network before
 #                           the regulator approves them for production.
-#   allowed_ledger_urls   — permitted ledgerUrl values for the buyerDiscom
+#   allowed_ledger_urls   — permitted ledgerUri values for the buyerDiscom
 #                           and sellerDiscom participants. Both discoms must
 #                           record against a recognized ledger endpoint —
 #                           the canonical IES P2P energy ledger in
@@ -145,11 +145,11 @@ environments := {
 			"nfh.global/testnet-deg",
 			"indiaenergystack.in/test-ies-p2p-trading-network",
 		},
-		"applicable_seller_discoms": {"TEST_DISCOM_SELLER"},
+		"applicable_seller_discoms": {"PaVVNL"},
 		"enforce_allowlist": true,
 		"allowed_buyer_discoms": {
-			"TEST_DISCOM_SELLER", # intra-discom trades always allowed
-			"TEST_DISCOM_BUYER",
+			"PaVVNL", # intra-discom trades always allowed
+			"BRPL",
 		},
 		"allowed_ledger_urls": {
 			"https://ies-p2p-energy-ledger.beckn.io",
@@ -160,7 +160,7 @@ environments := {
 	},
 	"production": {
 		"network_ids": {"indiaenergystack.in/ies-p2p-trading-network"},
-		"applicable_seller_discoms": {"TPDDL","BRPL","PVVNL"},
+		"applicable_seller_discoms": {"TPDDL", "BRPL", "PVVNL"},
 		"enforce_allowlist": true,
 		"allowed_buyer_discoms": {
 			"TPDDL", # intra-discom trades always allowed
@@ -221,30 +221,42 @@ _currencies contains c if {
 	c := d.currency
 }
 
-# The buyer prosumer's discom: utilityId of the buyerPlatform participant.
-_buyer_discom_id := id if {
-	some p in _contract.participants
-	p.role == "buyerPlatform"
-	id := p.participantAttributes.utilityId
+# participants[] are role-less (keyed by id); the role -> participantId map lives
+# in contractAttributes.roles. Resolve a role to its participant via that join.
+_role_id(role) := pid if {
+	some r in _contract.contractAttributes.roles
+	r.role == role
+	pid := r.participantId
 }
 
-# The seller prosumers' discoms, as a SET so the same rules cover both
-# message shapes (each contributor is shape-gated; the other shape simply
-# contributes nothing):
-#   - trade-shaped messages: the sellerPlatform participant's utilityId;
-#   - catalog publishes: each offer's provider.providerAttributes.utilityId.
+_participant_by_role(role) := p if {
+	some p in _contract.participants
+	p.id == _role_id(role)
+}
+
+# The buyer's discom: the buyerDiscom role id (a UPADHI short code).
+_buyer_discom_id := id if {
+	id := _role_id("buyerDiscom")
+	is_string(id)
+}
+
+# The seller's discom(s), as a SET so the same rules cover both message shapes:
+#   - trade-shaped messages: the sellerDiscom role id;
+#   - catalog publishes: each offer's sellerDiscom role id.
 # Every id found must be in _env.applicable_seller_discoms — this policy
 # must actually be the policy of the discom whose prosumer is selling.
 _seller_discom_ids contains id if {
-	some p in _contract.participants
-	p.role == "sellerPlatform"
-	id := p.participantAttributes.utilityId
+	id := _role_id("sellerDiscom")
+	is_string(id)
 }
 
 _seller_discom_ids contains id if {
 	some c in input.message.catalogs
 	some o in c.offers
-	id := o.provider.providerAttributes.utilityId
+	some r in o.offerAttributes.contractAttributes.roles
+	r.role == "sellerDiscom"
+	id := r.participantId
+	is_string(id)
 }
 
 # Environment resolution: context.networkId selects exactly one entry of the
@@ -317,9 +329,7 @@ _window_breakdown := concat("; ", [s |
 	alloc := _payload_val(i, "FINAL_ALLOC")
 	price := _price_by_id[i.id]
 	value := alloc * price
-	s := sprintf("%v kWh @ %v %s = %v %s [interval %v]", [
-		alloc, price, _currency, value, _currency, i.id,
-	])
+	s := sprintf("%v kWh @ %v %s = %v %s [interval %v]", [alloc, price, _currency, value, _currency, i.id])
 ])
 
 # ---------------------------------------------------------------------------
@@ -467,16 +477,22 @@ violations contains msg if {
 	_env
 	is_object(_contract) # trade-shaped message
 	count(_seller_discom_ids) == 0
-	msg := "cannot determine seller discom: no sellerPlatform participant with participantAttributes.utilityId"
+	msg := "cannot determine seller discom: no sellerDiscom role in contractAttributes.roles"
+}
+
+_offer_has_seller_discom(o) if {
+	some r in o.offerAttributes.contractAttributes.roles
+	r.role == "sellerDiscom"
+	is_string(r.participantId)
 }
 
 violations contains msg if {
 	_env
 	some c in input.message.catalogs # catalog-shaped message
 	some o in c.offers
-	not o.provider.providerAttributes.utilityId
+	not _offer_has_seller_discom(o)
 	msg := sprintf(
-		"catalog offer %q has no provider.providerAttributes.utilityId — cannot verify policy applicability",
+		"catalog offer %q has no sellerDiscom role id — cannot verify policy applicability",
 		[object.get(o, "id", "<no id>")],
 	)
 }
@@ -485,29 +501,29 @@ violations contains msg if {
 # Violations — discom ledger endpoints
 # ---------------------------------------------------------------------------
 # Both discoms record the trade against a ledger; their participants'
-# ledgerUrl must be a recognized endpoint for the environment (the canonical
+# ledgerUri must be a recognized endpoint for the environment (the canonical
 # IES P2P energy ledger in production). Shape-gated on the participant being
 # present — participant completeness is the schema/network policy's job.
 
 _discom_ledger_roles := {"buyerDiscom", "sellerDiscom"}
 
 violations contains msg if {
-	some p in _contract.participants
-	p.role in _discom_ledger_roles
-	url := p.participantAttributes.ledgerUrl
+	some role in _discom_ledger_roles
+	p := _participant_by_role(role)
+	url := p.participantAttributes.ledgerUri
 	not url in _env.allowed_ledger_urls
 	msg := sprintf(
-		"%s ledgerUrl %q is not a permitted ledger endpoint on the %s network (allowed: %v)",
-		[p.role, url, _environment, sort(_env.allowed_ledger_urls)],
+		"%s ledgerUri %q is not a permitted ledger endpoint on the %s network (allowed: %v)",
+		[role, url, _environment, sort(_env.allowed_ledger_urls)],
 	)
 }
 
 violations contains msg if {
 	_env
-	some p in _contract.participants
-	p.role in _discom_ledger_roles
-	not p.participantAttributes.ledgerUrl
-	msg := sprintf("%s participant is missing participantAttributes.ledgerUrl", [p.role])
+	some role in _discom_ledger_roles
+	p := _participant_by_role(role)
+	not p.participantAttributes.ledgerUri
+	msg := sprintf("%s participant is missing participantAttributes.ledgerUri", [role])
 }
 
 # ---------------------------------------------------------------------------
@@ -548,7 +564,7 @@ violations contains msg if {
 	_env.enforce_allowlist
 	is_object(_contract)
 	not _buyer_discom_id
-	msg := "cannot determine buyer discom: no buyerPlatform participant with participantAttributes.utilityId"
+	msg := "cannot determine buyer discom: no buyerDiscom role in contractAttributes.roles"
 }
 
 _required_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDiscom"}
