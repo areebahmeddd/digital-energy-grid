@@ -98,10 +98,10 @@ test_intra_discom_trade_allowed if {
 }
 
 test_blocked_buyer_discom_violation_at_init if {
-	vs := violations with input as _input("init", "TPDDL", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as _input("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	count(vs) == 1
 	some msg in vs
-	contains(msg, "TPDDL")
+	contains(msg, "TEST_OUTSIDE_DISCOM")
 	contains(msg, "not allowed to trade")
 }
 
@@ -109,7 +109,7 @@ test_blocked_buyer_discom_violation_at_init if {
 _envs_test_allowlist_off := json.patch(environments, [{"op": "replace", "path": "/test/enforce_allowlist", "value": false}])
 
 test_allowlist_disabled_lets_outsider_through if {
-	inp := _input("init", "TPDDL", [_iv_pre(0, 12.5, 20)])
+	inp := _input("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	count(violations) == 0 with input as inp with environments as _envs_test_allowlist_off
 }
 
@@ -125,8 +125,8 @@ test_allowlist_disabled_skips_missing_buyer_discom_check if {
 
 test_allowlist_disable_is_per_environment if {
 	# Same switch state, but traffic on the PRODUCTION network: still enforced.
-	# PaVVNL is a test-only partner (not in the prod allowlist).
-	inp := _input_prod("init", "PaVVNL", [_iv_pre(0, 12.5, 20)])
+	# TEST_OUTSIDE_DISCOM is not an approved discom, so it stays blocked on production.
+	inp := _input_prod("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp with environments as _envs_test_allowlist_off
 	count(vs) == 1
 }
@@ -220,10 +220,10 @@ test_publish_clean_catalog_no_violations if {
 }
 
 test_publish_inapplicable_provider_is_violation if {
-	vs := violations with input as _catalog_input("MSEDCL", "INR")
+	vs := violations with input as _catalog_input("TEST_OUTSIDE_DISCOM", "INR")
 	count(vs) == 1
 	some msg in vs
-	contains(msg, "does not apply to seller discom \"MSEDCL\"")
+	contains(msg, "does not apply to seller discom \"TEST_OUTSIDE_DISCOM\"")
 }
 
 test_publish_wrong_currency_is_violation if {
@@ -258,10 +258,10 @@ test_publish_unknown_network_is_violation if {
 # ---------------------------------------------------------------------------
 
 test_policy_not_applicable_to_seller_discom if {
-	inp := _input_on("init", "nfh.global/testnet-deg", "MSEDCL", "BRPL", [_iv_pre(0, 12.5, 20)])
+	inp := _input_on("init", "nfh.global/testnet-deg", "TEST_OUTSIDE_DISCOM", "BRPL", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp
 	some msg in vs
-	contains(msg, "does not apply to seller discom \"MSEDCL\"")
+	contains(msg, "does not apply to seller discom \"TEST_OUTSIDE_DISCOM\"")
 }
 
 test_missing_seller_discom_is_violation if {
@@ -315,18 +315,18 @@ test_prod_network_uses_prod_allowlist if {
 	count(violations) == 0 with input as inp
 }
 
-test_test_only_partner_blocked_on_prod_network if {
-	# PaVVNL is allowed on test but not in the production allowlist.
-	inp := _input_prod("init", "PaVVNL", [_iv_pre(0, 12.5, 20)])
+test_outsider_blocked_on_prod_network if {
+	# TEST_OUTSIDE_DISCOM is not an approved discom (the allowlist is shared test/prod).
+	inp := _input_prod("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp
 	count(vs) == 1
 	some msg in vs
 	contains(msg, "on the production network")
 }
 
-test_prod_partner_not_in_test_allowlist_blocked_on_test_network if {
-	# TPDDL is a production partner, not in the test allowlist {PaVVNL, BRPL}.
-	inp := _input("init", "TPDDL", [_iv_pre(0, 12.5, 20)])
+test_outsider_blocked_on_test_network if {
+	# TEST_OUTSIDE_DISCOM is not an approved discom; the allowlist is the same on test and prod.
+	inp := _input("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	vs := violations with input as inp
 	some msg in vs
 	contains(msg, "on the test network")
