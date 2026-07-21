@@ -20,8 +20,9 @@ Identity attributes for a regulated discom ledger Technical Service Provider (TS
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `subscriberId` | `string` | ✓ | The discom node's beckn subscriber id (routing/signing). |
 | `discomUri` | `URI` | ✓ | Base URL of the discom's own Beckn platform (init/cascade + allocation). |
 | `ledgerId` | `string` | ✓ | Subscriber id of the discom's ledger TSP (a distinct party). |
 | `ledgerUri` | `URI` | ✓ | Base URL of the discom ledger TSP endpoint. |
 
-The party's own id is the participant `id` (not repeated here); the human-readable utility alias (e.g. `PVVNL`) is resolved from `ledgerId` in the ledger, not carried on the wire.
+The participant `id` is the discom's UPADHI short code (e.g. `PVVNL`); the beckn routing identity is the `subscriberId` attribute.

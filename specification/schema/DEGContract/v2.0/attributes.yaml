@@ -53,9 +53,10 @@ components:
                 description: >
                   Concrete participant id once bound, matching a
                   Contract.participants[*].id. Platform roles use the platform
-                  subscriber id; discom roles use the DISCOM's own participant id
-                  (its subscriber id / did:web) — NOT the ledger id. The ledger is
-                  carried as an attribute (ledgerId/ledgerUri) on the discom
+                  subscriber id; discom roles use the DISCOM's UPADHI short code
+                  (e.g. "PVVNL") — NOT the ledger id or a subscriber id. The
+                  discom's beckn subscriberId, platform uri, and ledger
+                  (ledgerId/ledgerUri) are carried as attributes on the discom
                   participant. Null at catalog publish for sides not yet bound.
 
         policy:

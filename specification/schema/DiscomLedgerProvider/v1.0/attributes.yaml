@@ -8,16 +8,20 @@ info:
     the offer's participants[] at catalog publish) for entries whose role is
     buyerDiscom or sellerDiscom.
 
-    The party's own identity is the participant `id` (the discom's subscriber
-    id / did:web) — it is NOT repeated here. These attributes carry the two
-    endpoints a counterpart needs: `discomUri`, the discom's own Beckn platform
-    (target for init/cascade and unallocated-trade allocation), and the discom's
-    ledger, named by `ledgerId` (a distinct TSP participant) and reached at
-    `ledgerUri` (where trade records are written after on_confirm).
+    The party's `id` is the discom's short code as defined in CEA's UPADHI
+    portal list of abbreviations (e.g. "PVVNL", "TPDDL", "BRPL") — a stable,
+    regulator-defined identifier. It is NOT repeated here. These attributes
+    carry the discom's beckn identity and endpoints:
+      - `subscriberId` — the discom node's beckn subscriber id, used for
+        routing and signing (and appearing as bppId/bapId when the discom is
+        the caller/receiver on a cascade leg);
+      - `discomUri` — the discom's own Beckn platform base URL (target for
+        init/cascade and unallocated-trade allocation);
+      - `ledgerId` / `ledgerUri` — the discom's ledger TSP (a distinct party)
+        and the endpoint where trade records are written after on_confirm.
 
-    The human-readable utility alias (e.g. "PVVNL", "TPDDL") is intentionally
-    absent — it is resolved from `ledgerId` in the ledger, keeping the on-wire
-    identity stable and alias-free.
+    UPADHI list of abbreviations:
+    https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
 
     Two discoms MAY share a `ledgerUri`/`ledgerId` if they use the same TSP;
     each platform still calls only its own side's discom (BAP -> buyerDiscom,
@@ -28,7 +32,7 @@ components:
     DiscomLedgerProvider:
       type: object
       additionalProperties: false
-      required: [discomUri, ledgerId, ledgerUri]
+      required: [subscriberId, discomUri, ledgerId, ledgerUri]
       x-tags:
         - p2p-trading
         - discom-ledger
@@ -36,6 +40,17 @@ components:
         "@context": ./context.jsonld
         "@type": DiscomLedgerProvider
       properties:
+
+        subscriberId:
+          type: string
+          description: >
+            The discom node's beckn subscriber id (its routing/signing identity
+            in the network registry). Distinct from the participant `id`, which
+            is the UPADHI short code. Appears as context.bppId / context.bapId
+            when the discom is the caller/receiver on a cascade leg.
+          example: "seller-discom.example.com"
+          x-jsonld:
+            "@id": subscriberId
 
         discomUri:
           type: string
@@ -55,8 +70,7 @@ components:
           description: >
             Subscriber id (or did:web) of the discom's ledger TSP — a party
             distinct from the discom itself. Used to tag and route ledger
-            records, and as the key under which the ledger holds the discom's
-            human-readable alias.
+            records.
           example: "ies-p2p-energy-ledger.beckn.io"
           x-jsonld:
             "@id": ledgerId
