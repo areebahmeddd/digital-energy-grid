@@ -20,5 +20,8 @@ Identity attributes for a regulated discom ledger Technical Service Provider (TS
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `utilityId` | `string` | ✓ | Utility / DISCOM identifier the ledger TSP serves (e.g. `BRPL-DL`). |
+| `discomUri` | `URI` | ✓ | Base URL of the discom's own Beckn platform (init/cascade + allocation). |
+| `ledgerId` | `string` | ✓ | Subscriber id of the discom's ledger TSP (a distinct party). |
 | `ledgerUri` | `URI` | ✓ | Base URL of the discom ledger TSP endpoint. |
+
+The party's own id is the participant `id` (not repeated here); the human-readable utility alias (e.g. `PVVNL`) is resolved from `ledgerId` in the ledger, not carried on the wire.

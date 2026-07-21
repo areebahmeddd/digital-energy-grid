@@ -32,12 +32,13 @@ components:
         roles:
           type: array
           description: >
-            Contract roles. The participantId key is required on every role
-            entry, but its value MAY be null in the catalog/offer (buyer
-            and buyerDiscom unknown until select/init) and is bound to a
-            concrete participant id at select/init. Identity attributes
-            (meter, utility, utilityCustomerId) for each bound role live
-            at Contract.participants[*].participantAttributes.
+            Contract roles — the role -> participantId map. The participantId
+            key is required on every role entry, but its value MAY be null in
+            the catalog/offer (buyer and buyerDiscom unknown until select/init)
+            and is bound to a concrete participant id at select/init. Roles
+            carry NO identity attributes; each party's attributes live at
+            Contract.participants[*] (Beckn-native, role-less), joined on
+            `participants[].id == roles[].participantId`.
           items:
             type: object
             additionalProperties: false
@@ -50,10 +51,12 @@ components:
                   - string
                   - "null"
                 description: >
-                  Concrete participant id once bound (buyerPlatform/sellerPlatform
-                  use the utilityId-meter compound id, e.g. "TPDDL-DL-seller-001";
-                  discom roles use the discom-ledger participant id).
-                  Null at catalog publish for sides not yet bound.
+                  Concrete participant id once bound, matching a
+                  Contract.participants[*].id. Platform roles use the platform
+                  subscriber id; discom roles use the DISCOM's own participant id
+                  (its subscriber id / did:web) — NOT the ledger id. The ledger is
+                  carried as an attribute (ledgerId/ledgerUri) on the discom
+                  participant. Null at catalog publish for sides not yet bound.
 
         policy:
           type: object

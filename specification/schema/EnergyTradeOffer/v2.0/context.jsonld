@@ -12,6 +12,7 @@
     "EnergyTradeOffer": "deg:EnergyTradeOffer",
     "validityWindow": "deg:validityWindow",
     "contractAttributes": "deg:contractAttributes",
+    "participants": "deg:participants",
     "commitmentAttributes": "deg:commitmentAttributes",
     "insertedBy": "deg:insertedBy"
   },
