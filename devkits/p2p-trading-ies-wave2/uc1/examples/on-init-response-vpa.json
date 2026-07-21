@@ -68,17 +68,16 @@
         {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_BUYER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
         {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
-      "consideration": [
+      "settlements": [
         {
-          "id": "payment-term-p2p-001",
-          "considerationAttributes": {
+          "id": "settlement-p2p-001",
+          "status": "DRAFT",
+          "settlementAttributes": {
             "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 481.0},
-            "settlementStatus": "PENDING",
-            "paymentTrigger": "ON_FULFILLMENT",
             "payTo": {"vpa": "sellerplatform@hdfc"},
-            "acceptedPaymentMethods": ["UPI"]
+            "paymentTrigger": "ON_FULFILLMENT",
+            "settlementStatus": "PENDING"
           }
         }
       ]

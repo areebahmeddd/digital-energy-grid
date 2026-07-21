@@ -69,26 +69,18 @@
         {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
       ],
       "id": "contract-p2p-001",
-      "consideration": [
-        {
-          "id": "payment-term-p2p-001",
-          "considerationAttributes": {
-            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
-            "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 481.0},
-            "settlementStatus": "PENDING",
-            "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
-            "acceptedPaymentMethods": ["BANK_TRANSFER"]
-          }
-        }
-      ],
       "settlements": [
         {
           "id": "settlement-p2p-001",
-          "considerationId": "payment-term-p2p-001",
           "status": "COMMITTED",
-          "settlementAttributes": {"@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld", "@type": "SettlementTerm", "settlementFor": "Solar energy P2P trade: 35 kWh on 2026-04-26 10:00-12:00 IST"}
+          "settlementAttributes": {
+            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
+            "@type": "SettlementTerm",
+            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
+            "acceptedPaymentMethods": ["BANK_TRANSFER"],
+            "paymentTrigger": "ON_FULFILLMENT",
+            "settlementStatus": "PENDING"
+          }
         }
       ]
     }

@@ -76,31 +76,29 @@
       ],
       "consideration": [
         {
-          "id": "payment-term-p2p-001",
+          "id": "auto-settlement-flows",
           "considerationAttributes": {
-            "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
-            "@type": "SettlementTerm",
-            "amount": {"currency": "INR", "value": 450.26},
-            "settlementStatus": "PENDING",
-            "paymentTrigger": "ON_FULFILLMENT",
-            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
-            "acceptedPaymentMethods": ["BANK_TRANSFER"]
+            "@context": "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
+            "@type": "RevenueFlow",
+            "revenueFlows": [
+              {"role": "sellerPlatform", "value": 437.15, "currency": "INR", "description": "Energy sale proceeds (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"},
+              {"role": "buyerPlatform", "value": -437.15, "currency": "INR", "description": "Energy purchase cost (18.5 kWh × ₹12.5 + 14.2 kWh × ₹14.5)"}
+            ]
           }
         }
       ],
       "settlements": [
         {
           "id": "settlement-p2p-001",
-          "considerationId": "payment-term-p2p-001",
+          "considerationId": "auto-settlement-flows",
           "status": "COMMITTED",
           "settlementAttributes": {
             "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "settlementFor": "Solar energy P2P trade: 32.7 kWh delivered on 2026-04-26 10:00-12:00 IST",
-            "energyValue": 437.15,
-            "sellerPlatformFee": 13.11,
-            "buyerPlatformFee": 8.74,
-            "totalPayable": 459.0
+            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
+            "acceptedPaymentMethods": ["BANK_TRANSFER"],
+            "paymentTrigger": "ON_FULFILLMENT",
+            "settlementStatus": "PENDING"
           }
         }
       ]
