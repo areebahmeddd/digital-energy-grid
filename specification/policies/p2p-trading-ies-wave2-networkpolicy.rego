@@ -35,10 +35,10 @@
 #      absent; all data lives in Commitment.commitmentAttributes.
 # N15. Beckn semantic alignment: context.bppId and context.bapId must each
 #      match a participant `id` in contract.participants[] — or a discom
-#      participant's `subscriberId` (since a discom's id is its UPADHI short
-#      code, but it appears as its beckn subscriberId on a cascade leg).
-#      Catches cascade legs that rewrite bap/bppUri but leak original trade
-#      identifiers into the ID fields.
+#      participant's `subscriberId` / `ledgerId` (a discom's id is its UPADHI
+#      short code, so its beckn ids — the discom platform id and its ledger
+#      TSP id used on cascade legs — live in its attributes). Catches cascade
+#      legs that rewrite bap/bppUri but leak original identifiers into ID fields.
 # N16. BecknTimeSeries type-coverage: every payloadType used in
 #      commitmentAttributes.intervals[*].payloads[*].type must be declared
 #      in commitmentAttributes.payloadDescriptors. Catches typos like
@@ -340,9 +340,10 @@ _contract_violations contains "offer.offerAttributes must be absent in contract 
 # ---------------------------------------------------------------------------
 
 # The set of ids that may legitimately appear as context.bppId/bapId: every
-# participant `id`, plus each discom participant's `subscriberId` (a discom's
-# `id` is its UPADHI short code, but on a cascade leg it appears as its beckn
-# subscriberId).
+# participant `id`, plus each discom participant's `subscriberId` (its beckn
+# platform id) and `ledgerId` (its ledger TSP's id — the receiver/caller id on
+# the ledger cascade legs the recorder produces). A discom's `id` is its UPADHI
+# short code, so the beckn ids used on the wire live in its attributes.
 _participant_ids contains id if {
 	some p in _contract.participants
 	id := p.id
@@ -350,7 +351,8 @@ _participant_ids contains id if {
 
 _participant_ids contains sid if {
 	some p in _contract.participants
-	sid := object.get(p.participantAttributes, "subscriberId", "")
+	some key in ["subscriberId", "ledgerId"]
+	sid := object.get(p.participantAttributes, key, "")
 	sid != ""
 }
 

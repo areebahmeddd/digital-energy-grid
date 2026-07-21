@@ -254,16 +254,21 @@ func sampleWave2Status(ledgerURI string) string {
 	    "contract": {
 	      "id": "contract-p2p-001",
 	      "status": {"code": "ACTIVE"},
+	      "contractAttributes": {
+	        "@type": "DEGContract",
+	        "roles": [
+	          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+	          {"role": "sellerDiscom", "participantId": "TPDDL"}
+	        ]
+	      },
 	      "participants": [
 	        {
-	          "role": "sellerPlatform",
-	          "participantId": "sellerapp.example.com",
-	          "participantAttributes": {"platformUrl": "http://sellerapp.example.com:9000"}
+	          "id": "sellerapp.example.com",
+	          "participantAttributes": {"@type": "EnergyCustomer", "platformUrl": "http://sellerapp.example.com:9000"}
 	        },
 	        {
-	          "role": "sellerDiscom",
-	          "participantId": "seller-discom-ledger.example.com",
-	          "participantAttributes": {"ledgerUrl": "` + ledgerURI + `"}
+	          "id": "TPDDL",
+	          "participantAttributes": {"@type": "DiscomLedgerProvider", "ledgerId": "seller-discom-ledger.example.com", "ledgerUri": "` + ledgerURI + `"}
 	        }
 	      ]
 	    }
@@ -289,16 +294,21 @@ func sampleWave2OnStatus(targetLedgerURI, originalSenderURI string) string {
 	    "contract": {
 	      "id": "contract-p2p-001",
 	      "status": {"code": "ACTIVE"},
+	      "contractAttributes": {
+	        "@type": "DEGContract",
+	        "roles": [
+	          {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+	          {"role": "sellerDiscom", "participantId": "TPDDL"}
+	        ]
+	      },
 	      "participants": [
 	        {
-	          "role": "sellerPlatform",
-	          "participantId": "sellerapp.example.com",
-	          "participantAttributes": {"platformUrl": "http://sellerapp.example.com:9000"}
+	          "id": "sellerapp.example.com",
+	          "participantAttributes": {"@type": "EnergyCustomer", "platformUrl": "http://sellerapp.example.com:9000"}
 	        },
 	        {
-	          "role": "sellerDiscom",
-	          "participantId": "seller-discom-ledger.example.com",
-	          "participantAttributes": {"ledgerUrl": "` + targetLedgerURI + `"}
+	          "id": "TPDDL",
+	          "participantAttributes": {"@type": "DiscomLedgerProvider", "ledgerId": "seller-discom-ledger.example.com", "ledgerUri": "` + targetLedgerURI + `"}
 	        }
 	      ],
 	      "commitments": [

@@ -247,7 +247,7 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 		}
 		// Sender (BPP-side on this cascade leg) signs as this plugin's configured
 		// subscriber id; the receiver (BAP-side) is the discom ledger TSP whose
-		// subscriber id lives in participants[role=<side>Discom].participantId.
+		// subscriber id is the discom participant's participantAttributes.ledgerId.
 		// Both are written into context.bppId/bapId so the cascade leg is
 		// Beckn-spec-compliant — bap/bppId must identify the current leg's
 		// parties, not the original trade's parties.
@@ -259,7 +259,7 @@ func (r *DEGLedgerRecorder) handleOnConfirmWave2(ctx *model.StepContext) error {
 		case "SELLER":
 			ledgerSide = "sellerDiscom"
 		}
-		ledgerSubscriberID := participantID(findWave2Participant(payload.Message.Contract.Participants, ledgerSide))
+		ledgerSubscriberID := wave2LedgerID(payload.Message.Contract.Participants, payload.Message.Contract.ContractAttributes, ledgerSide)
 		// Build the receiver and caller endpoint URLs once; they're used both
 		// in the body's bapUri/bppUri AND as the wire URL the client POSTs to.
 		// ledgerEndpoint = <host>/bap/receiver, the ledger's inbound BAP path.
@@ -537,22 +537,23 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 
 	// platformUrl comes from participants[<own-role>].participantAttributes.platformUrl.
 	parts := payload.Message.Contract.Participants
+	ca := payload.Message.Contract.ContractAttributes
 	ownPlatformRole := wave2PlatformRole(r.config.Role)
-	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUrl")
+	ownPlatformURI := ParticipantEndpointURI(parts, ca, ownPlatformRole, "platformUrl")
 	if ownPlatformURI == "" {
 		log.Warnf(ctx, "DEGLedgerRecorder: own platformUrl not found in participants[%s]; skipping status forward (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
 	}
-	// Use participantId from the participants array for bapId/bppId so they are
-	// stable Beckn identities regardless of whether the routing URIs use ngrok
-	// tunnels, internal Docker hostnames, or production FQDNs.
-	ownParticipantID := participantID(findWave2Participant(parts, ownPlatformRole))
-	discomParticipantID := participantID(findWave2Participant(parts, string(side)))
+	// bapId/bppId are stable Beckn ids: the platform's own id and the receiving
+	// discom's ledgerId (the ledger TSP the cascade targets), regardless of the
+	// routing URIs (ngrok tunnels, internal Docker hostnames, production FQDNs).
+	ownParticipantID := participantID(findWave2Participant(parts, ca, ownPlatformRole))
+	discomLedgerSubID := wave2LedgerID(parts, ca, string(side))
 	subTx := SubTxContext{
 		BapURI: BapReceiverEndpoint(ownPlatformURI),
 		BppURI: ledgerEndpoint,
 		BapID:  ownParticipantID,
-		BppID:  discomParticipantID,
+		BppID:  discomLedgerSubID,
 	}
 	rewritten, err := RewriteContextForSubTx(ctx.Body, subTx)
 	if err != nil {
@@ -569,7 +570,7 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 	// must kick off the sub-transaction to the PEER's discom as well. In a normal
 	// 2-platform setup peerPlatformURI != ownPlatformURI and none of this runs.
 	peerRole := wave2PeerPlatformRole(r.config.Role)
-	if ParticipantEndpointURI(parts, peerRole, "platformUrl") != ownPlatformURI {
+	if ParticipantEndpointURI(parts, ca, peerRole, "platformUrl") != ownPlatformURI {
 		return nil // 2-platform topology — peer will handle its own discom
 	}
 
@@ -579,9 +580,9 @@ func (r *DEGLedgerRecorder) handleStatus(ctx *model.StepContext) error {
 		peerDiscomRole, peerDiscomSide = "sellerDiscom", SideSeller
 	}
 
-	peerDiscomID := participantID(findWave2Participant(parts, peerDiscomRole))
-	if peerDiscomID == discomParticipantID {
-		return nil // both roles share one discom — already sent above
+	peerDiscomID := wave2LedgerID(parts, ca, peerDiscomRole)
+	if peerDiscomID == discomLedgerSubID {
+		return nil // both roles share one discom ledger — already sent above
 	}
 
 	peerLedgerHost := ExtractWave2StatusDiscomLedgerURL(payload, peerDiscomSide)
@@ -655,15 +656,16 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		return nil
 	}
 
-	ownDiscomPid := participantIDForRole(payload, ownDiscomRole)
+	parts := payload.Message.Contract.Participants
+	ca := payload.Message.Contract.ContractAttributes
+	ownDiscomPid := discomLedgerIDForRole(payload, ownDiscomRole)
 	fromOwnDiscom := ownDiscomPid != "" && payload.Context.BppID == ownDiscomPid
 
 	// Look up this handler's trading-platform URI; rewriting the context for
 	// the next leg needs it for both Rule 2a (BPP-side of leg 4) and Rule 2b
 	// (BPP-side of leg 5). The platform plays BPP-caller on both forwards.
-	parts := payload.Message.Contract.Participants
 	ownPlatformRole := wave2PlatformRole(r.config.Role)
-	ownPlatformURI := ParticipantEndpointURI(parts, ownPlatformRole, "platformUrl")
+	ownPlatformURI := ParticipantEndpointURI(parts, ca, ownPlatformRole, "platformUrl")
 	if ownPlatformURI == "" {
 		log.Warnf(ctx, "DEGLedgerRecorder: own platformUrl not found in participants[%s] (transaction_id=%s)", ownPlatformRole, payload.Context.TransactionID)
 		return nil
@@ -673,13 +675,13 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	var baseURL string
 	var subTx SubTxContext
 	var branch string
-	ownParticipantID := participantID(findWave2Participant(parts, ownPlatformRole))
+	ownParticipantID := participantID(findWave2Participant(parts, ca, ownPlatformRole))
 
 	if fromOwnDiscom {
 		// Rule 2a: our discom just computed its allocation — pass the on_status to
 		// the peer so the peer can in turn cascade to its own discom (Rule 2b).
 		peerRole := wave2PeerPlatformRole(r.config.Role)
-		peerPlatformURI := ParticipantEndpointURI(parts, peerRole, "platformUrl")
+		peerPlatformURI := ParticipantEndpointURI(parts, ca, peerRole, "platformUrl")
 		if peerPlatformURI == "" {
 			log.Warnf(ctx, "DEGLedgerRecorder: peer platformUrl not found in participants[%s] (transaction_id=%s)", peerRole, payload.Context.TransactionID)
 			return nil
@@ -694,7 +696,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 				peerDiscomRole, peerDiscomSide = "sellerDiscom", SideSeller
 			}
 
-			peerDiscomID := participantIDForRole(payload, peerDiscomRole)
+			peerDiscomID := discomLedgerIDForRole(payload, peerDiscomRole)
 			if peerDiscomID == ownDiscomPid {
 				// Both roles share one discom — already notified via handleStatus; done.
 				log.Debugf(ctx, "DEGLedgerRecorder: prosumer: single discom for both roles, already notified (transaction_id=%s)", payload.Context.TransactionID)
@@ -715,7 +717,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 			subTx = SubTxContext{
 				BapURI: peerDiscomEndpoint,
 				BppURI: ownBppEndpoint,
-				BapID:  participantID(findWave2Participant(parts, peerDiscomRole)),
+				BapID:  wave2LedgerID(parts, ca, peerDiscomRole),
 				BppID:  ownParticipantID,
 			}
 		} else {
@@ -726,7 +728,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 			subTx = SubTxContext{
 				BapURI: peerBapEndpoint,
 				BppURI: ownBppEndpoint,
-				BapID:  participantID(findWave2Participant(parts, peerRole)),
+				BapID:  participantID(findWave2Participant(parts, ca, peerRole)),
 				BppID:  ownParticipantID,
 			}
 		}
@@ -747,7 +749,7 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 		subTx = SubTxContext{
 			BapURI: discomLedgerEndpoint,
 			BppURI: ownBppEndpoint,
-			BapID:  participantID(findWave2Participant(parts, ownDiscomRole)),
+			BapID:  wave2LedgerID(parts, ca, ownDiscomRole),
 			BppID:  ownParticipantID,
 		}
 	}
@@ -769,15 +771,12 @@ func (r *DEGLedgerRecorder) handleOnStatusWave2(ctx *model.StepContext) error {
 	return nil
 }
 
-// participantIDForRole returns the participantId of the contract participant
-// with the given role, or "" if not found.
-func participantIDForRole(payload *Wave2OnStatusPayload, role string) string {
-	for _, p := range payload.Message.Contract.Participants {
-		if p.Role == role {
-			return p.ParticipantID
-		}
-	}
-	return ""
+// discomLedgerIDForRole returns the ledgerId of the given discom role — the id
+// that appears as context.bppId when that discom's ledger emits an on_status —
+// resolved via the role -> id join. "" if absent.
+func discomLedgerIDForRole(payload *Wave2OnStatusPayload, role string) string {
+	c := payload.Message.Contract
+	return wave2LedgerID(c.Participants, c.ContractAttributes, role)
 }
 
 // swapURLPath replaces the path component of a URL while preserving scheme,

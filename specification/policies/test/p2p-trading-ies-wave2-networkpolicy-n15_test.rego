@@ -70,6 +70,15 @@ test_n15_passes_when_bppid_is_discom_shortcode if {
 	not _has_n15_violation(pl)
 }
 
+# A discom's ledgerId is accepted (it appears as bapId/bppId on ledger cascade legs).
+test_n15_passes_when_bapid_is_ledger_id if {
+	pl := {
+		"context": {"version": "2.0.0", "bppId": "sellerapp.example.com", "bapId": "seller-discom-ledger.example.com"},
+		"message": {"contract": _min_contract},
+	}
+	not _has_n15_violation(pl)
+}
+
 # ---------------------------------------------------------------------------
 # Negative cases — should produce an N15 violation.
 # ---------------------------------------------------------------------------
