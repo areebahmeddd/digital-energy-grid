@@ -9,11 +9,12 @@
 # Plugin docs:
 #   https://github.com/beckn/beckn-onix/blob/main/pkg/plugin/implementation/opapolicychecker/README.md
 
-# The ./policies directory inside the container is a docker-compose mount of
-# the repository's specification/policies/ — the single source of truth.
+# The rego is fetched from the repository's main branch over HTTP (type: file
+# resolves both local paths and remote URLs). specification/policies/ remains
+# the single source of truth; no docker-compose mount is required.
 
 networkPolicies:
   default:
     type: file
-    location: ./policies/p2p-trading-ies-wave2-networkpolicy.rego
+    location: https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/p2p-trading-ies-wave2-networkpolicy.rego
     query: data.deg.policy.p2p_trading_network.violations
