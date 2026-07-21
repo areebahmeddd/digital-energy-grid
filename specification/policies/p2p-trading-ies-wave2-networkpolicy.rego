@@ -91,7 +91,7 @@ import rego.v1
 # Config with defaults
 # ---------------------------------------------------------------------------
 
-_allowed_utility_ids := {"PVVNL", "TPDDL", "BRPL"} if {
+_allowed_utility_ids := {"PaVVNL", "TPDDL", "BRPL"} if {
 	not data.config.allowedUtilityIds
 } else := data.config.allowedUtilityIds
 
