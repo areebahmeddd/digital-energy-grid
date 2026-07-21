@@ -28,10 +28,10 @@ info:
       sellerdiscom/bpp/caller         --on_status-->  sellerdiscom-ledger/bap/receiver
       buyerdiscom/bpp/caller          --on_status-->  buyerdiscom-ledger/bap/receiver
 
-    Rule 1: /status at /bpp/receiver → cascade to own discom (sellerDiscom.ledgerUrl).
+    Rule 1: /status at /bpp/receiver → cascade to own discom (sellerDiscom.ledgerUri).
     Rule 2: /on_status at /bap/receiver → check context.bppId:
         if it matches own discom's participantId → forward to peer's /bap/receiver,
-        else → cascade to own discom's ledgerUrl.
+        else → cascade to own discom's ledgerUri.
 
     Run with Redocly respect (from p2p-trading-ies-wave2/):
 
@@ -185,14 +185,14 @@ workflows:
 
   - workflowId: init-blocked-by-policy
     summary: >
-      Negative path: the buyer's discom (TEST_DISCOM_OUTSIDER) is not in the
+      Negative path: the buyer's discom (MSEDCL) is not in the
       seller-discom policy's allowed_buyer_discoms, so the contractpolicyenforcer
       step on seller/bpp/receiver NACKs the init with the policy violation.
     steps:
       - stepId: init-blocked
         description: >
           Same init as select-through-settlement but with the buyerPlatform
-          participant's utilityId set to TEST_DISCOM_OUTSIDER. The seller-side
+          buyerDiscom role id set to MSEDCL (not on the discom allowlist). The seller-side
           contractpolicyenforcer step evaluates the linked seller-discom rego,
           finds a non-empty violations set, and returns a 400 NACK instead of
           an ACK — the trade never forms.

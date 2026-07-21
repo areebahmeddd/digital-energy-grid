@@ -201,6 +201,10 @@ _allowed_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDisc
 
 _contract_violations contains msg if {
 	roles_present := {r.role | some r in _contract.contractAttributes.roles}
+	# Only enforce role completeness once at least one role is declared; discom-
+	# internal messages (e.g. a discom ledger's own on_status) carry no roles and
+	# no participants — role completeness is a trade-scope concern that skips them.
+	count(roles_present) > 0
 	missing := _allowed_roles - roles_present
 	count(missing) > 0
 	msg := sprintf("missing required role(s) in contractAttributes.roles: %v", [missing])

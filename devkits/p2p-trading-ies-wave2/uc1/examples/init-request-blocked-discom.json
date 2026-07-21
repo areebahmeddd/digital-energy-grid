@@ -57,16 +57,16 @@
         "roles": [
           {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
           {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
-          {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com"},
-          {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
+          {"role": "buyerDiscom", "participantId": "MSEDCL"},
+          {"role": "sellerDiscom", "participantId": "PaVVNL"}
         ],
         "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}
       },
       "participants": [
-        {"role": "sellerPlatform", "participantId": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityId": "TEST_DISCOM_SELLER", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
-        {"role": "buyerPlatform", "participantId": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityId": "TEST_DISCOM_OUTSIDER", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
-        {"role": "buyerDiscom", "participantId": "buyer-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_OUTSIDER", "ledgerUrl": "http://buyer-discom-ledger.example.com:9000", "platformUrl": "http://buyer-discom.example.com:9000"}},
-        {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "utilityId": "TEST_DISCOM_SELLER", "ledgerUrl": "http://seller-discom-ledger.example.com:9000", "platformUrl": "http://seller-discom.example.com:9000"}}
+        {"id": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
+        {"id": "buyerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001", "utilityCustomerId": "TEST_CUST_BUYER_001", "platformUrl": "http://buyerapp.example.com:9000"}},
+        {"id": "MSEDCL", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "subscriberId": "buyer-discom.example.com", "discomUri": "http://buyer-discom.example.com:9000", "ledgerId": "buyer-discom-ledger.example.com", "ledgerUri": "http://buyer-discom-ledger.example.com:9000"}},
+        {"id": "PaVVNL", "participantAttributes": {"@context": "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld", "@type": "DiscomLedgerProvider", "subscriberId": "seller-discom.example.com", "discomUri": "http://seller-discom.example.com:9000", "ledgerId": "seller-discom-ledger.example.com", "ledgerUri": "http://seller-discom-ledger.example.com:9000"}}
       ]
     }
   }
