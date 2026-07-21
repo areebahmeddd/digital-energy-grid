@@ -91,6 +91,9 @@ import rego.v1
 # Config with defaults
 # ---------------------------------------------------------------------------
 
+# Approved DISCOM identifiers. These abbreviations are the standard utility
+# short-codes defined in CEA's UPADHI portal list of abbreviations:
+# https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
 _allowed_utility_ids := {"PaVVNL", "TPDDL", "BRPL"} if {
 	not data.config.allowedUtilityIds
 } else := data.config.allowedUtilityIds
