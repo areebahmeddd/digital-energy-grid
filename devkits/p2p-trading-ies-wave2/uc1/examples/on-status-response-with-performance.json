@@ -17,7 +17,8 @@
       "https://schema.nfh.global/RevenueFlow/v2.0/context.jsonld",
       "https://schema.nfh.global/BecknTimeSeries/v1.0/context.jsonld",
       "https://schema.nfh.global/DiscomLedgerProvider/v1.0/context.jsonld",
-      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld"
+      "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
+      "https://schema.nfh.global/PaymentAction/v2.0/context.jsonld"
     ]
   },
   "message": {
@@ -95,10 +96,22 @@
           "settlementAttributes": {
             "@context": "https://schema.nfh.global/SettlementTerm/2.0/context.jsonld",
             "@type": "SettlementTerm",
-            "payTo": {"accountHolderName": "Seller Platform Pvt Ltd", "accountNumber": "0012345678901", "branchCode": "HDFC0001234", "bankName": "HDFC Bank"},
-            "acceptedPaymentMethods": ["BANK_TRANSFER"],
+            "payTo": {"vpa": "sellerplatform@hdfc"},
             "paymentTrigger": "ON_FULFILLMENT",
             "settlementStatus": "PENDING"
+          }
+        },
+        {
+          "id": "payment-p2p-001",
+          "considerationId": "auto-settlement-flows",
+          "status": "COMMITTED",
+          "settlementAttributes": {
+            "@context": "https://schema.nfh.global/PaymentAction/v2.0/context.jsonld",
+            "@type": "PaymentAction",
+            "amount": {"currency": "INR", "value": 437.15},
+            "paymentMethod": {"method": "UPI"},
+            "paymentStatus": "PENDING",
+            "paymentUrl": "upi://pay?pa=sellerplatform@hdfc&pn=Seller%20Platform%20Pvt%20Ltd&am=437.15&cu=INR&tn=P2P-contract-p2p-001"
           }
         }
       ]
