@@ -7,7 +7,9 @@
 #
 # ── common (all actions) ──
 #
-# C1. Version: context.version must be "2.0.0".
+# C1.  Version: context.version must be "2.0.0".
+# NET1. Network membership: context.networkId must be exactly the production
+#       network or one of the recognized test networks — no other names.
 #
 # ── contract validation (when message.contract exists) ──
 #
@@ -40,6 +42,17 @@
 #      commitmentAttributes.intervals[*].payloads[*].type must be declared
 #      in commitmentAttributes.payloadDescriptors. Catches typos like
 #      "REQUESTED_QT" or undocumented signal names on the wire.
+# N17. Policy pin: when contractAttributes.policy is present, its queryPath must
+#      be exactly "data.deg.contracts.p2p_trading" — the network's single
+#      settlement policy entrypoint. Blocks payloads that point the enforcer at
+#      an arbitrary rego rule.
+#
+# ── catalog publish validation (when message.catalogs exists) ──
+#
+# PUB1. Policy pin: each offer's offerAttributes.contractAttributes.policy.queryPath
+#       must be exactly "data.deg.contracts.p2p_trading" (same rule as N17).
+#       (DISCOM/meter identity at publish is covered by the network rules below,
+#       which read the offer provider too.)
 #
 # ── performance validation (fires only on final-settlement on_status, i.e.
 #    when FINAL_ALLOC is present in commitmentAttributes) ──
@@ -51,16 +64,21 @@
 # P4.  Settlement consistency: FINAL_ALLOC ≤ min(BUYER_DISCOM_ALLOC,
 #      SELLER_DISCOM_ALLOC) per interval.
 #
-# ── TEST / PROD separation ──
+# ── network-gated DISCOM / meter identity rules ──
 #
-# T1.  Production network: buyer and seller utilityIds must each be an
-#      approved DISCOM (data.config.allowedUtilityIds or built-in default).
-# T2.  Test consistency: if ANY buyer/seller participant uses a utilityId or
-#      meterId that starts with "TEST_", ALL buyer/seller participants must
-#      use TEST_ prefixed identifiers.
+# Applies to every utilityId (all contract participants + the publish provider)
+# and every meterId in the message.
+#
+# PROD1. Production DISCOM allowlist: on the production network every utilityId
+#        must be an approved DISCOM (data.config.allowedUtilityIds or built-in
+#        default). This also forbids TEST_ discom names in production.
+# PROD2. Production meters: no meterId may start with "TEST_".
+# TEST1. Test meters: on a test network every meterId must start with "TEST_".
+#        DISCOM names are unconstrained by this policy on test networks — the
+#        ledger separates test from production by networkId, and the per-network
+#        contract policy governs which discoms may transact.
 #
 # Config:
-#   data.config.productionNetworkIds  — set of production networkId strings
 #   data.config.allowedUtilityIds     — set of approved DISCOM utilityIds
 #   data.config.minDeliveryLeadHours  — not enforced here (interval-based
 #                                       windows; enforce via catalog policy)
@@ -73,13 +91,29 @@ import rego.v1
 # Config with defaults
 # ---------------------------------------------------------------------------
 
-_production_network_ids := {"beckn.one:deg:p2p-trading-ies:2.0.0"} if {
-	not data.config.productionNetworkIds
-} else := data.config.productionNetworkIds
-
-_allowed_utility_ids := {"TPDDL-DL", "BRPL-DL", "PVVNL-DL", "BYPL-DL", "NDMC-DL"} if {
+# Approved DISCOM identifiers. These abbreviations are the standard utility
+# short-codes defined in CEA's UPADHI portal list of abbreviations:
+# https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
+_allowed_utility_ids := {"PaVVNL", "TPDDL", "BRPL"} if {
 	not data.config.allowedUtilityIds
 } else := data.config.allowedUtilityIds
+
+# The recognized P2P trading networks. context.networkId must be exactly one of
+# these; the ledger separates test from production trades by networkId. Test
+# networks carry TEST_ meter placeholders; the production network carries real
+# meters and only approved DISCOM identities.
+_test_networks := {"indiaenergystack.in/test-ies-p2p-trading-network", "nfh.global/testnet-deg"}
+
+_prod_network := "indiaenergystack.in/ies-p2p-trading-network"
+
+_valid_networks := _test_networks | {_prod_network}
+
+_is_test if input.context.networkId in _test_networks
+
+_is_prod if input.context.networkId == _prod_network
+
+# The one settlement-policy entrypoint the network pins for DEGContract.policy.
+_required_query_path := "data.deg.contracts.p2p_trading"
 
 # ---------------------------------------------------------------------------
 # Timeseries helpers
@@ -113,6 +147,14 @@ _common_violations contains msg if {
 	v := object.get(input.context, "version", "")
 	v != "2.0.0"
 	msg := sprintf("context.version is %q; must be 2.0.0", [v])
+}
+
+# NET1 — Network membership: context.networkId must be exactly the test or the
+# production P2P trading network. No other network names are accepted.
+_common_violations contains msg if {
+	nid := object.get(input.context, "networkId", "")
+	not nid in _valid_networks
+	msg := sprintf("context.networkId %q is not a recognized P2P trading network; must be one of %v", [nid, _valid_networks])
 }
 
 # ---------------------------------------------------------------------------
@@ -200,7 +242,7 @@ _contract_violations contains msg if {
 _contract_violations contains "commitmentAttributes must have @type: TimeSeries" if {
 	ca := _commitment.commitmentAttributes
 	is_object(ca)
-	ca.intervals  # only enforce when timeseries interval data is present
+	ca.intervals # only enforce when timeseries interval data is present
 	ca["@type"] != "TimeSeries"
 }
 
@@ -349,6 +391,22 @@ _contract_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
+# N17 — Policy pin: when contractAttributes.policy is present, its queryPath
+#        must be exactly the network's settlement policy entrypoint.
+# ---------------------------------------------------------------------------
+
+_contract_violations contains msg if {
+	pol := _contract.contractAttributes.policy
+	is_object(pol)
+	qp := object.get(pol, "queryPath", "")
+	qp != _required_query_path
+	msg := sprintf(
+		"contractAttributes.policy.queryPath is %q; must be exactly %q",
+		[qp, _required_query_path],
+	)
+}
+
+# ---------------------------------------------------------------------------
 # Performance validation (fires only when FINAL_ALLOC is present, signalling
 # a final-settlement report; partial single-discom reports are exempt).
 # ---------------------------------------------------------------------------
@@ -402,56 +460,92 @@ _performance_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# TEST / PROD separation
+# Catalog offer + identity collectors
 # ---------------------------------------------------------------------------
 
-_is_production if input.context.networkId in _production_network_ids
+_catalog_offers contains offer if {
+	some cat in input.message.catalogs
+	some offer in cat.offers
+}
 
-# T1 — Production: buyer and seller utilityIds must be approved DISCOMs
-_prod_violations contains msg if {
-	_is_production
+# Every DISCOM name (utilityId) that appears anywhere in the message — contract
+# participants (all roles) at select/init/… and the seller's provider at publish.
+_all_utility_ids contains uid if {
 	some p in _contract.participants
-	p.role in {"buyerPlatform", "sellerPlatform"}
-	uid := p.participantAttributes.utilityId
+	uid := object.get(p.participantAttributes, "utilityId", "")
+	uid != ""
+}
+
+_all_utility_ids contains uid if {
+	some offer in _catalog_offers
+	uid := object.get(object.get(offer.provider, "providerAttributes", {}), "utilityId", "")
+	uid != ""
+}
+
+# Every meterId that appears anywhere in the message.
+_all_meter_ids contains mid if {
+	some p in _contract.participants
+	mid := object.get(p.participantAttributes, "meterId", "")
+	mid != ""
+}
+
+_all_meter_ids contains mid if {
+	some offer in _catalog_offers
+	mid := object.get(object.get(offer.provider, "providerAttributes", {}), "meterId", "")
+	mid != ""
+}
+
+# ---------------------------------------------------------------------------
+# Production-network identity rules (context.networkId == _prod_network)
+# ---------------------------------------------------------------------------
+
+# PROD1 — DISCOM allowlist: every utilityId must be an approved DISCOM. This also
+# forbids TEST_ discom names in production, since no TEST_ value is on the list.
+_prod_violations contains msg if {
+	_is_prod
+	some uid in _all_utility_ids
 	not uid in _allowed_utility_ids
 	msg := sprintf(
-		"participant %q (role: %s): utilityId %q is not an approved DISCOM; must be one of %v",
-		[p.participantId, p.role, uid, _allowed_utility_ids],
+		"production network: utilityId %q is not an approved DISCOM; must be one of %v",
+		[uid, _allowed_utility_ids],
 	)
 }
 
-# T2 — Test consistency: if any buyer/seller uses TEST_ prefix, all must
-_any_is_test if {
-	some p in _contract.participants
-	p.role in {"buyerPlatform", "sellerPlatform"}
-	startswith(p.participantAttributes.utilityId, "TEST_")
+# PROD2 — No TEST_ meters in production.
+_prod_violations contains msg if {
+	_is_prod
+	some mid in _all_meter_ids
+	startswith(mid, "TEST_")
+	msg := sprintf("production network: meterId %q must not use a TEST_ prefix", [mid])
 }
 
-_any_is_test if {
-	some p in _contract.participants
-	p.role in {"buyerPlatform", "sellerPlatform"}
-	startswith(p.participantAttributes.meterId, "TEST_")
-}
+# ---------------------------------------------------------------------------
+# Test-network identity rules (context.networkId == _test_network)
+# ---------------------------------------------------------------------------
 
+# TEST1 — Meters must be TEST_ placeholders on the test network. (DISCOM names may
+# be real — the ledger separates test trades by networkId.)
 _test_violations contains msg if {
-	_any_is_test
-	some p in _contract.participants
-	p.role in {"buyerPlatform", "sellerPlatform"}
-	not startswith(p.participantAttributes.utilityId, "TEST_")
-	msg := sprintf(
-		"test consistency: participant %q (role: %s) utilityId %q must start with TEST_",
-		[p.participantId, p.role, p.participantAttributes.utilityId],
-	)
+	_is_test
+	some mid in _all_meter_ids
+	not startswith(mid, "TEST_")
+	msg := sprintf("test network: meterId %q must start with TEST_", [mid])
 }
 
-_test_violations contains msg if {
-	_any_is_test
-	some p in _contract.participants
-	p.role in {"buyerPlatform", "sellerPlatform"}
-	not startswith(p.participantAttributes.meterId, "TEST_")
+# ---------------------------------------------------------------------------
+# Catalog publish rules (when message.catalogs exists)
+# ---------------------------------------------------------------------------
+
+# PUB1 — Policy pin: offer contractAttributes.policy.queryPath must be exact.
+_publish_violations contains msg if {
+	some offer in _catalog_offers
+	ca := offer.offerAttributes.contractAttributes
+	is_object(ca)
+	qp := object.get(object.get(ca, "policy", {}), "queryPath", "")
+	qp != _required_query_path
 	msg := sprintf(
-		"test consistency: participant %q (role: %s) meterId %q must start with TEST_",
-		[p.participantId, p.role, p.participantAttributes.meterId],
+		"catalog offer %q: contractAttributes.policy.queryPath is %q; must be exactly %q",
+		[object.get(offer, "id", ""), qp, _required_query_path],
 	)
 }
 
@@ -475,11 +569,14 @@ violations contains msg if {
 }
 
 violations contains msg if {
-	input.message.contract
 	some msg in _prod_violations
 }
 
 violations contains msg if {
-	input.message.contract
 	some msg in _test_violations
+}
+
+violations contains msg if {
+	input.message.catalogs
+	some msg in _publish_violations
 }

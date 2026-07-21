@@ -56,7 +56,7 @@ modules:
           id: opapolicychecker
           config:
             networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
+            refreshInterval: "24h"
         cache:
           id: cache
           config:
@@ -164,7 +164,7 @@ modules:
           id: opapolicychecker
           config:
             networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
+            refreshInterval: "24h"
         cache:
           id: cache
           config:
@@ -251,7 +251,7 @@ modules:
           id: opapolicychecker
           config:
             networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
+            refreshInterval: "24h"
         cache:
           id: cache
           config:
@@ -336,7 +336,7 @@ modules:
           id: opapolicychecker
           config:
             networkPolicyConfig: ./config/opa-network-policies.yaml
-            refreshInterval: "5m"
+            refreshInterval: "24h"
         cache:
           id: cache
           config:

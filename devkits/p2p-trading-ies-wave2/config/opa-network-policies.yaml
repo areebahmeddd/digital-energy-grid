@@ -10,7 +10,9 @@
 #   https://github.com/beckn/beckn-onix/blob/main/pkg/plugin/implementation/opapolicychecker/README.md
 
 # The ./policies directory inside the container is a docker-compose mount of
-# the repository's specification/policies/ — the single source of truth.
+# the repository's specification/policies/ — the single source of truth. This
+# lets the rego be edited and re-loaded locally without a redeploy. Switch
+# `location` to the raw main-branch URL once the policy stabilizes.
 
 networkPolicies:
   default:

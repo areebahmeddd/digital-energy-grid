@@ -54,10 +54,12 @@ components:
           additionalProperties: true
           description: >
             JSON-LD container for contract terms attached at catalog publish time.
-            Only roles with a non-null participantId are included (unknown parties
-            are omitted at publish time). MUST carry @context and @type (typically
-            DEGContract). Present in catalog publish; omitted in downstream messages
-            where Contract.contractAttributes carries the full party list.
+            Buyer-side roles (buyerPlatform, buyerDiscom) are declared with
+            participantId: null at publish — the buyer is unknown to the seller
+            until it engages after discover. Seller-side roles carry their known
+            participantIds. MUST carry @context and @type (typically DEGContract).
+            Present in catalog publish; omitted in downstream messages where
+            Contract.contractAttributes carries the full party list.
           required: ["@context", "@type"]
           properties:
             "@context":

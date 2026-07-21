@@ -37,7 +37,6 @@
             "id": "offer-p2p-001",
             "descriptor": {"name": "Morning Solar - 2 hourly slots from 10:00 IST", "shortDesc": "12 INR/kWh (slot 0) and 14 INR/kWh (slot 1)"},
             "resourceIds": ["energy-resource-solar-001"],
-            "validity": {"startDate": "2026-04-25T06:00:00Z", "endDate": "2026-04-26T00:30:00Z"},
             "availableTo": [],
             "offerAttributes": {
               "@context": "https://schema.nfh.global/EnergyTradeOffer/v2.0/context.jsonld",
@@ -47,8 +46,9 @@
                 "@context": "https://schema.nfh.global/DEGContract/v2.0/context.jsonld",
                 "@type": "DEGContract",
                 "roles": [
-                  {"role": "buyerPlatform", "participantId": "buyerapp.example.com"},
+                  {"role": "buyerPlatform", "participantId": null},
                   {"role": "sellerPlatform", "participantId": "sellerapp.example.com"},
+                  {"role": "buyerDiscom", "participantId": null},
                   {"role": "sellerDiscom", "participantId": "seller-discom-ledger.example.com"}
                 ],
                 "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}

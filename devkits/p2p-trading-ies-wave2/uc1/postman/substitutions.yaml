@@ -49,8 +49,11 @@ common:
       message.catalogs[0].bppUri:                {var: sellerplatform_host_root, suffix: /bpp/receiver, required: false}
       message.catalogs[0].provider.id:           {var: sellerplatform_id, required: false}
       message.catalogs[0].offers[0].provider.id: {var: sellerplatform_id, required: false}
-      message.catalogs[0].offers[0].offerAttributes.contractAttributes.roles[role=buyerPlatform].participantId:  {var: buyerplatform_id, required: false}
+      # Buyer-side roles (buyerPlatform, buyerDiscom) stay participantId: null at
+      # publish — the buyer is unknown until it engages after discover. No
+      # substitution for them here; only the known seller-side parties are filled.
       message.catalogs[0].offers[0].offerAttributes.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
+      message.catalogs[0].offers[0].offerAttributes.contractAttributes.roles[role=sellerDiscom].participantId:   {var: seller_discom_ledger_id, required: false}
 
 roles:
   # ── BUYER (BAP) ──────────────────────────────────────────────────────────
