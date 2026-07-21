@@ -15,9 +15,9 @@
 #
 # N1.  Required roles: buyerPlatform, sellerPlatform, buyerDiscom, sellerDiscom
 #      must all be present in contractAttributes.roles; no unknown values allowed.
-# N2.  Participant utilityIds: seller and buyer participants must each have a
-#      non-empty utilityId.
-# N3.  Inter-discom: buyer and seller must have different utilityIds.
+#      (participants[] are role-less, keyed by id; role -> id is read from roles.)
+# N3.  Inter-discom: buyerDiscom and sellerDiscom must be different DISCOMs
+#      (their role ids — UPADHI short codes — must differ).
 # N4.  commitmentAttributes type: when commitmentAttributes is present it must
 #      be @type: TimeSeries.
 # N5.  commitmentAttributes payloadTypes: PRICE_PER_KWH must be declared
@@ -34,10 +34,11 @@
 # N14. No offerAttributes in contract messages: offer.offerAttributes must be
 #      absent; all data lives in Commitment.commitmentAttributes.
 # N15. Beckn semantic alignment: context.bppId and context.bapId must each
-#      match a participantId in contract.participants[]. Enforces that the
-#      current leg's caller/receiver (BPP/BAP) are declared trade-scope
-#      participants — catches cascade legs that rewrite bap/bppUri but leak
-#      original trade identifiers into the ID fields.
+#      match a participant `id` in contract.participants[] — or a discom
+#      participant's `subscriberId` / `ledgerId` (a discom's id is its UPADHI
+#      short code, so its beckn ids — the discom platform id and its ledger
+#      TSP id used on cascade legs — live in its attributes). Catches cascade
+#      legs that rewrite bap/bppUri but leak original identifiers into ID fields.
 # N16. BecknTimeSeries type-coverage: every payloadType used in
 #      commitmentAttributes.intervals[*].payloads[*].type must be declared
 #      in commitmentAttributes.payloadDescriptors. Catches typos like
@@ -66,20 +67,20 @@
 #
 # ── network-gated DISCOM / meter identity rules ──
 #
-# Applies to every utilityId (all contract participants + the publish provider)
-# and every meterId in the message.
+# Applies to every discom id (buyerDiscom/sellerDiscom role ids) and every
+# meterId declared in the message (contract + publish).
 #
-# PROD1. Production DISCOM allowlist: on the production network every utilityId
-#        must be an approved DISCOM (data.config.allowedUtilityIds or built-in
-#        default). This also forbids TEST_ discom names in production.
+# PROD1. Production DISCOM allowlist: on the production network every discom id
+#        must be an approved DISCOM (data.config.allowedDiscomIds or built-in
+#        default UPADHI short codes).
 # PROD2. Production meters: no meterId may start with "TEST_".
 # TEST1. Test meters: on a test network every meterId must start with "TEST_".
-#        DISCOM names are unconstrained by this policy on test networks — the
+#        DISCOM ids are unconstrained by this policy on test networks — the
 #        ledger separates test from production by networkId, and the per-network
 #        contract policy governs which discoms may transact.
 #
 # Config:
-#   data.config.allowedUtilityIds     — set of approved DISCOM utilityIds
+#   data.config.allowedDiscomIds      — set of approved DISCOM ids (UPADHI codes)
 #   data.config.minDeliveryLeadHours  — not enforced here (interval-based
 #                                       windows; enforce via catalog policy)
 
@@ -91,12 +92,11 @@ import rego.v1
 # Config with defaults
 # ---------------------------------------------------------------------------
 
-# Approved DISCOM identifiers. These abbreviations are the standard utility
-# short-codes defined in CEA's UPADHI portal list of abbreviations:
-# https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
-_allowed_utility_ids := {"PaVVNL", "TPDDL", "BRPL"} if {
-	not data.config.allowedUtilityIds
-} else := data.config.allowedUtilityIds
+# Approved DISCOM identifiers — the discom participant `id`, which is the CEA
+# UPADHI short code. https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
+_allowed_discom_ids := {"PaVVNL", "TPDDL", "BRPL"} if {
+	not data.config.allowedDiscomIds
+} else := data.config.allowedDiscomIds
 
 # The recognized P2P trading networks. context.networkId must be exactly one of
 # these; the ledger separates test from production trades by networkId. Test
@@ -175,9 +175,18 @@ _bid_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payload
 
 _perf_interval_ids := {i.id | some i in _commit_ts.intervals; some p in i.payloads; p.type == "FINAL_ALLOC"}
 
+# participants[] are role-less (keyed by `id`); the role -> participantId map
+# lives in contractAttributes.roles. Resolve a role to its participant via that
+# join (role -> roles[].participantId -> participants[].id).
+_role_id(role) := pid if {
+	some r in _contract.contractAttributes.roles
+	r.role == role
+	pid := r.participantId
+}
+
 _participant_by_role(role) := p if {
 	some p in _contract.participants
-	p.role == role
+	p.id == _role_id(role)
 }
 
 _seller_p := _participant_by_role("sellerPlatform")
@@ -192,6 +201,10 @@ _allowed_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDisc
 
 _contract_violations contains msg if {
 	roles_present := {r.role | some r in _contract.contractAttributes.roles}
+	# Only enforce role completeness once at least one role is declared; discom-
+	# internal messages (e.g. a discom ledger's own on_status) carry no roles and
+	# no participants — role completeness is a trade-scope concern that skips them.
+	count(roles_present) > 0
 	missing := _allowed_roles - roles_present
 	count(missing) > 0
 	msg := sprintf("missing required role(s) in contractAttributes.roles: %v", [missing])
@@ -204,34 +217,20 @@ _contract_violations contains msg if {
 }
 
 # ---------------------------------------------------------------------------
-# N2 — Participant utilityIds non-empty
-# ---------------------------------------------------------------------------
-
-_contract_violations contains "seller participant utilityId is missing or empty" if {
-	_seller_p
-	uid := object.get(_seller_p.participantAttributes, "utilityId", "")
-	uid == ""
-}
-
-_contract_violations contains "buyer participant utilityId is missing or empty" if {
-	_buyer_p
-	uid := object.get(_buyer_p.participantAttributes, "utilityId", "")
-	uid == ""
-}
-
-# ---------------------------------------------------------------------------
-# N3 — Inter-discom: buyer and seller must be on different DISCOMs
+# N3 — Inter-discom: buyer and seller must be on different DISCOMs. The discom
+# is a first-class role now, so this is a direct comparison of the two discom
+# role ids (each is a UPADHI short code).
 # ---------------------------------------------------------------------------
 
 _contract_violations contains msg if {
-	_seller_p
-	_buyer_p
-	s_uid := _seller_p.participantAttributes.utilityId
-	b_uid := _buyer_p.participantAttributes.utilityId
-	s_uid == b_uid
+	b := _role_id("buyerDiscom")
+	s := _role_id("sellerDiscom")
+	is_string(b)
+	is_string(s)
+	b == s
 	msg := sprintf(
-		"seller and buyer have the same utilityId %q; inter-discom trade requires different DISCOMs",
-		[s_uid],
+		"buyerDiscom and sellerDiscom are the same (%q); inter-discom trade requires different DISCOMs",
+		[s],
 	)
 }
 
@@ -344,7 +343,22 @@ _contract_violations contains "offer.offerAttributes must be absent in contract 
 # transport now targets a new pair.
 # ---------------------------------------------------------------------------
 
-_participant_ids := {p.participantId | some p in _contract.participants}
+# The set of ids that may legitimately appear as context.bppId/bapId: every
+# participant `id`, plus each discom participant's `subscriberId` (its beckn
+# platform id) and `ledgerId` (its ledger TSP's id — the receiver/caller id on
+# the ledger cascade legs the recorder produces). A discom's `id` is its UPADHI
+# short code, so the beckn ids used on the wire live in its attributes.
+_participant_ids contains id if {
+	some p in _contract.participants
+	id := p.id
+}
+
+_participant_ids contains sid if {
+	some p in _contract.participants
+	some key in ["subscriberId", "ledgerId"]
+	sid := object.get(p.participantAttributes, key, "")
+	sid != ""
+}
 
 # N15 only applies when the contract carries a participants list. Discom-internal
 # meter-data messages (e.g. buyerDiscom → buyerDiscom-ledger) omit participants
@@ -468,23 +482,39 @@ _catalog_offers contains offer if {
 	some offer in cat.offers
 }
 
-# Every DISCOM name (utilityId) that appears anywhere in the message — contract
-# participants (all roles) at select/init/… and the seller's provider at publish.
-_all_utility_ids contains uid if {
-	some p in _contract.participants
-	uid := object.get(p.participantAttributes, "utilityId", "")
-	uid != ""
+# Every DISCOM id (the buyerDiscom/sellerDiscom role's participantId, a UPADHI
+# short code) declared anywhere — contract roles at select/init/… and the
+# offer's roles at publish. Null (unbound buyer side at publish) is skipped.
+_discom_ids contains id if {
+	some r in _contract.contractAttributes.roles
+	r.role in {"buyerDiscom", "sellerDiscom"}
+	id := r.participantId
+	is_string(id)
 }
 
-_all_utility_ids contains uid if {
+_discom_ids contains id if {
 	some offer in _catalog_offers
-	uid := object.get(object.get(offer.provider, "providerAttributes", {}), "utilityId", "")
-	uid != ""
+	some r in offer.offerAttributes.contractAttributes.roles
+	r.role in {"buyerDiscom", "sellerDiscom"}
+	id := r.participantId
+	is_string(id)
 }
 
-# Every meterId that appears anywhere in the message.
-_all_meter_ids contains mid if {
+# Every participant that appears anywhere — contract participants at trade time
+# and the offer's seller-side participants at publish.
+_all_participants contains p if {
 	some p in _contract.participants
+}
+
+_all_participants contains p if {
+	some offer in _catalog_offers
+	some p in object.get(offer.offerAttributes, "participants", [])
+}
+
+# Every meterId that appears anywhere in the message (platform participants +
+# the catalog provider block). Discom participants carry no meterId.
+_all_meter_ids contains mid if {
+	some p in _all_participants
 	mid := object.get(p.participantAttributes, "meterId", "")
 	mid != ""
 }
@@ -499,15 +529,15 @@ _all_meter_ids contains mid if {
 # Production-network identity rules (context.networkId == _prod_network)
 # ---------------------------------------------------------------------------
 
-# PROD1 — DISCOM allowlist: every utilityId must be an approved DISCOM. This also
-# forbids TEST_ discom names in production, since no TEST_ value is on the list.
+# PROD1 — DISCOM allowlist: on the production network every discom id must be an
+# approved DISCOM (a UPADHI short code on the list).
 _prod_violations contains msg if {
 	_is_prod
-	some uid in _all_utility_ids
-	not uid in _allowed_utility_ids
+	some id in _discom_ids
+	not id in _allowed_discom_ids
 	msg := sprintf(
-		"production network: utilityId %q is not an approved DISCOM; must be one of %v",
-		[uid, _allowed_utility_ids],
+		"production network: discom id %q is not an approved DISCOM; must be one of %v",
+		[id, _allowed_discom_ids],
 	)
 }
 

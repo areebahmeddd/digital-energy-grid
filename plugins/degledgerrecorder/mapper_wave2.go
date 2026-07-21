@@ -137,12 +137,14 @@ type Wave2Offer struct {
 	OfferAttributes map[string]interface{} `json:"offerAttributes"`
 }
 
-// Wave2Participant is `contract.participants[*]`. participantAttributes is
-// loose-typed because its shape varies by role: EnergyCustomer for buyer/seller,
-// DiscomLedgerProvider for buyerDiscom/sellerDiscom.
+// Wave2Participant is `contract.participants[*]`. Participants are role-less
+// (keyed by `id`); the role -> id map lives in contractAttributes.roles. `id`
+// is the platform subscriber id for platform roles, and the DISCOM's UPADHI
+// short code for discom roles. participantAttributes is loose-typed because its
+// shape varies: EnergyCustomer for buyer/seller platforms, DiscomLedgerProvider
+// (subscriberId, discomUri, ledgerId, ledgerUri) for buyer/seller discoms.
 type Wave2Participant struct {
-	Role                  string                 `json:"role"`
-	ParticipantID         string                 `json:"participantId"`
+	ID                    string                 `json:"id"`
 	ParticipantAttributes map[string]interface{} `json:"participantAttributes"`
 }
 
@@ -168,8 +170,9 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 			len(payload.Message.Contract.Commitments), payload.Context.TransactionID)
 	}
 
-	buyerPart := findWave2Participant(payload.Message.Contract.Participants, Wave2RoleBuyerPlatform)
-	sellerPart := findWave2Participant(payload.Message.Contract.Participants, Wave2RoleSellerPlatform)
+	ca := payload.Message.Contract.ContractAttributes
+	buyerPart := findWave2Participant(payload.Message.Contract.Participants, ca, Wave2RoleBuyerPlatform)
+	sellerPart := findWave2Participant(payload.Message.Contract.Participants, ca, Wave2RoleSellerPlatform)
 
 	// Platform identity is trade-scoped: read from participants[role=buyerPlatform|sellerPlatform].participantId
 	// rather than from transport-level context.bapId/bppId. context.bapId/bppId reflect the
@@ -215,8 +218,8 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 			OrderItemID:       orderItemID,
 			PlatformIDBuyer:   platformIDBuyer,
 			PlatformIDSeller:  platformIDSeller,
-			DiscomIDBuyer:     wave2StringAttr(buyerPart, "utilityId"),
-			DiscomIDSeller:    wave2StringAttr(sellerPart, "utilityId"),
+			DiscomIDBuyer:     wave2RoleID(ca, Wave2RoleBuyerDiscom),
+			DiscomIDSeller:    wave2RoleID(ca, Wave2RoleSellerDiscom),
 			BuyerID:           wave2StringAttr(buyerPart, "meterId"),
 			SellerID:          wave2StringAttr(sellerPart, "meterId"),
 			TradeTime:         payload.Context.Timestamp,
@@ -239,27 +242,63 @@ func MapWave2ToLedgerRecords(payload *Wave2OnConfirmPayload, role string) ([]Led
 // `participants[role=buyerDiscom|sellerDiscom].participantAttributes.ledgerUrl`.
 // Returns "" if the side is missing or has no ledgerUrl.
 func ExtractWave2DiscomLedgerURL(payload *Wave2OnConfirmPayload, side Side) string {
-	part := findWave2Participant(payload.Message.Contract.Participants, string(side))
-	return wave2StringAttr(part, "ledgerUrl")
+	c := payload.Message.Contract
+	return wave2StringAttr(findWave2Participant(c.Participants, c.ContractAttributes, string(side)), "ledgerUri")
 }
 
-// findWave2Participant returns the first participant entry matching the role.
-func findWave2Participant(participants []Wave2Participant, role string) *Wave2Participant {
+// wave2RoleID resolves a role to its participantId via contractAttributes.roles
+// (the role -> id map). Returns "" if the role is absent or its id is null.
+func wave2RoleID(contractAttrs map[string]interface{}, role string) string {
+	roles, ok := contractAttrs["roles"].([]interface{})
+	if !ok {
+		return ""
+	}
+	for _, r := range roles {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if m["role"] == role {
+			if id, ok := m["participantId"].(string); ok {
+				return id
+			}
+		}
+	}
+	return ""
+}
+
+// findWave2ParticipantByID returns the participant with the given id, or nil.
+func findWave2ParticipantByID(participants []Wave2Participant, id string) *Wave2Participant {
+	if id == "" {
+		return nil
+	}
 	for i := range participants {
-		if participants[i].Role == role {
+		if participants[i].ID == id {
 			return &participants[i]
 		}
 	}
 	return nil
 }
 
-// participantID returns p.ParticipantID or "" if p is nil. Mirrors wave2StringAttr
-// for the top-level participantId field (not nested under participantAttributes).
+// findWave2Participant resolves role -> participantId -> participant via the
+// join (participants[] are role-less; the role map lives in contractAttributes).
+func findWave2Participant(participants []Wave2Participant, contractAttrs map[string]interface{}, role string) *Wave2Participant {
+	return findWave2ParticipantByID(participants, wave2RoleID(contractAttrs, role))
+}
+
+// participantID returns p.ID or "" if p is nil.
 func participantID(p *Wave2Participant) string {
 	if p == nil {
 		return ""
 	}
-	return p.ParticipantID
+	return p.ID
+}
+
+// wave2LedgerID returns the discom role's ledgerId (its ledger TSP's subscriber
+// id) — the id used as bppId/bapId when a cascade leg targets that discom's
+// ledger. Empty if the discom or its ledgerId is absent.
+func wave2LedgerID(participants []Wave2Participant, contractAttrs map[string]interface{}, discomRole string) string {
+	return wave2StringAttr(findWave2Participant(participants, contractAttrs, discomRole), "ledgerId")
 }
 
 // wave2StringAttr reads a string attribute from a participant's participantAttributes.
@@ -491,11 +530,14 @@ type Wave2StatusMessage struct {
 	Contract Wave2StatusContract `json:"contract"`
 }
 
-// Wave2StatusContract carries only what is needed for ledger routing.
+// Wave2StatusContract carries only what is needed for ledger routing. It now
+// also carries contractAttributes (the role -> id map) so participants can be
+// resolved by role via the join.
 type Wave2StatusContract struct {
-	ID           string              `json:"id"`
-	Status       Wave2ContractStatus `json:"status"`
-	Participants []Wave2Participant  `json:"participants"`
+	ID                 string                 `json:"id"`
+	Status             Wave2ContractStatus    `json:"status"`
+	Participants       []Wave2Participant     `json:"participants"`
+	ContractAttributes map[string]interface{} `json:"contractAttributes"`
 }
 
 // ParseStatusWave2 unmarshals a wave2 status body.
@@ -510,12 +552,8 @@ func ParseStatusWave2(body []byte) (*Wave2StatusPayload, error) {
 // ExtractWave2StatusDiscomLedgerURL returns the ledgerUrl for the given side
 // from a wave2 status payload's participants array.
 func ExtractWave2StatusDiscomLedgerURL(payload *Wave2StatusPayload, side Side) string {
-	for i := range payload.Message.Contract.Participants {
-		if payload.Message.Contract.Participants[i].Role == string(side) {
-			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUrl")
-		}
-	}
-	return ""
+	c := payload.Message.Contract
+	return wave2StringAttr(findWave2Participant(c.Participants, c.ContractAttributes, string(side)), "ledgerUri")
 }
 
 // DeriveSenderHostFromWave2Status returns the sender host from the status payload context.
@@ -555,11 +593,12 @@ type Wave2OnStatusMessage struct {
 }
 
 type Wave2OnStatusContract struct {
-	ID           string                 `json:"id"`
-	Status       map[string]interface{} `json:"status"`
-	Commitments  []Wave2Commitment      `json:"commitments"`
-	Performance  []Wave2Performance     `json:"performance"`
-	Participants []Wave2Participant     `json:"participants"`
+	ID                 string                 `json:"id"`
+	Status             map[string]interface{} `json:"status"`
+	Commitments        []Wave2Commitment      `json:"commitments"`
+	Performance        []Wave2Performance     `json:"performance"`
+	Participants       []Wave2Participant     `json:"participants"`
+	ContractAttributes map[string]interface{} `json:"contractAttributes"`
 }
 
 // ParseOnStatusWave2 unmarshals a wave2 on_status body.
@@ -671,12 +710,8 @@ func timeseriesHasPerformanceData(ts map[string]interface{}) bool {
 
 // ExtractWave2OnStatusDiscomLedgerURL returns ledgerUrl for the given side.
 func ExtractWave2OnStatusDiscomLedgerURL(payload *Wave2OnStatusPayload, side Side) string {
-	for i := range payload.Message.Contract.Participants {
-		if payload.Message.Contract.Participants[i].Role == string(side) {
-			return wave2StringAttr(&payload.Message.Contract.Participants[i], "ledgerUrl")
-		}
-	}
-	return ""
+	c := payload.Message.Contract
+	return wave2StringAttr(findWave2Participant(c.Participants, c.ContractAttributes, string(side)), "ledgerUri")
 }
 
 // DeriveSenderHostFromWave2OnStatus returns the sender host from the on_status context.
@@ -691,16 +726,11 @@ func DeriveSenderHostFromWave2OnStatus(payload *Wave2OnStatusPayload, role strin
 	}
 }
 
-// ParticipantEndpointURI returns participants[role=<role>].participantAttributes.<key>,
-// or "" if missing. Used to look up platformUrl/ledgerUrl for trading platforms
-// and discoms when rewriting context for a cascade sub-transaction.
-func ParticipantEndpointURI(participants []Wave2Participant, role, key string) string {
-	for i := range participants {
-		if participants[i].Role == role {
-			return wave2StringAttr(&participants[i], key)
-		}
-	}
-	return ""
+// ParticipantEndpointURI resolves the participant for <role> via the join and
+// returns its participantAttributes.<key> (e.g. platformUrl for a platform),
+// or "" if missing. Used when rewriting context for a cascade sub-transaction.
+func ParticipantEndpointURI(participants []Wave2Participant, contractAttrs map[string]interface{}, role, key string) string {
+	return wave2StringAttr(findWave2Participant(participants, contractAttrs, role), key)
 }
 
 // SubTxContext describes one Beckn sub-transaction's party identifiers. Used

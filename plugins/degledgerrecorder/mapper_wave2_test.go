@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-// Trimmed wave2 on_confirm body covering all the fields the mapper reads:
-// context (transactionId, bapId, bppId, timestamp), participants
-// (buyerPlatform/sellerPlatform with utilityId+meterId, buyerDiscom/sellerDiscom with
-// ledgerUrl), and a single commitment with a seller-side delivery window.
+// Trimmed wave2 on_confirm body covering the fields the mapper reads.
+// participants[] are role-less (keyed by id); the role -> id map is in
+// contractAttributes.roles. Platform ids are subscriber ids; discom ids are
+// UPADHI short codes. Discom identity carries ledgerId + ledgerUri.
 const sampleWave2OnConfirm = `{
   "context": {
     "networkId": "nfh.global/testnet-deg",
@@ -24,6 +24,15 @@ const sampleWave2OnConfirm = `{
   "message": {
     "contract": {
       "id": "contract-p2p-001",
+      "contractAttributes": {
+        "@type": "DEGContract",
+        "roles": [
+          {"role": "sellerPlatform", "participantId": "TPDDL-DL-seller-001"},
+          {"role": "buyerPlatform", "participantId": "BRPL-DL-buyer-001"},
+          {"role": "buyerDiscom", "participantId": "BRPL"},
+          {"role": "sellerDiscom", "participantId": "TPDDL"}
+        ]
+      },
       "commitments": [
         {
           "id": "commitment-p2p-001",
@@ -44,7 +53,6 @@ const sampleWave2OnConfirm = `{
               "inputs": [
                 {
                   "role": "sellerPlatform",
-                  "participantId": "TPDDL-DL-seller-001",
                   "inputs": {
                     "offers": [
                       {
@@ -58,11 +66,7 @@ const sampleWave2OnConfirm = `{
                     ]
                   }
                 },
-                {
-                  "role": "buyerPlatform",
-                  "participantId": "BRPL-DL-buyer-001",
-                  "inputs": {}
-                }
+                {"role": "buyerPlatform", "inputs": {}}
               ]
             }
           }
@@ -70,41 +74,39 @@ const sampleWave2OnConfirm = `{
       ],
       "participants": [
         {
-          "role": "sellerPlatform",
-          "participantId": "TPDDL-DL-seller-001",
+          "id": "TPDDL-DL-seller-001",
           "participantAttributes": {
             "@type": "EnergyCustomer",
             "meterId": "der://meter/seller-001",
-            "utilityId": "TPDDL-DL",
             "utilityCustomerId": "TPDDL-CUST-S-001"
           }
         },
         {
-          "role": "buyerPlatform",
-          "participantId": "BRPL-DL-buyer-001",
+          "id": "BRPL-DL-buyer-001",
           "participantAttributes": {
             "@type": "EnergyCustomer",
             "meterId": "der://meter/buyer-001",
-            "utilityId": "BRPL-DL",
             "utilityCustomerId": "BRPL-CUST-B-001"
           }
         },
         {
-          "role": "buyerDiscom",
-          "participantId": "buyer-discom-ledger",
+          "id": "BRPL",
           "participantAttributes": {
             "@type": "DiscomLedgerProvider",
-            "utilityId": "BRPL-DL",
-            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
+            "subscriberId": "buyer-discom.example.com",
+            "discomUri": "https://buyer-discom.example.com",
+            "ledgerId": "buyer-discom-ledger.example.com",
+            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
           }
         },
         {
-          "role": "sellerDiscom",
-          "participantId": "seller-discom-ledger",
+          "id": "TPDDL",
           "participantAttributes": {
             "@type": "DiscomLedgerProvider",
-            "utilityId": "TPDDL-DL",
-            "ledgerUrl": "https://ies-p2p-energy-ledger.beckn.io"
+            "subscriberId": "seller-discom.example.com",
+            "discomUri": "https://seller-discom.example.com",
+            "ledgerId": "seller-discom-ledger.example.com",
+            "ledgerUri": "https://ies-p2p-energy-ledger.beckn.io"
           }
         }
       ]
@@ -142,15 +144,16 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	}
 	rec := records[0]
 
-	// Platform ids are now sourced from participants[role=buyerPlatform|sellerPlatform].participantId
-	// (trade identity), not from context.bapId/bppId (transport identity).
+	// Platform ids come from the role -> id join (participants[].id, a subscriber
+	// id); discom ids are the buyerDiscom/sellerDiscom role ids (UPADHI codes);
+	// meter ids come from the platform participants' meterId.
 	checks := []struct{ name, got, want string }{
 		{"role", rec.Role, "BUYER"},
 		{"transactionId", rec.TransactionID, "txn-p2p-001"},
 		{"platformIdBuyer", rec.PlatformIDBuyer, "BRPL-DL-buyer-001"},
 		{"platformIdSeller", rec.PlatformIDSeller, "TPDDL-DL-seller-001"},
-		{"discomIdBuyer", rec.DiscomIDBuyer, "BRPL-DL"},
-		{"discomIdSeller", rec.DiscomIDSeller, "TPDDL-DL"},
+		{"discomIdBuyer", rec.DiscomIDBuyer, "BRPL"},
+		{"discomIdSeller", rec.DiscomIDSeller, "TPDDL"},
 		{"buyerId", rec.BuyerID, "der://meter/buyer-001"},
 		{"sellerId", rec.SellerID, "der://meter/seller-001"},
 		{"tradeTime", rec.TradeTime, "2026-04-25T10:10:05Z"},
@@ -172,12 +175,12 @@ func TestMapWave2ToLedgerRecord_AllFields(t *testing.T) {
 	}
 }
 
-// When participants[role=buyerPlatform|sellerPlatform].participantId is missing, the mapper
-// falls back to context.bapId/bppId so older payloads don't immediately fail.
+// When the role -> id join yields no platform participant (no roles map / no
+// matching id), the mapper falls back to context.bapId/bppId.
 func TestMapWave2ToLedgerRecord_FallsBackToContextWhenParticipantIDEmpty(t *testing.T) {
 	const noParticipantIDs = `{
 	  "context": {"transactionId":"t1","bapId":"bap.fallback.com","bppId":"bpp.fallback.com","timestamp":"2026-04-25T10:10:05Z"},
-	  "message": {"contract": {"id":"c1","commitments":[{"id":"co1","resources":[{"quantity":{"unitCode":"KWH","unitQuantity":1}}],"offer":{"id":"o1","offerAttributes":{"inputs":[{"role":"sellerPlatform","inputs":{"offers":[{"deliveryWindow":{"schema:startTime":"2026-04-26T04:30:00Z","schema:endTime":"2026-04-26T05:30:00Z"}}]}}]}}}],"participants":[{"role":"buyerPlatform"},{"role":"sellerPlatform"}]}}
+	  "message": {"contract": {"id":"c1","commitments":[{"id":"co1","resources":[{"quantity":{"unitCode":"KWH","unitQuantity":1}}],"offer":{"id":"o1","offerAttributes":{"inputs":[{"role":"sellerPlatform","inputs":{"offers":[{"deliveryWindow":{"schema:startTime":"2026-04-26T04:30:00Z","schema:endTime":"2026-04-26T05:30:00Z"}}]}}]}}}],"participants":[]}}
 	}`
 	p, err := ParseOnConfirmWave2([]byte(noParticipantIDs))
 	if err != nil {
@@ -201,15 +204,17 @@ func TestExtractWave2DiscomLedgerURL(t *testing.T) {
 		t.Fatalf("parse: %v", err)
 	}
 	if got := ExtractWave2DiscomLedgerURL(p, SideBuyer); got != "https://ies-p2p-energy-ledger.beckn.io" {
-		t.Errorf("buyerDiscom ledgerUrl: got %q", got)
+		t.Errorf("buyerDiscom ledgerUri: got %q", got)
 	}
 	if got := ExtractWave2DiscomLedgerURL(p, SideSeller); got != "https://ies-p2p-energy-ledger.beckn.io" {
-		t.Errorf("sellerDiscom ledgerUrl: got %q", got)
+		t.Errorf("sellerDiscom ledgerUri: got %q", got)
 	}
 }
 
+// Without a contractAttributes.roles map the discom cannot be resolved by the
+// join, so the ledger URI is empty.
 func TestExtractWave2DiscomLedgerURL_MissingReturnsEmpty(t *testing.T) {
-	const noLedgerURL = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"role":"buyerDiscom","participantId":"x"}]}}}`
+	const noLedgerURL = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"id":"BRPL","participantAttributes":{}}]}}}`
 	p, err := ParseOnConfirmWave2([]byte(noLedgerURL))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
@@ -219,17 +224,6 @@ func TestExtractWave2DiscomLedgerURL_MissingReturnsEmpty(t *testing.T) {
 	}
 	if got := ExtractWave2DiscomLedgerURL(p, SideSeller); got != "" {
 		t.Errorf("expected empty for missing side, got %q", got)
-	}
-}
-
-func TestExtractWave2DiscomLedgerURL_DoesNotReadLegacyLedgerUri(t *testing.T) {
-	const legacyOnly = `{"context":{"transactionId":"x"},"message":{"contract":{"participants":[{"role":"buyerDiscom","participantId":"x","participantAttributes":{"ledgerUri":"https://legacy.example.com"}}]}}}`
-	p, err := ParseOnConfirmWave2([]byte(legacyOnly))
-	if err != nil {
-		t.Fatalf("parse: %v", err)
-	}
-	if got := ExtractWave2DiscomLedgerURL(p, SideBuyer); got != "" {
-		t.Errorf("expected legacy ledgerUri to be ignored, got %q", got)
 	}
 }
 
