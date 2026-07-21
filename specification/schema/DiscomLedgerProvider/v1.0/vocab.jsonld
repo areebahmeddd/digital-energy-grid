@@ -13,13 +13,21 @@
       "@id": "deg:DiscomLedgerProvider",
       "@type": "rdfs:Class",
       "rdfs:label": "Discom Ledger Provider",
-      "rdfs:comment": "Identity attributes for a regulated discom ledger Technical Service Provider (TSP), attached to Contract.participants[*].participantAttributes for buyerDiscom/sellerDiscom roles."
+      "rdfs:comment": "Identity attributes for a discom acting as a buyerDiscom/sellerDiscom party in a P2P trade, attached to Contract.participants[*].participantAttributes. The party id is the participant id; these attributes carry the discom's platform URI and its ledger (id + uri)."
     },
     {
-      "@id": "deg:utilityId",
+      "@id": "deg:discomUri",
       "@type": "rdf:Property",
-      "rdfs:label": "Utility ID",
-      "rdfs:comment": "Utility/DISCOM identifier the ledger TSP serves.",
+      "rdfs:label": "Discom URI",
+      "rdfs:comment": "Base URL of the discom's own Beckn platform; target for init/cascade and unallocated-trade allocation.",
+      "rdfs:domain": "deg:DiscomLedgerProvider",
+      "rdfs:range": "xsd:anyURI"
+    },
+    {
+      "@id": "deg:ledgerId",
+      "@type": "rdf:Property",
+      "rdfs:label": "Ledger ID",
+      "rdfs:comment": "Subscriber id of the discom's ledger TSP (a distinct party); key under which the ledger holds the discom's human-readable alias.",
       "rdfs:domain": "deg:DiscomLedgerProvider",
       "rdfs:range": "xsd:string"
     },
@@ -27,7 +35,7 @@
       "@id": "deg:ledgerUri",
       "@type": "rdf:Property",
       "rdfs:label": "Ledger URI",
-      "rdfs:comment": "Base URL of the discom ledger TSP.",
+      "rdfs:comment": "Base URL of the discom ledger TSP where trade records are written after on_confirm.",
       "rdfs:domain": "deg:DiscomLedgerProvider",
       "rdfs:range": "xsd:anyURI"
     }

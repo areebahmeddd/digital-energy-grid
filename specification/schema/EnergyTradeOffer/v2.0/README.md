@@ -30,7 +30,8 @@ All interval data (price, quantities, allocations) lives in two BecknTimeSeries:
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `validityWindow` | `TimePeriod` | | Window during which the offer can be selected/accepted. Present at catalog publish. |
-| `contractAttributes` | `object` (JSON-LD) | | DEGContract terms at catalog publish. Only parties with known `participantId` are included — unknown parties (null) are omitted. Mirrors `Contract.contractAttributes` — NPs promote this field verbatim at init. |
+| `contractAttributes` | `object` (JSON-LD) | | DEGContract terms at catalog publish: the role → participantId map (buyer-side null until discover) + policy ref. Mirrors `Contract.contractAttributes` — NPs promote this field verbatim at init. |
+| `participants` | `array` | | Seller-declared parties (identity-only: `id` + `participantAttributes`, no role). Joined from `contractAttributes.roles[].participantId`. Carries the seller discom's `discomUri` + `ledgerUri` so the buyer can construct `init`. |
 | `commitmentAttributes` | `TimeSeries` (JSON-LD) | ✓ | Seller's offer declaration: full payloadDescriptor schema with `insertedBy` + seller's initial intervals. Immutable after publish. |
 
 ## commitmentAttributes.payloadDescriptors

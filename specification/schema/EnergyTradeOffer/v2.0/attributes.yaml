@@ -57,9 +57,12 @@ components:
             Buyer-side roles (buyerPlatform, buyerDiscom) are declared with
             participantId: null at publish — the buyer is unknown to the seller
             until it engages after discover. Seller-side roles carry their known
-            participantIds. MUST carry @context and @type (typically DEGContract).
-            Present in catalog publish; omitted in downstream messages where
-            Contract.contractAttributes carries the full party list.
+            participantIds. Roles carry only role -> participantId; each party's
+            identity attributes live in the sibling `participants[]`, joined on
+            `id == roles[].participantId`. MUST carry @context and @type
+            (typically DEGContract). Present in catalog publish; omitted in
+            downstream messages where Contract.contractAttributes carries the
+            full party list.
           required: ["@context", "@type"]
           properties:
             "@context":
@@ -69,6 +72,39 @@ components:
               type: string
           x-jsonld:
             "@id": contractAttributes
+
+        participants:
+          type: array
+          description: >
+            Seller-declared trade parties at catalog publish, mirroring
+            Contract.participants[] in trade messages. Each entry is
+            identity-only: a Beckn-native `id` plus `participantAttributes`
+            (e.g. EnergyCustomer for sellerPlatform, DiscomLedgerProvider for
+            sellerDiscom). The party's role is NOT carried here — it is given by
+            contractAttributes.roles[], joined on `id == roles[].participantId`.
+
+            Only the seller-side parties (sellerPlatform, sellerDiscom) are
+            declared at publish; buyer-side parties are unknown until after
+            discover. This is where the seller publishes its discom's
+            `discomUri` + `ledgerUri`, so the buyer can construct `init` and
+            downstream cascades can route to the discom and its ledger.
+          items:
+            type: object
+            additionalProperties: true
+            required: [id]
+            properties:
+              id:
+                type: string
+                description: Party subscriber id / did:web; joined from contractAttributes.roles[].participantId.
+              descriptor:
+                type: object
+                additionalProperties: true
+              participantAttributes:
+                type: object
+                additionalProperties: true
+                description: Domain identity attributes (EnergyCustomer or DiscomLedgerProvider). MUST carry @context and @type.
+          x-jsonld:
+            "@id": participants
 
         commitmentAttributes:
           type: object

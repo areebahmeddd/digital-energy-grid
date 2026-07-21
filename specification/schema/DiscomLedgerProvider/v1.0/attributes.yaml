@@ -3,15 +3,24 @@ info:
   title: DiscomLedgerProvider — Discom Ledger TSP Attributes (v1.0)
   version: 1.0.0
   description: >
-    Identity attributes for a regulated discom ledger Technical Service
-    Provider (TSP). Attached to Contract.participants[*].participantAttributes
-    for entries with role buyerDiscom or sellerDiscom. Carries the `ledgerUrl`
-    that platforms use to write trade records to that discom's ledger after
-    on_confirm, and `platformUrl` used to request allocation of unallocated
-    trades to this discom.
+    Identity attributes for a regulated discom acting as a party in a P2P
+    trade. Attached to Contract.participants[*].participantAttributes (and to
+    the offer's participants[] at catalog publish) for entries whose role is
+    buyerDiscom or sellerDiscom.
 
-    Two discoms MAY point at the same `ledgerUrl` if they share a TSP; each
-    platform still calls only its own side's discom URI (BAP -> buyerDiscom,
+    The party's own identity is the participant `id` (the discom's subscriber
+    id / did:web) — it is NOT repeated here. These attributes carry the two
+    endpoints a counterpart needs: `discomUri`, the discom's own Beckn platform
+    (target for init/cascade and unallocated-trade allocation), and the discom's
+    ledger, named by `ledgerId` (a distinct TSP participant) and reached at
+    `ledgerUri` (where trade records are written after on_confirm).
+
+    The human-readable utility alias (e.g. "PVVNL", "TPDDL") is intentionally
+    absent — it is resolved from `ledgerId` in the ledger, keeping the on-wire
+    identity stable and alias-free.
+
+    Two discoms MAY share a `ledgerUri`/`ledgerId` if they use the same TSP;
+    each platform still calls only its own side's discom (BAP -> buyerDiscom,
     BPP -> sellerDiscom).
 
 components:
@@ -19,7 +28,7 @@ components:
     DiscomLedgerProvider:
       type: object
       additionalProperties: false
-      required: [ledgerUrl, platformUrl]
+      required: [discomUri, ledgerId, ledgerUri]
       x-tags:
         - p2p-trading
         - discom-ledger
@@ -28,17 +37,31 @@ components:
         "@type": DiscomLedgerProvider
       properties:
 
-        utilityId:
+        discomUri:
+          type: string
+          format: uri
+          description: >
+            Base URL (scheme + host[:port], no path) of the discom's own Beckn
+            platform. Target for init/cascade routing and for requesting
+            allocation of unallocated trades to this discom. The platform
+            exposes the standard Beckn paths under this base:
+            `/bap/caller`, `/bap/receiver`, `/bpp/caller`, `/bpp/receiver`.
+          example: "https://ies-p2p-energy-discom.beckn.io"
+          x-jsonld:
+            "@id": discomUri
+
+        ledgerId:
           type: string
           description: >
-            Utility/DISCOM identifier the ledger TSP serves (e.g.,
-            "TPDDL-DL", "BRPL-DL"). Mirrors EnergyCustomer.utilityId on
-            buyer/seller participants for cross-reference.
-          example: "BRPL-DL"
+            Subscriber id (or did:web) of the discom's ledger TSP — a party
+            distinct from the discom itself. Used to tag and route ledger
+            records, and as the key under which the ledger holds the discom's
+            human-readable alias.
+          example: "ies-p2p-energy-ledger.beckn.io"
           x-jsonld:
-            "@id": utilityId
+            "@id": ledgerId
 
-        ledgerUrl:
+        ledgerUri:
           type: string
           format: uri
           description: >
@@ -46,30 +69,18 @@ components:
             TSP. The ledger acts as a Beckn node and exposes the standard
             paths under this base:
 
-              `<ledgerUrl>/bap/receiver/<action>`  — inbound endpoint where
+              `<ledgerUri>/bap/receiver/<action>`  — inbound endpoint where
                   buyer/seller platforms cascade on_confirm and status to
                   this ledger. The ledger is BAP-receiver on this leg.
-              `<ledgerUrl>/bpp/caller/<action>`    — outbound endpoint from
+              `<ledgerUri>/bpp/caller/<action>`    — outbound endpoint from
                   which the ledger initiates on_status callbacks back to
                   buyer/seller platforms. The ledger is BPP-caller on that
                   leg.
-              `<ledgerUrl>/ledger/put`             — legacy_ledger mode PUT
+              `<ledgerUri>/ledger/put`             — legacy_ledger mode PUT
                   for non-beckn writes; kept for backward compatibility.
 
             The path is appended by the caller per the action being
-            invoked; `ledgerUrl` itself MUST NOT include a path component.
+            invoked; `ledgerUri` itself MUST NOT include a path component.
           example: "https://ies-p2p-energy-ledger.beckn.io"
           x-jsonld:
-            "@id": ledgerUrl
-
-        platformUrl:
-          type: string
-          format: uri
-          description: >
-            Base URL (scheme + host[:port]) of the discom's Beckn platform.
-            Used to request allocation of unallocated trades to this discom.
-            The platform exposes standard Beckn paths under this base:
-            `/bap/caller`, `/bap/receiver`, `/bpp/caller`, `/bpp/receiver`.
-          example: "https://ies-p2p-energy-discom.beckn.io"
-          x-jsonld:
-            "@id": platformUrl
+            "@id": ledgerUri
