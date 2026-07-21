@@ -53,12 +53,12 @@ test_net1_passes_on_nfh_testnet_deg if {
 }
 
 test_net1_passes_on_production_network if {
-	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL-DL", "REAL_METER_1")])
+	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL", "REAL_METER_1")])
 	not _has(pl, "not a recognized P2P trading network")
 }
 
 test_net1_fails_on_unknown_network if {
-	pl := _contract_payload("some.other/network", [_participant("sellerPlatform", "TPDDL-DL", "REAL_METER_1")])
+	pl := _contract_payload("some.other/network", [_participant("sellerPlatform", "TPDDL", "REAL_METER_1")])
 	_has(pl, "not a recognized P2P trading network")
 }
 
@@ -67,12 +67,12 @@ test_net1_fails_on_unknown_network if {
 # ---------------------------------------------------------------------------
 
 test_prod1_passes_on_allowlisted_discoms if {
-	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL-DL", "M1"), _participant("buyerDiscom", "BRPL-DL", "M2")])
+	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL", "M1"), _participant("buyerDiscom", "BRPL", "M2")])
 	not _has(pl, "is not an approved DISCOM")
 }
 
 test_prod1_fails_on_unlisted_discom if {
-	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL-DL", "M1"), _participant("buyerDiscom", "FAKE-DISCOM", "M2")])
+	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL", "M1"), _participant("buyerDiscom", "FAKE-DISCOM", "M2")])
 	_has(pl, "FAKE-DISCOM")
 	_has(pl, "is not an approved DISCOM")
 }
@@ -87,12 +87,12 @@ test_prod1_fails_on_test_discom_name if {
 # ---------------------------------------------------------------------------
 
 test_prod2_fails_on_test_meter_in_prod if {
-	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL-DL", "TEST_METER_1")])
+	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL", "TEST_METER_1")])
 	_has(pl, "must not use a TEST_ prefix")
 }
 
 test_prod2_passes_on_real_meter if {
-	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL-DL", "REAL_METER_1")])
+	pl := _contract_payload(_prod_net, [_participant("sellerPlatform", "TPDDL", "REAL_METER_1")])
 	not _has(pl, "must not use a TEST_ prefix")
 }
 
@@ -107,7 +107,7 @@ test_test1_passes_with_test_meters if {
 
 test_test1_allows_real_discom_on_test if {
 	# Real DISCOM name is fine on a test network (no allowlist there); meter is TEST_.
-	pl := _contract_payload(_test_net, [_participant("sellerPlatform", "TPDDL-DL", "TEST_METER_1")])
+	pl := _contract_payload(_test_net, [_participant("sellerPlatform", "TPDDL", "TEST_METER_1")])
 	not _has(pl, "is not an approved DISCOM")
 	not _has(pl, "must start with TEST_")
 }
@@ -152,6 +152,6 @@ test_publish_prod1_checks_provider_discom if {
 }
 
 test_publish_test1_checks_provider_meter if {
-	pl := _publish_payload(_test_net, "TPDDL-DL", "REAL_METER_1", _good_query_path)
+	pl := _publish_payload(_test_net, "TPDDL", "REAL_METER_1", _good_query_path)
 	_has(pl, "must start with TEST_")
 }
