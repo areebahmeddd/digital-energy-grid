@@ -204,8 +204,8 @@ DEVKIT_CONFIGS = {
         # Ledger TSP base URLs (ledgerUri on DiscomLedgerProvider). Match the
         # local example.com hosts used by uc1 examples / docker-compose; override
         # the Postman variable to point at a shared IES ledger if needed.
-        "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
-        "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
+        "ledger_host_buyer": "https://ies-p2p-energy-ledger.beckn.io",
+        "ledger_host_seller": "https://ies-p2p-energy-ledger.beckn.io",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
         # Source dirs for the discom-ledger TSP collections. The on_status.json
         # response fixtures here ARE the canonical outbound on_status payloads
@@ -247,8 +247,8 @@ DEVKIT_CONFIGS = {
         # Postman variables in all wave2 collections. seller_discom_ledger_id is
         # also used in substitutions.yaml for context.bppId in
         # seller-initiated-status-to-seller-discom flows.
-        "ledger_buyer_discom_id": "buyer-discom-ledger.example.com",
-        "ledger_seller_discom_id": "seller-discom-ledger.example.com",
+        "ledger_buyer_discom_id": "ies-p2p-energy-ledger.beckn.io",
+        "ledger_seller_discom_id": "ies-p2p-energy-ledger.beckn.io",
         "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2026",
         "seller_discom_ledger_id": "seller-discom-ledger.example.com",
         "usecase": "uc1",
