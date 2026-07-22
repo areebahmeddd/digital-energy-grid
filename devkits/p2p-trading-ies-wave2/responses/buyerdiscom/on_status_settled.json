@@ -66,7 +66,7 @@
           {"role": "buyerDiscom", "participantId": "TEST_DISCOM_BUYER"},
           {"role": "sellerDiscom", "participantId": "TEST_DISCOM_SELLER"}
         ],
-        "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-policies/ies-p2p-network-settlement-rego-policy-v1", "queryPath": "data.deg.contracts.p2p_trading"}
+        "policy": {"url": "https://api.dedi.global/dedi/lookup/indiaenergystack.in/ies-rulesets/p2p-trading-ies-contractpolicy-common", "queryPath": "data.deg.contracts.p2p_trading"}
       },
       "participants": [
         {"id": "sellerapp.example.com", "participantAttributes": {"@context": "https://schema.nfh.global/EnergyCustomer/v2.0/context.jsonld", "@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001", "utilityCustomerId": "TEST_CUST_SELLER_001", "platformUrl": "http://sellerapp.example.com:9000"}},
