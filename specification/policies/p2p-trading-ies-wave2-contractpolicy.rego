@@ -139,11 +139,15 @@ import rego.v1
 #                           production; the test set additionally lists the
 #                           devkit-local ledger endpoints the compose
 #                           stack's cascade routing uses.
-# Approved DISCOM ids (CEA UPADHI short codes) — the SINGLE source for both
-# applicable_seller_discoms and allowed_buyer_discoms, shared across test and
-# production. Keep in sync with the network policy's _allowed_discom_ids.
+# Approved DISCOM ids (CEA UPADHI short codes) — the production allowlist, used
+# for both applicable_seller_discoms and allowed_buyer_discoms. Keep in sync with
+# the network policy's _allowed_discom_ids.
 # https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
 approved_discoms := {"PaVVNL", "TPDDL", "BRPL"}
+
+# The test environment additionally accepts placeholder discom ids for local /
+# dev flows, so the same allowlist rules exercise TEST_* participants too.
+approved_discoms_test := approved_discoms | {"TEST_DISCOM_BUYER", "TEST_DISCOM_SELLER"}
 
 environments := {
 	"test": {
@@ -151,9 +155,9 @@ environments := {
 			"nfh.global/testnet-deg",
 			"indiaenergystack.in/test-ies-p2p-trading-network",
 		},
-		"applicable_seller_discoms": approved_discoms,
+		"applicable_seller_discoms": approved_discoms_test,
 		"enforce_allowlist": true,
-		"allowed_buyer_discoms": approved_discoms,
+		"allowed_buyer_discoms": approved_discoms_test,
 		"allowed_ledger_urls": {
 			"https://ies-p2p-energy-ledger.beckn.io",
 			# devkit-local ledger endpoints (degledgerrecorder cascade targets)
