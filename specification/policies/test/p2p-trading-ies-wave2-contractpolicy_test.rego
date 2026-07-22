@@ -97,6 +97,25 @@ test_intra_discom_trade_allowed if {
 	count(violations) == 0 with input as _input("init", "PaVVNL", [_iv_pre(0, 12.5, 20)])
 }
 
+# Test env additionally allows the TEST_* placeholder discoms.
+test_test_placeholder_buyer_discom_allowed_on_test if {
+	count(violations) == 0 with input as _input("init", "TEST_BUYER_DISCOM", [_iv_pre(0, 12.5, 20)])
+}
+
+test_test_placeholder_seller_discom_applicable_on_test if {
+	inp := _input_on("init", "nfh.global/testnet-deg", "TEST_SELLER_DISCOM", "BRPL", [_iv_pre(0, 12.5, 20)])
+	count(violations) == 0 with input as inp
+}
+
+# But the TEST_* placeholders are NOT in the production allowlist.
+test_test_placeholder_discom_blocked_on_prod if {
+	inp := _input_prod("init", "TEST_BUYER_DISCOM", [_iv_pre(0, 12.5, 20)])
+	vs := violations with input as inp
+	count(vs) == 1
+	some msg in vs
+	contains(msg, "on the production network")
+}
+
 test_blocked_buyer_discom_violation_at_init if {
 	vs := violations with input as _input("init", "TEST_OUTSIDE_DISCOM", [_iv_pre(0, 12.5, 20)])
 	count(vs) == 1
