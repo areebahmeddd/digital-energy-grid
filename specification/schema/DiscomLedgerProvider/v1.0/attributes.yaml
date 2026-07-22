@@ -12,7 +12,7 @@ info:
     portal list of abbreviations (e.g. "PVVNL", "TPDDL", "BRPL") — a stable,
     regulator-defined identifier. It is NOT repeated here. These attributes
     carry the discom's beckn identity and endpoints:
-      - `subscriberId` — the discom node's beckn subscriber id, used for
+      - `discomId` — the discom node's beckn subscriber id, used for
         routing and signing (and appearing as bppId/bapId when the discom is
         the caller/receiver on a cascade leg);
       - `discomUri` — the discom's own Beckn platform base URL (target for
@@ -32,7 +32,7 @@ components:
     DiscomLedgerProvider:
       type: object
       additionalProperties: false
-      required: [subscriberId, discomUri, ledgerId, ledgerUri]
+      required: [discomId, discomUri, ledgerId, ledgerUri]
       x-tags:
         - p2p-trading
         - discom-ledger
@@ -41,7 +41,7 @@ components:
         "@type": DiscomLedgerProvider
       properties:
 
-        subscriberId:
+        discomId:
           type: string
           description: >
             The discom node's beckn subscriber id (its routing/signing identity
@@ -50,7 +50,7 @@ components:
             when the discom is the caller/receiver on a cascade leg.
           example: "seller-discom.example.com"
           x-jsonld:
-            "@id": subscriberId
+            "@id": discomId
 
         discomUri:
           type: string

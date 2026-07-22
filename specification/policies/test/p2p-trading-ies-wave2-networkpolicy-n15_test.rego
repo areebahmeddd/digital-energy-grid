@@ -4,15 +4,15 @@ import rego.v1
 
 # ----------------------------------------------------------------------------
 # Tests for N15: context.bppId/bapId must match a participant `id` in
-# message.contract.participants[] — or a discom participant's `subscriberId`.
+# message.contract.participants[] — or a discom participant's `discomId`.
 # Participants are role-less (keyed by id); roles carry the role -> id map.
 # ----------------------------------------------------------------------------
 
 _base_participants := [
 	{"id": "sellerapp.example.com", "participantAttributes": {"@type": "EnergyCustomer", "meterId": "TEST_METER_SELLER_001"}},
 	{"id": "buyerapp.example.com", "participantAttributes": {"@type": "EnergyCustomer", "meterId": "TEST_METER_BUYER_001"}},
-	{"id": "PaVVNL", "participantAttributes": {"@type": "DiscomLedgerProvider", "subscriberId": "seller-discom.example.com", "discomUri": "https://seller-discom.example.com", "ledgerId": "seller-discom-ledger.example.com", "ledgerUri": "https://seller-discom-ledger.example.com"}},
-	{"id": "BRPL", "participantAttributes": {"@type": "DiscomLedgerProvider", "subscriberId": "buyer-discom.example.com", "discomUri": "https://buyer-discom.example.com", "ledgerId": "buyer-discom-ledger.example.com", "ledgerUri": "https://buyer-discom-ledger.example.com"}},
+	{"id": "PaVVNL", "participantAttributes": {"@type": "DiscomLedgerProvider", "discomId": "seller-discom.example.com", "discomUri": "https://seller-discom.example.com", "ledgerId": "seller-discom-ledger.example.com", "ledgerUri": "https://seller-discom-ledger.example.com"}},
+	{"id": "BRPL", "participantAttributes": {"@type": "DiscomLedgerProvider", "discomId": "buyer-discom.example.com", "discomUri": "https://buyer-discom.example.com", "ledgerId": "buyer-discom-ledger.example.com", "ledgerUri": "https://buyer-discom-ledger.example.com"}},
 ]
 
 _roles := [
@@ -33,7 +33,7 @@ _min_contract := {
 }
 
 # ---------------------------------------------------------------------------
-# Positive cases — bppId/bapId valid against participant ids / discom subscriberIds.
+# Positive cases — bppId/bapId valid against participant ids / discom discomIds.
 # ---------------------------------------------------------------------------
 
 test_n15_passes_when_platform_ids_match if {
@@ -45,7 +45,7 @@ test_n15_passes_when_platform_ids_match if {
 }
 
 test_n15_passes_when_cascade_to_seller_discom_subscriberid if {
-	# sellerapp -> sellerDiscom cascade: bapId becomes the discom's subscriberId.
+	# sellerapp -> sellerDiscom cascade: bapId becomes the discom's discomId.
 	pl := {
 		"context": {"version": "2.0.0", "bppId": "sellerapp.example.com", "bapId": "seller-discom.example.com"},
 		"message": {"contract": _min_contract},
