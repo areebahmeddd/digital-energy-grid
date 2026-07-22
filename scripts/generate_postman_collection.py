@@ -201,8 +201,11 @@ DEVKIT_CONFIGS = {
         # status to buyer or to seller-discom). New in this devkit; mirrors
         # buyerapp's /bap/caller but on port 8082.
         "seller_bap_caller_url": "http://localhost:8082/bap/caller",
-        "ledger_host_buyer": "https://ies-p2p-energy-ledger.beckn.io",
-        "ledger_host_seller": "https://ies-p2p-energy-ledger.beckn.io",
+        # Ledger TSP base URLs (ledgerUri on DiscomLedgerProvider). Match the
+        # local example.com hosts used by uc1 examples / docker-compose; override
+        # the Postman variable to point at a shared IES ledger if needed.
+        "ledger_host_buyer": "http://buyer-discom-ledger.example.com:9000",
+        "ledger_host_seller": "http://seller-discom-ledger.example.com:9000",
         "examples_path": "devkits/p2p-trading-ies-wave2/uc1/examples",
         # Source dirs for the discom-ledger TSP collections. The on_status.json
         # response fixtures here ARE the canonical outbound on_status payloads
@@ -232,14 +235,20 @@ DEVKIT_CONFIGS = {
         # Platform URLs for the discom Beckn platforms (distinct from the ledger
         # TSP URLs). Used for trade allocation requests; emitted as dedicated
         # Postman variables so testers can override them independently.
+        # These map to DiscomLedgerProvider.discomUri in the payload.
         "buyer_discom_host_url": "http://buyer-discom.example.com:9000",
         "seller_discom_host_url": "http://seller-discom.example.com:9000",
-        # Subscriber IDs for the discom-ledger TSPs. Emitted as Postman variables
-        # in all wave2 collections so participantId fields in the contract body can
-        # reference them. seller_discom_ledger_id is also used in substitutions.yaml
-        # for context.bppId in seller-initiated-status-to-seller-discom flows.
-        "ledger_buyer_discom_id": "ies-p2p-energy-ledger.beckn.io",
-        "ledger_seller_discom_id": "ies-p2p-energy-ledger.beckn.io",
+        # Discom Beckn subscriberIds (DiscomLedgerProvider.subscriberId) —
+        # routing/signing identity of the discom platform, distinct from the
+        # UPADHI short code used as participants[].id / roles[].participantId.
+        "buyer_discom_subscriber_id": "buyer-discom.example.com",
+        "seller_discom_subscriber_id": "seller-discom.example.com",
+        # Ledger TSP subscriber IDs (DiscomLedgerProvider.ledgerId). Emitted as
+        # Postman variables in all wave2 collections. seller_discom_ledger_id is
+        # also used in substitutions.yaml for context.bppId in
+        # seller-initiated-status-to-seller-discom flows.
+        "ledger_buyer_discom_id": "buyer-discom-ledger.example.com",
+        "ledger_seller_discom_id": "seller-discom-ledger.example.com",
         "transaction_id": "2b4d69aa-22e4-4c78-9f56-5a7b9e2b2026",
         "seller_discom_ledger_id": "seller-discom-ledger.example.com",
         "usecase": "uc1",
@@ -256,14 +265,14 @@ DEVKIT_CONFIGS = {
             "bap_host_root":  "buyerplatform_host_root",
             "bpp_host_root":  "sellerplatform_host_root",
         },
-        # Participant-attribute substitutions: for each participant role, map
-        # attribute names to Postman variable names. Applied during collection
-        # generation; example JSONs on disk stay with their hardcoded values.
+        # Legacy participant-attribute map (used only when substitutions.yaml is
+        # absent). Keys are role names from the older role-bearing participants[]
+        # shape; wave2 now uses role-less participants[] + substitutions.yaml.
         "participant_attr_vars": {
             "buyer":        {"platformUrl": "buyerplatform_host_root"},
             "seller":       {"platformUrl": "sellerplatform_host_root"},
-            "buyerDiscom":  {"ledgerUrl": "ledger_host_buyer",  "platformUrl": "buyer_discom_host_url"},
-            "sellerDiscom": {"ledgerUrl": "ledger_host_seller", "platformUrl": "seller_discom_host_url"},
+            "buyerDiscom":  {"ledgerUri": "ledger_host_buyer",  "discomUri": "buyer_discom_host_url"},
+            "sellerDiscom": {"ledgerUri": "ledger_host_seller", "discomUri": "seller_discom_host_url"},
         },
     },
     "data-exchange-uc1-meter-data": {
@@ -714,6 +723,9 @@ def _parse_path(path_str: str) -> List[tuple]:
     Parse a dot-notation path with optional array filters or positional
     indices into segments.
 
+    Dots *inside* bracket filters are preserved so domain-valued ids work:
+      participants[id=buyerapp.example.com].participantAttributes.platformUrl
+
     'context.bapId'
       → [('key','context'), ('key','bapId')]
 
@@ -725,21 +737,44 @@ def _parse_path(path_str: str) -> List[tuple]:
       → [('key','message'), ('key','contract'),
          ('key','participants'), ('filter','role','buyer'),
          ('key','participantAttributes'), ('key','platformUri')]
+
+    'message.contract.participants[id=buyerapp.example.com].id'
+      → [('key','message'), ('key','contract'),
+         ('key','participants'), ('filter','id','buyerapp.example.com'),
+         ('key','id')]
     """
     segments: List[tuple] = []
-    for part in path_str.split("."):
-        if "[" in part:
-            arr_key, rest = part.split("[", 1)
-            if arr_key:
-                segments.append(("key", arr_key))
-            inner = rest.rstrip("]").strip()
+    i = 0
+    n = len(path_str)
+    while i < n:
+        if path_str[i] == ".":
+            i += 1
+            continue
+        if path_str[i] == "[":
+            end = path_str.find("]", i)
+            if end < 0:
+                raise ValueError(f"Unclosed '[' in path {path_str!r}")
+            inner = path_str[i + 1 : end].strip()
             if inner.isdigit() or (inner.startswith("-") and inner[1:].isdigit()):
                 segments.append(("index", int(inner)))
             else:
+                if "=" not in inner:
+                    raise ValueError(
+                        f"Array filter in path {path_str!r} must be index or field=value, got [{inner}]"
+                    )
                 field, value = inner.split("=", 1)
                 segments.append(("filter", field.strip(), value.strip()))
-        else:
-            segments.append(("key", part))
+            i = end + 1
+            continue
+        # Read a key token up to the next '.' or '['
+        j = i
+        while j < n and path_str[j] not in ".[":
+            j += 1
+        key = path_str[i:j]
+        if not key:
+            raise ValueError(f"Empty path segment in {path_str!r} at index {i}")
+        segments.append(("key", key))
+        i = j
     return segments
 
 
@@ -1184,24 +1219,24 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
     bpp_host_root_value = config.get("bpp_host_root")
     if role == "BUYERDISCOMLEDGER":
         bpp_id_value = "buyer-discom-ledger.example.com"
-        bpp_host_root_value = config.get("ledger_host_buyer", "https://ies-p2p-energy-ledger.beckn.io")
+        bpp_host_root_value = config.get("ledger_host_buyer", "http://buyer-discom-ledger.example.com:9000")
     elif role == "SELLERDISCOMLEDGER":
         bpp_id_value = "seller-discom-ledger.example.com"
-        bpp_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
+        bpp_host_root_value = config.get("ledger_host_seller", "http://seller-discom-ledger.example.com:9000")
     elif role == "SELLERDISCOM":
         # Sellerdiscom actor pushes on_status TO the sellerdiscomledger TSP:
         # bpp = the actor, bap = the ledger.
         bpp_id_value = "sellerdiscom.example.com"
         bpp_host_root_value = config.get("sellerdiscom_host_root", "http://sellerdiscom.example.com:9000")
         bap_id_value = "seller-discom-ledger.example.com"
-        bap_host_root_value = config.get("ledger_host_seller", "https://ies-p2p-energy-ledger.beckn.io")
+        bap_host_root_value = config.get("ledger_host_seller", "http://seller-discom-ledger.example.com:9000")
     elif role == "BUYERDISCOM":
         # Buyerdiscom actor pushes on_status TO the buyerdiscomledger TSP:
         # bpp = the actor, bap = the ledger.
         bpp_id_value = "buyerdiscom.example.com"
         bpp_host_root_value = config.get("buyerdiscom_host_root", "http://buyerdiscom.example.com:9000")
         bap_id_value = "buyer-discom-ledger.example.com"
-        bap_host_root_value = config.get("ledger_host_buyer", "https://ies-p2p-energy-ledger.beckn.io")
+        bap_host_root_value = config.get("ledger_host_buyer", "http://buyer-discom-ledger.example.com:9000")
 
     # var_names renames apply to BAP/BPP collections only; ledger/discom roles
     # keep generic names to avoid ambiguity (their bpp_id is the ledger, not seller).
@@ -1287,12 +1322,17 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         variables.append({"key": "seller_discom_host_url", "value": config["seller_discom_host_url"]})
     if "ledger_adapter_url" in config:
         variables.append({"key": "ledger_adapter_url", "value": config["ledger_adapter_url"]})
-    # Discom-ledger subscriber IDs — emitted for all roles so contract body
-    # participantId fields can reference them in every collection.
+    # Discom-ledger TSP subscriber IDs (DiscomLedgerProvider.ledgerId) —
+    # emitted for all roles so contract-body fields can reference them.
     if "ledger_buyer_discom_id" in config:
         variables.append({"key": "ledger_buyer_discom_id", "value": config["ledger_buyer_discom_id"]})
     if "ledger_seller_discom_id" in config:
         variables.append({"key": "ledger_seller_discom_id", "value": config["ledger_seller_discom_id"]})
+    # Discom platform subscriberIds (DiscomLedgerProvider.subscriberId).
+    if "buyer_discom_subscriber_id" in config:
+        variables.append({"key": "buyer_discom_subscriber_id", "value": config["buyer_discom_subscriber_id"]})
+    if "seller_discom_subscriber_id" in config:
+        variables.append({"key": "seller_discom_subscriber_id", "value": config["seller_discom_subscriber_id"]})
 
     # Trading-platform subscriber IDs / host roots — emitted for every role
     # that doesn't already define them (BUYER/SELLER get them via var_names

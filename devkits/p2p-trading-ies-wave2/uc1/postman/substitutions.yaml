@@ -4,7 +4,7 @@
 # Structure:
 #   common:  rules applied to every role before role-specific rules
 #   roles:   per-canonical-role rule lists (BAP, BPP, BUYERDISCOMLEDGER,
-#            SELLERDISCOMLEDGER, SELLERDISCOM)
+#            SELLERDISCOMLEDGER, SELLERDISCOM, BUYERDISCOM)
 #
 # Each rule entry:
 #   match:  glob pattern (or list of patterns) matched against the source filename
@@ -16,6 +16,16 @@
 # Later matching entries for the same path override earlier ones (last-writer-wins).
 # Role-specific rules override common rules for the same path.
 #
+# Payload model (roles/participants):
+#   - contractAttributes.roles[]: {role, participantId}
+#       * buyerPlatform / sellerPlatform → platform subscriber ids
+#       * buyerDiscom / sellerDiscom → UPADHI short codes (BRPL / PaVVNL) —
+#         scenario constants, left as literals (not environment vars)
+#   - participants[]: role-less {id, participantAttributes}
+#       * platform id = subscriber domain; attrs include platformUrl
+#       * discom id = UPADHI short code; attrs = DiscomLedgerProvider
+#         (subscriberId, discomUri, ledgerId, ledgerUri)
+#
 # Variable names in BUYER/SELLER collections (renamed from generic transport-role names):
 #   bap_id        → buyerplatform_id       (bare subscriber domain, e.g. buyerapp.example.com)
 #   bpp_id        → sellerplatform_id      (bare subscriber domain, e.g. sellerapp.example.com)
@@ -24,7 +34,11 @@
 # All other roles keep the generic names; their bpp_id refers to a ledger, not the seller.
 #
 # The *_id variables hold bare domain names (no scheme/port) — correct for participantId.
-# The *_host_root variables hold full URLs — used only for URI fields with a path suffix.
+# The *_host_root / *_host_url / ledger_host_* variables hold full URLs — used for URI fields.
+#
+# Path application order matters when filtering participants by id=: attribute
+# substitutions must be listed BEFORE the id: rewrite, because once id becomes
+# {{buyerplatform_id}} the id=<literal> filter no longer matches.
 
 common:
   - match: "*.json"
@@ -52,8 +66,16 @@ common:
       # Buyer-side roles (buyerPlatform, buyerDiscom) stay participantId: null at
       # publish — the buyer is unknown until it engages after discover. No
       # substitution for them here; only the known seller-side parties are filled.
+      # sellerDiscom.participantId stays the UPADHI short code (PaVVNL) — not
+      # the ledger subscriber id.
       message.catalogs[0].offers[0].offerAttributes.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
-      message.catalogs[0].offers[0].offerAttributes.contractAttributes.roles[role=sellerDiscom].participantId:   {var: seller_discom_ledger_id, required: false}
+      # Offer-level participants[] (role-less). Attribute paths before id rewrite.
+      message.catalogs[0].offers[0].offerAttributes.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=PaVVNL].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=PaVVNL].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=PaVVNL].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=PaVVNL].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
 
 roles:
   # ── BUYER (BAP) ──────────────────────────────────────────────────────────
@@ -66,20 +88,29 @@ roles:
         context.bapUri: {var: buyerplatform_host_root, suffix: /bap/receiver}
         context.bppId:  {var: sellerplatform_id, required: false}
         context.bppUri: {var: sellerplatform_host_root, suffix: /bpp/receiver, required: false}
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:              {var: buyerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerPlatform].participantId:             {var: sellerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:                          {var: buyerplatform_id, required: false}
-        message.contract.participants[role=sellerPlatform].participantId:                         {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerDiscom].participantId:                    {var: ledger_buyer_discom_id, required: false}
-        message.contract.participants[role=sellerDiscom].participantId:                   {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:         {var: buyerplatform_host_root, required: false}
-        message.contract.participants[role=sellerPlatform].participantAttributes.platformUrl:        {var: sellerplatform_host_root, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
+        # Platform roles only — discom roles keep UPADHI short codes (BRPL /
+        # PaVVNL / TEST_OUTSIDE_DISCOM) as scenario literals.
+        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:  {var: buyerplatform_id, required: false}
+        message.contract.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
+        # participants[] is role-less: filter by id=. Attribute paths first.
+        message.contract.participants[id=buyerapp.example.com].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
+        message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
+        message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
+        # Discom participants — UPADHI id left literal; environment attrs only.
+        # Covers BRPL (happy path) and TEST_OUTSIDE_DISCOM (policy-block fixture).
+        message.contract.participants[id=BRPL].participantAttributes.subscriberId:                 {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.discomUri:                    {var: buyer_discom_host_url, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerId:                     {var: ledger_buyer_discom_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerUri:                    {var: ledger_host_buyer, required: false}
+        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.subscriberId: {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.discomUri:    {var: buyer_discom_host_url, required: false}
+        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.ledgerId:     {var: ledger_buyer_discom_id, required: false}
+        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.ledgerUri:    {var: ledger_host_buyer, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.subscriberId:               {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.discomUri:                  {var: seller_discom_host_url, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerId:                   {var: ledger_seller_discom_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerUri:                  {var: ledger_host_seller, required: false}
 
   # ── SELLER (BPP) ─────────────────────────────────────────────────────────
   # Three sub-cases handled by ordered rules (later rules override earlier):
@@ -94,20 +125,20 @@ roles:
         context.bapUri: {var: buyerplatform_host_root, suffix: /bap/receiver, required: false}
         context.bppId:  {var: sellerplatform_id, required: false}
         context.bppUri: {var: sellerplatform_host_root, suffix: /bpp/receiver, required: false}
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:              {var: buyerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerPlatform].participantId:             {var: sellerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:                          {var: buyerplatform_id, required: false}
-        message.contract.participants[role=sellerPlatform].participantId:                         {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerDiscom].participantId:                    {var: ledger_buyer_discom_id, required: false}
-        message.contract.participants[role=sellerDiscom].participantId:                   {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:         {var: buyerplatform_host_root, required: false}
-        message.contract.participants[role=sellerPlatform].participantAttributes.platformUrl:        {var: sellerplatform_host_root, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
+        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:  {var: buyerplatform_id, required: false}
+        message.contract.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=buyerapp.example.com].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
+        message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
+        message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
 
     # 2. Seller-initiated to buyer: seller=BAP, buyer=BPP (roles swapped vs. default)
     #    {{sellerplatform_id}} = sellerapp.example.com; {{buyerplatform_id}} = buyerapp.example.com
@@ -137,18 +168,26 @@ roles:
         context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
         context.bppId:  {var: bpp_id}
         context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
-        # Trading-platform identities inside the contract body (roles /
-        # participants) — same values the BUYER/SELLER collections use.
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:   {var: buyerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerPlatform].participantId:  {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:               {var: buyerplatform_id, required: false}
-        message.contract.participants[role=sellerPlatform].participantId:              {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
-        message.contract.participants[role=sellerPlatform].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        # Trading-platform identities inside the contract body.
+        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:  {var: buyerplatform_id, required: false}
+        message.contract.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=buyerapp.example.com].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
+        message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
+        message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
 
     # Ledger-initiated status request to the discom utility (ledger = BAP).
     # bapId/bapUri = the ledger itself; bppId/bppUri = the discom utility.
     # transactionId is a separate sub-tx from the main trade.
+    # Meter-request fixtures have no roles/participants block.
     - match: "status-request.json"
       paths:
         context.transactionId: {var: meter_request_tx_id}
@@ -156,17 +195,6 @@ roles:
         context.bapUri: {var: bpp_host_root, suffix: /bap/receiver}
         context.bppId:  {var: discom_actor_id}
         context.bppUri: {var: discom_actor_host_root, suffix: /bpp/receiver}
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:              {var: bap_id, required: false}
-        message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:                          {var: bap_id, required: false}
-        message.contract.participants[role=buyerDiscom].participantId:                    {var: ledger_buyer_discom_id, required: false}
-        message.contract.participants[role=sellerDiscom].participantId:                   {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:         {var: bap_host_root, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
   # ── SELLERDISCOMLEDGER ───────────────────────────────────────────────────
   # Seller-discom ledger TSP. Two outbound flows:
@@ -179,14 +207,20 @@ roles:
         context.bapUri: {var: bap_host_root, suffix: /bap/receiver}
         context.bppId:  {var: bpp_id}
         context.bppUri: {var: bpp_host_root, suffix: /bpp/caller}
-        # Trading-platform identities inside the contract body (roles /
-        # participants) — same values the BUYER/SELLER collections use.
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:   {var: buyerplatform_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerPlatform].participantId:  {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:               {var: buyerplatform_id, required: false}
-        message.contract.participants[role=sellerPlatform].participantId:              {var: sellerplatform_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
-        message.contract.participants[role=sellerPlatform].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:  {var: buyerplatform_id, required: false}
+        message.contract.contractAttributes.roles[role=sellerPlatform].participantId: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=buyerapp.example.com].participantAttributes.platformUrl:  {var: buyerplatform_host_root, required: false}
+        message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
+        message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
+        message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
+        message.contract.participants[id=BRPL].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
+        message.contract.participants[id=PaVVNL].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
 
     # Ledger-initiated status request to the discom utility (ledger = BAP).
     - match: "status-request.json"
@@ -196,17 +230,6 @@ roles:
         context.bapUri: {var: bpp_host_root, suffix: /bap/receiver}
         context.bppId:  {var: discom_actor_id}
         context.bppUri: {var: discom_actor_host_root, suffix: /bpp/receiver}
-        message.contract.contractAttributes.roles[role=buyerPlatform].participantId:              {var: bap_id, required: false}
-        message.contract.contractAttributes.roles[role=buyerDiscom].participantId:        {var: ledger_buyer_discom_id, required: false}
-        message.contract.contractAttributes.roles[role=sellerDiscom].participantId:       {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantId:                          {var: bap_id, required: false}
-        message.contract.participants[role=buyerDiscom].participantId:                    {var: ledger_buyer_discom_id, required: false}
-        message.contract.participants[role=sellerDiscom].participantId:                   {var: ledger_seller_discom_id, required: false}
-        message.contract.participants[role=buyerPlatform].participantAttributes.platformUrl:         {var: bap_host_root, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.ledgerUrl:     {var: ledger_host_buyer, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.ledgerUrl:    {var: ledger_host_seller, required: false}
-        message.contract.participants[role=buyerDiscom].participantAttributes.platformUrl:   {var: buyer_discom_host_url, required: false}
-        message.contract.participants[role=sellerDiscom].participantAttributes.platformUrl:  {var: seller_discom_host_url, required: false}
 
   # ── SELLERDISCOM ─────────────────────────────────────────────────────────
   # Seller-discom actor (the utility itself) pushing meter actuals as on_status

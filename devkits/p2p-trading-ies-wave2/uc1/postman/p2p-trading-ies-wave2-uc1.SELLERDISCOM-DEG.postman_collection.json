@@ -81,7 +81,7 @@
     },
     {
       "key": "bap_host_root",
-      "value": "https://ies-p2p-energy-ledger.beckn.io"
+      "value": "http://seller-discom-ledger.example.com:9000"
     },
     {
       "key": "bpp_host_root",
@@ -93,15 +93,15 @@
     },
     {
       "key": "sellerdiscom_ledger_host_root",
-      "value": "https://ies-p2p-energy-ledger.beckn.io"
+      "value": "http://seller-discom-ledger.example.com:9000"
     },
     {
       "key": "ledger_host_buyer",
-      "value": "https://ies-p2p-energy-ledger.beckn.io"
+      "value": "http://buyer-discom-ledger.example.com:9000"
     },
     {
       "key": "ledger_host_seller",
-      "value": "https://ies-p2p-energy-ledger.beckn.io"
+      "value": "http://seller-discom-ledger.example.com:9000"
     },
     {
       "key": "buyer_discom_host_url",
@@ -113,11 +113,19 @@
     },
     {
       "key": "ledger_buyer_discom_id",
-      "value": "ies-p2p-energy-ledger.beckn.io"
+      "value": "buyer-discom-ledger.example.com"
     },
     {
       "key": "ledger_seller_discom_id",
-      "value": "ies-p2p-energy-ledger.beckn.io"
+      "value": "seller-discom-ledger.example.com"
+    },
+    {
+      "key": "buyer_discom_subscriber_id",
+      "value": "buyer-discom.example.com"
+    },
+    {
+      "key": "seller_discom_subscriber_id",
+      "value": "seller-discom.example.com"
     },
     {
       "key": "buyerplatform_id",
