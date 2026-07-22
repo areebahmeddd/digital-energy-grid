@@ -24,7 +24,7 @@
 #   - participants[]: role-less {id, participantAttributes}
 #       * platform id = subscriber domain; attrs include platformUrl
 #       * discom id = UPADHI short code; attrs = DiscomLedgerProvider
-#         (subscriberId, discomUri, ledgerId, ledgerUri)
+#         (discomId, discomUri, ledgerId, ledgerUri)
 #
 # Variable names in BUYER/SELLER collections (renamed from generic transport-role names):
 #   bap_id        → buyerplatform_id       (bare subscriber domain, e.g. buyerapp.example.com)
@@ -72,7 +72,7 @@ common:
       # Offer-level participants[] (role-less). Attribute paths before id rewrite.
       message.catalogs[0].offers[0].offerAttributes.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
       message.catalogs[0].offers[0].offerAttributes.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
-      message.catalogs[0].offers[0].offerAttributes.participants[id=TEST_DISCOM_SELLER].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+      message.catalogs[0].offers[0].offerAttributes.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomId: {var: seller_discom_subscriber_id, required: false}
       message.catalogs[0].offers[0].offerAttributes.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
       message.catalogs[0].offers[0].offerAttributes.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
       message.catalogs[0].offers[0].offerAttributes.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
@@ -99,15 +99,15 @@ roles:
         message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
         # Discom participants — UPADHI id left literal; environment attrs only.
         # Covers TEST_DISCOM_BUYER (happy path) and TEST_OUTSIDE_DISCOM (policy-block fixture).
-        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.subscriberId:                 {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomId:                 {var: buyer_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomUri:                    {var: buyer_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerId:                     {var: ledger_buyer_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerUri:                    {var: ledger_host_buyer, required: false}
-        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.subscriberId: {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.discomId: {var: buyer_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.discomUri:    {var: buyer_discom_host_url, required: false}
         message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.ledgerId:     {var: ledger_buyer_discom_id, required: false}
         message.contract.participants[id=TEST_OUTSIDE_DISCOM].participantAttributes.ledgerUri:    {var: ledger_host_buyer, required: false}
-        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.subscriberId:               {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomId:               {var: seller_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomUri:                  {var: seller_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerId:                   {var: ledger_seller_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerUri:                  {var: ledger_host_seller, required: false}
@@ -131,11 +131,11 @@ roles:
         message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
         message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
         message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
-        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomId:   {var: buyer_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
-        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomId: {var: seller_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
@@ -175,11 +175,11 @@ roles:
         message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
         message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
         message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
-        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomId:   {var: buyer_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
-        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomId: {var: seller_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}
@@ -213,11 +213,11 @@ roles:
         message.contract.participants[id=sellerapp.example.com].participantAttributes.platformUrl: {var: sellerplatform_host_root, required: false}
         message.contract.participants[id=buyerapp.example.com].id:  {var: buyerplatform_id, required: false}
         message.contract.participants[id=sellerapp.example.com].id: {var: sellerplatform_id, required: false}
-        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.subscriberId:   {var: buyer_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomId:   {var: buyer_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.discomUri:      {var: buyer_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerId:       {var: ledger_buyer_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_BUYER].participantAttributes.ledgerUri:      {var: ledger_host_buyer, required: false}
-        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.subscriberId: {var: seller_discom_subscriber_id, required: false}
+        message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomId: {var: seller_discom_subscriber_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.discomUri:    {var: seller_discom_host_url, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerId:     {var: ledger_seller_discom_id, required: false}
         message.contract.participants[id=TEST_DISCOM_SELLER].participantAttributes.ledgerUri:    {var: ledger_host_seller, required: false}

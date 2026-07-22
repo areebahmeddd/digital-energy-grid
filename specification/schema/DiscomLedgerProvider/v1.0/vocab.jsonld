@@ -13,10 +13,10 @@
       "@id": "deg:DiscomLedgerProvider",
       "@type": "rdfs:Class",
       "rdfs:label": "Discom Ledger Provider",
-      "rdfs:comment": "Identity attributes for a discom acting as a buyerDiscom/sellerDiscom party in a P2P trade, attached to Contract.participants[*].participantAttributes. The participant id is the UPADHI short code; these attributes carry the discom's beckn subscriberId, platform URI, and its ledger (id + uri)."
+      "rdfs:comment": "Identity attributes for a discom acting as a buyerDiscom/sellerDiscom party in a P2P trade, attached to Contract.participants[*].participantAttributes. The participant id is the UPADHI short code; these attributes carry the discom's beckn discomId, platform URI, and its ledger (id + uri)."
     },
     {
-      "@id": "deg:subscriberId",
+      "@id": "deg:discomId",
       "@type": "rdf:Property",
       "rdfs:label": "Subscriber ID",
       "rdfs:comment": "The discom node's beckn subscriber id (routing/signing identity); distinct from the participant id (the UPADHI short code).",

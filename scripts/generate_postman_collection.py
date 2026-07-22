@@ -178,7 +178,7 @@ DEVKIT_CONFIGS = {
         # still recognized everywhere (configs, policy, sandbox fixture
         # mounts) — override the {{domain}} variable to use it.
         "domain": "indiaenergystack.in/test-ies-p2p-trading-network",
-        # Per-node Beckn hostnames matching subscriberIds (resolve via Caddy
+        # Per-node Beckn hostnames matching discomIds (resolve via Caddy
         # host-routing + Docker network aliases on beckn-router). Each
         # participant lives on its own host; standard Beckn paths (/bap/receiver,
         # /bpp/receiver, etc.) live under each. SubscriberIds name the entity
@@ -238,7 +238,7 @@ DEVKIT_CONFIGS = {
         # These map to DiscomLedgerProvider.discomUri in the payload.
         "buyer_discom_host_url": "http://buyer-discom.example.com:9000",
         "seller_discom_host_url": "http://seller-discom.example.com:9000",
-        # Discom Beckn subscriberIds (DiscomLedgerProvider.subscriberId) —
+        # Discom Beckn discomIds (DiscomLedgerProvider.discomId) —
         # routing/signing identity of the discom platform, distinct from the
         # UPADHI short code used as participants[].id / roles[].participantId.
         "buyer_discom_subscriber_id": "buyer-discom.example.com",
@@ -1328,7 +1328,7 @@ def get_collection_variables(devkit: str, role: str, var_names: Optional[Dict[st
         variables.append({"key": "ledger_buyer_discom_id", "value": config["ledger_buyer_discom_id"]})
     if "ledger_seller_discom_id" in config:
         variables.append({"key": "ledger_seller_discom_id", "value": config["ledger_seller_discom_id"]})
-    # Discom platform subscriberIds (DiscomLedgerProvider.subscriberId).
+    # Discom platform discomIds (DiscomLedgerProvider.discomId).
     if "buyer_discom_subscriber_id" in config:
         variables.append({"key": "buyer_discom_subscriber_id", "value": config["buyer_discom_subscriber_id"]})
     if "seller_discom_subscriber_id" in config:

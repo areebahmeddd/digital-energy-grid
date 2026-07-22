@@ -35,7 +35,7 @@
 #      absent; all data lives in Commitment.commitmentAttributes.
 # N15. Beckn semantic alignment: context.bppId and context.bapId must each
 #      match a participant `id` in contract.participants[] — or a discom
-#      participant's `subscriberId` / `ledgerId` (a discom's id is its UPADHI
+#      participant's `discomId` / `ledgerId` (a discom's id is its UPADHI
 #      short code, so its beckn ids — the discom platform id and its ledger
 #      TSP id used on cascade legs — live in its attributes). Catches cascade
 #      legs that rewrite bap/bppUri but leak original identifiers into ID fields.
@@ -201,6 +201,7 @@ _allowed_roles := {"buyerPlatform", "sellerPlatform", "buyerDiscom", "sellerDisc
 
 _contract_violations contains msg if {
 	roles_present := {r.role | some r in _contract.contractAttributes.roles}
+
 	# Only enforce role completeness once at least one role is declared; discom-
 	# internal messages (e.g. a discom ledger's own on_status) carry no roles and
 	# no participants — role completeness is a trade-scope concern that skips them.
@@ -344,7 +345,7 @@ _contract_violations contains "offer.offerAttributes must be absent in contract 
 # ---------------------------------------------------------------------------
 
 # The set of ids that may legitimately appear as context.bppId/bapId: every
-# participant `id`, plus each discom participant's `subscriberId` (its beckn
+# participant `id`, plus each discom participant's `discomId` (its beckn
 # platform id) and `ledgerId` (its ledger TSP's id — the receiver/caller id on
 # the ledger cascade legs the recorder produces). A discom's `id` is its UPADHI
 # short code, so the beckn ids used on the wire live in its attributes.
@@ -355,7 +356,7 @@ _participant_ids contains id if {
 
 _participant_ids contains sid if {
 	some p in _contract.participants
-	some key in ["subscriberId", "ledgerId"]
+	some key in ["discomId", "ledgerId"]
 	sid := object.get(p.participantAttributes, key, "")
 	sid != ""
 }
