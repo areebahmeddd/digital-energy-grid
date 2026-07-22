@@ -147,7 +147,7 @@ approved_discoms := {"PaVVNL", "TPDDL", "BRPL"}
 
 # The test environment additionally accepts placeholder discom ids for local /
 # dev flows, so the same allowlist rules exercise TEST_* participants too.
-approved_discoms_test := approved_discoms | {"TEST_BUYER_DISCOM", "TEST_SELLER_DISCOM"}
+approved_discoms_test := approved_discoms | {"TEST_DISCOM_BUYER", "TEST_DISCOM_SELLER"}
 
 environments := {
 	"test": {
