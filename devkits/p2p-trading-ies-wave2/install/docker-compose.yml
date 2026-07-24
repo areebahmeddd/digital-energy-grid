@@ -121,6 +121,12 @@ services:
       - NODE_ENV=production
       - PORT=3002
       - PERSONA=bpp
+      # Re-point the seller discom's ledger in on_init/on_confirm fixtures to the
+      # shared IES ledger (the fixtures default to the local sandbox ledger via
+      # {{SELLER_LEDGER_*:-...}}). Requires a sandbox image with fixture env
+      # substitution (readDomainResponse). Unset these to keep records local.
+      - SELLER_LEDGER_ID=ies-p2p-energy-ledger.beckn.io
+      - SELLER_LEDGER_URI=https://ies-p2p-energy-ledger.beckn.io
     ports:
       - "3002:3002"
     volumes:
