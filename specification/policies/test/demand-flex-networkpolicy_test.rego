@@ -7,9 +7,7 @@ package deg.policy.demand_flex_network
 import rego.v1
 
 # Helper: minimal on_status payload with one meter
-_payload(meter) := {"message": {"contract": {"performance": [
-	{"performanceAttributes": {"meters": [meter]}},
-]}}}
+_payload(meter) := {"message": {"contract": {"performance": [{"performanceAttributes": {"meters": [meter]}}]}}}
 
 # Test: clean payload (every used type declared) → no violations
 test_clean_payload if {
@@ -60,9 +58,7 @@ test_declared_but_unused_is_allowed if {
 				{"payloadType": "BASELINE"},
 				{"payloadType": "USAGE"},
 			],
-			"intervals": [{"payloads": [
-				{"type": "BASELINE", "values": [46.0]},
-			]}],
+			"intervals": [{"payloads": [{"type": "BASELINE", "values": [46.0]}]}],
 		},
 	}
 	count(violations) == 0 with input as _payload(meter)
@@ -90,9 +86,7 @@ test_typo_isolated_to_one_meter if {
 			"intervals": [{"payloads": [{"type": "BASLN", "values": [46.0]}]}],
 		},
 	}
-	inp := {"message": {"contract": {"performance": [
-		{"performanceAttributes": {"meters": [good, bad]}},
-	]}}}
+	inp := {"message": {"contract": {"performance": [{"performanceAttributes": {"meters": [good, bad]}}]}}}
 	vs := violations with input as inp
 	count(vs) == 1
 	some v in vs
@@ -111,9 +105,7 @@ _valid_need := {
 		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "PRICE"},
 		{"objectType": "EVENT_PAYLOAD_DESCRIPTOR", "payloadType": "SHORTFALL_PENALTY"},
 	],
-	"intervals": [
-		{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
-	],
+	"intervals": [{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]}],
 }
 
 _need_input(ra) := {"message": {"contract": {"commitments": [{"resources": [{"resourceAttributes": ra}]}]}}}
@@ -147,4 +139,114 @@ test_need_type_coverage_catalog if {
 	vs := violations with input as inp
 	some v in vs
 	contains(v, "MYSTERY")
+}
+
+# ---------------------------------------------------------------------------
+# 3) commitment formation completeness (fail fast at init/confirm)
+# ---------------------------------------------------------------------------
+
+# two-slot need + matching-grid CAPACITY_OFFERED series
+_need2 := {
+	"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+	"payloadDescriptors": [
+		{"payloadType": "CAPACITY_REQUESTED"},
+		{"payloadType": "PRICE"},
+		{"payloadType": "SHORTFALL_PENALTY"},
+	],
+	"intervals": [
+		{"id": 0, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [150]}, {"type": "PRICE", "values": [3.5]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+		{"id": 1, "payloads": [{"type": "CAPACITY_REQUESTED", "values": [200]}, {"type": "PRICE", "values": [4.0]}, {"type": "SHORTFALL_PENALTY", "values": [1.5]}]},
+	],
+}
+
+_offered2 := {
+	"@type": "TimeSeries",
+	"intervalPeriod": {"start": "2026-04-01T08:30:00Z", "duration": "PT30M"},
+	"payloadDescriptors": [{"payloadType": "CAPACITY_OFFERED"}],
+	"intervals": [
+		{"id": 0, "payloads": [{"type": "CAPACITY_OFFERED", "values": [150]}]},
+		{"id": 1, "payloads": [{"type": "CAPACITY_OFFERED", "values": [120]}]},
+	],
+}
+
+_commit_input(need, ca) := {"message": {"contract": {"commitments": [{
+	"id": "cmt-1",
+	"resources": [{"resourceAttributes": need}],
+	"commitmentAttributes": ca,
+}]}}}
+
+# complete offer against every slot, matching grid → no violation
+test_capacity_offered_complete_ok if {
+	count(violations) == 0 with input as _commit_input(_need2, _offered2)
+}
+
+# offered series missing a slot → violation naming the missing interval
+test_capacity_offered_missing_slot if {
+	partial := json.patch(_offered2, [{"op": "remove", "path": "/intervals/1"}])
+	vs := violations with input as _commit_input(_need2, partial)
+	count(vs) == 1
+	some v in vs
+	contains(v, "missing CAPACITY_OFFERED")
+	contains(v, "interval 1")
+}
+
+# offered grid does not match the need grid → violation
+test_capacity_offered_grid_mismatch if {
+	mism := json.patch(_offered2, [{"op": "replace", "path": "/intervalPeriod/duration", "value": "PT60M"}])
+	vs := violations with input as _commit_input(_need2, mism)
+	count(vs) == 1
+	some v in vs
+	contains(v, "does not match the DemandFlexNeed grid")
+}
+
+# no offered series yet (e.g. on_select) → formation checks self-skip
+test_no_offer_yet_self_skips if {
+	inp := {"message": {"contract": {"commitments": [{
+		"id": "cmt-1",
+		"resources": [{"resourceAttributes": _need2}],
+		"status": {"descriptor": {"code": "ACTIVE"}},
+	}]}}}
+	count(violations) == 0 with input as inp
+}
+
+# ---------------------------------------------------------------------------
+# 4) BecknTimeSeries interval id sequence
+# ---------------------------------------------------------------------------
+
+# ids 0,1 → no violation
+test_interval_ids_ok if {
+	count(violations) == 0 with input as _need_input(_need2)
+}
+
+# ids do not start at 0 → violation
+test_interval_ids_must_start_at_zero if {
+	bad := json.patch(_valid_need, [{"op": "replace", "path": "/intervals/0/id", "value": 1}])
+	vs := violations with input as _need_input(bad)
+	some v in vs
+	contains(v, "DemandFlexNeed")
+	contains(v, "start at 0")
+}
+
+# gap in ids (0,2) → violation
+test_interval_ids_gap if {
+	bad := json.patch(_need2, [{"op": "replace", "path": "/intervals/1/id", "value": 2}])
+	vs := violations with input as _need_input(bad)
+	some v in vs
+	contains(v, "start at 0 and increase by 1")
+}
+
+# some intervals carry no id → violation (partial id declaration)
+test_interval_ids_partial_missing if {
+	bad := json.patch(_need2, [{"op": "remove", "path": "/intervals/1/id"}])
+	vs := violations with input as _need_input(bad)
+	some v in vs
+	contains(v, "increase by 1")
+}
+
+# the id check also applies to the CAPACITY_OFFERED series
+test_interval_ids_on_offered_series if {
+	bad := json.patch(_offered2, [{"op": "replace", "path": "/intervals/0/id", "value": 5}])
+	vs := violations with input as _commit_input(_need2, bad)
+	some v in vs
+	contains(v, "CAPACITY_OFFERED series")
 }
