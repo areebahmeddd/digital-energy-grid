@@ -39,7 +39,6 @@
             "descriptor": {"name": "Pay-As-Clear Demand Flex Auction", "shortDesc": "Submit a bid curve per hour; clearing price set by market at 5:30pm IST"},
             "resourceIds": ["flex-need-north-delhi-jun15"],
             "validity": {"startDate": "2026-06-14T00:00:00Z", "endDate": "2026-06-15T12:00:00Z"},
-            "availableTo": [],
             "offerAttributes": {
               "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",

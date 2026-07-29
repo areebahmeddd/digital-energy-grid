@@ -51,7 +51,7 @@
           "offer": {
             "id": "offer-flex-001",
             "resourceIds": ["flex-need-north-delhi-apr1"],
-            "validUntil": "2026-03-31T08:30:00Z",
+            "validity": {"endDate": "2026-03-31T08:30:00Z"},
             "offerAttributes": {
               "@context": "https://schema.nfh.global/DemandFlexBuyOffer/v2.0/context.jsonld",
               "@type": "DemandFlexBuyOffer",
