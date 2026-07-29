@@ -119,7 +119,7 @@
           {"role": "seller", "value": 436.25, "currency": "INR", "description": "Net receivable across 2 flex slots"}
         ]
       },
-      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
+      "participants": [{"id": "tpddl-north-delhi"}, {"id": "greenflex-agg"}]
     }
   }
 }
