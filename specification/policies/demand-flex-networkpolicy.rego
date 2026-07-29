@@ -29,6 +29,24 @@
 #      rule transparently passes traffic that lacks a seller
 #      `reportDescriptors` declaration.
 #
+#   3. Commitment formation completeness (fail fast). Once the seller
+#      has presented a CAPACITY_OFFERED column
+#      (`commitments[*].commitmentAttributes` declaring CAPACITY_OFFERED —
+#      first on the wire at init), every DemandFlexNeed interval MUST
+#      carry a seller CAPACITY_OFFERED value, and the offered series'
+#      `intervalPeriod` MUST match the need grid. This surfaces a
+#      malformed commitment at init/confirm rather than at settlement.
+#      The contract rego keeps the equivalent rules as a settlement-time
+#      backstop. Self-skips on messages with no offered series (bare
+#      select / on_select, status-id round-trips).
+#
+#   4. BecknTimeSeries interval id sequence. Every series' `intervals[*].id`
+#      MUST be 0,1,2,… — start at 0 and increase by 1, with no gaps,
+#      duplicates, or out-of-order ids. Applied to the DemandFlexNeed
+#      series, the CAPACITY_OFFERED series, and each meter's telemetry.
+#      A series that declares no ids at all self-skips (partial/legacy
+#      payloads).
+#
 # Canonical source: specification/policies/demand-flex-networkpolicy.rego
 
 package deg.policy.demand_flex_network
@@ -62,7 +80,7 @@ _per_event_types := {d.payloadType |
 
 _per_interval_types := {d.payloadType |
 	some d in _seller_descriptors
-	d.cardinality != "PER_EVENT"   # default == PER_INTERVAL
+	d.cardinality != "PER_EVENT" # default == PER_INTERVAL
 }
 
 _count_payloads(meter, ptype) := n if {
@@ -128,13 +146,16 @@ violations contains msg if {
 	some ptype in _per_event_types
 	n := _count_payloads(meter, ptype)
 	n != 1
+
 	# Tolerate completely-absent telemetry types (e.g. a grid-meter-only
 	# baselines push) by skipping when the meter doesn't declare ptype in
 	# its own payloadDescriptors.
 	declared := {d.payloadType | some d in meter.telemetry.payloadDescriptors}
 	ptype in declared
-	msg := sprintf("device %s: PER_EVENT payload '%s' must appear in exactly 1 interval (found %d)",
-		[meter.meterId, ptype, n])
+	msg := sprintf(
+		"device %s: PER_EVENT payload '%s' must appear in exactly 1 interval (found %d)",
+		[meter.meterId, ptype, n],
+	)
 }
 
 # ----- 2b) PER_INTERVAL — present in every interval -------------------
@@ -148,6 +169,92 @@ violations contains msg if {
 	total := count(meter.telemetry.intervals)
 	hits := _count_payloads(meter, ptype)
 	hits != total
-	msg := sprintf("device %s: PER_INTERVAL payload '%s' must appear in every interval (found %d of %d)",
-		[meter.meterId, ptype, hits, total])
+	msg := sprintf(
+		"device %s: PER_INTERVAL payload '%s' must appear in every interval (found %d of %d)",
+		[meter.meterId, ptype, hits, total],
+	)
+}
+
+# ----- 3) commitment formation completeness (fail fast) ---------------
+# Pair each commitment's buyer DemandFlexNeed with the seller's
+# CAPACITY_OFFERED series. A pair forms only once the seller has presented
+# a CAPACITY_OFFERED column (commitmentAttributes declaring it); bare
+# select / on_select and status-id round-trips carry no offered series and
+# self-skip. The contract rego keeps equivalent rules as a settlement-time
+# backstop.
+
+_offered_pairs contains pair if {
+	some c in input.message.contract.commitments
+	need := c.resources[0].resourceAttributes
+	need.intervals
+	ca := c.commitmentAttributes
+	"CAPACITY_OFFERED" in {d.payloadType | some d in ca.payloadDescriptors}
+	pair := {"cid": object.get(c, "id", "?"), "need": need, "offered": ca}
+}
+
+_offered_val(intervals, ivid) := v if {
+	some iv in intervals
+	iv.id == ivid
+	some pl in iv.payloads
+	pl.type == "CAPACITY_OFFERED"
+	v := pl.values[0]
+}
+
+# every requested slot must carry a seller CAPACITY_OFFERED value
+violations contains msg if {
+	some p in _offered_pairs
+	some iv in p.need.intervals
+	not _offered_val(p.offered.intervals, iv.id)
+	msg := sprintf("commitment %s, interval %v: missing CAPACITY_OFFERED", [p.cid, iv.id])
+}
+
+# the CAPACITY_OFFERED grid must match the DemandFlexNeed grid
+violations contains msg if {
+	some p in _offered_pairs
+	p.offered.intervalPeriod != p.need.intervalPeriod
+	msg := sprintf("commitment %s: CAPACITY_OFFERED intervalPeriod does not match the DemandFlexNeed grid", [p.cid])
+}
+
+# ----- 4) BecknTimeSeries interval id sequence ------------------------
+# Every series' intervals[*].id MUST be 0,1,2,… (start at 0, +1 each, no
+# gaps/dups/out-of-order). Applied to the need series, the CAPACITY_OFFERED
+# series, and each meter's telemetry. A series declaring no ids self-skips.
+
+_id_series contains s if {
+	some ra in _demand_flex_needs
+	s := {"label": "DemandFlexNeed", "intervals": ra.intervals}
+}
+
+_id_series contains s if {
+	some c in input.message.contract.commitments
+	ca := c.commitmentAttributes
+	ca.intervals
+	s := {"label": sprintf("commitment %s CAPACITY_OFFERED series", [object.get(c, "id", "?")]), "intervals": ca.intervals}
+}
+
+_id_series contains s if {
+	some perf in input.message.contract.performance
+	some m in perf.performanceAttributes.meters
+	m.telemetry.intervals
+	s := {"label": sprintf("meter %s telemetry", [m.meterId]), "intervals": m.telemetry.intervals}
+}
+
+_ids(intervals) := [iv.id | some iv in intervals]
+
+# no ids declared anywhere → out of scope for this check
+_ids_ok(intervals) if count(_ids(intervals)) == 0
+
+# every interval carries an id and they are 0,1,2,… in order
+_ids_ok(intervals) if {
+	ids := _ids(intervals)
+	count(ids) == count(intervals)
+	every i, id in ids {
+		id == i
+	}
+}
+
+violations contains msg if {
+	some s in _id_series
+	not _ids_ok(s.intervals)
+	msg := sprintf("%s: interval ids must start at 0 and increase by 1, got %v", [s.label, _ids(s.intervals)])
 }
