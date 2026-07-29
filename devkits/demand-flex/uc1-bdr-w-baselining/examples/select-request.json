@@ -62,7 +62,7 @@
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": null}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex"}
       },
-      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}]
+      "participants": [{"id": "tpddl-north-delhi"}]
     }
   }
 }

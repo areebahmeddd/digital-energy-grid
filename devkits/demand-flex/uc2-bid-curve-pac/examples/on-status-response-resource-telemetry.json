@@ -148,7 +148,7 @@
         "roles": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}],
         "policy": {"url": "https://raw.githubusercontent.com/beckn/DEG/refs/heads/main/specification/policies/demand-flex-pac-contractpolicy.rego", "queryPath": "data.deg.contracts.demand_flex_pac"}
       },
-      "participants": [{"role": "buyer", "participantId": "tpddl-north-delhi"}, {"role": "seller", "participantId": "greenflex-agg"}]
+      "participants": [{"id": "tpddl-north-delhi"}, {"id": "greenflex-agg"}]
     }
   }
 }
