@@ -173,3 +173,17 @@ test_offer_column_absent_at_select_ok if {
 	vs := violations with input as _std_no_column_at("select")
 	every v in vs { not contains(v, "requires a CAPACITY_OFFERED column") }
 }
+
+# revenue_flows is exported ONLY when a settlement-eligible performance record
+# exists. This is what lets the contractpolicyenforcer step enforce `violations`
+# pre-settlement while skipping injection (no zero-value settlement artifact on a
+# confirm). Without performance the rule must be UNDEFINED.
+test_revenue_flows_undefined_without_performance if {
+	no_perf := json.patch(_std, [{"op": "remove", "path": "/message/contract/performance"}])
+	not revenue_flows with input as no_perf
+}
+
+# with settlement performance present, revenue_flows is exported for injection
+test_revenue_flows_defined_with_performance if {
+	count(revenue_flows) == 2 with input as _std
+}

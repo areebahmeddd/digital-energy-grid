@@ -74,21 +74,34 @@ modules:
               role: bpp
         steps:
           # Enforce the contract policy on INCOMING requests, before the BPP
-          # app sees them. Enforce-only (no output* keys → no injection):
-          # evaluates <contractAttributes.policy.queryPath>.violations and
-          # NACKs when non-empty. Scoped to pre-settlement actions only —
-          # on_status is deliberately excluded because the contract rego's
+          # app sees them. Enforcement instance: evaluates
+          # <contractAttributes.policy.queryPath>.violations and NACKs when
+          # non-empty (violationActions). Scoped to pre-settlement actions only
+          # — on_status is deliberately excluded because the contract rego's
           # settlement checks (missing USAGE / net-zero / no settlement perf)
           # legitimately fire on intermediate baseline / resource-telemetry
           # pushes; structural enforcement at status is owned by checkPolicy
           # (the network policy). select is safe: the contract rego self-skips
           # when no seller offer is present.
+          #
+          # outputPath/outputMode are REQUIRED by the plugin, but injection is
+          # inert here: the contract rego only exports `revenue_flows` once a
+          # settlement-eligible performance record is present, which never
+          # happens at select/init/confirm, so this instance enforces without
+          # writing any settlement artifact. Config mirrors the caller's
+          # injection instance so it stays well-formed if ever exercised.
           - id: contractpolicyenforcer
             config:
               actions: "select,init,confirm"
               violationActions: "select,init,confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
+              outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
+              outputMode: "jsonld"
+              outputType: "RevenueFlow"
+              outputContextURL: "https://schema.nfh.global/RevenueFlow/2.0/context.jsonld"
+              outputArrayKey: "revenueFlows"
+              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
         - validateSign
         - checkPolicy
