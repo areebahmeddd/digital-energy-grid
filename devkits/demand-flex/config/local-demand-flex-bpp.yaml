@@ -154,13 +154,19 @@ modules:
               uuidKeys: transaction_id,message_id
               role: bpp
         steps:
-          # First step: injects settlement flows so validateSchema sees the
-          # enriched payload and sign signs it.
+          # First step: on on_status it INJECTS settlement flows (so
+          # validateSchema sees the enriched payload and sign signs it); on the
+          # response actions it EMITS (on_select/on_init/on_confirm) it ENFORCES
+          # the contract policy — fail-fast, so the BPP rejects its own
+          # malformed response before signing and sending. Injection and
+          # enforcement are independent: on_select/on_init/on_confirm are not in
+          # `actions`, so nothing is injected there (only violations checked).
+          # on_status stays inject-only (settlement checks legitimately fire on
+          # intermediate telemetry, so it is NOT enforced).
           - id: contractpolicyenforcer
             config:
               actions: "on_status"
-              # Injection-only instance: violations are logged, never NACKed.
-              violationActions: ""
+              violationActions: "on_select,on_init,on_confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
               # Wave2-style: rego output is wrapped as a Beckn-native

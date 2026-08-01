@@ -151,8 +151,22 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          # Fail-fast ENFORCEMENT on the requests the BAP EMITS
+          # (select/init/confirm): the BAP rejects its own malformed request
+          # before signing and sending, so errors are caught at the source (the
+          # counterparty BPP receiver enforces the same policy authoritatively).
+          # Pure enforcement — `actions: ""` means nothing is ever injected on
+          # the outbound request; no outputPath/outputMode needed.
+          - id: contractpolicyenforcer
+            config:
+              actions: ""
+              violationActions: "select,init,confirm"
+              debugLogging: "true"
+              allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
       steps:
         - validateSchema
         - checkPolicy
+        - contractpolicyenforcer
         - addRoute
         - sign
