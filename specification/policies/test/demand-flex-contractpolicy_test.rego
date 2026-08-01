@@ -146,3 +146,30 @@ test_std_no_column_violation if {
 	vs := violations with input as _std
 	every v in vs { not contains(v, "columns must be") }
 }
+
+# V3a — CAPACITY_OFFERED column presence (stage-gated).
+# Drop commitmentAttributes entirely and stamp a context.action.
+_std_no_column_at(action) := inp if {
+	dropped := json.patch(_std, [{"op": "remove", "path": "/message/contract/commitments/0/commitmentAttributes"}])
+	inp := object.union(dropped, {"context": {"action": action}})
+}
+
+# whole column dropped at confirm → presence violation (the reported bug)
+test_offer_column_dropped_at_confirm if {
+	vs := violations with input as _std_no_column_at("confirm")
+	some v in vs
+	contains(v, "requires a CAPACITY_OFFERED column")
+}
+
+# same drop at on_status → presence violation
+test_offer_column_dropped_at_status if {
+	vs := violations with input as _std_no_column_at("on_status")
+	some v in vs
+	contains(v, "requires a CAPACITY_OFFERED column")
+}
+
+# select carries no seller offer yet → presence rule self-skips
+test_offer_column_absent_at_select_ok if {
+	vs := violations with input as _std_no_column_at("select")
+	every v in vs { not contains(v, "requires a CAPACITY_OFFERED column") }
+}
