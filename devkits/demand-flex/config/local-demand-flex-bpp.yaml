@@ -72,9 +72,27 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bpp
+        steps:
+          # Enforce the contract policy on INCOMING requests, before the BPP
+          # app sees them. Enforce-only (no output* keys → no injection):
+          # evaluates <contractAttributes.policy.queryPath>.violations and
+          # NACKs when non-empty. Scoped to pre-settlement actions only —
+          # on_status is deliberately excluded because the contract rego's
+          # settlement checks (missing USAGE / net-zero / no settlement perf)
+          # legitimately fire on intermediate baseline / resource-telemetry
+          # pushes; structural enforcement at status is owned by checkPolicy
+          # (the network policy). select is safe: the contract rego self-skips
+          # when no seller offer is present.
+          - id: contractpolicyenforcer
+            config:
+              actions: "select,init,confirm"
+              violationActions: "select,init,confirm"
+              debugLogging: "true"
+              allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
       steps:
         - validateSign
         - checkPolicy
+        - contractpolicyenforcer
         - addRoute
         - validateSchema
 

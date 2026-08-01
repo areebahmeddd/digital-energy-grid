@@ -210,6 +210,50 @@ test_no_offer_yet_self_skips if {
 }
 
 # ---------------------------------------------------------------------------
+# 3a) CAPACITY_OFFERED column presence (stage-gated)
+# ---------------------------------------------------------------------------
+
+# commitment carrying a need but no commitmentAttributes at all, at a
+# post-commitment action, adds the action + context envelope.
+_need_only_at(action) := {"context": {"action": action}, "message": {"contract": {"commitments": [{
+	"id": "cmt-1",
+	"resources": [{"resourceAttributes": _need2}],
+}]}}}
+
+# whole CAPACITY_OFFERED column dropped at confirm → violation (the reported bug)
+test_offer_column_dropped_at_confirm if {
+	vs := violations with input as _need_only_at("confirm")
+	some v in vs
+	contains(v, "requires a CAPACITY_OFFERED column")
+	contains(v, "confirm")
+}
+
+# same drop at init → violation
+test_offer_column_dropped_at_init if {
+	vs := violations with input as _need_only_at("init")
+	some v in vs
+	contains(v, "requires a CAPACITY_OFFERED column")
+}
+
+# same drop at on_status → violation
+test_offer_column_dropped_at_status if {
+	vs := violations with input as _need_only_at("on_status")
+	some v in vs
+	contains(v, "requires a CAPACITY_OFFERED column")
+}
+
+# select carries a bare need with no seller offer yet → must NOT flag
+test_offer_column_absent_at_select_ok if {
+	count(violations) == 0 with input as _need_only_at("select")
+}
+
+# full column present at confirm → no presence violation
+test_offer_column_present_at_confirm_ok if {
+	inp := object.union(_commit_input(_need2, _offered2), {"context": {"action": "confirm"}})
+	count(violations) == 0 with input as inp
+}
+
+# ---------------------------------------------------------------------------
 # 4) BecknTimeSeries interval id sequence
 # ---------------------------------------------------------------------------
 

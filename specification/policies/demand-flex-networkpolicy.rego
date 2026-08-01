@@ -1,7 +1,22 @@
 # DEG Network Policy — Demand Flex
 #
-# Network-level gate evaluated by the BPP's `checkPolicy` step.
-# Fires NACK when `violations` is non-empty.
+# Network-level gate evaluated by the `checkPolicy` step on EVERY module
+# (BAP + BPP, caller + receiver), so it runs on every action in both
+# directions. Fires NACK when `violations` is non-empty.
+#
+# Design: this policy owns all STRUCTURAL / FORMATION checks and is the
+# early-catch layer for the whole flow. Each rule self-skips when the data
+# it inspects is not on the wire, so one rule set safely spans
+# select → init → confirm → status without false positives. The
+# settlement-math (net-zero, per-meter payout) lives in the contract rego,
+# which only makes sense once telemetry has arrived.
+#
+# Stage legend (which rule is live when):
+#   discover / catalog … 1b, 4          (need series only)
+#   select / on_select … 1b, 4          (buyer need; no seller offer yet)
+#   init / on_init …… 1b, 3, 3a, 4      (seller must now commit CAPACITY_OFFERED)
+#   confirm/on_confirm  1b, 3, 3a, 4     (same commitment rules re-checked)
+#   status / on_status  1, 1b, 2, 3, 3a, 4  (+ per-meter telemetry checks)
 #
 # The `violations` rule combines these checks:
 #
@@ -39,6 +54,16 @@
 #      The contract rego keeps the equivalent rules as a settlement-time
 #      backstop. Self-skips on messages with no offered series (bare
 #      select / on_select, status-id round-trips).
+#
+#   3a. CAPACITY_OFFERED column presence (stage-gated). Rule 3 above can
+#      only check a column the seller actually declared — drop the whole
+#      `commitmentAttributes` block and rule 3 silently self-skips. This
+#      rule closes that gap: from `init` onward (init, on_init, confirm,
+#      on_confirm, status, on_status, update, on_update — see
+#      `_offer_required_actions`), any commitment carrying a DemandFlexNeed
+#      MUST also declare a CAPACITY_OFFERED column. `select` / `on_select`
+#      are excluded because the seller has not committed capacity yet.
+#      This is the rule that catches a dropped CAPACITY_OFFERED at confirm.
 #
 #   4. BecknTimeSeries interval id sequence. Every series' `intervals[*].id`
 #      MUST be 0,1,2,… — start at 0 and increase by 1, with no gaps,
@@ -213,6 +238,35 @@ violations contains msg if {
 	some p in _offered_pairs
 	p.offered.intervalPeriod != p.need.intervalPeriod
 	msg := sprintf("commitment %s: CAPACITY_OFFERED intervalPeriod does not match the DemandFlexNeed grid", [p.cid])
+}
+
+# ----- 3a) CAPACITY_OFFERED column presence (stage-gated) -------------
+# Actions at which the seller must ALREADY have committed a CAPACITY_OFFERED
+# column against the buyer's DemandFlexNeed — everything from init onward.
+# `select` / `on_select` are deliberately absent: the seller has not offered
+# capacity yet, so a bare need with no commitment column is valid there.
+_offer_required_actions := {
+	"init", "on_init",
+	"confirm", "on_confirm",
+	"status", "on_status",
+	"update", "on_update",
+}
+
+# Unlike rule 3 (which keys off the CAPACITY_OFFERED descriptor and therefore
+# self-skips when the whole column is dropped), this reads the column presence
+# directly from the commitment, so dropping `commitmentAttributes` entirely is
+# caught. `object.get` keeps the reference defined even when the block is absent.
+violations contains msg if {
+	input.context.action in _offer_required_actions
+	some c in input.message.contract.commitments
+	c.resources[0].resourceAttributes.intervals # a DemandFlexNeed is present
+	ca := object.get(c, "commitmentAttributes", {})
+	declared := {d.payloadType | some d in object.get(ca, "payloadDescriptors", [])}
+	not "CAPACITY_OFFERED" in declared
+	msg := sprintf(
+		"commitment %s: action %q requires a CAPACITY_OFFERED column on commitmentAttributes, but none is declared",
+		[object.get(c, "id", "?"), input.context.action],
+	)
 }
 
 # ----- 4) BecknTimeSeries interval id sequence ------------------------
