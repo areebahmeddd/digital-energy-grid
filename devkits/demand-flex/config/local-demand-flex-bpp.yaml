@@ -74,18 +74,20 @@ modules:
               role: bpp
         steps:
           # Enforce the contract policy on INCOMING requests, before the BPP
-          # app sees them. Enforce-only (no output* keys → no injection):
-          # evaluates <contractAttributes.policy.queryPath>.violations and
-          # NACKs when non-empty. Scoped to pre-settlement actions only —
-          # on_status is deliberately excluded because the contract rego's
-          # settlement checks (missing USAGE / net-zero / no settlement perf)
-          # legitimately fire on intermediate baseline / resource-telemetry
-          # pushes; structural enforcement at status is owned by checkPolicy
-          # (the network policy). select is safe: the contract rego self-skips
-          # when no seller offer is present.
+          # app sees them. Pure ENFORCEMENT instance: evaluates
+          # <contractAttributes.policy.queryPath>.violations and NACKs when
+          # non-empty. `actions: ""` clears the injection actions, so this step
+          # NEVER writes to the payload — nothing is injected before on_status —
+          # and outputPath/outputMode are therefore not required. Scoped to
+          # pre-settlement actions only; on_status is excluded because the
+          # contract rego's settlement checks (missing USAGE / net-zero / no
+          # settlement perf) legitimately fire on intermediate baseline /
+          # resource-telemetry pushes. Structural enforcement at status is owned
+          # by checkPolicy (the network policy). select is safe: the contract
+          # rego self-skips when no seller offer is present.
           - id: contractpolicyenforcer
             config:
-              actions: "select,init,confirm"
+              actions: ""
               violationActions: "select,init,confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
@@ -152,13 +154,19 @@ modules:
               uuidKeys: transaction_id,message_id
               role: bpp
         steps:
-          # First step: injects settlement flows so validateSchema sees the
-          # enriched payload and sign signs it.
+          # First step: on on_status it INJECTS settlement flows (so
+          # validateSchema sees the enriched payload and sign signs it); on the
+          # response actions it EMITS (on_select/on_init/on_confirm) it ENFORCES
+          # the contract policy — fail-fast, so the BPP rejects its own
+          # malformed response before signing and sending. Injection and
+          # enforcement are independent: on_select/on_init/on_confirm are not in
+          # `actions`, so nothing is injected there (only violations checked).
+          # on_status stays inject-only (settlement checks legitimately fire on
+          # intermediate telemetry, so it is NOT enforced).
           - id: contractpolicyenforcer
             config:
               actions: "on_status"
-              # Injection-only instance: violations are logged, never NACKed.
-              violationActions: ""
+              violationActions: "on_select,on_init,on_confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
               # Wave2-style: rego output is wrapped as a Beckn-native

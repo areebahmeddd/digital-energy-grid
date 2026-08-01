@@ -74,16 +74,18 @@ modules:
               role: bap
         steps:
           # Enforce the contract policy on INCOMING responses from the BPP,
-          # before the BAP app sees them. Enforce-only (no output* keys):
-          # evaluates <contractAttributes.policy.queryPath>.violations and
-          # NACKs when non-empty. Scoped to pre-settlement responses only —
-          # on_status is excluded (settlement checks fire on intermediate
-          # telemetry pushes); structural enforcement at status is owned by
-          # checkPolicy (the network policy). on_select is safe: the contract
-          # rego self-skips when no seller offer is present.
+          # before the BAP app sees them. Pure ENFORCEMENT instance: evaluates
+          # <contractAttributes.policy.queryPath>.violations and NACKs when
+          # non-empty. `actions: ""` clears the injection actions, so this step
+          # NEVER writes to the payload and needs no outputPath/outputMode.
+          # Scoped to pre-settlement responses only; on_status is excluded
+          # (settlement checks fire on intermediate telemetry pushes).
+          # Structural enforcement at status is owned by checkPolicy (the
+          # network policy). on_select is safe: the contract rego self-skips
+          # when no seller offer is present.
           - id: contractpolicyenforcer
             config:
-              actions: "on_select,on_init,on_confirm"
+              actions: ""
               violationActions: "on_select,on_init,on_confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
@@ -149,8 +151,22 @@ modules:
             config:
               uuidKeys: transaction_id,message_id
               role: bap
+        steps:
+          # Fail-fast ENFORCEMENT on the requests the BAP EMITS
+          # (select/init/confirm): the BAP rejects its own malformed request
+          # before signing and sending, so errors are caught at the source (the
+          # counterparty BPP receiver enforces the same policy authoritatively).
+          # Pure enforcement — `actions: ""` means nothing is ever injected on
+          # the outbound request; no outputPath/outputMode needed.
+          - id: contractpolicyenforcer
+            config:
+              actions: ""
+              violationActions: "select,init,confirm"
+              debugLogging: "true"
+              allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
       steps:
         - validateSchema
         - checkPolicy
+        - contractpolicyenforcer
         - addRoute
         - sign

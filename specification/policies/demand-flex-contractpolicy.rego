@@ -130,12 +130,21 @@ _buyer_desc := sprintf("Net payable across %d flex slots", [_slot_count])
 
 _seller_desc := sprintf("Net receivable across %d flex slots", [_slot_count])
 
-revenue_flows := [
+# internal net flows — always defined (0 when nothing settles yet)
+_revenue_flows := [
 	{"role": "buyer", "value": _buyer_value, "currency": _currency, "description": _buyer_desc},
 	{"role": "seller", "value": total_settlement, "currency": _currency, "description": _seller_desc},
 ]
 
-_revenue_sum := sum([f.value | some f in revenue_flows])
+# Exported for injection ONLY when a settlement-eligible performance record is
+# present. Pre-settlement (select / init / confirm) this rule is UNDEFINED, so a
+# contractpolicyenforcer step still evaluates `violations` (enforcement) but
+# finds no `revenue_flows` and skips injection — no zero-value settlement
+# artifact is written onto a pre-settlement contract. net-zero and _revenue_sum
+# key off the always-defined _revenue_flows, so their semantics are unchanged.
+revenue_flows := _revenue_flows if _settlement_perf
+
+_revenue_sum := sum([f.value | some f in _revenue_flows])
 
 net_zero_ok if _revenue_sum == 0
 
