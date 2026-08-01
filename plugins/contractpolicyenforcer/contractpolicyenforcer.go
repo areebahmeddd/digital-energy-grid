@@ -60,19 +60,24 @@ func (rf *ContractPolicyEnforcer) Run(ctx *model.StepContext) error {
 		return nil
 	}
 
-	// Check action
+	// The step activates when the action either injects (action in Actions)
+	// or enforces (action in ViolationActions). These are independent: a step
+	// may enforce on select/init/confirm (check violations, write nothing) and
+	// inject on on_status.
 	action := ExtractAction(ctx.Request.URL.Path, ctx.Body)
-	if !rf.config.IsActionEnabled(action) {
-		if rf.config.DebugLogging {
-			log.Debugf(ctx, "ContractPolicyEnforcer: action '%s' not enabled, skipping", action)
-		}
-		return nil
-	}
+	inject := rf.config.IsActionEnabled(action)
 
 	// On enforced actions every failure below is fail-closed: the policy
 	// gate must not be bypassable by stripping the policy ref or breaking
 	// the policy fetch.
 	enforced := rf.config.IsViolationEnforced(action)
+
+	if !inject && !enforced {
+		if rf.config.DebugLogging {
+			log.Debugf(ctx, "ContractPolicyEnforcer: action '%s' neither injects nor enforces, skipping", action)
+		}
+		return nil
+	}
 
 	// Collect policy references. Trade-shaped messages carry exactly one at
 	// message.contract.contractAttributes.policy; catalog publishes carry
@@ -166,6 +171,16 @@ func (rf *ContractPolicyEnforcer) Run(ctx *model.StepContext) error {
 		}
 		log.Warnf(ctx, "ContractPolicyEnforcer: %d policy violation(s) on %s (not enforced): %s",
 			len(violations), action, strings.Join(violations, "; "))
+	}
+
+	// Injection happens ONLY on injection actions (Actions). A pure-enforcement
+	// action (in ViolationActions but not Actions — e.g. select/init/confirm)
+	// writes nothing to the payload: nothing is injected before on_status.
+	if !inject {
+		if rf.config.DebugLogging {
+			log.Debugf(ctx, "ContractPolicyEnforcer: action '%s' is enforcement-only, no injection", action)
+		}
+		return nil
 	}
 	if flows == nil {
 		if rf.config.DebugLogging {

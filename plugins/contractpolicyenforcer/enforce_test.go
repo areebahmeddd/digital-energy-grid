@@ -32,6 +32,21 @@ violations contains msg if {
 }
 `
 
+// enforceAndFlowsPolicy exports BOTH a violation (when blocked) and
+// revenue_flows, so tests can assert that a pure-enforcement step evaluates
+// violations but does NOT inject the flows.
+const enforceAndFlowsPolicy = `package test.policy
+
+import rego.v1
+
+violations contains msg if {
+	input.message.buyerDiscom == "BLOCKED_DISCOM"
+	msg := sprintf("buyer discom %q is not in the allowlist", [input.message.buyerDiscom])
+}
+
+revenue_flows := [{"role": "seller", "value": 100}]
+`
+
 // servePolicy returns an httptest server serving a bare rego policy.
 func servePolicy(t *testing.T, policy string) *httptest.Server {
 	t.Helper()
@@ -109,15 +124,52 @@ func TestParseConfig_ViolationActions(t *testing.T) {
 	}
 }
 
-func TestParseConfig_ViolationActionsMustBeSubsetOfActions(t *testing.T) {
-	_, err := ParseConfig(map[string]string{
+// violationActions need NOT be a subset of actions — enforcement and injection
+// are independent concerns.
+func TestParseConfig_ViolationActionsNeedNotBeSubsetOfActions(t *testing.T) {
+	cfg, err := ParseConfig(map[string]string{
 		"actions":          "on_status",
 		"violationActions": "init",
 		"outputPath":       "x.y",
 		"outputMode":       "raw",
 	})
-	if err == nil {
-		t.Error("expected error when violationActions is not a subset of actions")
+	if err != nil {
+		t.Fatalf("violationActions outside actions must be allowed, got: %v", err)
+	}
+	if !cfg.IsViolationEnforced("init") {
+		t.Error("init should be enforced")
+	}
+	if cfg.IsActionEnabled("init") {
+		t.Error("init should NOT be an injection action")
+	}
+}
+
+// A pure-enforcement step (actions explicitly cleared to "") needs no
+// outputPath/outputMode.
+func TestParseConfig_EnforceOnlyNeedsNoOutput(t *testing.T) {
+	cfg, err := ParseConfig(map[string]string{
+		"actions":          "",
+		"violationActions": "select,init,confirm",
+	})
+	if err != nil {
+		t.Fatalf("enforce-only config must be valid without outputPath, got: %v", err)
+	}
+	if len(cfg.Actions) != 0 {
+		t.Errorf("Actions = %v, want empty", cfg.Actions)
+	}
+	if !cfg.IsViolationEnforced("confirm") {
+		t.Error("confirm should be enforced")
+	}
+}
+
+// outputPath is still required when actions is non-empty (injection configured).
+func TestParseConfig_OutputRequiredWhenInjecting(t *testing.T) {
+	if _, err := ParseConfig(map[string]string{
+		"actions":          "on_status",
+		"violationActions": "on_status",
+		"outputMode":       "raw",
+	}); err == nil {
+		t.Error("expected error: actions non-empty but outputPath missing")
 	}
 }
 
@@ -148,6 +200,37 @@ func TestRun_NoViolationsPasses(t *testing.T) {
 
 	if err := p.Run(stepCtx(t, "init", enforceBody("init", srv.URL, "ALLOWED_DISCOM"))); err != nil {
 		t.Fatalf("expected clean payload to pass, got: %v", err)
+	}
+}
+
+// A pure-enforcement step (actions "", violationActions "confirm") NACKs on a
+// violating payload but NEVER injects — even when the policy exports
+// revenue_flows. This is what keeps confirm/init/select payloads untouched
+// before on_status.
+func TestRun_EnforceOnly_DoesNotInject(t *testing.T) {
+	srv := servePolicy(t, enforceAndFlowsPolicy)
+	p, err := New(map[string]string{
+		"actions":          "",
+		"violationActions": "confirm",
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	// clean payload → passes AND body is unmodified (no injection)
+	ctx := stepCtx(t, "confirm", enforceBody("confirm", srv.URL, "ALLOWED_DISCOM"))
+	orig := string(ctx.Body)
+	if err := p.Run(ctx); err != nil {
+		t.Fatalf("clean payload must pass, got: %v", err)
+	}
+	if string(ctx.Body) != orig {
+		t.Errorf("enforce-only step must not modify the body\n before=%s\n after =%s", orig, string(ctx.Body))
+	}
+
+	// violating payload → NACK
+	bad := stepCtx(t, "confirm", enforceBody("confirm", srv.URL, "BLOCKED_DISCOM"))
+	if err := p.Run(bad); err == nil {
+		t.Fatal("expected NACK on violation for enforce-only action")
 	}
 }
 

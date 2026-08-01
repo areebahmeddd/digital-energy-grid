@@ -12,25 +12,32 @@ type Config struct {
 	// Enabled controls whether the plugin is active.
 	Enabled bool
 
-	// Actions is the list of beckn actions that trigger settlement flow computation.
-	// Entries match the message action exactly OR the final segment of a
-	// compound action — "publish" matches both "publish" and
-	// "catalog/publish". Default: ["on_status"]
+	// Actions is the list of INJECTION actions — the beckn actions on which
+	// the policy output (settlement / revenue flows) is written into the
+	// message body at OutputPath. Entries match the message action exactly OR
+	// the final segment of a compound action — "publish" matches both
+	// "publish" and "catalog/publish".
+	//
+	// Empty = the step NEVER injects (a pure-enforcement step). OutputPath /
+	// OutputMode are then not required. Set explicitly to "" in YAML to clear
+	// the default. Default: ["on_status"].
 	Actions []string
 
-	// ViolationActions is the subset of Actions on which policy violations
-	// are ENFORCED: if the evaluated policy reports a non-empty `violations`
-	// set for one of these actions, the step returns an error and the
-	// message is NACKed. Enforcement is fail-closed — on these actions a
-	// missing policy reference, a disallowed policy URL, or a fetch/compile/
-	// eval failure also blocks the message (otherwise enforcement could be
-	// bypassed by stripping the policy ref).
+	// ViolationActions is the list of ENFORCEMENT actions: if the evaluated
+	// policy reports a non-empty `violations` set for one of these actions,
+	// the step returns an error and the message is NACKed. Enforcement is
+	// fail-closed — on these actions a missing policy reference, a disallowed
+	// policy URL, or a fetch/compile/eval failure also blocks the message
+	// (otherwise enforcement could be bypassed by stripping the policy ref).
 	//
-	// Actions NOT listed here keep the original soft-failure behavior: the
-	// message passes through unmodified on any problem.
+	// INDEPENDENT of Actions — a step may enforce on actions where it does
+	// NOT inject (e.g. select/init/confirm — check violations only, write
+	// nothing) and inject on others (on_status). Actions NOT listed here keep
+	// soft-failure behavior: the message passes through unmodified on any
+	// problem.
 	//
 	// Comma-separated list in YAML, e.g. "select,init,confirm".
-	// Default: empty (never enforce). Must be a subset of Actions.
+	// Default: empty (never enforce).
 	ViolationActions []string
 
 	// CacheTTL is how long a compiled rego policy is cached before re-fetch.
@@ -163,24 +170,16 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		config.Enabled = enabled == "true" || enabled == "1"
 	}
 
-	if actions, ok := cfg["actions"]; ok && actions != "" {
-		list := strings.Split(actions, ",")
-		config.Actions = make([]string, 0, len(list))
-		for _, a := range list {
-			a = strings.TrimSpace(a)
-			if a != "" {
-				config.Actions = append(config.Actions, a)
-			}
-		}
+	// `actions` are the injection actions. When the key is PRESENT (even as
+	// an empty string) it replaces the default — so `actions: ""` explicitly
+	// clears injection for a pure-enforcement step. When absent, the default
+	// (["on_status"]) stands.
+	if actions, ok := cfg["actions"]; ok {
+		config.Actions = splitCSV(actions)
 	}
 
-	if actions, ok := cfg["violationActions"]; ok && actions != "" {
-		for _, a := range strings.Split(actions, ",") {
-			a = strings.TrimSpace(a)
-			if a != "" {
-				config.ViolationActions = append(config.ViolationActions, a)
-			}
-		}
+	if actions, ok := cfg["violationActions"]; ok {
+		config.ViolationActions = splitCSV(actions)
 	}
 
 	if ttl, ok := cfg["cacheTTL"]; ok && ttl != "" {
@@ -256,24 +255,22 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 		config.EntryDefaults = strings.TrimSpace(d)
 	}
 
-	// Required fields — no code defaults. Each devkit's YAML MUST declare
-	// the destination explicitly so behavior is visible from the config.
-	if config.OutputPath == "" {
-		return nil, fmt.Errorf(
-			"contractpolicyenforcer: outputPath is required (e.g. " +
-				"\"message.contract.contractAttributes.revenueFlows\" or " +
-				"\"message.contract.consideration[id=auto-settlement-flows].considerationAttributes\")")
-	}
-	if config.OutputMode == "" {
-		return nil, fmt.Errorf(
-			"contractpolicyenforcer: outputMode is required (allowed: %q, %q)",
-			OutputModeRaw, OutputModeJSONLD)
-	}
-	for _, va := range config.ViolationActions {
-		if !config.IsActionEnabled(va) {
+	// Output destination is required ONLY when the step injects — i.e. when
+	// `actions` (the injection actions) is non-empty. A pure-enforcement step
+	// (actions empty, violationActions set) writes nothing to the payload and
+	// needs no outputPath/outputMode. Enforcement and injection are
+	// independent, so violationActions need NOT be a subset of actions.
+	if len(config.Actions) > 0 {
+		if config.OutputPath == "" {
 			return nil, fmt.Errorf(
-				"contractpolicyenforcer: violationActions entry %q is not in actions %v — violations can only be enforced on actions the step runs on",
-				va, config.Actions)
+				"contractpolicyenforcer: outputPath is required when actions is non-empty (injection) — e.g. " +
+					"\"message.contract.contractAttributes.revenueFlows\" or " +
+					"\"message.contract.consideration[id=auto-settlement-flows].considerationAttributes\"")
+		}
+		if config.OutputMode == "" {
+			return nil, fmt.Errorf(
+				"contractpolicyenforcer: outputMode is required when actions is non-empty (allowed: %q, %q)",
+				OutputModeRaw, OutputModeJSONLD)
 		}
 	}
 	if config.CacheTTL < MinCacheTTL {
@@ -283,6 +280,18 @@ func ParseConfig(cfg map[string]string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// splitCSV splits a comma-separated config value, trimming whitespace and
+// dropping empty entries. Returns nil for an empty/blank input.
+func splitCSV(s string) []string {
+	var out []string
+	for _, a := range strings.Split(s, ",") {
+		if a = strings.TrimSpace(a); a != "" {
+			out = append(out, a)
+		}
+	}
+	return out
 }
 
 // matchesAction reports whether the action is in the list. A list entry

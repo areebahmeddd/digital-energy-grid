@@ -74,32 +74,21 @@ modules:
               role: bap
         steps:
           # Enforce the contract policy on INCOMING responses from the BPP,
-          # before the BAP app sees them. Enforcement instance: evaluates
+          # before the BAP app sees them. Pure ENFORCEMENT instance: evaluates
           # <contractAttributes.policy.queryPath>.violations and NACKs when
-          # non-empty (violationActions). Scoped to pre-settlement responses
-          # only — on_status is excluded (settlement checks fire on
-          # intermediate telemetry pushes); structural enforcement at status is
-          # owned by checkPolicy (the network policy). on_select is safe: the
-          # contract rego self-skips when no seller offer is present.
-          #
-          # outputPath/outputMode are REQUIRED by the plugin, but injection is
-          # inert here: the contract rego only exports `revenue_flows` once a
-          # settlement-eligible performance record is present, which never
-          # happens at on_select/on_init/on_confirm, so this instance enforces
-          # without writing any settlement artifact. Config mirrors the caller's
-          # injection instance so it stays well-formed if ever exercised.
+          # non-empty. `actions: ""` clears the injection actions, so this step
+          # NEVER writes to the payload and needs no outputPath/outputMode.
+          # Scoped to pre-settlement responses only; on_status is excluded
+          # (settlement checks fire on intermediate telemetry pushes).
+          # Structural enforcement at status is owned by checkPolicy (the
+          # network policy). on_select is safe: the contract rego self-skips
+          # when no seller offer is present.
           - id: contractpolicyenforcer
             config:
-              actions: "on_select,on_init,on_confirm"
+              actions: ""
               violationActions: "on_select,on_init,on_confirm"
               debugLogging: "true"
               allowedPolicyUrlPrefixes: "https://raw.githubusercontent.com/beckn/DEG/"
-              outputPath: "message.contract.consideration[id=auto-revenue-flows].considerationAttributes"
-              outputMode: "jsonld"
-              outputType: "RevenueFlow"
-              outputContextURL: "https://schema.nfh.global/RevenueFlow/2.0/context.jsonld"
-              outputArrayKey: "revenueFlows"
-              entryDefaults: '{"status":{"code":"SETTLED"}}'
       steps:
         - validateSign
         - checkPolicy
